@@ -1,0 +1,49 @@
+>>Overview
+    Project Name: Dashboard
+    Description: Flexible and elegant student management system of the University of The Gambia
+    Development Language: Java
+    Source Packages:
+        customs
+        icons
+        main
+        utg
+    External Libraries:
+            JSoup-1.12.1
+            iText-2.1.7
+            Selenium-Server-Standalone-3.141.59 + Web-Driver-Manager-3.6.2
+            Java Mail API
+    Frameworks: No framework is used in this project
+
+>>Notes to Overview
+    Source Packages (4 packages):
+        customs (16 classes):
+            Classes of this package extends the standard JDK for initialization of project-based components.
+        icons (24 files):
+            The image icons used in building the Dashboard are placed in this package for uniform access.
+        main (39 classes):
+            It's the residential package for all the classes, interfaces, and types used in the project.
+            Classes of this package make good use of the customs package and interacts with one-another
+            to make Dashboard what it is.
+        utg (3 classes):
+            Contains classes for testing and running the project from every aspects with the real runner
+            class - main.Dashboard. The other two types - main.GeneralTester and main.SpecificTester are
+             to be used for by-passed user detail testing and specific-functionality testing, respectively.
+
+    External Libs (4 libraries):
+        To get Dashboard fully-setup for development, the following external libraries must be recognized as
+        additional libraries by your IDE. External libraries are added differently under different development
+        environments. It is assumed that you already know how to do this as per your environment - being it
+        Eclipse, IntelliJ IDEA, NetBeans, or any.
+
+        1) JSoup (version 1.12.1):
+            This is the library used for the scraping of news contents from the official utg news site -
+            https://www.utg.edu.gm/category/news/ - listening for change and update events therein.
+        2) iText (version 2.1.7):
+            For the exportation of the transcript.
+        3) Selenium-Server-Standalone (version 3.141.59) + Web-Driver-Manager:
+            All portal automations are handled by these two libraries working hand-in-hand.
+            Dashboard is functionally multi-threaded. At runtime, any of these two libraries is
+            capable of triggering of well over a dozen of threads, sub-threads, providing a smooth
+            user-experience without the sacrifice of speed, or time.
+            For instance, synchronization of courses should not be waited by reading of notices, or vice-versa.
+        4) The Java Mail API

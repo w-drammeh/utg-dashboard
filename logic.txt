@@ -1,0 +1,44 @@
+The life process of Dashboard includes important series of sets of calls called 'Sequences'. These are:
+Verification, Launch, Build, and Collapse Sequences. These sequences are logical, and can have a serious
+consequences on the succeeding sequence. They involve an intensive interaction of classes,
+several io-operations, generation of components or even temporary files.
+The following explanation assumes that Dashboard is ran through the actual runner-type - main.Dashboard -
+and that no tester-classes have been involved - like GeneralTester, SpecificTester, etc.
+
+The Verification Sequence is the first and foremost of all the sequences. Verification does not only mean
+verifying the user through the Portal on 'First Run'. In fact, on every start, Dashboard gets into this
+sequence in search of the username in the 'serials' path. If there's no such file, Dashboard assumes the
+user is running Dashboard for the first time, then the user will be welcomed through the Portal.
+Otherwise the serialized-username will be compared with the current username. If the two match, then the
+details will be generated and the Launch Sequence is triggered forthwith. Please see main.Dashboard class
+for more info.
+Notice this sequence does not comes into play when the tester-classes are engaged. The tester-classes
+bypass this sequence and make a manual Launch Sequence as their aim is to show a Dashboard that does not
+read or write data, hence purposely for testing.
+
+Following the Verification Sequence, is the Launch Sequence. This is only triggered if the Verification
+Sequence succeeds. The Verification is said to be successful, if either the user is just been through
+the Portal, in which case we have a 'First Launch', or the user's username matches the serialized-username
+and the user's core-details were found to be intact.
+This sequence will then start the job of setting the user's details - which if it's a 'First Launch', are
+given by 'PrePortal' class, otherwise are harvested from serialization. The user's details are indispensable
+for the Build Sequence. Therefore, if the de-serialization of the user's data failed for whatever reason,
+then the Verification is asked to force the user back to the Login page. Failure of any other de-serializations
+- like de-serialization of Tasks, Alerts, etc. - wont cause this retreat. If it's a 'First Launch',
+serialization obviously comes into play instead of de-serialization. In this case, the Build Sequence does
+not wait on the Launch Sequence as the user's data are readily available by 'PrePortal'. The Launch Sequence,
+then, will complete its job by activating the 'FirstLaunch' class which performs the serialization at 'dispose'.
+See main.FirstLaunch.
+
+Next is the Build Sequence. This involves loading the components for user-interaction. This undergoes different
+phases and may not wait on the Launch to finish but can never start before it. The initial phase is the same for
+all the runs whether 'First' or not. If it's not 'First', then a 'Remembrance' is made eventually to reload the
+previously saved settings. See main.Dashboard, and its collaborators.
+
+Collapse Sequence, in brief, involves preparing the data for the next Verification Sequence. The Dashboard is made
+to hide prior to this serialization, and the virtual machine is terminated afterwards. Finally, the root folder
+is, entirely, overridden. Dashboard is independent of this directory within runtime. The VM is terminated to relief
+the native system of any potential pending charges. This saves memory and battery-life.
+To forestall an unexpected shutdown, Dashboard also adds the Collapse Sequence in the system's shutdown-hook.
+This can minimize loss of data due to abnormal termination of the VM. See main.MyClass.
+
