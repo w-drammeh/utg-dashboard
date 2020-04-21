@@ -6,7 +6,9 @@ _Dashboard is built by the students for the students._
 Dashboard uses the Portal system of UTG as a center of verification for users. The same portal is therefore
 used as the main source of users-data for analysis and presentation among others. This makes it impossible for
 non-UTG students to use the system. Such students can however bypass this mechanism and get to temporarily use
-Dashboard by providing details by hand. See main.GeneralTester class for information on how to do this.
+Dashboard by providing details by hand. See utg.GeneralTester class for information on how to do this.
+
+To be familiar with the general execution flow of the program, read the logic.txt file.
 
 This project does not use any frameworks - only and only the core java in conjunction with several
 '3rd-party libraries'. Please see the overview.txt file for more information.
