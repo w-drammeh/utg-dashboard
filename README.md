@@ -17,8 +17,7 @@ Thus, allowing independent developers to easily integrate whatever they're build
 the UTG.
 
 For ease of access and use, and platform-independence reasons, Dashboard is distributed as a JAR file.
-Download it through the following link:
-https://drive.google.com/open?id=1XPtGEKnK-fQQDE4olu-GX-FU0f8fNGL4
+Download it through the following link - https://drive.google.com/open?id=1XPtGEKnK-fQQDE4olu-GX-FU0f8fNGL4.
 Feel free to share it across the UTG fraternity.
 
 This project is made available by the Developer Student Clubs UTG. Its LICENCE, or 'terms of use' must comply
