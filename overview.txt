@@ -27,7 +27,7 @@
         utg (3 classes):
             Contains classes for testing and running the project from every aspects with the real runner
             class - main.Dashboard. The other two types - main.GeneralTester and main.SpecificTester are
-             to be used for by-passed user detail testing and specific-functionality testing, respectively.
+            to be used for by-passed user detail testing and specific-functionality testing, respectively.
 
     External Libs (4 libraries):
         To get Dashboard fully-setup for development, the following external libraries must be recognized as
