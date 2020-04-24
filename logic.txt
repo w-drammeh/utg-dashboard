@@ -21,7 +21,7 @@ Sequence succeeds. The Verification is said to be successful, if either the user
 the Portal, in which case we have a 'First Launch', or the user's username matches the serialized-username
 and the user's core-details were found to be intact.
 This sequence will then start the job of setting the user's details - which if it's a 'First Launch', are
-given by 'main.PrePortal' class, otherwise are harvested from serialization. The user's details are indispensable
+given by 'main.PrePortal' class, otherwise are harvested from de-serialization. The user's details are indispensable
 for the Build Sequence. Therefore, if the de-serialization of the user's data failed for whatever reason,
 then the Verification is asked to force the user back to the Login page. Failure of any other de-serializations
 - like de-serialization of Tasks, Alerts, etc. - wont cause this retreat. If it's a 'First Launch',
@@ -33,7 +33,7 @@ See main.FirstLaunch.
 Next is the Build Sequence. This involves loading the components for user-interaction. This undergoes different
 phases and may not wait on the Launch to finish but can never start before it. The initial phase is the same for
 all the runs whether 'First' or not. If it's not 'First', then a 'Remembrance' is made eventually to reload the
-previously saved settings. See main.Dashboard, and its collaborators.
+previously saved settings. See main.Board, and its collaborators.
 
 Collapse Sequence, in brief, involves preparing the data for the next Verification Sequence. The Dashboard is made
 to hide prior to this serialization, and the virtual machine is terminated afterwards. Finally, the root folder
