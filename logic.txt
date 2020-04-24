@@ -2,8 +2,6 @@ The life process of Dashboard includes important series of sets of calls called 
 Verification, Launch, Build, and Collapse Sequences. These sequences are logical, and can have serious
 consequences on the succeeding sequence. They involve an intensive interaction of classes,
 several io-operations, generation of components or even temporary files.
-The following explanation assumes that Dashboard is ran through the actual runner-type - utg.Dashboard -
-and that no tester-classes have been involved - like utg.GeneralTester, utg.SpecificTester, etc.
 
 The Verification Sequence is the first and foremost of all the sequences. Verification does not only mean
 verifying the user through the Portal on 'First Run'. In fact, on every startup, Dashboard gets into this
@@ -12,15 +10,12 @@ user is running Dashboard for the first time, then the user will be welcomed thr
 Otherwise the serialized-username will be compared with the current username. If the two match, then the
 details will be generated and the Launch Sequence is triggered forthwith. Please see utg.Dashboard class
 for more info.
-Notice this sequence does not comes into play when the tester-classes are engaged. The tester-classes
-bypass this sequence and make a manual Launch Sequence as their aim is to show a Dashboard that does not
-read or write data, hence purposely for testing.
 
 Following the Verification Sequence, is the Launch Sequence. This is only triggered if the Verification
 Sequence succeeds. The Verification is said to be successful, if either the user is just been through
 the Portal, in which case we have a 'First Launch', or the user's username matches the serialized-username
-and the user's core-details were found to be intact.
-This sequence will then start the job of setting the user's details - which if it's a 'First Launch', are
+and the core-details were found to be intact.
+This sequence will then start the job of generating the user's details - which if it's a 'First Launch', are
 given by 'main.PrePortal' class, otherwise are harvested from de-serialization. The user's details are indispensable
 for the Build Sequence. Therefore, if the de-serialization of the user's data failed for whatever reason,
 then the Verification is asked to force the user back to the Login page. Failure of any other de-serializations
