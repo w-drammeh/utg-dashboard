@@ -7,8 +7,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class MDate {
-    private static final SimpleDateFormat standardFormat = new SimpleDateFormat("dd-MM-yyyy H:m:s");
-
+    private static final SimpleDateFormat standardFormat = new SimpleDateFormat("dd/MM/yyyy H:m:s");
+    public static final String VAL_SEPARATOR = "/";
 
     public static String now(){
         return standardFormat.format(new Date());

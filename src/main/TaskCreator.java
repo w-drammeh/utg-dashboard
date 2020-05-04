@@ -68,7 +68,7 @@ public class TaskCreator {
         }
 
         public String getDuration(){
-            return durationBox.getSelectedItem().toString();
+            return String.valueOf(durationBox.getSelectedItem());
         }
     }
 
@@ -93,7 +93,7 @@ public class TaskCreator {
             namePanelPlus.add(KPanel.wantDirectAddition(new KLabel("Project Name:", labelsFont)), BorderLayout.WEST);
             namePanelPlus.add(KPanel.wantDirectAddition(nameField), BorderLayout.CENTER);
 
-            typeBox = new JComboBox<>(new String[]{"Java", "Python", "C/C++", "C#", "Database", "Web", "Other"});
+            typeBox = new JComboBox<>(new String[]{"Java", "Python", "C / C++", "C#", "Database", "Web", "Other"});
             typeBox.setFont(boxFont);
             typeBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             final KPanel typePanelPlus = new KPanel(new BorderLayout(),panelsDimension);
@@ -308,7 +308,8 @@ public class TaskCreator {
         	if (Globals.isBlank(dField.getText()) || Globals.isBlank(mField.getText()) || Globals.isBlank(yField.getText())) {
         		return "";
         	}
-        	return dField.getText()+"-"+mField.getText()+"-"+yField.getText();
+        	final String sep = MDate.VAL_SEPARATOR;
+        	return dField.getText()+sep+mField.getText()+sep+yField.getText();
         }
     }
 
@@ -414,8 +415,8 @@ public class TaskCreator {
             if(Globals.isBlank(dayField.getText()) || Globals.isBlank(monthField.getText()) || Globals.isBlank(yearField.getText())) {
                 return "";
             }
-
-            return dayField.getText()+"-"+monthField.getText()+"-"+yearField.getText();
+            final String sep = MDate.VAL_SEPARATOR;
+            return dayField.getText()+sep+monthField.getText()+sep+yearField.getText();
         }
 
         public String type(){

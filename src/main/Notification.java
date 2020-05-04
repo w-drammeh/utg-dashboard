@@ -95,9 +95,7 @@ public class Notification implements Serializable {
         return new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                SwingUtilities.invokeLater(()->{
-                    Notification.this.shower.setVisible(true);
-                });
+                SwingUtilities.invokeLater(()-> Notification.this.shower.setVisible(true));
                 if (!Notification.this.isRead()) {
                     Notification.this.justRead();
                     NotificationGenerator.effectCount(-1);
@@ -141,9 +139,7 @@ public class Notification implements Serializable {
         }
 
         private ActionListener closeListener(){
-            return e->{
-                this.dispose();
-            };
+            return e-> this.dispose();
         }
     }
 
