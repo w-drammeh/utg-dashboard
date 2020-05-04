@@ -51,7 +51,8 @@ public class SettingsUI implements ActivityAnswerer{
         settingsTab.setTabComponentAt(2, new KLabel("Customize Dashboard", tabFont));
 
         final KPanel settingsUI = new KPanel(new BorderLayout());
-        settingsUI.add(KPanel.wantDirectAddition(new KLabel("Personalization", KFontFactory.createPlainFont(20), Color.BLUE)), BorderLayout.NORTH);
+        settingsUI.add(KPanel.wantDirectAddition(new KLabel("Personalization",
+                KFontFactory.createPlainFont(20), Color.BLUE)), BorderLayout.NORTH);
         settingsUI.add(settingsTab,BorderLayout.CENTER);
 
         Board.addCard(settingsUI, "Settings");
@@ -530,7 +531,8 @@ public class SettingsUI implements ActivityAnswerer{
 
         final KPanel profileUI = new KPanel();
         profileUI.setLayout(new BoxLayout(profileUI, BoxLayout.Y_AXIS));
-        profileUI.addAll(portalMailPanel, portalPsswdPanel, studentMailPanel, studentPsswdPanel, majorCodePanel, minorPanel, minorCodePanel, msPanel, pobPanel,
+        profileUI.addAll(portalMailPanel, portalPsswdPanel, studentMailPanel, studentPsswdPanel, majorCodePanel,
+                minorPanel, minorCodePanel, msPanel, pobPanel,
                 dialPanel, KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER),null,
                         new KSeparator(new Dimension(875,1))),craftPanel,aboutPanel);
         profileUI.add(ComponentAssistant.contentBottomGap());
@@ -773,7 +775,7 @@ public class SettingsUI implements ActivityAnswerer{
                     }
                 } catch (Exception e1) {
                     App.signalError(e1.getClass().getSimpleName(), "Unexpected error occurred setting the the UI to "+lookName+"\n" +
-                            "Error message = "+e1.getMessage());
+                            "Error Message = "+e1.getMessage());
                 }
 
                 break;

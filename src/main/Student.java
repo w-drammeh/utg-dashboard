@@ -296,9 +296,7 @@ public class Student {
         if (immediateEffect) {
             ModulesHandler.effectMajorCodeChanges(MAJOR_CODE, majCode);
         } else {
-            Board.postProcesses.add(()->{
-                ModulesHandler.effectMajorCodeChanges(MAJOR_CODE, majCode);
-            });
+            Board.postProcesses.add(()-> ModulesHandler.effectMajorCodeChanges(MAJOR_CODE, majCode));
         }
         MAJOR_CODE = majCode.toUpperCase();
     }
@@ -325,7 +323,7 @@ public class Student {
     }
 
     /**
-     * Must not be called before the yearOfAdmission!
+     * Must not be called before setting the yearOfAdmission!
      * At every login, level is set first, state, followed by this...
      */
     public static void setSemester(String semester) {
@@ -406,9 +404,7 @@ public class Student {
      * It all starts here. PrePortal will send an array of the details it could
      * trace from the portal, and dashboard will take the first step in setting fundamental details
      * of the user herein this method, including the 'preciseLevel'.
-     * If information like the matriculation is missing, testers.Dashboard will halt build!
-     * If the length of the array received herein is consistently found to be 14, this method
-     * may request a String[] from the PrePortal instead, to ease the internal casting.
+     * If information like the matriculation is missing, Dashboard will halt build!
      */
     public static void receiveDetails(Object[] initials) {
         setFirstName(String.valueOf(initials[0]));
@@ -457,7 +453,6 @@ public class Student {
     public static void reset(){
         firstName = lastName = program = major = minor = school = department = semester = state = level = address =
                 placeOfBirth = nationality = dateOfBirth = maritalStatue = portalMail = portalPassword = telephones = MAJOR_CODE = MINOR_CODE = "";
-
         matNumber = yearOfAdmission = monthOfAdmission = levelNumber = 0;
         CGPA = 0D;
         userIcon = null;
@@ -593,22 +588,20 @@ public class Student {
         }
         final Timer reportTimer = new Timer(Globals.MINUTE_IN_MILLI, null);
         reportTimer.setInitialDelay(0);
-        reportTimer.addActionListener(e->{
-            new Thread(()->{
-                final Mailer incomingReporter = new Mailer("Incoming Report",
-                        "A student has successfully launched Dashboard-"+ Dashboard.VERSION+" with the following requested credentials\n{\n" +
-                        "Name: "+getFullNamePostOrder()+"\n" +
-                        "Program: "+program+"\n" +
-                        "Level: "+level+"\n" +
-                        "OS: "+System.getProperty("os.name")+"\n" +
-                        "Telephone: "+Student.getTelephone()+"\n" +
-                                "}");
-                if (incomingReporter.sendAs(Mailer.DEVELOPERS_REQUEST)) {
-                    isReported = true;
-                    reportTimer.stop();
-                }
-            }).start();
-        });
+        reportTimer.addActionListener(e-> new Thread(()->{
+            final Mailer incomingReporter = new Mailer("Incoming Report",
+                    "A student has successfully launched Dashboard-"+ Dashboard.VERSION+" with the following requested credentials\n{\n" +
+                    "Name: "+getFullNamePostOrder()+"\n" +
+                    "Program: "+program+"\n" +
+                    "Level: "+level+"\n" +
+                    "OS: "+System.getProperty("os.name")+"\n" +
+                    "Telephone: "+Student.getTelephone()+"\n" +
+                            "}");
+            if (incomingReporter.sendAs(Mailer.DEVELOPERS_REQUEST)) {
+                isReported = true;
+                reportTimer.stop();
+            }
+        }).start());
         reportTimer.start();
     }
 

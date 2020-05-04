@@ -81,7 +81,8 @@ public class TaskSelf {
 
             final KPanel quantaPanel = new KPanel(new FlowLayout(FlowLayout.RIGHT));
             quantaPanel.addAll(new KLabel(this.specifiedDuration+" days task", KFontFactory.createPlainFont(16)),
-                    Box.createRigidArea(new Dimension(10, 10)), this.togoLabel, Box.createRigidArea(new Dimension(15, 10)), moreOptions);
+                    Box.createRigidArea(new Dimension(10, 10)), this.togoLabel,
+                    Box.createRigidArea(new Dimension(15, 10)), moreOptions);
 
             this.setPreferredSize(new Dimension(1_000,35));
             this.setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
@@ -90,16 +91,20 @@ public class TaskSelf {
 
         private void signalEveNotice(){
             if (!eveIsAlerted) {
-                final String text = "Dear "+Student.getLastName()+", the Task you created on "+this.getStartDate()+", "+this.getDescription()+", is to be completed in less than a day.";
-                Notification.create("Task Reminder","Task "+this.getDescription()+" is due tomorrow",text,this.generateNotificationButtonListener());
+                final String text = "Dear "+Student.getLastName()+", the Task you created on "+this.getStartDate()+", "+
+                        this.getDescription()+", is to be completed in less than a day.";
+                Notification.create("Task Reminder","Task "+this.getDescription()+" is due tomorrow",
+                        text,this.generateNotificationButtonListener());
                 eveIsAlerted = true;
             }
         }
 
         private void signalDoneNotice(){
             if (!doneIsAlerted) {
-                final String text = "Dear "+Student.getLastName()+", the Task you created on "+this.getStartDate()+", "+this.getDescription()+", is now due. This Task is now considered done as per the given date limit.";
-                Notification.create("Task Completed","Task "+this.getDescription()+" is now completed",text,this.generateNotificationButtonListener());
+                final String text = "Dear "+Student.getLastName()+", the Task you created on "+this.getStartDate()+", "+
+                        this.getDescription()+", is now due. This Task is now considered done as per the given date limit.";
+                Notification.create("Task Completed","Task "+this.getDescription()+" is now completed",
+                        text,this.generateNotificationButtonListener());
                 doneIsAlerted = true;
             }
         }
@@ -311,16 +316,20 @@ public class TaskSelf {
 
         private void signalEveNotice(){
             if (!eveIsAlerted) {
-                final String text = "Dear "+Student.getLastName()+", the "+this.getSpecifiedDuration()+" days "+this.getType()+" Project you created, "+this.getProjectName()+", since "+this.getStartDate()+" is to be completed by tomorrow.";
-                Notification.create("Project Reminder","Specified duration for the "+this.getType()+" Project "+this.getProjectName()+" is running out",text,this.generateNotificationButtonListener());
+                final String text = "Dear "+Student.getLastName()+", the "+this.getSpecifiedDuration()+" days "+
+                        this.getType()+" Project you created, "+this.getProjectName()+", since "+this.getStartDate()+" is to be completed by tomorrow.";
+                Notification.create("Project Reminder","Specified duration for the "+this.getType()+" Project "+
+                        this.getProjectName()+" is running out",text,this.generateNotificationButtonListener());
                 eveIsAlerted = true;
             }
         }
 
         private void signalCompletionNotice(){
             if (!completionIsAlerted) {
-                final String text = "Dear "+Student.getLastName()+", the specified period of the "+this.getType()+" Project you created, "+this.getProjectName()+", since "+this.getStartDate()+" is now attained.";
-                Notification.create("Project Completed","Specified duration for the "+this.getType()+" Project "+this.getProjectName()+" is reached",text,this.generateNotificationButtonListener());
+                final String text = "Dear "+Student.getLastName()+", the specified period of the "+
+                        this.getType()+" Project you created, "+this.getProjectName()+", since "+this.getStartDate()+" is now attained.";
+                Notification.create("Project Completed","Specified duration for the "+this.getType()+" Project "+
+                        this.getProjectName()+" is reached",text,this.generateNotificationButtonListener());
                 completionIsAlerted = true;
             }
         }
@@ -533,17 +542,21 @@ public class TaskSelf {
 
         private void signalEveNotice(){
             if (!eveIsAlerted) {
-                final String text = "Dear, "+Student.getLastName()+", the "+this.courseName+(this.isGroup ? " Group Assignment" : " Assignment")+" is to be submitted in 24 hours. Submission Mode is "+this.modeOfSubmission+". " +
+                final String text = "Dear, "+Student.getLastName()+", the "+this.courseName+
+                        (this.isGroup ? " Group Assignment" : " Assignment")+" is to be submitted in 24 hours. Submission Mode is "+this.modeOfSubmission+". " +
                         "If you have already submitted this assignment, mark it as 'submitted' to prevent further-notifications.";
-                Notification.create("Assignment Reminder",this.courseName+" Assignment is due tomorrow!",text,this.generateNotificationButtonListener());
+                Notification.create("Assignment Reminder",this.courseName+" Assignment is due tomorrow!",
+                        text,this.generateNotificationButtonListener());
                 eveIsAlerted = true;
             }
         }
 
         private void signalSubmissionNotice(){
             if (!submissionIsAlerted) {
-                final String text = "Dear, "+Student.getLastName()+", the submission date of the "+this.courseName+(this.isGroup ? " Group Assignment" : " Assignment")+" is past. Submission Mode was "+this.modeOfSubmission+".";
-                Notification.create("Assignment Completed",this.courseName+" Assignment has reached submission date.", text, this.generateNotificationButtonListener());
+                final String text = "Dear, "+Student.getLastName()+", the submission date of the "+
+                        this.courseName+(this.isGroup ? " Group Assignment" : " Assignment")+" is past. Submission Mode was "+this.modeOfSubmission+".";
+                Notification.create("Assignment Completed",this.courseName+" Assignment has reached submission date.",
+                        text, this.generateNotificationButtonListener());
                 submissionIsAlerted = true;
             }
         }
@@ -613,7 +626,8 @@ public class TaskSelf {
         }
 
         public int getTimeRemaining(){
-            return MDate.actualDayDifference(MDate.parse(MDate.formatDateOnly(new Date())+" 0:0:0"), MDate.parse(this.deadLine+" 0:0:0"));
+            return MDate.actualDayDifference(MDate.parse(MDate.formatDateOnly(new Date())+" 0:0:0"),
+                    MDate.parse(this.deadLine+" 0:0:0"));
         }
 
         private void effectMembersCount(int effectValue){
@@ -654,7 +668,8 @@ public class TaskSelf {
                 yField.setText(MDate.getPropertyFrom(assignmentDeadline, Calendar.YEAR));
                 final KPanel datesPanel = new KPanel(new FlowLayout(FlowLayout.CENTER));
                 datesPanel.addAll(new KLabel("D", valsFont), dField, Box.createRigidArea(new Dimension(20, 30)),
-                        new KLabel("M", valsFont), mField, Box.createRigidArea(new Dimension(20, 30)), new KLabel("Y", valsFont), yField);
+                        new KLabel("M", valsFont), mField, Box.createRigidArea(new Dimension(20, 30)),
+                        new KLabel("Y", valsFont), yField);
                 final KPanel deadLinePanel = new KPanel(new BorderLayout(), new Dimension(465, 35));
                 deadLinePanel.add(KPanel.wantDirectAddition(new KLabel("New Deadline", KFontFactory.createBoldFont(15))), BorderLayout.WEST);
                 deadLinePanel.add(datesPanel,BorderLayout.EAST);
@@ -726,7 +741,8 @@ public class TaskSelf {
                     @Override
                     public void mouseDragged(MouseEvent e) {
                         super.mouseDragged(e);
-                        MemberExhibitor.this.setLocation(MemberExhibitor.this.getLocation().x + e.getX() - pX, MemberExhibitor.this.getLocation().y + e.getY() - pY);
+                        MemberExhibitor.this.setLocation(MemberExhibitor.this.getLocation().x + e.getX() - pX,
+                                MemberExhibitor.this.getLocation().y + e.getY() - pY);
                     }
 
                     @Override
@@ -739,7 +755,8 @@ public class TaskSelf {
                     @Override
                     public void mouseDragged(MouseEvent e) {
                         super.mouseDragged(e);
-                        MemberExhibitor.this.setLocation(MemberExhibitor.this.getLocation().x + e.getX() - pX, MemberExhibitor.this.getLocation().y + e.getY() - pY);
+                        MemberExhibitor.this.setLocation(MemberExhibitor.this.getLocation().x + e.getX() - pX,
+                                MemberExhibitor.this.getLocation().y + e.getY() - pY);
                     }
                 });
 
@@ -823,7 +840,8 @@ public class TaskSelf {
 
                 removeButton.setToolTipText("Remove "+name.split(" ")[0]);
                 removeButton.addActionListener(e -> {
-                    if (App.showYesNoCancelDialog(this.getRootPane(), "Confirm Removal","This action will remove "+name+" as a group participant for this assignment.\nContinue?")) {
+                    if (App.showYesNoCancelDialog(this.getRootPane(), "Confirm Removal",
+                            "This action will remove "+name+" as a group participant for this assignment.\nContinue?")) {
                         membersPanel.remove(namePanel);
                         ComponentAssistant.ready(membersPanel);
                         AssignmentSelf.this.members.remove(name);
@@ -883,7 +901,8 @@ public class TaskSelf {
                 canceller = KButton.getIconifiedButton("terminate.png", 15, 15);
                 canceller.setToolTipText("Terminate this Event");
                 canceller.addActionListener(e -> {
-                    if (App.showYesNoCancelDialog("Confirm Termination", "Do you really wish to cancel this " + (this.isTest() ? "Test?" : this.isExam() ? "Exam?" : "Event?"))) {
+                    if (App.showYesNoCancelDialog("Confirm Termination",
+                            "Do you really wish to cancel this " + (this.isTest() ? "Test?" : this.isExam() ? "Exam?" : "Event?"))) {
                         TasksGenerator.EventsHandler.deleteEvent(this);
                         this.isPending = false;
                         this.timer.stop();
@@ -911,7 +930,8 @@ public class TaskSelf {
         private void signalEveNotice(){
             if (!eveIsAlerted) {
                 final String eveText = "Dear "+Student.getLastName()+", "+this.title+" is just one day away from now.";
-                Notification.create("Event Reminder",Student.getLastName()+", "+this.getTitle()+" is at your door-step!",eveText,this.generateNotificationButtonListener());
+                Notification.create("Event Reminder",Student.getLastName()+", "+this.getTitle()+" is at your door-step!",
+                        eveText,this.generateNotificationButtonListener());
                 eveIsAlerted = true;
             }
         }
@@ -919,7 +939,8 @@ public class TaskSelf {
         private void signalTimeupNotice(){
             if (!timeupIsAlerted) {
                 final String timeupText = "Dear "+Student.getLastName()+", time is up for the event "+this.title+".";
-                Notification.create("Event Time-Up",Student.getLastName()+", "+this.getTitle()+" is due now!",timeupText,this.generateNotificationButtonListener());
+                Notification.create("Event Time-Up",Student.getLastName()+", "+this.getTitle()+" is due now!",
+                        timeupText,this.generateNotificationButtonListener());
                 timeupIsAlerted = true;
             }
         }

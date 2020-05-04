@@ -5,7 +5,6 @@ import main.*;
 import javax.swing.*;
 
 /**
- * <h1>class GeneralTester</h1>
  * This class runs Dashboard as if the user is already verified and it's intended for testing only!
  * This class simply jumps into the 'Build Sequence' by providing temporary data as specified in the
  * forgeXxx() calls thereby by-passing main.PrePortal and main.FirstLaunch mechanisms of initializing data.

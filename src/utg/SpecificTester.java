@@ -3,7 +3,6 @@ package utg;
 import main.MyClass;
 
 /**
- * <h1>class SpecificTester</h1>
  * This type is intended for testing a specific component / functionality of the project.
  * Notice: using utg.GeneralTester loads the entire project which can be time and memory consuming.
  * This class becomes useful when testing: for instance how accurate is some computation returned by Dashboard?

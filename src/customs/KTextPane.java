@@ -16,7 +16,6 @@ public class KTextPane extends JTextPane implements Preference {
         final String formattedText = "<!DOCTYPE html><html><head><style> body {font-size: 12px; font-family: Tahoma;} </style></head><body>" +
                 htmlText +
                 "</body></html>";
-
         return new KTextPane("text/html", formattedText);
     }
 

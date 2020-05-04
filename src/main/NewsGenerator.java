@@ -50,7 +50,7 @@ public class NewsGenerator {
     }
 
     /**
-     * <p>Places all the separately organized newsPackages in the resident.</p>
+     * Places all the separately organized newsPackages in the resident.
      */
     public void packAllIn(JComponent resident, boolean userClicked) {
         try {
@@ -83,13 +83,11 @@ public class NewsGenerator {
     }
 
     /**
-     * <p>Organizes a news in a panel.</p>
+     * Organizes a news in a panel.
      */
     private KPanel packageNews(String header, String body, String allContent){
         final KLabel hLabel = new KLabel(header, KFontFactory.createBoldFont(18), Color.BLUE);
-
         final KTextPane textPane = KTextPane.wantHtmlFormattedPane(body.substring(0, body.length() - (header.length() + 13)));
-
         final KButton extendedReader = new KButton();
         extendedReader.setFont(KFontFactory.createPlainFont(14));
         extendedReader.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -136,8 +134,8 @@ public class NewsGenerator {
 
 
     private static class AllReader extends KDialog {
-    private String keyContent;//the header
-    private String bodyContent;//the body packaged. It's only used here for a special purpose
+    private String keyContent;//The header
+    private String bodyContent;//The body packaged. It's only used here for a special purpose
     private String allContent;
     private KTextPane textPane;
 
@@ -150,21 +148,19 @@ public class NewsGenerator {
         this.allContent = allNews;
 
         textPane = KTextPane.wantHtmlFormattedPane(this.allContent);
-        textPane.setPreferredSize(new Dimension(525, 365));
+        textPane.setPreferredSize(new Dimension(530, 375));
 
         final KButton jumpButton = new KButton("Visit site");
-        jumpButton.addActionListener(e -> {
-            new Thread(() -> {
-                jumpButton.setEnabled(false);
-                this.dispose();
-                try {
-                    Desktop.getDesktop().browse(URI.create(NEWS_SITE));
-                } catch (Exception e1) {
-                    App.signalError(e1);
-                }
-                jumpButton.setEnabled(true);
-            }).start();
-        });
+        jumpButton.addActionListener(e -> new Thread(() -> {
+            jumpButton.setEnabled(false);
+            this.dispose();
+            try {
+                Desktop.getDesktop().browse(URI.create(NEWS_SITE));
+            } catch (Exception e1) {
+                App.signalError(e1);
+            }
+            jumpButton.setEnabled(true);
+        }).start());
 
         final KButton closeButton = new KButton("Close");
         closeButton.addActionListener(e -> AllReader.this.dispose());
@@ -183,8 +179,8 @@ public class NewsGenerator {
     }
 
     /**
-     * <p>Actually, to decide whether to be visible, given it has all the news contents,
-     * or to download it.</p>
+     * Actually, to decide whether to be visible, given it has all the news contents,
+     * or to download it.
      */
     private void primaryClick(KButton primaryButton){
         new Thread(()->{
@@ -192,7 +188,7 @@ public class NewsGenerator {
             try {
                 final String associatedLink = this.keyContent.toLowerCase().replace("’", "").replace(" ", "-");
                 final Document specificDocument = Jsoup.connect(HOME_SITE + associatedLink).get();
-                this.allContent = specificDocument.select(".entry-content").text();
+                this.allContent = specificDocument.select(".entry-content").outerHtml();
                 this.textPane.setText(this.allContent);
                 primaryButton.setText("Continue Reading");
                 primaryButton.setForeground(Color.BLUE);

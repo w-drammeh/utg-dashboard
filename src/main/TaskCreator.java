@@ -7,9 +7,8 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 /**
- * <h1>class TaskCreator</h1>
- * <p>Extends {@link KDialog} to provide addition frames for tasks.</p>
- * <p><i>This class is supported by series of inner classes for each of the addition types.</i></p>
+ * Extends KDialog to provide addition frames for tasks.
+ * This class is supported by series of inner classes for each of the addition types.
  */
 public class TaskCreator {
     public static final int TASKS_DESCRIPTION_LIMIT = 50;//Note, this should be increased. it's only small because of irregular component arrangement and fixed layouts

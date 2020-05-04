@@ -8,11 +8,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 /**
- * <h1>class TaskExhibition</h1>
- *
- * <p>Like its co., {@link TaskExhibition} too has subclasses for all the separate task types.
- * for exhibiting them.</p>
- * <p>The event has no Exhibitor</p>
+ * Like its co., TaskExhibition too has subclasses for all the separate task types.
+ * for exhibiting them.
+ * The event has no Exhibitor
  */
 public class TaskExhibition {
 
@@ -24,6 +22,7 @@ public class TaskExhibition {
     private static KLabel giveValueLabel(String text){
         return new KLabel(text, KFontFactory.createPlainFont(16));
     }
+
 
     public static class TodoExhibition extends KDialog {
 

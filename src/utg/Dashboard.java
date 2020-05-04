@@ -6,8 +6,6 @@ import javax.swing.*;
 import java.io.File;
 
 /**
- * <h1>class Dashboard</h1>
- *
  * @author Muhammed W. Drammeh
  *
  * This is the actual runner type of the project.

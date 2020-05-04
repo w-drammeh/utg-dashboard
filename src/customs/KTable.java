@@ -6,9 +6,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- * <h1>class KTable</h1>
- * <p><b>Description</b>: One of the most useful swing components as long as Dashboard is concerned.</p>
- * <p><i> </i></p>
+ * One of the most useful swing components as long as Dashboard is concerned.
  */
 public class KTable extends JTable implements Preference {
 

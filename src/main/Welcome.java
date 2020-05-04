@@ -9,11 +9,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 /**
- * <h1>class Welcome</h1>
- * <p>The Welcome class shows an overview of the project at glance.</p>
- * <p><i>It should contain useful info. of the dashboard.</i></p>
+ * The Welcome class shows an overview of the project at glance.
+ * It should contain useful info. of the dashboard.
  *
- * <p><i>It causes a new instance of Login to be visible.</i></p>
+ * It causes a new instance of Login to be visible at 'dispose'.
  */
 public class Welcome extends KDialog {
     private static final int PREFERRED_WIDTH = 675;
@@ -23,7 +22,8 @@ public class Welcome extends KDialog {
         super("Welcome");
         this.setSize(PREFERRED_WIDTH + 50, 575);
 
-        final KPanel topPanel = KPanel.wantDirectAddition(new KLabel("Personal Dashboard", KFontFactory.createBoldFont(25)));
+        final KPanel topPanel = KPanel.wantDirectAddition(new KLabel("Personal Dashboard",
+                KFontFactory.createBoldFont(25)));
         topPanel.setBackground(Color.WHITE);
 
         final String broughtString = "Proudly brought to you by the <b>Dashboard Project</b>. Dashboard comes with solutions long-anticipated by the UTG Students, " +
@@ -77,7 +77,8 @@ public class Welcome extends KDialog {
         final KPanel welcomePanel = new KPanel();
         welcomePanel.setLayout(new BoxLayout(welcomePanel, BoxLayout.Y_AXIS));
         welcomePanel.addAll(topPanel, write(broughtString, 70),
-                head("Dedication"),write(dedicationText, 90),head("System Requirement"),write(requirementText, 210), head("Portal & Privacy"),write(securityText, 565),
+                head("Dedication"),write(dedicationText, 90),head("System Requirement"),write(requirementText, 210),
+                head("Portal & Privacy"),write(securityText, 565),
                 head("Important"),write(importantText, 455), separatorPanel, write(nextText, 75));
 
         final KScrollPane kScrollPane = new KScrollPane(welcomePanel, false);
@@ -91,9 +92,7 @@ public class Welcome extends KDialog {
         nextButton.setFont(KFontFactory.createPlainFont(15));
         nextButton.addActionListener(e -> {
             Welcome.this.dispose();
-            SwingUtilities.invokeLater(() -> {
-                new Login(this).setVisible(true);
-            });
+            SwingUtilities.invokeLater(() -> new Login(this).setVisible(true));
         });
         nextButton.setEnabled(false);
 
@@ -102,9 +101,7 @@ public class Welcome extends KDialog {
         checkBox.setFocusable(true);
         checkBox.setForeground(Color.RED);
         checkBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        checkBox.addItemListener(e -> {
-            nextButton.setEnabled(e.getStateChange() == ItemEvent.SELECTED);
-        });
+        checkBox.addItemListener(e -> nextButton.setEnabled(e.getStateChange() == ItemEvent.SELECTED));
 
         final KPanel lowerPanel = new KPanel(new Dimension(PREFERRED_WIDTH, 50));
         lowerPanel.setLayout(new BoxLayout(lowerPanel, BoxLayout.X_AXIS));
@@ -143,9 +140,7 @@ public class Welcome extends KDialog {
     public void setVisible(boolean b) {
         super.setVisible(b);
         if (b) {
-            SwingUtilities.invokeLater(()->{
-                ((KScrollPane) this.getContentPane().getComponent(0)).toTop();
-            });
+            SwingUtilities.invokeLater(()-> ((KScrollPane) this.getContentPane().getComponent(0)).toTop());
         }
     }
 
