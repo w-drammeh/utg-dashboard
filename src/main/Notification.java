@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Or NotificationSelf
@@ -23,17 +24,19 @@ public class Notification implements Serializable {
     private Exhibitor shower;
     private boolean isRead;
     private NotificationLayer layer;
+    private Date time;
 
 
-    private Notification(String heading, String vText, String information, ActionListener buttonListener){
+    private Notification(String heading, String vText, String information, Date time, ActionListener buttonListener){
         this.heading = heading;
         this.text = vText;
         this.description = information;
+        this.time = time;
         this.shower = new Exhibitor(this);
 
         this.leftMostLabel = new KLabel(heading.toUpperCase(), KFontFactory.createBoldFont(16),Color.BLUE);
         this.innerLabel = new KLabel(text, KFontFactory.createPlainFont(16), this.isRead ? null : Color.RED);
-        this.rightMostLabel = new KLabel(MDate.now(),KFontFactory.createPlainFont(16), Color.GRAY);
+        this.rightMostLabel = new KLabel(MDate.formatFully(time), KFontFactory.createPlainFont(16), Color.GRAY);
 
         final KPanel easternPanel = new KPanel(new FlowLayout(FlowLayout.RIGHT));
         easternPanel.add(rightMostLabel);
@@ -55,7 +58,7 @@ public class Notification implements Serializable {
     }
 
     public static void create(String heading, String vText, String information, ActionListener buttonListener){
-        final Notification incoming = new Notification(heading, vText, information, buttonListener);
+        final Notification incoming = new Notification(heading, vText, information, new Date(), buttonListener);
         NotificationGenerator.join(incoming);
         NOTIFICATIONS.add(incoming);
     }
@@ -153,7 +156,7 @@ public class Notification implements Serializable {
         System.out.print("Deserializing notifications... ");
         final ArrayList<Notification> savedAlerts = (ArrayList<Notification>) MyClass.deserialize("alerts.ser");
         for (Notification alert : savedAlerts) {
-            final Notification replacementAlert = new Notification(alert.heading, alert.text, alert.description, null);
+            final Notification replacementAlert = new Notification(alert.heading, alert.text, alert.description, alert.time, null);
             if (alert.isRead) {
                 replacementAlert.justRead();
             }
