@@ -6,17 +6,19 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * <h1>class HelpGenerator</h1>
- * <p>Encompasses both the 'FAQs' and 'Dashboard Tips'</p>
+ * Encompasses both the 'FAQs' and 'Dashboard Tips'.
  */
 public class HelpGenerator implements ActivityAnswerer {
-    private static final CardLayout helpCard = new CardLayout();
-    private static KScrollPane tipScrollPane, faqsScrollPane;
-    private static boolean isFirst = true;
+    private CardLayout helpCard;
+    private KScrollPane tipScrollPane, faqsScrollPane;
+    private boolean isFirst;
 
 
     public HelpGenerator(){
-        final KPanel centerPanel = new KPanel(helpCard);//there's north, and this is the center
+        isFirst = true;
+
+        helpCard = new CardLayout();
+        final KPanel centerPanel = new KPanel(helpCard);//There's north, and this is the center
         final KLabel showingLabel = new KLabel("Showing Dashboard Tips", KFontFactory.createBoldFont(16));
         final JComboBox<String> helpBox = new JComboBox<String>(new String[] {"Dashboard Tips", "UTG FAQs"}){
             @Override
@@ -54,8 +56,8 @@ public class HelpGenerator implements ActivityAnswerer {
     }
 
     /**
-     * <p>Can quickly provide a reference to a tip. The parsed string should, for instance
-     * to reference syncing from 'Modules Collection' be "Module Collection : Syncing".</p>
+     * Can quickly provide a reference to a tip. The parsed string should, for instance
+     * to reference syncing from 'Modules Collection' be "Module Collection : Syncing".
      */
     public static String reference(String ref){
         return "'Home | FAQs & Help | Dashboard Tips | "+ref+"'";
@@ -63,7 +65,6 @@ public class HelpGenerator implements ActivityAnswerer {
 
     @Override
     public void answerActivity() {
-        Board.getBody().setPreferredSize(Board.BODYSIZE_NOSCROLLBARS);
         Board.showCard("Faqs & Help");
         if (isFirst) {
             SwingUtilities.invokeLater(()->{
@@ -74,8 +75,7 @@ public class HelpGenerator implements ActivityAnswerer {
         }
     }
 
-
-    //Dashboard tips
+//    Dashboard tips
     private void setUpTips(){
         final String runningTip = "Dashboard provides a mechanism for you to effectively keep track of the courses you " +
                 "register for every ongoing semester. Go to 'Home | This Semester'. Temporarily, you can add courses to " +
@@ -192,8 +192,7 @@ public class HelpGenerator implements ActivityAnswerer {
         return tipTextPane;
     }
 
-
-    //UTG Faqs
+//    UTG Faqs
     private void setUpFAQs(){
         //declaring the q, a strings
         final String mailQ = "How do I get to discover my Student Mail address?";
@@ -214,7 +213,7 @@ public class HelpGenerator implements ActivityAnswerer {
                 "by giving it to us. Simply go to 'Home | Personal Dashboard | Feedback | Answer a FAQ'.";
         final KPanel downPanel = new KPanel(new Dimension(900,115));
         downPanel.setLayout(new BoxLayout(downPanel, BoxLayout.Y_AXIS));
-        downPanel.addAll(ComponentAssistant.provideBlankSpace(500,30),KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))),
+        downPanel.addAll(Box.createVerticalStrut(30),KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))),
                 newBlank(), insertedText(contributeString));
 
         final KPanel faqsPlace = new KPanel();
@@ -257,7 +256,7 @@ public class HelpGenerator implements ActivityAnswerer {
     }
 
     private Component newBlank(){
-        return ComponentAssistant.provideBlankSpace(500,10);
+        return Box.createRigidArea(new Dimension(500, 10));
     }
 
     private Dimension newDimension(int height){

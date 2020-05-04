@@ -1,24 +1,23 @@
 package main;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
 /**
- * <h1>class InternetAvailabilityChecker</h1>
- * <p><i>A class which is lucky that its functionality is not integrated to other types.</i></p>
+ * A class which is lucky that its functionality is not integrated in other types.
  */
-public class InternetAvailabilityChecker implements Serializable {
+public class InternetAvailabilityChecker {
 
 
     /**
-     * <p>Calling this on the main thread may cause Dashboard to be waiting!</p>
+     * Calling this on the main thread can put Dashboard in a serious waiting state.
      */
     public static boolean isInternetAvailable(){
         try {
-            return isHostAvailable("utg.gm") || isHostAvailable("google.com") || isHostAvailable("facebook.com");
+            return isHostAvailable("utg.gm") || isHostAvailable("google.com") ||
+                    isHostAvailable("facebook.com");
         } catch (IOException e) {
             return false;
         }

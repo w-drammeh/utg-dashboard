@@ -10,22 +10,18 @@ import java.awt.event.MouseEvent;
 import java.util.Objects;
 
 /**
- * <h1>class TranscriptGenerator</h1>
- *
- * <p>Dashboard does not make any effort(s) to calculate the CGPA. So, the cgpa, the upperDivision,
+ * Dashboard does not make any effort(s) to calculate the CGPA. So, the cgpa, the upperDivision,
  * as well as other generated resources of this type should be renewed anytime it answerActivity.
- * And the cgpa is always set before the upperDivision is re-checked!</p>
- * <p>Feel free of what this class presents, because what's printed is independent of it.</p>
+ * And the cgpa is always set before the upperDivision is re-checked!
+ * Feel free of what this class presents, because what's printed is independent of it.
  */
 public class TranscriptGenerator implements ActivityAnswerer {
-    public static final String[] HEADS = {"COURSE CODE","COURSE DESCRIPTION","CREDIT VALUE","GRADE","QUALITY POINT"};
-    private static final KLabel classificationLabel = KLabel.getPredefinedLabel("Current Upper Class Division: ",SwingConstants.LEFT);
-    /**
-     * <p>Adds the detailsPanelPlus, and the tables. This is what is actually printed, or exported.</p>
-     */
+    public static final String[] HEADS = {"COURSE CODE", "COURSE DESCRIPTION", "CREDIT VALUE", "GRADE", "QUALITY POINT"};
+    private static final KLabel classificationLabel = KLabel.getPredefinedLabel("Current Upper Class Division: ",
+            SwingConstants.LEFT);
     private static KPanel transcriptFace;
     /**
-     * <p>Hold the logo, labels, as well as the details.</p>
+     * Hold the logo, labels, as well as the details.
      */
     private static KPanel detailsPanelPlus;
     private static KDefaultTableModel tModel;
@@ -84,7 +80,7 @@ public class TranscriptGenerator implements ActivityAnswerer {
         downloadButton.setPreferredSize(new Dimension(175, 30));
         downloadButton.setStyle(KFontFactory.createPlainFont(15), Color.BLUE);
         downloadButton.undress();
-        downloadButton.underline(null, true);
+        downloadButton.underline(null, false);
         downloadButton.setToolTipText("Export Transcript to PDF");
         downloadButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         downloadButton.addActionListener(actionEvent -> {
@@ -114,7 +110,6 @@ public class TranscriptGenerator implements ActivityAnswerer {
 
         final KPanel helloPanel = new KPanel(new FlowLayout(FlowLayout.RIGHT));
         helloPanel.addAll(detailsCheck, downloadButton);
-
         return helloPanel;
     }
 
@@ -122,8 +117,8 @@ public class TranscriptGenerator implements ActivityAnswerer {
         transcriptFace = new KPanel();
         transcriptFace.setLayout(new BoxLayout(transcriptFace, BoxLayout.Y_AXIS));
         transcriptFace.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-        transcriptFace.addAll(ComponentAssistant.provideBlankSpace(500,10), detailsPanelPlus, ComponentAssistant.provideBlankSpace(500,20),
-                tWrapper, ComponentAssistant.provideBlankSpace(500,10), getPointPanel());
+        transcriptFace.addAll(Box.createVerticalStrut(10), detailsPanelPlus, Box.createVerticalStrut(20),
+                tWrapper, Box.createVerticalStrut(10), getPointPanel());
     }
 
     private static void buildDetailsPanelPlus(){
@@ -134,12 +129,12 @@ public class TranscriptGenerator implements ActivityAnswerer {
         l1l2_Panel.addAll(l1,l2);
 
         final KPanel lParted = new KPanel();
-        lParted.addAll(KLabel.wantIconLabel("Logo_of_UTG.gif",125,125),
-                ComponentAssistant.provideBlankSpace(50,100),l1l2_Panel);
+        lParted.addAll(KLabel.wantIconLabel("UTGLogo.gif",125,125),
+                Box.createRigidArea(new Dimension(50, 100)),l1l2_Panel);
 
         detailsPanelPlus = new KPanel();
         detailsPanelPlus.setLayout(new BoxLayout(detailsPanelPlus, BoxLayout.Y_AXIS));
-        detailsPanelPlus.addAll(lParted,ComponentAssistant.provideBlankSpace(500,30),packAllSeparatedPanels());
+        detailsPanelPlus.addAll(lParted,Box.createVerticalStrut(30),packAllSeparatedPanels());
         detailsPanelPlus.setVisible(false);
     }
 
@@ -147,23 +142,24 @@ public class TranscriptGenerator implements ActivityAnswerer {
         final KPanel leftSide = new KPanel();
         leftSide.setLayout(new BoxLayout(leftSide, BoxLayout.Y_AXIS));
         leftSide.add(provideRectangularPanel(130,30,"STUDENT NAME", Student.getFullNamePostOrder()));
-        leftSide.add(ComponentAssistant.provideBlankSpace(100,10));
-        leftSide.add(provideRectangularPanel(130,60,"YEAR","ENROLLED", Integer.toString(Student.getYearOfAdmission())));
-        leftSide.add(ComponentAssistant.provideBlankSpace(100,10));
+        leftSide.add(Box.createVerticalStrut(10));
+        leftSide.add(provideRectangularPanel(130,60,"YEAR","ENROLLED",
+                Integer.toString(Student.getYearOfAdmission())));
+        leftSide.add(Box.createVerticalStrut(10));
         leftSide.add(provideRectangularPanel(130,30,"MINOR", ""));
 
         final KPanel rightSide = new KPanel();
         rightSide.setLayout(new BoxLayout(rightSide,BoxLayout.Y_AXIS));
         rightSide.add(provideRectangularPanel(165,30,"STUDENT NUMBER", Student.getMatNumber()+""));
-        rightSide.add(ComponentAssistant.provideBlankSpace(100,10));
-        rightSide.add(provideRectangularPanel(165,60,"YEAR EXPECTED", "TO GRADUATE",Student.getExpectedYearOfGraduation()+""));
-        rightSide.add(ComponentAssistant.provideBlankSpace(100,10));
+        rightSide.add(Box.createVerticalStrut(10));
+        rightSide.add(provideRectangularPanel(165,60,"YEAR EXPECTED", "TO GRADUATE",
+                Student.getExpectedYearOfGraduation()+""));
+        rightSide.add(Box.createVerticalStrut(10));
         rightSide.add(provideRectangularPanel(165,30,"MAJOR", Student.getMajor()));
 
         final KPanel returningPanel = new KPanel(new BorderLayout());
         returningPanel.add(leftSide, BorderLayout.WEST);
         returningPanel.add(rightSide, BorderLayout.EAST);
-
         return returningPanel;
     }
 
@@ -190,7 +186,6 @@ public class TranscriptGenerator implements ActivityAnswerer {
         lr.add(l, BorderLayout.WEST);
         lr.add(new KSeparator(KSeparator.VERTICAL), BorderLayout.CENTER);
         lr.add(r, BorderLayout.EAST);
-
         return lr;
     }
 
@@ -212,7 +207,6 @@ public class TranscriptGenerator implements ActivityAnswerer {
 
         final KPanel kPanel = new KPanel(new BorderLayout());
         kPanel.add(avgPanel, BorderLayout.EAST);
-
         return kPanel;
     }
 
@@ -223,12 +217,13 @@ public class TranscriptGenerator implements ActivityAnswerer {
     private static void reIndexTableResources(){
         for (int i = 0; i < tTable.getRowCount(); i++){
             tModel.removeRow(i);
-            tWrapper.setPreferredSize(new Dimension(tWrapper.getPreferredSize().width,tWrapper.getPreferredSize().height - 30));
+            tWrapper.setPreferredSize(new Dimension(tWrapper.getPreferredSize().width, tWrapper.getPreferredSize().height - 30));
         }
 
         for (Course tCourse : Memory.listRequested()) {
-            tModel.addRow(new String[] {tCourse.getCode(),tCourse.getName(),tCourse.getCreditHours()+"",tCourse.getGrade(),tCourse.getQualityPoint()+""});
-            tWrapper.setPreferredSize(new Dimension(tWrapper.getPreferredSize().width,tWrapper.getPreferredSize().height + 30));
+            tModel.addRow(new String[] {tCourse.getCode(),tCourse.getName(),tCourse.getCreditHours()+"", tCourse.getGrade(),
+                    tCourse.getQualityPoint()+""});
+            tWrapper.setPreferredSize(new Dimension(tWrapper.getPreferredSize().width, tWrapper.getPreferredSize().height + 30));
         }
     }
 
@@ -243,10 +238,7 @@ public class TranscriptGenerator implements ActivityAnswerer {
         classificationLabel.setForeground(classificationLabel.getText().contains("None") ? Color.RED : Color.BLUE);
         cgpaLabel.setText(Double.toString(Student.getCGPA()));
 
-        SwingUtilities.invokeLater(()->{
-            reIndexTableResources();
-        });
-        Board.getBody().setPreferredSize(Board.BODYSIZE_NOSCROLLBARS);
+        SwingUtilities.invokeLater(TranscriptGenerator::reIndexTableResources);
         Board.showCard("Transcript");
     }
 

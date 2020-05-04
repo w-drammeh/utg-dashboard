@@ -24,7 +24,7 @@ public class GeneralTester {
     }
 
     public static void main(String[] args) {
-        Student.resetFields();
+        Student.reset();
         forgeDetailsForTest();
         forgeActiveCoursesForTest();
         forgeCoursesForTest();
@@ -99,6 +99,7 @@ public class GeneralTester {
         ModulesHandler.STARTUP_COURSES.add(new Course("2017/2018","Second Semester","der122","General Chemistry 2","Anthony Adjivon","","","",76,3,"",true));
         ModulesHandler.STARTUP_COURSES.add(new Course("2017/2018","Second Semester","cps111","Introduction to Information Communication Technology","Ebrima Sarr","","","",70,3,"",true));
         ModulesHandler.STARTUP_COURSES.add(new Course("2017/2018","Second Semester","cps101","Computer Programming 1","Fred Sangol","","","",80,3,"",true));
+        //...
     }
 
 }

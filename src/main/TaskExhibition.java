@@ -16,6 +16,7 @@ import java.awt.event.KeyEvent;
  */
 public class TaskExhibition {
 
+
     private static KLabel giveLabel(String text){
         return new KLabel(text, KFontFactory.createBoldFont(16));
     }
@@ -31,7 +32,7 @@ public class TaskExhibition {
             this.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
             this.setResizable(true);
 
-            final KPanel contentPanel = new KPanel();//to be used... contentPane!
+            final KPanel contentPanel = new KPanel();//To be used... contentPane!
             contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
             final KPanel nameLayer = new KPanel(new BorderLayout());
@@ -78,18 +79,14 @@ public class TaskExhibition {
 
             final KButton doneButton = new KButton("Mark as Done");
             doneButton.setForeground(Color.BLUE);
-            doneButton.addActionListener(e -> {
-                TasksGenerator.TodoHandler.transferTask(theTask,this,false);
-            });
+            doneButton.addActionListener(e -> TasksGenerator.TodoHandler.transferTask(theTask,this,false));
 
             final KButton removeButton = new KButton("Remove");
             removeButton.setForeground(Color.RED);
             removeButton.addActionListener(TasksGenerator.TodoHandler.removalWaiter(theTask,this));
 
             final KButton closeButton = new KButton("Close");
-            closeButton.addActionListener(e -> {
-                this.dispose();
-            });
+            closeButton.addActionListener(e -> this.dispose());
 
             final KPanel buttonsContainer = new KPanel(new FlowLayout(FlowLayout.CENTER));
             if (theTask.isActive()) {
@@ -104,11 +101,10 @@ public class TaskExhibition {
             this.pack();
             this.setMinimumSize(this.getPreferredSize());
             this.setLocationRelativeTo(Board.getRoot());
-            SwingUtilities.invokeLater(() -> {
-                this.setVisible(true);
-            });
+            SwingUtilities.invokeLater(() -> this.setVisible(true));
         }
     }
+
 
     public static class ProjectExhibition extends KDialog{
 
@@ -138,7 +134,7 @@ public class TaskExhibition {
 
             final KPanel expectedPanel = new KPanel(new BorderLayout());
             expectedPanel.add(KPanel.wantDirectAddition(giveLabel("Expected to complete:")),BorderLayout.WEST);
-            expectedPanel.add(KPanel.wantDirectAddition(giveValueLabel(theProject.getDateExpectedToComplete())),BorderLayout.CENTER);
+            expectedPanel.add(KPanel.wantDirectAddition(giveValueLabel(theProject.getDateExpectedToComplete())), BorderLayout.CENTER);
 
             final KPanel soFarPanel = new KPanel(new BorderLayout());
             soFarPanel.add(KPanel.wantDirectAddition(giveLabel("Time taken so far:")),BorderLayout.WEST);
@@ -159,15 +155,13 @@ public class TaskExhibition {
             if (theProject.isLive()) {
                 exhibitionPane.addAll(namePanel, typePanel, statusPanel, startedPanel, expectedPanel, soFarPanel, remPanel);
             } else {
-                exhibitionPane.addAll(namePanel,typePanel,statusPanel,startedPanel,completedPanel,consumedPanel);
+                exhibitionPane.addAll(namePanel, typePanel, statusPanel, startedPanel, completedPanel, consumedPanel);
             }
 
             final KButton closeButton = new KButton("Close");
-            closeButton.addActionListener(e -> {
-                this.dispose();
-            });
+            closeButton.addActionListener(e -> this.dispose());
 
-            exhibitionPane.add(ComponentAssistant.provideBlankSpace(400,25));
+            exhibitionPane.add(Box.createVerticalStrut(25));
             exhibitionPane.add(KPanel.wantDirectAddition(closeButton));
 
             this.getRootPane().setDefaultButton(closeButton);
@@ -175,11 +169,10 @@ public class TaskExhibition {
             this.pack();
             this.setMinimumSize(this.getPreferredSize());
             this.setLocationRelativeTo(Board.getRoot());
-            SwingUtilities.invokeLater(() -> {
-                this.setVisible(true);
-            });
+            SwingUtilities.invokeLater(() -> this.setVisible(true));
         }
     }
+
 
     public static class AssignmentExhibition extends KDialog{
 
@@ -243,24 +236,21 @@ public class TaskExhibition {
 
             final KButton submitButton = new KButton("Mark as Submit");
             submitButton.setForeground(Color.BLUE);
-            submitButton.addActionListener(e->{
-                TasksGenerator.AssignmentsHandler.transferAssignment(assignment,this,false);
-            });
+            submitButton.addActionListener(e-> TasksGenerator.AssignmentsHandler.transferAssignment(assignment,this,false));
 
             final KButton removeButton = new KButton("Remove");
             removeButton.setForeground(Color.RED);
             removeButton.addActionListener(TasksGenerator.AssignmentsHandler.removalListener(assignment, this));
 
-            final KButton closeButton = new KButton("Close", true);
-            closeButton.addActionListener(e -> {
-                this.dispose();
-            });
+            final KButton closeButton = new KButton("Close");
+            closeButton.setFocusable(true);
+            closeButton.addActionListener(e -> this.dispose());
 
             final KPanel buttonsContainer = new KPanel(new FlowLayout(FlowLayout.CENTER));
             if (assignment.isOn()) {
-                buttonsContainer.addAll(removeButton,submitButton,closeButton);
+                buttonsContainer.addAll(removeButton, submitButton, closeButton);
             } else {
-                buttonsContainer.addAll(removeButton,closeButton);
+                buttonsContainer.addAll(removeButton, closeButton);
             }
 
             assignmentPane.addAll(ComponentAssistant.contentBottomGap(), buttonsContainer);
@@ -269,9 +259,7 @@ public class TaskExhibition {
             this.pack();
             this.setMinimumSize(this.getPreferredSize());
             this.setLocationRelativeTo(Board.getRoot());
-            SwingUtilities.invokeLater(() -> {
-                this.setVisible(true);
-            });
+            SwingUtilities.invokeLater(() -> this.setVisible(true));
         }
     }
 

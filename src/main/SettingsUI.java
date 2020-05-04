@@ -8,9 +8,6 @@ import java.awt.event.*;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 
-/**
- * <h1>class SettingsUI</h1>
- */
 public class SettingsUI implements ActivityAnswerer{
     public static final KTextField majorCodeField = KTextField.rangeControlField(3);
     public static final KTextField minorField = new KTextField(new Dimension(320,30));
@@ -165,7 +162,7 @@ public class SettingsUI implements ActivityAnswerer{
                     final KLabel label = new KLabel(" "+t+" ");
                     label.setFont(dFont);
                     label.setForeground(Color.BLUE);
-                    label.underline(null,true);
+                    label.underline(null,false);
                     label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                     label.addMouseListener(new MouseAdapter() {
                         @Override
@@ -514,7 +511,7 @@ public class SettingsUI implements ActivityAnswerer{
         valueField.addActionListener(keyField.getActionListeners()[0]);
         final KPanel craftPanel = new KPanel(new BorderLayout());
         craftPanel.add(KPanel.wantDirectAddition(new KLabel("Add a Custom Detail:",hFont)), BorderLayout.WEST);
-        craftPanel.add(KPanel.wantDirectAddition(new KLabel("Key", dFont), keyField, ComponentAssistant.provideBlankSpace(30,25),
+        craftPanel.add(KPanel.wantDirectAddition(new KLabel("Key", dFont), keyField, Box.createRigidArea(new Dimension(30,25)),
                 new KLabel("Value", dFont), valueField), BorderLayout.CENTER);
 
         descriptionArea.setText(Student.getAbout());
@@ -632,7 +629,7 @@ public class SettingsUI implements ActivityAnswerer{
             Student.setNameFormat(selectedFormat);
         });
         final KPanel nameFormatPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        nameFormatPanel.addAll(new KLabel("Change Name Format:",hFont),ComponentAssistant.provideBlankSpace(30,25),nameFormatBox);
+        nameFormatPanel.addAll(new KLabel("Change Name Format:",hFont),Box.createRigidArea(new Dimension(30,25)),nameFormatBox);
 
         bgBox = new JComboBox<String>(SettingsCore.allBackgroundNames()){
             @Override
@@ -652,7 +649,7 @@ public class SettingsUI implements ActivityAnswerer{
             });
         });
         final KPanel bgPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        bgPanel.addAll(new KLabel("Change Background:",hFont),ComponentAssistant.provideBlankSpace(30,25),bgBox);
+        bgPanel.addAll(new KLabel("Change Background:",hFont),Box.createRigidArea(new Dimension(30,25)),bgBox);
 
         looksBox = new JComboBox<String>(SettingsCore.getLookNames()){
             @Override
@@ -674,13 +671,13 @@ public class SettingsUI implements ActivityAnswerer{
             });
         });
         final KPanel lafPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        lafPanel.addAll(new KLabel("Change Look & Feel:",hFont),ComponentAssistant.provideBlankSpace(30,25),looksBox);
+        lafPanel.addAll(new KLabel("Change Look & Feel:",hFont),Box.createRigidArea(new Dimension(30,25)),looksBox);
 
         final KButton outButton = new KButton("Sign out");
         outButton.setPreferredSize(new Dimension(125, 30));
         outButton.setStyle(KFontFactory.createBoldFont(15), Color.BLUE);
         outButton.undress();
-        outButton.underline(null, false);
+        outButton.underline(null, true);
         outButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         outButton.addActionListener(e-> {
             if (App.showOkCancelDialog("Sign out?", "By signing out, all your data will be lost, continue?")) {
@@ -691,11 +688,10 @@ public class SettingsUI implements ActivityAnswerer{
 
                 if (vInt == App.VERIFICATION_TRUE) {
                     if (MyClass.unMountUserData()) {
-                        Board.getAppInstance().dispose();
-                        Runtime.getRuntime().removeShutdownHook(Board.shutDownThread);
-//                        loadDefaults();
-//                        Dashboard.main(null);
-                        Runtime.getRuntime().exit(0);
+                        Board.getInstance().dispose();
+                        if (Runtime.getRuntime().removeShutdownHook(Board.shutDownThread)) {
+                            Runtime.getRuntime().exit(0);
+                        }
                     } else {
                         App.signalError("Error", "Unusual error encountered un-mounting the serializable files.\n" +
                                 "If there is any process using the Dashboard directory, stop it, and try signing out again.");
@@ -706,7 +702,7 @@ public class SettingsUI implements ActivityAnswerer{
             }
         });
         final KPanel outPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        outPanel.addAll(new KLabel("You may wish to:",hFont),ComponentAssistant.provideBlankSpace(30,25),outButton);
+        outPanel.addAll(new KLabel("You may wish to:",hFont),Box.createRigidArea(new Dimension(30,25)),outButton);
 
         final KPanel homeOfNice = new KPanel();
         homeOfNice.setBackground(Color.WHITE);
@@ -783,6 +779,7 @@ public class SettingsUI implements ActivityAnswerer{
                 break;
             }
         }
+
         NotificationGenerator.awareLookShift();
     }
 
@@ -817,7 +814,6 @@ public class SettingsUI implements ActivityAnswerer{
 
     @Override
     public void answerActivity() {
-        Board.getBody().setPreferredSize(Board.BODYSIZE_NOSCROLLBARS);
         Board.showCard("Settings");
     }
 

@@ -9,23 +9,11 @@ import java.io.File;
 import java.util.LinkedHashMap;
 
 /**
- * <h1>class Student</h1>
- * <p>Like the {@link Course} type, the Student class models a student with as much
- * properties as enough</p>
- * <p>As long as dashboard is concern, it should be customizable, but some details of the user
- * can not be directly modified!</p>
- *
+ * Like the Course type, the Student class models a student with as much properties as needed.
+ * As long as dashboard is concern, it should be customizable, but some details of the user
+ * can not be directly modified!
  */
 public class Student {
-    //
-    public static final String FIRST_SEMESTER = "First Semester";
-    public static final String SECOND_SEMESTER = "Second Semester";
-    public static final String SUMMER_SEMESTER = "Summer Semester";//These are but for uniformity
-    private static final int iconWidth = 275, iconHeight = 200;
-    private static final ImageIcon emptyIcon = MyClass.scaleForMe(new App().getIconURL("default-user-icon.png"),iconWidth,iconHeight);
-    private static final ImageIcon shooterIcon = MyClass.scaleForMe(new App().getIconURL("shooter.png"),iconWidth,iconHeight);
-    //
-    public static boolean isReported;
     private static String firstName;
     private static String lastName;
     private static String program;
@@ -34,16 +22,15 @@ public class Student {
     private static String school;
     private static String department;
     /**
-     * <p>Determines the currently running semester. Initially provided by {@link PrePortal} but always
-     * auto-renewed.</p>
+     * Determines the currently running semester. Initially provided by PrePortal but always auto-renewed.
      */
     private static String semester;
     /**
-     * <p>The state or status. Also auto-renewed.</p>
+     * The state or status. Also auto-renewed.
      */
     private static String state;
     /**
-     * <p>The level, i.e "Undergraduate", "Post-graduate", etc. Also auto-renewed.</p>
+     * The level, i.e "Undergraduate", "Post-graduate", etc. Also auto-renewed.
      */
     private static String level;
     private static String address;
@@ -59,79 +46,51 @@ public class Student {
     private static String MAJOR_CODE;
     private static String MINOR_CODE;
     private static String about;
-    //
+
     private static int matNumber;
-    private static int yearOfAdmission;//the exact year admission takes place
+    private static int yearOfAdmission;//The exact year admission takes place
     private static int monthOfAdmission;
     /**
-     * <p>Deals with the level in 'cents'</p>
+     * Deals with the level in 'cents'
      *
-     * <p>Dashboard records levels in 50s.</p>
-     * <p><i>50 = first semester; 100 = second semester; 150 = 2nd year, first semester, so on like that.</i></p>
-     * <p><i>The same way 300 implies 3rd year, 2nd semester.</i></p>
+     * Dashboard records levels in 50s.</p>
+     * 50 = first semester; 100 = second semester; 150 = 2nd year, first semester; so on and so forth.
+     * The same way 300 implies 3rd year, 2nd semester.
      */
     private static int levelNumber;
     private static double CGPA;
-    //
+    public static boolean isReported;
+
     private static ImageIcon userIcon;
-    //
+
+    public static final String FIRST_SEMESTER = "First Semester";
+    public static final String SECOND_SEMESTER = "Second Semester";
+    public static final String SUMMER_SEMESTER = "Summer Semester";//These are but for uniformity
+    private static final int iconWidth = 275, iconHeight = 200;
+    private static final ImageIcon emptyIcon = MyClass.scaleForMe(App.getIconURL("defaultUserIcon.png"),iconWidth,iconHeight);
+    private static final ImageIcon shooterIcon = MyClass.scaleForMe(App.getIconURL("shooter.png"),iconWidth,iconHeight);
+
     /**
      * The format of the name shown at the top center
      */
     private static String nameFormat = "First Name first";
 
 
-    //Calls for the fields
-    public static String getFirstName() {
+//    Calls for the fields..
+    public static String getFirstName(){
         return firstName;
     }
 
-    /**
-     * <p>This method should receive the first name from the portal in a raw state,
-     * and must always be in a word, e.g DRAMMEH.</p>
-     * <p><i>So it'll make sure it has only the first character capitalized.</i></p>
-     */
     public static void setFirstName(String firstName) {
-        Student.firstName = firstName.charAt(0)+firstName.substring(1).toLowerCase();
+        Student.firstName = firstName;
     }
 
     public static String getLastName() {
         return lastName;
     }
 
-    /**
-     * <p>Not as simple as the name may suggests.</p>
-     * <p>It receives the other part(s) of the full name, e.g if the full name is MOMODOU ALIEU JALLOW,
-     * then, MOMODOU ALIEU is parsed to this methods param.</p>
-     * <p><i>It automatically sets the last name to the first word found in the param-arg
-     * after splitting it by a whitespace.</i></p>
-     * <p><i>If the student has two initials they are appended. If any of the initials has at least 4
-     * letters they'll be case-checked and then appended</i></p>
-     */
     public static void setLastName(String lastName) {
-        final String[] lastNames = lastName.split(" ");
-        String actualLast = lastNames[0].charAt(0)+lastNames[0].substring(1).toLowerCase();
-        if (lastNames.length == 2) {
-            if (lastNames[1].length() >= 4) {
-                actualLast+=" "+lastNames[1].charAt(0)+lastNames[1].substring(1).toLowerCase();
-            } else {
-                actualLast+=" "+lastNames[1];
-            }
-        } else if (lastNames.length == 3) {
-            if (lastNames[1].length() >= 4) {
-                actualLast+=" "+lastNames[1].charAt(0)+lastNames[1].substring(1).toLowerCase();
-            } else {
-                actualLast+=" "+lastNames[1];
-            }
-            //
-            if (lastNames[2].length() >= 4) {
-                actualLast+=" "+lastNames[2].charAt(0)+lastNames[2].substring(1).toLowerCase();
-            } else {
-                actualLast+=" "+lastNames[2];
-            }
-        }
-
-        Student.lastName = actualLast;
+        Student.lastName = lastName;
     }
 
     public static String getProgram(){
@@ -154,19 +113,20 @@ public class Student {
         return minor;
     }
 
-    public static void setMinor(String minor) {
+    public static void setMinor(String minor){
         Student.minor = minor;
         if (Globals.isBlank(minor)) {
             if (Board.isAppReady()) {
-                setMinorCode("", true);
-                SettingsUI.minorCodeField.setText(minor);
+                resetMinorCode();
             } else {
-                Board.postProcesses.add(()->{
-                    setMinorCode("", true);
-                    SettingsUI.minorCodeField.setText(minor);
-                });
+                Board.postProcesses.add(Student::resetMinorCode);
             }
         }
+    }
+
+    private static void resetMinorCode(){
+        setMinorCode("", true);
+        SettingsUI.minorCodeField.setText(minor);
     }
 
     public static String getSchool() {
@@ -174,36 +134,15 @@ public class Student {
     }
 
     public static void setSchool(String school) {
-        if (school.contains("Unknown")) {
-            Student.school = school;
-        } else {
-            final StringBuilder builder = new StringBuilder();
-            final String[] sParts = school.split(" ");
-            for(int i = 2; i < sParts.length; i++){
-                builder.append(i == sParts.length-1 ? sParts[i] : sParts[i]+" ");
-            }
-
-            Student.school = builder.toString();
-        }
+        Student.school = school.replace("School of ", "");
     }
 
-    public static String getDepartment() {
+    public static String getDepartment(){
         return department;
     }
 
     public static void setDepartment(String department) {
-        if (department.contains("Unknown")) {
-            Student.department = department;
-        } else {
-            final StringBuilder builder = new StringBuilder();
-            final String[] dParts = department.split(" ");
-            for(int i = 2; i < dParts.length; i++){
-                builder.append(i == dParts.length-1 ? dParts[i] : dParts[i]+" ");
-            }
-
-            Student.department = builder.toString();
-        }
-
+        Student.department = department.replace("Department of ", "");
     }
 
     public static String getAddress() {
@@ -303,13 +242,13 @@ public class Student {
     }
 
     /**
-     * Returns just the first contact in the current telephones list
+     * Returns just the first contact in the current telephone list
      */
     public static String getTelephone() {
         return telephones.split("/")[0];
     }
 
-    public static String getTelephones() {//useful in de-serialization
+    public static String getTelephones() {//Useful in deserialization
         return telephones;
     }
 
@@ -339,7 +278,7 @@ public class Student {
     }
 
     /**
-     * <p>Never surround this by SpecialClass.toFourth()!</p>
+     * Never surround this by SpecialClass.toFourth()!
      */
     public static double getCGPA() {
         return CGPA;
@@ -350,8 +289,8 @@ public class Student {
     }
 
     /**
-     * <p>Blank param may be given to signify reset.
-     * <p><i>Never give null to this, or its co.</i></p>
+     * Blank param may be given to signify reset.
+     * Null is not to be given to this, or its co.
      */
     public static void setMajorCode(String majCode, boolean immediateEffect){
         if (immediateEffect) {
@@ -361,7 +300,6 @@ public class Student {
                 ModulesHandler.effectMajorCodeChanges(MAJOR_CODE, majCode);
             });
         }
-        //After all
         MAJOR_CODE = majCode.toUpperCase();
     }
 
@@ -373,9 +311,7 @@ public class Student {
         if (immediateEffect) {
             ModulesHandler.effectMinorCodeChanges(MINOR_CODE, minCode);
         } else {
-            Board.postProcesses.add(()->{
-                ModulesHandler.effectMinorCodeChanges(MINOR_CODE, minCode);
-            });
+            Board.postProcesses.add(()-> ModulesHandler.effectMinorCodeChanges(MINOR_CODE, minCode));
         }
         MINOR_CODE = minCode.toUpperCase();
     }
@@ -389,21 +325,21 @@ public class Student {
     }
 
     /**
-     * <p>Must not be called before the yearOfAdmission!</p>
-     * <p>At every login, level is set first, state, followed by this...</p>
+     * Must not be called before the yearOfAdmission!
+     * At every login, level is set first, state, followed by this...
      */
     public static void setSemester(String semester) {
         if (semester.contains("FIRST")) {
-            Student.semester = semester.split(" ")[0]+" "+FIRST_SEMESTER;
+            Student.semester = String.join(" ", semester.split(" ")[0], FIRST_SEMESTER);
         } else if (semester.contains("SECOND")) {
-            Student.semester = semester.split(" ")[0]+" "+SECOND_SEMESTER;
+            Student.semester = String.join(" ", semester.split(" ")[0], SECOND_SEMESTER);
         } else if (semester.contains("SUMMER")) {
-            Student.semester = semester.split(" ")[0]+" "+SUMMER_SEMESTER;
+            Student.semester = String.join(" ", semester.split(" ")[0], SUMMER_SEMESTER);
         }
 
         Board.effectSemesterUpgrade(getSemester());
 
-        final int current = Integer.valueOf(semester.split("/")[0]) + 1;
+        final int current = Integer.parseInt(semester.split("/")[0]) + 1;
         setLevelNumber((current - getYearOfAdmission())  * 100);
     }
 
@@ -421,7 +357,7 @@ public class Student {
 
     public static void setLevel(String level) {
         Student.level = level;
-        Board.effectLevelUpgrade(level);
+        Board.effectLevelUpgrade();
     }
 
     public static int getLevelNumber() {
@@ -429,14 +365,14 @@ public class Student {
     }
 
     /**
-     * <p>Do not directly call to set this!. It is embedded with the call setSemester()</p>
+     * Do not directly call to set this!. It is embedded with the call setSemester()
      */
     private static void setLevelNumber(int levelNumber) {
         Student.levelNumber = levelNumber;
     }
 
     public static ImageIcon getIcon(){
-        return userIcon == null ? emptyIcon : userIcon;//notice can only be true in the first call! So initially, am giving the .. icon
+        return userIcon == null ? emptyIcon : userIcon;
     }
 
     public static void setUserIcon(ImageIcon userIcon) {
@@ -461,28 +397,25 @@ public class Student {
     }
 
     public static String requiredNameForFormat(){
-        if (nameFormat.startsWith("First")) {
-            return getFullName().toUpperCase();
-        } else {
-            return getFullNamePostOrder().toUpperCase();
-        }
+        return nameFormat.startsWith("First") ? getFullName().toUpperCase() : getFullNamePostOrder().toUpperCase();
     }
 
-    //Special calls...
+
+//    Special calls...
     /**
-     * <p>It all starts here. {@link PrePortal} will send an array of the details it could
+     * It all starts here. PrePortal will send an array of the details it could
      * trace from the portal, and dashboard will take the first step in setting fundamental details
-     * of the user herein this method, including the 'preciseLevel'.</p>
-     * <p><i>If information like the matriculation is missing, testers.Dashboard will halt build!</i></p>
-     * <p><i>If the length of the array received herein is consistently found to be 14, this method
-     * may request a String[] from the {@link PrePortal} instead, to ease the internal casting.</i></p>
+     * of the user herein this method, including the 'preciseLevel'.
+     * If information like the matriculation is missing, testers.Dashboard will halt build!
+     * If the length of the array received herein is consistently found to be 14, this method
+     * may request a String[] from the PrePortal instead, to ease the internal casting.
      */
     public static void receiveDetails(Object[] initials) {
         setFirstName(String.valueOf(initials[0]));
         setLastName(String.valueOf(initials[1]));
         setProgram(String.valueOf(initials[2]));
         try {
-            setMatNumber(Integer.valueOf(String.valueOf(initials[3])));
+            setMatNumber(Integer.parseInt(String.valueOf(initials[3])));
         } catch (Exception e){
             reportCriticalInfoMissing(Login.getRoot(), "mat number");
         }
@@ -491,14 +424,13 @@ public class Student {
         setDepartment(String.valueOf(initials[6]));
         setNationality(String.valueOf(initials[7]));
         try {
-            setMonthOfAdmission(Integer.valueOf(String.valueOf(initials[8])));
+            setMonthOfAdmission(Integer.parseInt(String.valueOf(initials[8])));
         } catch (Exception e){
             reportCriticalInfoMissing(Login.getRoot(), "month of admission");
         }
         try {
-            //of course, the exact year is what's actually provided...
-            setYearOfAdmission(Integer.valueOf(String.valueOf(initials[9])));
-        }catch (Exception e){
+            setYearOfAdmission(Integer.parseInt(String.valueOf(initials[9])));
+        } catch (Exception e){
             reportCriticalInfoMissing(Login.getRoot(),"year of admission");
         }
         setAddress(String.valueOf(initials[10]));
@@ -508,7 +440,7 @@ public class Student {
         setPortalMail(String.valueOf(initials[14]));
         setPortalPassword(String.valueOf(initials[15]));
         try {
-            setCGPA(Double.valueOf(String.valueOf(initials[19])));
+            setCGPA(Double.parseDouble(String.valueOf(initials[19])));
         } catch (Exception e){
             reportCriticalInfoMissing(Login.getRoot(), "CGPA");
         }
@@ -518,11 +450,11 @@ public class Student {
     }
 
     /**
-     * <p>Resets all fields.</p>
-     * <p>Invoked on start to avoid null-pointer exceptions;
-     * after log-out to prevent clash of details.</p>
+     * Resets all fields.
+     * Invoked to avoid null-pointer exceptions;
+     * after log-out to prevent clash of details?.
      */
-    public static void resetFields(){
+    public static void reset(){
         firstName = lastName = program = major = minor = school = department = semester = state = level = address =
                 placeOfBirth = nationality = dateOfBirth = maritalStatue = portalMail = portalPassword = telephones = MAJOR_CODE = MINOR_CODE = "";
 
@@ -531,19 +463,15 @@ public class Student {
         userIcon = null;
     }
 
-    /*
-     * Special calls
-     *
-     */
     public static String getFullName() {
-        return getFirstName()+" "+getLastName();
+        return String.join(" ", getFirstName(), getLastName());
     }
 
     /**
-     * <p><i>Returns the full name, starting with the name first.</i></p>
+     * Returns the full name, starting with the name first.
      */
     public static String getFullNamePostOrder() {
-        return getLastName()+" "+getFirstName();
+        return String.join(" ", getLastName(), getFirstName());
     }
 
     public static String upperDivision(){
@@ -551,15 +479,15 @@ public class Student {
             return TranscriptHandler.FIRST_CLASS;
         } else if (getCGPA() >= 3.8) {
             return TranscriptHandler.SECOND_CLASS;
-        }else if (getCGPA() >= 3.5) {
+        } else if (getCGPA() >= 3.5) {
             return TranscriptHandler.THIRD_CLASS;
-        }else {
+        } else {
             return TranscriptHandler.UNCLASSIFIED;
         }
     }
 
     /**
-     * <p>Should return the currently running academic year in yyyy/yyyy format.</p>
+     * Should return the currently running academic year in yyyy/yyyy format.
      */
     public static String thisAcademicYear(){
         return getSemester().split(" ")[0];
@@ -572,7 +500,7 @@ public class Student {
                 final int part2 = Integer.parseInt(extendedYear.split("/")[1]);
 
                 return String.valueOf(part1).length() == 4 && String.valueOf(part2).length() == 4;
-            }catch (Exception e){
+            } catch (Exception e){
                 return false;
             }
         } else {
@@ -629,7 +557,7 @@ public class Student {
     }
 
     /**
-     * <p>Do not mistake this with the final year!</p>
+     * Do not mistake this with the final year!
      */
     public static int getExpectedYearOfGraduation(){
         return getYearOfAdmission() + 4;
@@ -652,7 +580,7 @@ public class Student {
     }
 
     public static String predictedStudentMailAddress(){
-        return (lastName.charAt(0)+""+firstName.charAt(0)+matNumber).toLowerCase()+"@utg.edu.gm";
+        return String.valueOf(lastName.charAt(0)+firstName.charAt(0)+matNumber).toLowerCase()+"@utg.edu.gm";
     }
 
     public static String predictedStudentPassword(){
@@ -663,7 +591,6 @@ public class Student {
         if (isReported) {
             return;
         }
-
         final Timer reportTimer = new Timer(Globals.MINUTE_IN_MILLI, null);
         reportTimer.setInitialDelay(0);
         reportTimer.addActionListener(e->{
@@ -691,9 +618,10 @@ public class Student {
                 "and analysis are concern. Please refer your department for this problem.");
     }
 
-    //Calls for the icon
+    
+//    Calls for the icon
     /**
-     * <p>Called to notify that a user wants to change the image icon</p>
+     * Called to notify that a user wants to change the image icon
      */
     public static void startSettingImage(Component... parents){
         final String homeDir = System.getProperty("user.home"),
@@ -716,10 +644,10 @@ public class Student {
     }
 
     /**
-     * <p>Remember, this call must be accompanied by a file! So it will send it, to <b>setUserIcon</b> as an icon to be set.</p>
-     * <p><i>It will also notify the containers harboring the icon. One of such known component:
-     * <b>imagePanel of {@link Board}</b></i></p>
-     * <p><i>If the parsing-file is null, the function does nothing.</i></p>
+     * Remember, this call must be accompanied by a file! So it will send it, to setUserIcon as an icon to be set.
+     * It will also notify the containers harboring the icon. One of such known component:
+     * imagePanel of Board
+     * If the parsing-file is null, the function does nothing.
      */
     private static void fireIconChange(File iFile){
         if (iFile != null) {
@@ -741,7 +669,7 @@ public class Student {
     }
 
     /**
-     * <p>Will set the icon to the null value, and makes the effects by making the appropriate call(s).</p>
+     * Will set the icon to the null value, and makes the effects by making the appropriate call(s).
      */
     public static void fireIconReset(){
         if (App.showOkCancelDialog("Confirm reset","This action will remove your image icon. Continue?")) {
@@ -756,8 +684,8 @@ public class Student {
     }
 
     /**
-     * <p>Should always be called on icon amendments.</p>
-     * <p><i>It effects the visual changes on all the containers of the icon.</i></p>
+     * Should always be called on icon amendments.
+     * It effects the visual changes on all the containers of the icon.
      */
     private static void effectImageChangeOnComponents(){
         ComponentAssistant.repair(Board.getImagePanel());
@@ -766,7 +694,7 @@ public class Student {
     }
 
 
-    //Calls for serialization
+//    Calls for the serialization
     public static void serializeData(){
         System.out.print("Serializing student's data... ");
         final LinkedHashMap<String, String> dataMap = new LinkedHashMap<>();
@@ -808,38 +736,41 @@ public class Student {
     public static void deserializeData(){
         System.out.print("Deserializing student's data... ");
         final LinkedHashMap<String, String> dataMap = (LinkedHashMap) MyClass.deserialize("core.ser");
-        setFirstName(dataMap.get("fName"));
-        setLastName(dataMap.get("lName"));
-        setProgram(dataMap.get("program"));
-        setMatNumber(Integer.parseInt(dataMap.get("mat")));
-        setMajor(dataMap.get("major"));
-        setSchool(dataMap.get("school"));
-        setDepartment(dataMap.get("dept"));
-        setNationality(dataMap.get("nationality"));
-        setMonthOfAdmission(Integer.parseInt(dataMap.get("moa")));
-        setYearOfAdmission(Integer.parseInt(dataMap.get("yoa")));
-        setAddress(dataMap.get("address"));
-        setMaritalStatue(dataMap.get("marital"));
-        setDateOfBirth(dataMap.get("dob"));
-        resetTelephones(dataMap.get("tels"));
-        setPortalMail(dataMap.get("portalMail"));
-        setPortalPassword(dataMap.get("portalPsswd"));
-        setStudentMail(dataMap.get("studentMail"));
-        setStudentPassword(dataMap.get("studentPsswd"));
-        setCGPA(Double.parseDouble(dataMap.get("cg")));
-        setLevel(dataMap.get("level"));
-        setSemester(dataMap.get("semester"));
-        setState(dataMap.get("state"));
-        //secondary, as being provided
-        setMajorCode(dataMap.get("majCode"), false);
-        setMinor(dataMap.get("minor"));
-        setMinorCode(dataMap.get("minCode"), false);
-        setPlaceOfBirth(dataMap.get("pob"));
-        setAbout(dataMap.get("aboutMe"));
-        setNameFormat(dataMap.get("nameFormat"));
-        isReported = Boolean.parseBoolean(dataMap.get("isReported"));
-        final ImageIcon userIcon = (ImageIcon) MyClass.deserialize("icon.ser");
-        setUserIcon(userIcon);
+        if (!(dataMap == null)) {
+            setFirstName(dataMap.get("fName"));
+            setLastName(dataMap.get("lName"));
+            setProgram(dataMap.get("program"));
+            setMatNumber(Integer.parseInt(dataMap.get("mat")));
+            setMajor(dataMap.get("major"));
+            setSchool(dataMap.get("school"));
+            setDepartment(dataMap.get("dept"));
+            setNationality(dataMap.get("nationality"));
+            setMonthOfAdmission(Integer.parseInt(dataMap.get("moa")));
+            setYearOfAdmission(Integer.parseInt(dataMap.get("yoa")));
+            setAddress(dataMap.get("address"));
+            setMaritalStatue(dataMap.get("marital"));
+            setDateOfBirth(dataMap.get("dob"));
+            resetTelephones(dataMap.get("tels"));
+            setPortalMail(dataMap.get("portalMail"));
+            setPortalPassword(dataMap.get("portalPsswd"));
+            setStudentMail(dataMap.get("studentMail"));
+            setStudentPassword(dataMap.get("studentPsswd"));
+            setCGPA(Double.parseDouble(dataMap.get("cg")));
+            setLevel(dataMap.get("level"));
+            setSemester(dataMap.get("semester"));
+            setState(dataMap.get("state"));
+
+            setMajorCode(dataMap.get("majCode"), false);
+            setMinor(dataMap.get("minor"));
+            setMinorCode(dataMap.get("minCode"), false);
+            setPlaceOfBirth(dataMap.get("pob"));
+            setAbout(dataMap.get("aboutMe"));
+            setNameFormat(dataMap.get("nameFormat"));
+            isReported = Boolean.parseBoolean(dataMap.get("isReported"));
+        }
+
+        final ImageIcon serialIcon = (ImageIcon) MyClass.deserialize("icon.ser");
+        setUserIcon(serialIcon == null ? emptyIcon : serialIcon);
         System.out.println("Completed.");
     }
 

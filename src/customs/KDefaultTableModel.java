@@ -3,11 +3,12 @@ package customs;
 import javax.swing.table.DefaultTableModel;
 
 /**
- * <h1>class KDefaultTableModel</h1>
- * The add and removeRow() are yet tobe effectively overridden!
+ * The add and removeRow() are yet tobe effectively overridden as per Dashboard's specification.
+ * These are course oriented, since all the tables deals with courses?
  */
-public class KDefaultTableModel extends DefaultTableModel {
+public class KDefaultTableModel extends DefaultTableModel implements Preference {
     KTable table;
+
 
     public KTable getTable(){
         return table;
@@ -37,8 +38,8 @@ public class KDefaultTableModel extends DefaultTableModel {
     }
 
     /**
-     * <p>Gets the row index of the row (more formally, the first row found) holding this string in the first column.</p>
-     * -1 is returned to signal absence
+     * Gets the row-index of the row (more formally, the first row found) holding this string in the first column.
+     * A return of -1 signals absence of such a row in this table's model.
      */
     public int getRowOf(String key){
         for (int i = 0; i < this.getRowCount(); i++) {
@@ -46,8 +47,12 @@ public class KDefaultTableModel extends DefaultTableModel {
                 return i;
             }
         }
-
         return -1;
+    }
+
+    @Override
+    public void setPreferences() {
+
     }
 
 }

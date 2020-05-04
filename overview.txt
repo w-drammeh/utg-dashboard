@@ -16,20 +16,20 @@
 
 >>Notes to Overview
     Source Packages (4 packages):
-        customs (16 classes):
+        customs:
             Classes of this package extends the standard JDK for initialization of project-based components.
-        icons (24 files):
+        icons:
             The image icons used in building the Dashboard are placed in this package for uniform access.
-        main (39 classes):
+        main:
             It's the residential package for all the classes, interfaces, and types used in the project.
             Classes of this package make good use of the customs package and interacts with one-another
             to make Dashboard what it is.
-        utg (3 classes):
+        utg:
             Contains classes for testing and running the project from every aspects with the real runner
             class - utg.Dashboard. The other two types - utg.GeneralTester and utg.SpecificTester are
             to be used for by-passed user detail testing and specific-functionality testing, respectively.
 
-    External Libs (4 libraries):
+    External Libs:
         To get Dashboard fully-setup for development, the following external libraries must be recognized as
         additional libraries by your IDE. External libraries are added differently under different development
         environments. It is assumed that you already know how to do this as per your environment - being it

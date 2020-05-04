@@ -2,15 +2,8 @@ package customs;
 
 import javax.swing.*;
 
-/**
- * <h1>class KCheckBox</h1>
- */
-public class KCheckBox extends JCheckBox {
+public class KCheckBox extends JCheckBox implements Preference {
 
-
-    public KCheckBox(){
-        super();
-    }
 
     public KCheckBox(String text){
         super(text);
@@ -23,6 +16,11 @@ public class KCheckBox extends JCheckBox {
     @Override
     public JToolTip createToolTip(){
         return KLabel.preferredTip();
+    }
+
+    @Override
+    public void setPreferences() {
+
     }
 
 }

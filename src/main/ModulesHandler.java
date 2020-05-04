@@ -14,24 +14,22 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-/**
- * <h1>class ModulesHandler</h1>
- */
 public class ModulesHandler {
-    public static final KDefaultTableModel[] models = new KDefaultTableModel[10];//8 + summer + misc
+    public static final KDefaultTableModel[] models = new KDefaultTableModel[10];//8 and summer and misc
     public static final ArrayList<Course> STARTUP_COURSES = new ArrayList<>();
-    //These are for the popups
-    public static final String addString = "Add", confirmString = "Verify", deleteString = "Remove",
-        detailsString = "Show Details", editString = "Edit";
-    private static String semesterName;//value keeps changing to the table-semester currently receiving focus
-    //the tables are local to their inner classes, not the models
+//    For the popups
+    public static final String ADD_STRING = "Add", CONFIRM_STRING = "Verify", DELETE_STRING = "Remove",
+        DETAILS_STRING = "Show Details", EDIT_STRING = "Edit";
+    private static final String[] COLUMN_IDENTIFIERS = new String[] {"CODE", "NAME", "LECTURER", "GRADE"};
+    private static String semesterName;//Value keeps changing to the table-semester currently receiving focus
+    //The tables are local to their inner classes, but not the models
     private static KDefaultTableModel model1, model2, model3, model4, model5, model6, model7, model8;
+    private static FirefoxDriver allDriver;
     /**
-     * <p>It's a static field of this type. All the models herein delegate to this. They only add after it add
-     * and delete after it does.</p>
-     * <p>This list monitors all the addition, and removal changes. And that its used by {@link Memory}
-     * for analysis.</p>
+     * This list has complete dominance over all the addition, removal, and editing changes to every
+     * single module. All the models delegate to it. They only add or delete or substitute after it does.
      */
     private static final ArrayList<Course> modulesMonitor = new ArrayList<Course>(){
         @Override
@@ -74,7 +72,7 @@ public class ModulesHandler {
         public boolean remove(Object o) {
             final Course c = (Course) o;
             if (c.isVerified()) {
-                final int vInt = App.verifyUser("Enter your your mat. number to proceed with this changes:\n \n");
+                final int vInt = App.verifyUser("Enter your your Matriculation Number to proceed with this changes:");
                 if (vInt == App.VERIFICATION_FALSE) {
                     App.reportMatError();
                     return false;
@@ -104,16 +102,12 @@ public class ModulesHandler {
             } else if (model8.getRowOf(c.getCode()) >= 0) {
                 model8.removeRow(model8.getRowOf(c.getCode()));
             }
+
             Memory.mayForget(c);
             return super.remove(c);
         }
     };
-    private static FirefoxDriver allDriver;
 
-    /**
-     * <p>Called by {@link Board} to notify Dashboard is at the brink of being visible.</p>
-     * <p>Notice this action could not be done at the time {@link PrePortal} delivers the modules.</p>
-     */
     public static void uploadModules(){
         for (Course c : STARTUP_COURSES) {
             modulesMonitor.add(c);
@@ -121,7 +115,8 @@ public class ModulesHandler {
     }
 
     /**
-     * Note, the edition dialogs should not use this, since they present an exception by skipping the focused row.
+     * Note: the edition dialogs should not use this, since they present an exception
+     * by skipping the focused row.
      */
     public static boolean existsInList(String code){
         for (Course course : modulesMonitor) {
@@ -129,13 +124,12 @@ public class ModulesHandler {
                 return true;
             }
         }
-
         return false;
     }
 
     /**
      * Useful for the editing.
-     * The model is given so that it excludes the selected row of the particular model
+     * The model is given so that it excludes the selected row of the particular model.
      */
     public static boolean existsInListExcept(KDefaultTableModel targetModel, String code){
         for (KDefaultTableModel model : models) {
@@ -143,17 +137,17 @@ public class ModulesHandler {
                 return true;
             }
         }
-
         return false;
     }
 
     /**
-     * This call is complete. It makes sure the list replaces the old with recent, and inflict
+     * This call is complete.
+     * It makes sure the list replaces the old with recent, and inflict
      * the changes on the appropriate table, thereafter.
-     * This also cater for the case where the old might not exist for whatever reason, and halt the subsequent
-     * attempt for visual changes.
+     * This also cater for the case where the old might not exist for whatever reason,
+     * and halt the subsequent attempt for visual changes.
      *
-     * Do not call set() on the monitor, call this.
+     * Do not call set() on the monitor! Call this.
      */
     public static void substitute(Course old, Course recent){
         if (existsInList(old.getCode())) {//Typically for editing. Or if it's from a sync / verification, the details should be merged prior to this call
@@ -181,16 +175,17 @@ public class ModulesHandler {
     }
 
     public static void reportCodeDuplication(String dCode){
-        App.signalError(dCode.toUpperCase()+" - Repeated","Sorry, there's already a course with the code '"+dCode.toUpperCase()+"' in the list.");
+        App.signalError(dCode.toUpperCase()+" - Repeated",
+                "Sorry, there's already a course with the code '"+dCode.toUpperCase()+"' in the list.");
     }
 
     /**
-     * <p>This method is useful. Especially, since indexing of the single static list and the
+     * This method is useful. Especially, since indexing of the single static list and the
      * many models cannot coincide, call this - never want to retrieve a course from the list
      * by using get(int#) as the int passed by the model might be matching a different course
-     * according to the list's index.</p>
-     * <p><i>This function compares only the code.</i></p>
-     * <p>Null value shall implies no such course in the entire list.</p>
+     * according to the list's index.
+     * This function compares only the code.
+     * Null value shall implies no such course in the entire list.
      */
     public static Course getModuleByCode(String code){
         for (Course course : modulesMonitor) {
@@ -198,7 +193,6 @@ public class ModulesHandler {
                 return course;
             }
         }
-
         return null;
     }
 
@@ -206,16 +200,17 @@ public class ModulesHandler {
         if (allDriver != null) {
             return;
         }
-
         allDriver = DriversPack.forgeNew(true);
     }
 
     /**
-     * <p>Attempts to verify this course using its code only.</p>
+     * Attempts to verify this course using its code only.
      */
     public static void launchVerification(Course target){
-        if (!App.showOkCancelDialog("Verify "+target.getName(), "Dashboard will now launch Verification sequences for "+target.getName()+" - "+target.getYear()+" "+target.getSemester()+".\n" +
-                "It might be taken to another table if this is not its year & semester.\nFor more info about this action, read "+HelpGenerator.reference("My Courses | Course Verification."))) {
+        if (!App.showOkCancelDialog("Confirm",
+                "Dashboard will now launch Verification sequences for "+target.getName()+" - "+target.getYear()+" "+target.getSemester()+".\n" +
+                "It might be taken to another table if this is not its year & semester.\n \n" +
+                        "For more info about this action, read "+HelpGenerator.reference("My Courses | Course Verification."))) {
             return;
         }
         if (allDriver == null) {
@@ -278,7 +273,8 @@ public class ModulesHandler {
             //Checking... if the course was found and assigned, then we shall continue to set its succeeding details
             if (foundOne == null) {
                 App.promptWarning("Verification Unsuccessful","Your search for "+target.getName()+" was unsuccessful.\n" +
-                        "Dashboard could not locate any trace of it on your portal.\nIf you've done this course, then contact the lecturer.\nYou may also want to refer to "+HelpGenerator.reference("My Courses | Course Verification."));
+                        "Dashboard could not locate any trace of it on your portal.\nIf you've done this course, then contact the lecturer.\n" +
+                        "You may also want to refer to "+HelpGenerator.reference("My Courses | Course Verification."));
                 return;
             }
             //Secondly, the code, year and semester at transcript tab
@@ -329,9 +325,9 @@ public class ModulesHandler {
     }
 
     /**
-     * <p>Called to perform thorough sync. This action has a lot of consequences!</p>
-     * <p>Never call this directly! Use ModulesGenerator.triggerRefresh() instead, it forges
-     * a thread and checks the internet prior to this call which does none!</p>
+     * Called to perform a thorough sync. This action has a lot of consequences!
+     * Never call this directly! Use ModulesGenerator.triggerRefresh() instead, it forges
+     * a thread and checks internet-availability prior to this call which does none!
      */
     public static void startThoroughSync(KButton syncButton, boolean userRequested){
         syncButton.setEnabled(false);
@@ -481,7 +477,7 @@ public class ModulesHandler {
     /**
      * This method and its co should:
      * - Affect only the obligatory program courses
-     * - Spare courses which were requirement set by the user except the if the requirement is majorObligatory
+     * - Spare courses which were requirement set by the user save majorObligatory
      */
     public static void effectMajorCodeChanges(String from, String to) {
         new Thread(()->{
@@ -519,7 +515,7 @@ public class ModulesHandler {
     }
 
     public static void reportScoreInvalid(String invalidScore, Container root){
-        App.signalError(root,"Invalid Score", "Sorry, "+invalidScore+" is not a valid score. Please try again.");
+        App.signalError(root,"Invalid score", invalidScore+" is not a valid score. Please try again.");
     }
 
     public static void reportScoreOutOfRange(Container root){
@@ -577,8 +573,8 @@ public class ModulesHandler {
     }
 
     /**
-     * <p>Deals with pretty much, everything of the first year, and present the entire frame work on a panel.</p>
-     * <p>All other colleagues do the same.</p>
+     * Deals with pretty much, everything of the first year, and present the entire frame work
+     * on a panel. All the subsequent colleagues do the same.
      */
     private static class YearOneHandler {
         private String y1Name;
@@ -594,57 +590,60 @@ public class ModulesHandler {
             setTableOne();
             setTableTwo();
 
-            detailsItem = new JMenuItem(detailsString);
+            detailsItem = new JMenuItem(DETAILS_STRING);
             detailsItem.setFont(KFontFactory.createPlainFont(15));
             detailsItem.addActionListener(e -> {
-                final Course t = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                if (t != null) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(), t);
-                    });
+                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
+                try {
+                    Course.exhibit(Board.getRoot(), Objects.requireNonNull(c));
+                } catch (NullPointerException npe){
+                    App.silenceException("No such course in list");
                 }
             });
 
-            editItem = new JMenuItem(editString);
+            editItem = new JMenuItem(EDIT_STRING);
             editItem.setFont(KFontFactory.createPlainFont(15));
             editItem.addActionListener(e -> {
-                final Course t = getModuleByCode(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0).toString());
-                if (t != null) {
-                    SwingUtilities.invokeLater(()->{
-                        new ModuleEditor(t, getFocusModel()).setVisible(true);
-                    });
+                final Course c = getModuleByCode(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0).toString());
+                try {
+                    SwingUtilities.invokeLater(() -> new ModuleEditor(Objects.requireNonNull(c), getFocusModel()).setVisible(true));
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            removeItem = new JMenuItem(deleteString);
+            removeItem = new JMenuItem(DELETE_STRING);
             removeItem.setFont(KFontFactory.createPlainFont(15));
             removeItem.addActionListener(e -> {
-                final Course t = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                if (t != null) {
-                    if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+t.getName()+",\nand that you wish to remove it from your collection?")) {
-                        modulesMonitor.remove(t);
+                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
+                try {
+                    Objects.requireNonNull(c);
+                    if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+c.getName()+",\n" +
+                            "and that you wish to remove it from your collection?")) {
+                        modulesMonitor.remove(c);
                     }
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            confirmItem = new JMenuItem(confirmString);
+            confirmItem = new JMenuItem(CONFIRM_STRING);
             confirmItem.setFont(KFontFactory.createPlainFont(15));
             confirmItem.addActionListener(e -> {
-                final Course t = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(),0)));
-                if (t != null) {
-                    new Thread(()->{
-                        launchVerification(t);
-                    }).start();
-                }
+                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(),0)));
+                new Thread(()->{
+                    try {
+                        Objects.requireNonNull(c);
+                        launchVerification(c);
+                    } catch (NullPointerException npe) {
+                        App.silenceException("No such course in list");
+                    }
+                }).start();
             });
 
-            newItem = new JMenuItem(addString);
+            newItem = new JMenuItem(ADD_STRING);
             newItem.setFont(KFontFactory.createPlainFont(15));
-            newItem.addActionListener(e -> {
-                SwingUtilities.invokeLater(()->{
-                    new ModuleAdder(y1Name, semesterName).setVisible(true);
-                });
-            });
+            newItem.addActionListener(e -> SwingUtilities.invokeLater(()-> new ModuleAdder(y1Name, semesterName).setVisible(true)));
 
             jPopupMenu = new JPopupMenu();
             jPopupMenu.add(detailsItem);
@@ -656,7 +655,7 @@ public class ModulesHandler {
 
         private void setTableOne(){
             model1 = new KDefaultTableModel();
-            model1.setColumnIdentifiers(new String[] {"CODE","NAME","LECTURER","GRADE"});
+            model1.setColumnIdentifiers(COLUMN_IDENTIFIERS);
             models[0] = model1;
 
             table1 = new KTable(model1);
@@ -676,10 +675,9 @@ public class ModulesHandler {
                         confirmItem.setEnabled(true);
                         newItem.setEnabled(table1.getRowCount() <= 5);
 
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(table1,e.getX(),e.getY()));
+                        SwingUtilities.invokeLater(()-> jPopupMenu.show(table1, e.getX(), e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -689,7 +687,7 @@ public class ModulesHandler {
 
         private void setTableTwo(){
             model2 = new KDefaultTableModel();
-            model2.setColumnIdentifiers(new String[] {"CODE","NAME","LECTURER","GRADE"});
+            model2.setColumnIdentifiers(COLUMN_IDENTIFIERS);
             models[1] = model2;
 
             table2 = new KTable(model2);
@@ -712,7 +710,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(table2,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -740,7 +737,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane1,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -765,7 +761,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane2,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -776,12 +771,11 @@ public class ModulesHandler {
             present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
             present.add(KPanel.wantDirectAddition(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane1);
-            present.add(ComponentAssistant.provideBlankSpace(700,30));
+            present.add(Box.createVerticalStrut(30));
             present.add(KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))));
             present.add(KPanel.wantDirectAddition(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane2);
-            present.add(ComponentAssistant.provideBlankSpace(700,15));
-
+            present.add(Box.createVerticalStrut(15));
             return present;
         }
 
@@ -816,57 +810,57 @@ public class ModulesHandler {
             setTableThree();
             setTableFour();
 
-            detailsItem = new JMenuItem(detailsString);
+            detailsItem = new JMenuItem(DETAILS_STRING);
             detailsItem.setFont(KFontFactory.createPlainFont(15));
             detailsItem.addActionListener(e -> {
-                final Course t = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                if (t != null) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(), t);
-                    });
+                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
+                try {
+                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(), Objects.requireNonNull(c)));
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            editItem = new JMenuItem(editString);
+            editItem = new JMenuItem(EDIT_STRING);
             editItem.setFont(KFontFactory.createPlainFont(15));
             editItem.addActionListener(e -> {
-                final Course t = getModuleByCode(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0).toString());
-                if (t != null) {
-                    SwingUtilities.invokeLater(()->{
-                        new ModuleEditor(t, getFocusModel()).setVisible(true);
-                    });
+                final Course c = getModuleByCode(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0).toString());
+                try {
+                    SwingUtilities.invokeLater(()-> new ModuleEditor(Objects.requireNonNull(c), getFocusModel()).setVisible(true));
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            removeItem = new JMenuItem(deleteString);
+            removeItem = new JMenuItem(DELETE_STRING);
             removeItem.setFont(KFontFactory.createPlainFont(15));
             removeItem.addActionListener(e -> {
-                final Course t = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                if (t != null) {
-                    if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+t.getName()+",\nand that you wish to remove it from your collection?")) {
-                        modulesMonitor.remove(t);
+                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
+                try {
+                    Objects.requireNonNull(c);
+                    if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+c.getName()+",\n" +
+                            "and that you wish to remove it from your collection?")) {
+                        modulesMonitor.remove(c);
                     }
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            confirmItem = new JMenuItem(confirmString);
+            confirmItem = new JMenuItem(CONFIRM_STRING);
             confirmItem.setFont(KFontFactory.createPlainFont(15));
             confirmItem.addActionListener(e -> {
-                final Course t = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(),0)));
-                if (t != null) {
-                    new Thread(()->{
-                        launchVerification(t);
-                    }).start();
+                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(),0)));
+                try {
+                    new Thread(()-> launchVerification(Objects.requireNonNull(c))).start();
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            newItem = new JMenuItem(addString);
+            newItem = new JMenuItem(ADD_STRING);
             newItem.setFont(KFontFactory.createPlainFont(15));
-            newItem.addActionListener(e -> {
-                SwingUtilities.invokeLater(()->{
-                    new ModuleAdder(y2Name, semesterName).setVisible(true);
-                });
-            });
+            newItem.addActionListener(e -> SwingUtilities.invokeLater(()-> new ModuleAdder(y2Name, semesterName).setVisible(true)));
 
             jPopupMenu = new JPopupMenu();
             jPopupMenu.add(detailsItem);
@@ -878,7 +872,7 @@ public class ModulesHandler {
 
         private void setTableThree(){
             model3 = new KDefaultTableModel();
-            model3.setColumnIdentifiers(new String[] {"CODE","NAME","LECTURER","GRADE"});
+            model3.setColumnIdentifiers(COLUMN_IDENTIFIERS);
             models[2] = model3;
 
             table3 = new KTable(model3);
@@ -901,7 +895,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(table3,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -911,7 +904,7 @@ public class ModulesHandler {
 
         private void setTableFour(){
             model4 = new KDefaultTableModel();
-            model4.setColumnIdentifiers(new String[] {"CODE","NAME","LECTURER","GRADE"});
+            model4.setColumnIdentifiers(COLUMN_IDENTIFIERS);
             models[3] = model4;
 
             table4 = new KTable(model4);
@@ -934,7 +927,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(table4,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -962,7 +954,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane3,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -987,7 +978,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane4,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -998,12 +988,11 @@ public class ModulesHandler {
             present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
             present.add(KPanel.wantDirectAddition(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane3);
-            present.add(ComponentAssistant.provideBlankSpace(700,30));
+            present.add(Box.createVerticalStrut(30));
             present.add(KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))));
             present.add(KPanel.wantDirectAddition(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane4);
-            present.add(ComponentAssistant.provideBlankSpace(700,15));
-
+            present.add(Box.createVerticalStrut(15));
             return present;
         }
 
@@ -1038,57 +1027,57 @@ public class ModulesHandler {
             setTableFive();
             setTableSix();
 
-            detailsItem = new JMenuItem(detailsString);
+            detailsItem = new JMenuItem(DETAILS_STRING);
             detailsItem.setFont(KFontFactory.createPlainFont(15));
             detailsItem.addActionListener(e -> {
-                final Course t = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                if (t != null) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(), t);
-                    });
+                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
+                try {
+                    SwingUtilities.invokeLater(() -> Course.exhibit(Board.getRoot(), Objects.requireNonNull(c)));
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            editItem = new JMenuItem(editString);
+            editItem = new JMenuItem(EDIT_STRING);
             editItem.setFont(KFontFactory.createPlainFont(15));
             editItem.addActionListener(e -> {
-                final Course t = getModuleByCode(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0).toString());
-                if (t != null) {
-                    SwingUtilities.invokeLater(()->{
-                        new ModuleEditor(t, getFocusModel()).setVisible(true);
-                    });
+                final Course c = getModuleByCode(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0).toString());
+                try {
+                    Objects.requireNonNull(c);
+                    SwingUtilities.invokeLater(()-> new ModuleEditor(c, getFocusModel()).setVisible(true));
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            removeItem = new JMenuItem(deleteString);
+            removeItem = new JMenuItem(DELETE_STRING);
             removeItem.setFont(KFontFactory.createPlainFont(15));
             removeItem.addActionListener(e -> {
-                final Course t = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                if (t != null) {
-                    if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+t.getName()+",\nand that you wish to remove it from your collection?")) {
-                        modulesMonitor.remove(t);
+                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
+                try {
+                    Objects.requireNonNull(c);
+                    if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+c.getName()+",\nand that you wish to remove it from your collection?")) {
+                        modulesMonitor.remove(c);
                     }
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            confirmItem = new JMenuItem(confirmString);
+            confirmItem = new JMenuItem(CONFIRM_STRING);
             confirmItem.setFont(KFontFactory.createPlainFont(15));
             confirmItem.addActionListener(e -> {
-                final Course t = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(),0)));
-                if (t != null) {
-                    new Thread(()->{
-                        launchVerification(t);
-                    }).start();
+                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(),0)));
+                try {
+                    new Thread(()-> launchVerification(Objects.requireNonNull(c))).start();
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            newItem = new JMenuItem(addString);
+            newItem = new JMenuItem(ADD_STRING);
             newItem.setFont(KFontFactory.createPlainFont(15));
-            newItem.addActionListener(e -> {
-                SwingUtilities.invokeLater(()->{
-                    new ModuleAdder(y3Name, semesterName).setVisible(true);
-                });
-            });
+            newItem.addActionListener(e -> SwingUtilities.invokeLater(()-> new ModuleAdder(y3Name, semesterName).setVisible(true)));
 
             jPopupMenu = new JPopupMenu();
             jPopupMenu.add(detailsItem);
@@ -1100,7 +1089,7 @@ public class ModulesHandler {
 
         private void setTableFive(){
             model5 = new KDefaultTableModel();
-            model5.setColumnIdentifiers(new String[] {"CODE","NAME","LECTURER","GRADE"});
+            model5.setColumnIdentifiers(COLUMN_IDENTIFIERS);
             models[4] = model5;
 
             table5 = new KTable(model5);
@@ -1123,7 +1112,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(table5,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -1133,7 +1121,7 @@ public class ModulesHandler {
 
         private void setTableSix(){
             model6 = new KDefaultTableModel();
-            model6.setColumnIdentifiers(new String[] {"CODE","NAME","LECTURER","GRADE"});
+            model6.setColumnIdentifiers(COLUMN_IDENTIFIERS);
             models[5] = model6;
 
             table6 = new KTable(model6);
@@ -1156,7 +1144,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(table6,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -1184,7 +1171,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane5,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -1209,7 +1195,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane6,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -1220,12 +1205,11 @@ public class ModulesHandler {
             present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
             present.add(KPanel.wantDirectAddition(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane5);
-            present.add(ComponentAssistant.provideBlankSpace(700,30));
+            present.add(Box.createVerticalStrut(30));
             present.add(KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))));
             present.add(KPanel.wantDirectAddition(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane6);
-            present.add(ComponentAssistant.provideBlankSpace(700,15));
-
+            present.add(Box.createVerticalStrut(15));
             return present;
         }
 
@@ -1260,57 +1244,61 @@ public class ModulesHandler {
             setTableSeven();
             setTableEight();
 
-            detailsItem = new JMenuItem(detailsString);
+            detailsItem = new JMenuItem(DETAILS_STRING);
             detailsItem.setFont(KFontFactory.createPlainFont(15));
             detailsItem.addActionListener(e -> {
-                final Course t = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                if (t != null) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(), t);
-                    });
+                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
+                try {
+                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(), Objects.requireNonNull(c)));
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            editItem = new JMenuItem(editString);
+            editItem = new JMenuItem(EDIT_STRING);
             editItem.setFont(KFontFactory.createPlainFont(15));
             editItem.addActionListener(e -> {
-                final Course t = getModuleByCode(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0).toString());
-                if (t != null) {
-                    SwingUtilities.invokeLater(()->{
-                        new ModuleEditor(t, getFocusModel()).setVisible(true);
-                    });
+                final Course c = getModuleByCode(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0).toString());
+                try {
+                    Objects.requireNonNull(c);
+                    SwingUtilities.invokeLater(()-> new ModuleEditor(c, getFocusModel()).setVisible(true));
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            removeItem = new JMenuItem(deleteString);
+            removeItem = new JMenuItem(DELETE_STRING);
             removeItem.setFont(KFontFactory.createPlainFont(15));
             removeItem.addActionListener(e -> {
-                final Course t = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                if (t != null) {
-                    if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+t.getName()+",\nand that you wish to remove it from your collection?")) {
-                        modulesMonitor.remove(t);
+                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
+                try {
+                    Objects.requireNonNull(c);
+                    if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+c.getName()+",\n" +
+                            "and that you wish to remove it from your collection?")) {
+                        modulesMonitor.remove(c);
                     }
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            confirmItem = new JMenuItem(confirmString);
+            confirmItem = new JMenuItem(CONFIRM_STRING);
             confirmItem.setFont(KFontFactory.createPlainFont(15));
             confirmItem.addActionListener(e -> {
-                final Course t = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(),0)));
-                if (t != null) {
+                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(),0)));
+                try {
                     new Thread(()->{
-                        launchVerification(t);
+                        Objects.requireNonNull(c);
+                        launchVerification(c);
                     }).start();
+                } catch (NullPointerException npe) {
+                    App.silenceException("No such course in list");
                 }
             });
 
-            newItem = new JMenuItem(addString);
+            newItem = new JMenuItem(ADD_STRING);
             newItem.setFont(KFontFactory.createPlainFont(15));
-            newItem.addActionListener(e -> {
-                SwingUtilities.invokeLater(()->{
-                    new ModuleAdder(y4Name, semesterName).setVisible(true);
-                });
-            });
+            newItem.addActionListener(e -> SwingUtilities.invokeLater(()-> new ModuleAdder(y4Name, semesterName).setVisible(true)));
 
             jPopupMenu = new JPopupMenu();
             jPopupMenu.add(detailsItem);
@@ -1322,7 +1310,7 @@ public class ModulesHandler {
 
         private void setTableSeven(){
             model7 = new KDefaultTableModel();
-            model7.setColumnIdentifiers(new String[] {"CODE","NAME","LECTURER","GRADE"});
+            model7.setColumnIdentifiers(COLUMN_IDENTIFIERS);
             models[6] = model7;
 
             table7 = new KTable(model7);
@@ -1354,7 +1342,7 @@ public class ModulesHandler {
 
         private void setTableEight(){
             model8 = new KDefaultTableModel();
-            model8.setColumnIdentifiers(new String[] {"CODE","NAME","LECTURER","GRADE"});
+            model8.setColumnIdentifiers(COLUMN_IDENTIFIERS);
             models[7] = model8;
 
             table8 = new KTable(model8);
@@ -1377,7 +1365,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(table8,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -1405,7 +1392,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane7,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -1430,7 +1416,6 @@ public class ModulesHandler {
                         SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane8,e.getX(),e.getY()));
                     }
                 }
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -1441,12 +1426,11 @@ public class ModulesHandler {
             present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
             present.add(KPanel.wantDirectAddition(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane7);
-            present.add(ComponentAssistant.provideBlankSpace(700,30));
+            present.add(Box.createVerticalStrut(30));
             present.add(KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))));
             present.add(KPanel.wantDirectAddition(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane8);
-            present.add(ComponentAssistant.provideBlankSpace(700,15));
-
+            present.add(Box.createVerticalStrut(15));
             return present;
         }
 
@@ -1467,8 +1451,9 @@ public class ModulesHandler {
         }
     }
 
+
     /**
-     *<p>Provides the dialog for locally addition of courses.</p>
+     * Provides the dialog for locally addition of courses.
      */
     public static class ModuleAdder extends KDialog {
         KTextField yearField, semesterField, codeField, nameField, lecturerField, venueField, scoreField;
@@ -1477,7 +1462,7 @@ public class ModulesHandler {
         String yearName, semesterName;
         KButton actionButton;
 
-        public ModuleAdder(String yearName, String semesterName){//the yearName and semesterName fields are provided set, not editable
+        public ModuleAdder(String yearName, String semesterName){//The yearName and semesterName fields are provided-set, not editable
             super("New Course");
             this.setResizable(true);
             this.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
@@ -1527,7 +1512,7 @@ public class ModulesHandler {
             timeBox.setFont(KFontFactory.createPlainFont(15));
             final KPanel schedulePanel = new KPanel(new FlowLayout(FlowLayout.CENTER));//this a litte sort of an exception
             schedulePanel.addAll(new KLabel("Day:",hintFont),dayBox);
-            schedulePanel.addAll(ComponentAssistant.provideBlankSpace(25,30),new KLabel("Time:",hintFont),timeBox);
+            schedulePanel.addAll(Box.createRigidArea(new Dimension(25, 30)),new KLabel("Time:",hintFont),timeBox);
 
             venueField = new KTextField(new Dimension(300,30));
             final KPanel venuePanel = new KPanel(new BorderLayout());
@@ -1554,9 +1539,7 @@ public class ModulesHandler {
             scorePanel.add(KPanel.wantDirectAddition(scoreField),BorderLayout.CENTER);
 
             final KButton cancelButton = new KButton("Cancel");
-            cancelButton.addActionListener(e -> {
-                ModuleAdder.this.dispose();
-            });
+            cancelButton.addActionListener(e -> ModuleAdder.this.dispose());
 
             actionButton = new KButton("Add");
             actionButton.addActionListener(additionListener());
@@ -1566,8 +1549,8 @@ public class ModulesHandler {
             this.getRootPane().setDefaultButton(actionButton);
             final KPanel bigPane = new KPanel();
             bigPane.setLayout(new BoxLayout(bigPane, BoxLayout.Y_AXIS));
-            bigPane.addAll(ComponentAssistant.provideBlankSpace(425,10),yearPanel,semesterPanel,codePanel,namePanel,lecturerPanel,schedulePanel,
-                    venuePanel,requirementPanel,creditPanel,scorePanel,ComponentAssistant.provideBlankSpace(425,25),buttonsPanel);
+            bigPane.addAll(Box.createVerticalStrut(10),yearPanel,semesterPanel,codePanel,namePanel,lecturerPanel,schedulePanel,
+                    venuePanel,requirementPanel,creditPanel,scorePanel,Box.createVerticalStrut(30),buttonsPanel);
             this.setContentPane(bigPane);
             this.pack();
             this.setMinimumSize(this.getPreferredSize());
@@ -1620,13 +1603,17 @@ public class ModulesHandler {
     }
 
     /**
-     * <p>Extends the Adding-dialog to make it an editing-one.</p>
+     * Extends the Adding-dialog to make it an editing-one. Cool uh...
      */
     private static class ModuleEditor extends ModuleAdder {
         private KDefaultTableModel onModel;
         private Course target;
 
-        //the course on which edition is to be. the model to perform the removal. the index of the performance from the model's table
+        /**
+         *
+         * @param eCourse The course on which edition is to be.
+         * @param onModel The model to perform the removal.
+         */
         private ModuleEditor(Course eCourse, KDefaultTableModel onModel) {
             super(eCourse.getYear(), eCourse.getSemester());
             this.setTitle(eCourse.getName());

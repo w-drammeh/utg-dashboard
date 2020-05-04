@@ -18,8 +18,8 @@ public class NewsGenerator {
     private static final String NEWS_SITE = "https://www.utg.edu.gm/category/news/";
     private static KLabel accessLabel;
     private static KPanel accessPanel;
-    private static String accessTime;
-    private static ArrayList<NewsSavior> NEWS_DATA = new ArrayList<NewsSavior>(){
+    private static String accessTime = "Never";
+    private static final ArrayList<NewsSavior> NEWS_DATA = new ArrayList<NewsSavior>(){
         @Override
         public boolean add(NewsSavior incomingSavior) {
             for (NewsSavior s : NEWS_DATA) {
@@ -30,6 +30,7 @@ public class NewsGenerator {
             }
             return super.add(incomingSavior);
         }
+
         @Override
         public boolean contains(Object o) {
             for (NewsSavior s : NEWS_DATA) {
@@ -39,32 +40,13 @@ public class NewsGenerator {
             }
             return false;
         }
-    };//Unlike many of its kind, this does not explicitly delete
+    };//Unlike many of its kind, this does not explicitly delete / remove.
 
 
     public NewsGenerator(){
-        accessLabel = KLabel.getPredefinedLabel("The contents provided herein are from the official UTG news site, accessed: ",SwingConstants.LEFT);
+        accessLabel = KLabel.getPredefinedLabel("Last accessed: ", SwingConstants.LEFT);
         accessLabel.setStyle(KFontFactory.createPlainFont(15), Color.RED);
         accessPanel = KPanel.wantDirectAddition(accessLabel);
-    }
-
-    public static void serializeData(){
-        System.out.print("Serializing news... ");
-        MyClass.serialize(NEWS_DATA, "news.ser");
-        MyClass.serialize(accessTime, "newsAccessTime.ser");
-        System.out.println("Completed.");
-    }
-
-    public static void deSerializeData(){
-        System.out.print("Deserializing news... ");
-        final ArrayList<NewsSavior> savedNews = (ArrayList<NewsSavior>) MyClass.deserialize("news.ser");
-        for (NewsSavior savior : savedNews) {
-            NEWS_DATA.add(savior);
-        }
-        if (MyClass.deserialize("newsAccessTime.ser") != null) {
-            accessTime = MyClass.deserialize("newsAccessTime.ser").toString();
-        }
-        System.out.println("Completed.");
     }
 
     /**
@@ -86,8 +68,6 @@ public class NewsGenerator {
             }
             accessTime = MDate.now();
             accessLabel.setText(accessTime);
-            resident.add(accessPanel);
-            ComponentAssistant.ready(resident);
             if (userClicked) {
                 App.promptPlain("News", "News refreshed successfully from " + NEWS_SITE + ".");
             }
@@ -96,6 +76,9 @@ public class NewsGenerator {
                 App.signalError("Internet Error", "Feeds will be available when you're connected to the internet.");
             }
         } catch (NullPointerException ignored) {
+        } finally {
+            resident.add(accessPanel);
+            ComponentAssistant.ready(resident);
         }
     }
 
@@ -129,14 +112,13 @@ public class NewsGenerator {
             }
         };
         niceBox.setBackground(Color.WHITE);
-        niceBox.setPreferredSize(new Dimension(970,150));
+        niceBox.setPreferredSize(new Dimension(975, 150));
         niceBox.setBorder(BorderFactory.createLineBorder(Color.BLUE,2,true));
         niceBox.add(hLabel, BorderLayout.NORTH);
         niceBox.add(textPane, BorderLayout.CENTER);
         final KPanel readerWrap = KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, extendedReader);
         readerWrap.setBackground(Color.WHITE);
         niceBox.add(readerWrap, BorderLayout.SOUTH);
-
         return KPanel.wantDirectAddition(niceBox);
     }
 
@@ -151,6 +133,7 @@ public class NewsGenerator {
             ComponentAssistant.ready(c);
         }
     }
+
 
     private static class AllReader extends KDialog {
     private String keyContent;//the header
@@ -167,31 +150,24 @@ public class NewsGenerator {
         this.allContent = allNews;
 
         textPane = KTextPane.wantHtmlFormattedPane(this.allContent);
-        textPane.setBackground(Color.WHITE);
         textPane.setPreferredSize(new Dimension(525, 365));
 
         final KButton jumpButton = new KButton("Visit site");
         jumpButton.addActionListener(e -> {
-            jumpButton.setEnabled(false);
             new Thread(() -> {
-                if (Desktop.isDesktopSupported()) {
-                    try {
-                        Desktop.getDesktop().browse(URI.create(NEWS_SITE));
-                    } catch (Exception e1) {
-                        App.signalError(e1);
-                    }
-                } else {
-                    App.signalError("Unsupported Platform","Sorry, launching of default-browser by 'swing' is not supported by your desktop.");
+                jumpButton.setEnabled(false);
+                this.dispose();
+                try {
+                    Desktop.getDesktop().browse(URI.create(NEWS_SITE));
+                } catch (Exception e1) {
+                    App.signalError(e1);
                 }
-                AllReader.this.dispose();
                 jumpButton.setEnabled(true);
             }).start();
         });
 
         final KButton closeButton = new KButton("Close");
-        closeButton.addActionListener(e -> {
-            AllReader.this.dispose();
-        });
+        closeButton.addActionListener(e -> AllReader.this.dispose());
 
         final KPanel buttonPane = new KPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPane.addAll(jumpButton, closeButton);
@@ -221,21 +197,21 @@ public class NewsGenerator {
                 primaryButton.setText("Continue Reading");
                 primaryButton.setForeground(Color.BLUE);
                 primaryButton.removeActionListener(primaryButton.getActionListeners()[0]);
-                primaryButton.addActionListener(e -> {
-                    AllReader.this.setVisible(true);
-                });
-                this.setVisible(true);
-                primaryButton.setEnabled(true);
+                primaryButton.addActionListener(e -> this.setVisible(true));
                 NEWS_DATA.add(new NewsSavior(this.keyContent, this.bodyContent, this.allContent));
+                this.setVisible(true);
             } catch (IOException ioe) {
-                App.signalError("Download Error", "We are facing troubles getting the contents of the news '" + this.keyContent + "'\nPlease check back later.");
-                primaryButton.setEnabled(true);
+                App.signalError("Download Error", "We are facing troubles getting the contents of the news '" + this.keyContent + "'\n" +
+                        "Please check back later.");
             } catch (Exception e) {
                 App.silenceException(e);
+            } finally {
+                primaryButton.setEnabled(true);
             }
         }).start();
     }
 }
+
 
     private static final class NewsSavior implements Serializable {
         private String heading, body, content;
@@ -245,6 +221,31 @@ public class NewsGenerator {
             this.body = body;
             this.content = content;
         }
+    }
+
+    public static void serializeData(){
+        System.out.print("Serializing news... ");
+        MyClass.serialize(NEWS_DATA, "news.ser");
+        MyClass.serialize(accessTime, "newsAccessTime.ser");
+        System.out.println("Completed.");
+    }
+
+    public static void deSerializeData(){
+        System.out.print("Deserializing news...");
+        final ArrayList<NewsSavior> savedNews = (ArrayList<NewsSavior>) MyClass.deserialize("news.ser");
+        if (!(savedNews == null)) {
+            for (NewsSavior savior : savedNews) {
+                NEWS_DATA.add(savior);
+            }
+            if (!savedNews.isEmpty()) {
+                accessTime = "Undefined";
+            }
+        }
+        final Object accessObj = MyClass.deserialize("newsAccessTime.ser");
+        if (!(accessObj == null || "Never".equals(accessObj))) {
+            accessTime = accessObj.toString();
+        }
+        System.out.println("Completed.");
     }
 
 }

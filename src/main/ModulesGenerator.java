@@ -5,21 +5,18 @@ import customs.*;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * <h1>class ModulesGenerator</h1>
- */
-public class ModulesGenerator implements ActivityAnswerer{
-    private static final KLabel indicator = new KLabel("First Year - "+Student.firstAcademicYear(),KFontFactory.bodyHeaderFont());
-    private static final CardLayout residentLayout = new CardLayout();//there's a 'residentPanel'
-    private static final ModulesHandler modulesHandler = new ModulesHandler();
-    /*
-       to be used by sync
-     */
-    private static KButton refreshButton;
+public class ModulesGenerator implements ActivityAnswerer {
     private KButton onButton;
+    private KLabel indicator;
+    private CardLayout residentLayout;//There's a 'residentPanel'
+    private ModulesHandler handlerInstance;
+    private static KButton refreshButton;//To be used by sync
 
 
     public ModulesGenerator(){
+        indicator = new KLabel("First Year - "+Student.firstAcademicYear(), KFontFactory.bodyHeaderFont());
+        handlerInstance = new ModulesHandler();
+        residentLayout = new CardLayout();
         final KPanel residentPanel = new KPanel(residentLayout){
             @Override
             public Component add(Component comp) {
@@ -29,24 +26,20 @@ public class ModulesGenerator implements ActivityAnswerer{
 
         final KButton tipShower = KButton.getIconifiedButton("warn.png", 25, 25);
         tipShower.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        tipShower.addActionListener(e->{
-            App.promptPlain("Module Collection", "For more options, simply right-click on the tables.\n" +
-                    "To Edit, Remove, Verify, or Show the Details of a course, just right-click on it and choose the corresponding\n" +
-                    "option from the Popup Menu.\n \n" +
-                    "You can navigate through your collection by using the buttons outlined in the left-most panel.\n" +
-                    "If Dashboard cannot determine the academic year & semester of a course relative to your level,\n" +
-                    "it will be pushed to the Miscellaneous table.\n \n" +
-                    "It should be noted that only the courses that are Confirmed will be included in your 'Analysis' and Transcript.\n \n" +
-                    "For more information about this activity, refer to "+HelpGenerator.reference("Module Collection"));
-        });
+        tipShower.addActionListener(e-> App.promptPlain("Module Collection", "For more options, simply right-click on the tables.\n" +
+                "To Edit, Remove, Verify, or Show the Details of a course, just right-click on it and choose the corresponding\n" +
+                "option from the Popup Menu.\n \n" +
+                "You can navigate through your collection by using the buttons outlined in the left-most panel.\n" +
+                "If Dashboard cannot determine the academic year & semester of a course relative to your level,\n" +
+                "it will be pushed to the Miscellaneous table.\n \n" +
+                "It should be noted that only the courses that are Confirmed will be included in your 'Analysis' and Transcript.\n \n" +
+                "For more information about this activity, refer to "+HelpGenerator.reference("Module Collection")));
 
         refreshButton = new KButton("Sync");
         refreshButton.setToolTipText("Synchronize Courses");
         refreshButton.setFont(KFontFactory.createPlainFont(15));
         refreshButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        refreshButton.addActionListener(e -> {
-            triggerRefresh(true);
-        });
+        refreshButton.addActionListener(e -> triggerRefresh(true));
 
         final KPanel headerPanel = new KPanel(new BorderLayout());
         headerPanel.add(KPanel.wantDirectAddition(refreshButton), BorderLayout.EAST);
@@ -99,9 +92,9 @@ public class ModulesGenerator implements ActivityAnswerer{
         });
 
         final KPanel controlPanel = new KPanel(new Dimension(150,400));
-        controlPanel.add(ComponentAssistant.provideBlankSpace(150,50));
-        controlPanel.addAll(y1Button,y2Button,y3Button,y4Button,new KSeparator(new Dimension(125,1)),summerButton
-                ,new KSeparator(new Dimension(125,1)),miscButton);
+        controlPanel.add(Box.createRigidArea(new Dimension(150, 50)));
+        controlPanel.addAll(y1Button,y2Button,y3Button,y4Button,new KSeparator(new Dimension(125,1)),
+                summerButton, new KSeparator(new Dimension(125,1)),miscButton);
 
         residentLayout.addLayoutComponent(residentPanel.add(generateYear1()),"Year1");
         residentLayout.addLayoutComponent(residentPanel.add(generateYear2()),"Year2");
@@ -111,14 +104,14 @@ public class ModulesGenerator implements ActivityAnswerer{
         residentLayout.addLayoutComponent(residentPanel.add(generateMiscellaneous()),"misc");
 
         final KPanel allPanel = new KPanel(new BorderLayout());
-        allPanel.add(headerPanel,BorderLayout.NORTH);
-        allPanel.add(controlPanel,BorderLayout.WEST);
-        allPanel.add(residentPanel,BorderLayout.CENTER);
+        allPanel.add(headerPanel, BorderLayout.NORTH);
+        allPanel.add(controlPanel, BorderLayout.WEST);
+        allPanel.add(residentPanel, BorderLayout.CENTER);
 
         Board.addCard(allPanel, "Modules Collection");
     }
 
-    private static KButton getControlButton(String text){
+    private KButton getControlButton(String text){
         final KButton newButton = new KButton(text);
         newButton.setStyle(KFontFactory.createPlainFont(16),Color.BLUE);
         newButton.setPreferredSize(new Dimension(150,30));
@@ -130,11 +123,12 @@ public class ModulesGenerator implements ActivityAnswerer{
     }
 
     /**
-     * <p>Syn will only be allowed to commence if one is not already on the way.</p>
+     * Sync will only be allowed to commence if one is not already on the way.
      */
     public static void triggerRefresh(boolean userRequested){
         new Thread(()-> {
-            if (!userRequested || App.showOkCancelDialog("Synchronize Courses","This action is experimental. Dashboard will perform a thorough 'Re-indexing' of your modules.\n" +
+            if (!userRequested || App.showOkCancelDialog("Synchronize Courses",
+                    "This action is experimental. Dashboard will perform a thorough 'Re-indexing' of your modules.\n" +
                     "Please refer to "+HelpGenerator.reference("My Courses | Modules Synchronization")+"\n" +
                     "for details about the consequences of this action. Start now?")) {
                 ModulesHandler.startThoroughSync(refreshButton, userRequested);
@@ -142,29 +136,27 @@ public class ModulesGenerator implements ActivityAnswerer{
                 refreshButton.setEnabled(true);
             }
         }).start();
-
     }
 
     @Override
     public void answerActivity() {
-        Board.getBody().setPreferredSize(Board.BODYSIZE_NOSCROLLBARS);
         Board.showCard("Modules Collection");
     }
 
     private JComponent generateYear1(){
-        return modulesHandler.presentForYearOne();
+        return handlerInstance.presentForYearOne();
     }
 
     private JComponent generateYear2(){
-        return modulesHandler.presentForYearTwo();
+        return handlerInstance.presentForYearTwo();
     }
 
     private JComponent generateYear3(){
-        return modulesHandler.presentForYearThree();
+        return handlerInstance.presentForYearThree();
     }
 
     private JComponent generateYear4(){
-        return modulesHandler.presentForYearFour();
+        return handlerInstance.presentForYearFour();
     }
 
     private JComponent generateSummer(){

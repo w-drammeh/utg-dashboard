@@ -3,6 +3,7 @@ package utg;
 import main.*;
 
 import javax.swing.*;
+import java.io.File;
 
 /**
  * <h1>class Dashboard</h1>
@@ -25,36 +26,29 @@ public class Dashboard {
     public static void main(String[] args) {
         preview  = new Preview(null);
         preview.setVisible(true);
-        final Object object = MyClass.deserialize("userName.ser");
-        if (object == null) {
-            System.out.println("Triggering a new instance for a potential first launch... Please wait");
-            forgeNew();
-            return;
-        }
 
-        final String recentUser = object.toString();
-        final String immediateUser = System.getProperty("user.name");
-        if (immediateUser.equals(recentUser)) {
-            try {
-                System.out.println("Reading from your serializable state... Please wait");
-                Student.resetFields();
-                Student.deserializeData();
-            } catch (Exception e) {
-                System.out.println("Serializable file - core - not found, or otherwise could not be read properly; now triggering a new instance...");
+        final Object recentUser = MyClass.deserialize("userName.ser");
+        if (recentUser == null) {
+            final File coreFile = new File(MyClass.serialsDir + MyClass.fileSeparator + "core.ser");
+            if (coreFile.exists()) {
+                verifyUser(true);
+            } else {
                 forgeNew();
-                return;
             }
-            launchRebuildSequences();
         } else {
-            System.out.println("Different user detected; now triggering a new instance...");
-            forgeNew();
+            final String immediateUser = System.getProperty("user.name");
+            if (immediateUser.equals(recentUser)) {
+                rebuildNow(true);
+            } else {
+                verifyUser(true);
+            }
         }
     }
 
     private static void forgeNew(){
         isFirst = true;
         new Thread(()-> {
-            Student.resetFields();
+            Student.reset();
             PrePortal.startFixingDriver();
         }).start();
         final Welcome welcome = new Welcome();
@@ -64,7 +58,49 @@ public class Dashboard {
         });
     }
 
-    private static void launchRebuildSequences(){
+    private static void verifyUser(boolean deserialize){
+        if (deserialize) {
+            try {
+                Student.reset();
+                Student.deserializeData();
+            } catch (Exception e) {
+                App.silenceException(e);
+                forgeNew();
+                return;
+            }
+        }
+
+        final String matNumber = constantlyRequestInput();
+        if (matNumber.equals(String.valueOf(Student.getMatNumber()))) {
+            rebuildNow(false);
+        } else {
+            App.signalError(preview, "Error", "That Mat. Number does not match "+Student.getFullNamePostOrder()+".\n" +
+                    "Try again.");
+            verifyUser(false);
+        }
+    }
+
+    private static String constantlyRequestInput(){
+        final String input = App.requestInput(preview, "UTG Dashboard", "This Dashboard belongs to "+Student.getFullNamePostOrder()+"\n" +
+                "You can enter your Matriculation Number to confirm it's you:\n \n");
+        if (input == null) {
+            System.exit(0);
+        }
+        return Globals.hasText(input) ? input : constantlyRequestInput();
+    }
+
+    private static void rebuildNow(boolean deserialize){
+        if (deserialize) {
+            try {
+                Student.reset();
+                Student.deserializeData();
+            } catch (Exception e) {
+                App.silenceException(e);
+                forgeNew();
+                return;
+            }
+        }
+
         try {
             SettingsCore.deSerialize();
         } catch (Exception e) {
@@ -80,8 +116,7 @@ public class Dashboard {
         } catch (Exception e) {
             App.silenceException(e);
         }
-
-        SwingUtilities.invokeLater(()->{
+        SwingUtilities.invokeLater(()-> {
             final Board lastBoard = new Board();
             try {
                 SettingsUI.deSerialize();

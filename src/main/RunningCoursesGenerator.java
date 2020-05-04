@@ -13,11 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RunningCoursesGenerator implements ActivityAnswerer {
-    public static final KLabel noticeLabel = new KLabel(Portal.getBufferedNotice_Registration()+("    [Last updated: "+Portal.getLastNoticeUpdate()+"]"),KFontFactory.createPlainFont(16), Color.RED);
-    public static final KLabel semesterBigLabel = new KLabel(Student.getSemester(), KFontFactory.createBoldFont(20));
-    public static final ArrayList<RunningCourse> STARTUP_REGISTRATIONS = new ArrayList<>();
+    public static final KLabel noticeLabel = new KLabel("", KFontFactory.createPlainFont(16), Color.RED);
+    public static final KLabel semesterBigLabel = new KLabel("", KFontFactory.createBoldFont(20));
     private static KTable runningTable;
     private static KDefaultTableModel runningModel;
+    private static FirefoxDriver runningDriver;
+    private static KButton popUpButton;
+    private static KMenuItem matchItem;
+    public static final ArrayList<RunningCourse> STARTUP_REGISTRATIONS = new ArrayList<>();
     private static final ArrayList<RunningCourse> ACTIVE_COURSES = new ArrayList<RunningCourse>(){
         @Override
         public boolean add(RunningCourse course) {
@@ -42,32 +45,23 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
             runningModel.setValueAt(element.getLecturer(), targetRow, 2);
             runningModel.setValueAt(element.schedule(), targetRow, 3);
             runningModel.setValueAt(element.isConfirmed() ? "Confirmed" : "Unknown", targetRow, 4);
+
             return super.set(index, element);
         }
     };
-    private static FirefoxDriver runningDriver;
-    private static KButton popUpButton;
-    private static JMenuItem matchItem;
 
 
     public RunningCoursesGenerator(){
-        final Font itemsFont = KFontFactory.createPlainFont(15);
+        noticeLabel.setText(Portal.getBufferedNotice_Registration()+ ("    [Last updated: "+Portal.getLastNoticeUpdate()+"]"));
+        semesterBigLabel.setText(Student.getSemester());
 
-        matchItem = new JMenuItem("Match Portal");
-        matchItem.setFont(itemsFont);
-        matchItem.addActionListener(actionEvent -> {
-            startMatching(true);
-        });
+        matchItem = new KMenuItem("Match Portal", e -> startMatching(true));
 
-        final JMenuItem updateItem = new JMenuItem("Update Registration Notice");
-        updateItem.setFont(itemsFont);
-        updateItem.addActionListener(actionEvent -> {
-            App.promptPlain("Tip","To renew the registration notice, go to Notifications | Portal Alerts | Update Alerts");
-        });
+        final KMenuItem visitItem = new KMenuItem("Visit Portal Instead");
+        visitItem.addActionListener(e -> Portal.userRequestsOpenPortal(visitItem));
 
-        final JMenuItem visitItem = new JMenuItem("Visit Portal Instead");
-        visitItem.setFont(itemsFont);
-        visitItem.addActionListener(actionEvent -> Portal.userRequestsOpenPortal(visitItem));
+        final KMenuItem updateItem = new KMenuItem("Update Registration Notice",
+                e -> App.promptPlain("Tip", "To renew the registration notice, go to 'Notifications | Portal Alerts | Update Alerts'."));
 
         final JPopupMenu jPopup = new JPopupMenu();
         jPopup.add(matchItem);
@@ -79,23 +73,22 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
         popUpButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         popUpButton.setFont(KFontFactory.createBoldFont(15));
         popUpButton.setToolTipText("More options");
-        popUpButton.addActionListener(e -> {
-            jPopup.show(popUpButton,popUpButton.getX(),popUpButton.getY()+(popUpButton.getPreferredSize().height));
-        });
+        popUpButton.addActionListener(e -> jPopup.show(popUpButton, popUpButton.getX(),
+                popUpButton.getY()+(popUpButton.getPreferredSize().height)));
 
         semesterBigLabel.setPreferredSize(new Dimension(925,35));
         semesterBigLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        semesterBigLabel.underline(null,false);
+        semesterBigLabel.underline(null,true);
 
         final KPanel upperPanel = new KPanel(new BorderLayout());
-        upperPanel.add(popUpButton,BorderLayout.WEST);
-        upperPanel.add(KPanel.wantDirectAddition(semesterBigLabel),BorderLayout.CENTER);
-        upperPanel.add(ComponentAssistant.provideBlankSpace(975,10),BorderLayout.SOUTH);
+        upperPanel.add(popUpButton, BorderLayout.WEST);
+        upperPanel.add(KPanel.wantDirectAddition(semesterBigLabel), BorderLayout.CENTER);
+        upperPanel.add(Box.createRigidArea(new Dimension(975, 10)), BorderLayout.SOUTH);
 
         final KPanel runningContainer = new KPanel(new BorderLayout());
-        runningContainer.add(upperPanel,BorderLayout.NORTH);
-        runningContainer.add(runningSubstances(),BorderLayout.CENTER);
-        runningContainer.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.LEFT),null,noticeLabel),BorderLayout.SOUTH);
+        runningContainer.add(upperPanel, BorderLayout.NORTH);
+        runningContainer.add(runningSubstances(), BorderLayout.CENTER);
+        runningContainer.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.LEFT), null, noticeLabel), BorderLayout.SOUTH);
 
         Board.addCard(runningContainer, "Running Courses");
     }
@@ -107,8 +100,8 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
     }
 
     /**
-     * <p>Goes ahead and launch search for the selected row's data</p>
-     * <p>As for the approach, the codes is the weapon. If a module is found with the same code,
+     * Goes ahead and launch search for the selected row's data.
+     * As for the approach, the codes is the weapon. If a module is found with the same code,
      * the added module will be replaced; otherwise not found.
      */
     private static void launchConfirmationSequence(){
@@ -117,13 +110,15 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
         if (targetCourse == null) {
             return;
         }
-        if (!App.showOkCancelDialog("Verify "+targetCourse.getName(),"Dashboard will initiate a handshake with your portal, and notify you if" +
-                "\n"+targetCourse.getName()+" is among the courses you registered this semester.\n" +
+        if (!App.showOkCancelDialog("Verify "+targetCourse.getName(),
+                "Dashboard will initiate a handshake with your portal, and notify you if\n" +
+                        targetCourse.getName()+" is among the courses you registered this semester.\n" +
                 "Please refer to "+HelpGenerator.reference("Running Courses | Verification")+"\n" +
                 "for more information about this action.")) {
             return;
         }
-        final String initialValue = String.valueOf(runningModel.getValueAt(runningModel.getRowOf(targetCode), runningModel.getColumnCount() - 1));
+        final String initialValue = String.valueOf(runningModel.getValueAt(runningModel.getRowOf(targetCode),
+                runningModel.getColumnCount() - 1));
         runningModel.setValueAt("Checking...", runningModel.getRowOf(targetCode), runningModel.getColumnCount() - 1);
         if (runningDriver == null) {
             fixRunningDriver();
@@ -140,7 +135,7 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
         }
 
         synchronized (runningDriver){
-            final WebDriverWait loadWaiter = new WebDriverWait(runningDriver, 50);//should be more?
+            final WebDriverWait loadWaiter = new WebDriverWait(runningDriver, 50);//Should be more?
             if (DriversPack.isIn(runningDriver)) {
                 try {
                     runningDriver.navigate().refresh();
@@ -239,16 +234,16 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
     }
 
     /**
-     * <p>Syn will only be allowed to commence if one is not already on the way.
+     * Sync will only be allowed to commence if one is not already on the way.
      * The difference is that: the user does not need to be prompted when they
-     * did not request it</p>
-     *
+     * did not request it.
      */
     public static void startMatching(boolean userRequested){
         if (!userRequested && !matchItem.isEnabled()) {
             return;
         }
-        if (!userRequested || App.showOkCancelDialog("Match Registration Table", "This feature is experimental: Dashboard will start to contact, and bring all the courses\n" +
+        if (!userRequested || App.showOkCancelDialog("Match Registration Table",
+                "This feature is experimental: Dashboard will start to contact, and bring all the courses\n" +
                 "(if there exists any) you have registered this semester. Continue?")) {
             new Thread(()->{
                 matchItem.setEnabled(false);
@@ -395,17 +390,19 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
     }
 
     public static synchronized void fixRunningDriver(){
-        if (runningDriver != null) {
-            return;
+        if (runningDriver == null) {
+            runningDriver = DriversPack.forgeNew(true);
         }
-
-        runningDriver = DriversPack.forgeNew(true);
     }
 
     private static String generateNotificationWarning(String moduleName){
-        return "Dear "+Student.getLastName()+", you've added "+moduleName+" to your list of registered courses. However, this does not mean that Dashboard will effect the changes on your portal."+
-                "\nDashboard does not write your portal!\nIf you've registered the course already on your portal, then let Dashboard confirm it by selecting the course from the list and clicking the confirm button." +
-                "\n-\nHowever, we recommend that you let Dashboard match the entire table with that of your portal, after your registrations. To achieve this, click the 'More Options' button " +
+        return "Dear "+Student.getLastName()+", you've added "+moduleName+" to your list of registered courses. " +
+                "However, this does not means that Dashboard will effects the changes on your portal.\n" +
+                "Dashboard does not write your portal!\n" +
+                "If you've registered the course already on your portal, then let Dashboard confirms it " +
+                "by selecting the course from the list and clicking the Confirm button." +
+                "\n-\nHowever, we recommend that you let Dashboard match the entire table with that of your portal, " +
+                "after your registrations. To achieve this, click the 'More Options' button " +
                 "which appears at the top-left and select 'Match Portal'.";
     }
 
@@ -414,7 +411,6 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
         for (int i = 0; i < ACTIVE_COURSES.size(); i++) {
             names[i] = ACTIVE_COURSES.get(i).getName();
         }
-
         return names;
     }
 
@@ -423,7 +419,6 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
         for (int i = 0; i < ACTIVE_COURSES.size(); i++) {
             codes[i] = ACTIVE_COURSES.get(i).getCode();
         }
-
         return codes;
     }
 
@@ -433,7 +428,6 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
                 return r;
             }
         }
-
         return null;
     }
 
@@ -446,33 +440,12 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
                 return i;
             }
         }
-
         return -1;
-    }
-
-    public static void serializeModules(){
-        System.out.print("Serializing registered courses... ");
-        final String[] runningCourses = new String[ACTIVE_COURSES.size()];
-        for (int i = 0; i < runningCourses.length; i++) {
-            runningCourses[i] = ACTIVE_COURSES.get(i).exportContent();
-        }
-        MyClass.serialize(runningCourses, "runCourses.ser");
-        System.out.println("Completed.");
-    }
-
-    public static void deserializeModules(){
-        System.out.print("Deserializing registered courses... ");
-        final String[] runningCourses = (String[]) MyClass.deserialize("runCourses.ser");
-        for (String line : runningCourses) {
-            ACTIVE_COURSES.add(RunningCourse.importFromSerial(line));
-        }
-        System.out.println("Completed.");
     }
 
     private Container runningSubstances(){
         runningModel = new KDefaultTableModel();
         runningModel.setColumnIdentifiers(new String[] {"CODE", "NAME", "LECTURER", "SCHEDULE","STATUS"});
-
         runningTable = new KTable(runningModel);
         runningTable.setRowHeight(30);
         runningTable.setFont(KFontFactory.createBoldFont(15));
@@ -507,9 +480,7 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
                 final String eCode = String.valueOf(runningModel.getValueAt(runningTable.getSelectedRow(), 0));
                 final RunningCourse eCourse = getByCode(eCode);
                 if (eCourse != null) {
-                    SwingUtilities.invokeLater(()->{
-                        RunningCourse.exhibit(Board.getRoot(), eCourse);
-                    });
+                    SwingUtilities.invokeLater(()-> RunningCourse.exhibit(Board.getRoot(), eCourse));
                 }
             } else {
                 App.promptPlain("No selection", "Firstly, select a course from the table that you want to show details of.");
@@ -523,9 +494,7 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
                 final String code = String.valueOf(runningModel.getValueAt(runningTable.getSelectedRow(), 0));
                 final RunningCourse t = getByCode(code);
                 if (t != null) {
-                    SwingUtilities.invokeLater(() -> {
-                        new RunningCourseEditor(t).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(() -> new RunningCourseEditor(t).setVisible(true));
                 }
             } else {
                 App.promptPlain("No selection", "Firstly, select a course from the table that you want to edit.");
@@ -572,16 +541,35 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
 
         final KPanel substancePanel = new KPanel();
         substancePanel.setLayout(new BoxLayout(substancePanel, BoxLayout.Y_AXIS));
-        substancePanel.addAll(new KScrollPane(runningTable, false), buttonsPanel, ComponentAssistant.provideBlankSpace(500,50));
+        substancePanel.addAll(new KScrollPane(runningTable, false), buttonsPanel, Box.createVerticalStrut(50));
 
         return substancePanel;
     }
 
     @Override
     public void answerActivity() {
-        Board.getBody().setPreferredSize(Board.BODYSIZE_NOSCROLLBARS);
         Board.showCard("Running Courses");
     }
+
+    public static void serializeModules(){
+        System.out.print("Serializing registered courses... ");
+        final String[] runningCourses = new String[ACTIVE_COURSES.size()];
+        for (int i = 0; i < runningCourses.length; i++) {
+            runningCourses[i] = ACTIVE_COURSES.get(i).exportContent();
+        }
+        MyClass.serialize(runningCourses, "runCourses.ser");
+        System.out.println("Completed.");
+    }
+
+    public static void deserializeModules(){
+        System.out.print("Deserializing registered courses... ");
+        final String[] runningCourses = (String[]) MyClass.deserialize("runCourses.ser");
+        for (String line : runningCourses) {
+            ACTIVE_COURSES.add(RunningCourse.importFromSerial(line));
+        }
+        System.out.println("Completed.");
+    }
+
 
     private static class RunningCourseAdder extends KDialog {
         KPanel layers;
@@ -625,12 +613,10 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
             hoursBox = new JComboBox<>(Course.availableCoursePeriods());
             hoursBox.setFont(daysBox.getFont());
             final KPanel scheduleLayer = new KPanel(new FlowLayout(FlowLayout.CENTER));
-            scheduleLayer.addAll(dialogLabel("Day:"),daysBox,ComponentAssistant.provideBlankSpace(50,30),dialogLabel("Time:"),hoursBox);
+            scheduleLayer.addAll(dialogLabel("Day:"),daysBox,Box.createRigidArea(new Dimension(50,30)),dialogLabel("Time:"),hoursBox);
 
             final KButton cancelButton = new KButton("Cancel");
-            cancelButton.addActionListener(e -> {
-                RunningCourseAdder.this.dispose();
-            });
+            cancelButton.addActionListener(e -> RunningCourseAdder.this.dispose());
 
             doneButton = new KButton("Done");
             doneButton.addActionListener(e -> {
@@ -653,9 +639,7 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
                     ACTIVE_COURSES.add(new RunningCourse(codeField.getText(), nameField.getText(), lecturerField.getText(), venueField.getText(), roomField.getText(), String.valueOf(daysBox.getSelectedItem()),
                             String.valueOf(hoursBox.getSelectedItem()), false));
                     this.dispose();
-                    SwingUtilities.invokeLater(()->{
-                        Notification.create("Local Registration", nameField.getText()+" is locally added, and may not be on your portal", generateNotificationWarning(nameField.getText()), null);
-                    });
+                    SwingUtilities.invokeLater(()-> Notification.create("Local Registration", nameField.getText()+" is locally added, and may not be on your portal", generateNotificationWarning(nameField.getText()), null));
                 }
             });
 
@@ -676,6 +660,7 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
             return new KLabel(string,KFontFactory.createBoldFont(16));
         }
     }
+
 
     private static class RunningCourseEditor extends RunningCourseAdder {
 

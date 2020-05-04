@@ -12,11 +12,11 @@ import java.awt.event.WindowEvent;
  * <p><i>This class is supported by series of inner classes for each of the addition types.</i></p>
  */
 public class TaskCreator {
+    public static final int TASKS_DESCRIPTION_LIMIT = 50;//Note, this should be increased. it's only small because of irregular component arrangement and fixed layouts
 
-    public static final int TASKS_DESCRIPTION_LIMIT = 50;//note, this should be increased. it's only small because of irregular component arrangement and fixed layouts
 
     private static Component giveSpace(int w, int h){
-        return ComponentAssistant.provideBlankSpace(w,h);
+        return Box.createRigidArea(new Dimension(w, h));
     }
 
     public static class TodoCreator extends KDialog {
@@ -29,27 +29,25 @@ public class TaskCreator {
             this.setModalityType(TodoCreator.DEFAULT_MODALITY_TYPE);
             this.setResizable(true);
 
-            final Dimension platesDimension = new Dimension(475,35);
-            final Dimension fieldsDimension = new Dimension(310,30);
+            final Dimension platesDimension = new Dimension(475, 35);
+            final Dimension fieldsDimension = new Dimension(310, 30);
             final Font labelsFont = KFontFactory.createBoldFont(16);
 
             descriptionField = KTextField.rangeControlField(TASKS_DESCRIPTION_LIMIT);
             descriptionField.setPreferredSize(fieldsDimension);
-            final KPanel namePlate = new KPanel(new BorderLayout(),platesDimension);
-            namePlate.add(KPanel.wantDirectAddition(new KLabel("Task Description:",labelsFont)),BorderLayout.WEST);
-            namePlate.add(KPanel.wantDirectAddition(descriptionField),BorderLayout.CENTER);
+            final KPanel namePlate = new KPanel(new BorderLayout(), platesDimension);
+            namePlate.add(KPanel.wantDirectAddition(new KLabel("Task Description:", labelsFont)), BorderLayout.WEST);
+            namePlate.add(KPanel.wantDirectAddition(descriptionField), BorderLayout.CENTER);
 
-            durationBox = new JComboBox<>(new Object[] {"Five Days","One Week","Two Weeks","Three Weeks","One Month"});
+            durationBox = new JComboBox<>(new Object[] {"Five Days", "One Week", "Two Weeks", "Three Weeks", "One Month"});
             durationBox.setFont(KFontFactory.createPlainFont(15));
             durationBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             final KPanel durationPlate = new KPanel(new BorderLayout(), platesDimension);
-            durationPlate.add(KPanel.wantDirectAddition(new KLabel("To be completed in:",labelsFont)), BorderLayout.WEST);
+            durationPlate.add(KPanel.wantDirectAddition(new KLabel("To be completed in:", labelsFont)), BorderLayout.WEST);
             durationPlate.add(KPanel.wantDirectAddition(durationBox), BorderLayout.CENTER);
 
             final KButton quitButton = new KButton("Cancel");
-            quitButton.addActionListener(e -> {
-                this.dispose();
-            });
+            quitButton.addActionListener(e -> this.dispose());
             createButton = new KButton("Create");
             createButton.setFocusable(true);
             createButton.addActionListener(TasksGenerator.TodoHandler.additionWaiter());
@@ -90,19 +88,19 @@ public class TaskCreator {
             final Dimension panelsDimension = new Dimension(465,35);
 
             nameField = KTextField.rangeControlField(TASKS_DESCRIPTION_LIMIT);
-            nameField.setPreferredSize(new Dimension(310,30));
-            final KPanel namePanelPlus = new KPanel(new BorderLayout(),panelsDimension);
-            namePanelPlus.add(KPanel.wantDirectAddition(new KLabel("Project Name:",labelsFont)),BorderLayout.WEST);
-            namePanelPlus.add(KPanel.wantDirectAddition(nameField),BorderLayout.CENTER);
+            nameField.setPreferredSize(new Dimension(310, 30));
+            final KPanel namePanelPlus = new KPanel(new BorderLayout(), panelsDimension);
+            namePanelPlus.add(KPanel.wantDirectAddition(new KLabel("Project Name:", labelsFont)), BorderLayout.WEST);
+            namePanelPlus.add(KPanel.wantDirectAddition(nameField), BorderLayout.CENTER);
 
-            typeBox = new JComboBox<>(new String[]{"Java","Python","C/C++","C#","Database","Web","Other"});
+            typeBox = new JComboBox<>(new String[]{"Java", "Python", "C/C++", "C#", "Database", "Web", "Other"});
             typeBox.setFont(boxFont);
             typeBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             final KPanel typePanelPlus = new KPanel(new BorderLayout(),panelsDimension);
-            typePanelPlus.add(KPanel.wantDirectAddition(new KLabel("Project Type:",labelsFont)),BorderLayout.WEST);
-            typePanelPlus.add(KPanel.wantDirectAddition(typeBox),BorderLayout.CENTER);
+            typePanelPlus.add(KPanel.wantDirectAddition(new KLabel("Project Type:", labelsFont)), BorderLayout.WEST);
+            typePanelPlus.add(KPanel.wantDirectAddition(typeBox), BorderLayout.CENTER);
 
-            durationBox = new JComboBox<>(new Object[] {"Five Days","One Week","Two Weeks","Three Weeks","One Month","Two Months","Three Months","Six Months"});
+            durationBox = new JComboBox<>(new Object[] {"Five Days", "One Week", "Two Weeks", "Three Weeks", "One Month", "Two Months", "Three Months", "Six Months"});
             durationBox.setFont(boxFont);
             durationBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             final KPanel durationPanelPlus = new KPanel(new BorderLayout(),panelsDimension);
@@ -110,16 +108,14 @@ public class TaskCreator {
             durationPanelPlus.add(KPanel.wantDirectAddition(durationBox),BorderLayout.CENTER);
 
             final KButton cancelButton = new KButton("Cancel");
-            cancelButton.addActionListener(e -> {
-                this.dispose();
-            });
+            cancelButton.addActionListener(e -> this.dispose());
             createButton = new KButton("Create");
             createButton.addActionListener(TasksGenerator.ProjectsHandler.additionWaiter());
             this.getRootPane().setDefaultButton(createButton);
 
             final KPanel contentPlate = new KPanel();
             contentPlate.setLayout(new BoxLayout(contentPlate,BoxLayout.Y_AXIS));
-            contentPlate.addAll(namePanelPlus,typePanelPlus,durationPanelPlus,giveSpace(400,25),
+            contentPlate.addAll(namePanelPlus,typePanelPlus,durationPanelPlus, giveSpace(400, 25),
                     KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, cancelButton, createButton));
             this.setContentPane(contentPlate);
             this.pack();
@@ -132,13 +128,14 @@ public class TaskCreator {
         }
 
         public String getTheType(){
-            return typeBox.getSelectedItem().toString();
+            return String.valueOf(typeBox.getSelectedItem());
         }
 
         public String getTheDuration(){
-            return durationBox.getSelectedItem().toString();
+            return String.valueOf(durationBox.getSelectedItem());
         }
     }
+
 
     public static class AssignmentCreator extends KDialog{
         private KTextField nameField;
@@ -241,9 +238,7 @@ public class TaskCreator {
             questionPanel.add(scrollPane,BorderLayout.CENTER);
 
             final KButton cancelButton = new KButton("Cancel");
-            cancelButton.addActionListener(e -> {
-                this.dispose();
-            });
+            cancelButton.addActionListener(e -> this.dispose());
             final KButton addButton = new KButton("Add");
             addButton.addActionListener(TasksGenerator.AssignmentsHandler.additionListener());
 
@@ -397,9 +392,7 @@ public class TaskCreator {
             datesLayer.add(dateFieldsPanel,BorderLayout.CENTER);
 
             final KButton cancelButton = new KButton("Cancel");
-            cancelButton.addActionListener(e -> {
-                this.dispose();
-            });
+            cancelButton.addActionListener(e -> this.dispose());
 
             final KButton addButton = new KButton("Add");
             addButton.addActionListener(TasksGenerator.EventsHandler.newListener());//No fear - if value was not one of the specified 3, compiler won't reach this line

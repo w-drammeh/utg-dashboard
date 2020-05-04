@@ -5,10 +5,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 /**
- * <h1>class KTextArea</h1>
- * <p>This, and the {@link KTable} types should always be surrounded in a {@link KScrollPane}</p>
+ * This, and the KTable types should always be surrounded in a KScrollPane?
  */
-public class KTextArea extends JTextArea {
+public class KTextArea extends JTextArea implements Preference {
 
 
     public KTextArea(){
@@ -17,7 +16,7 @@ public class KTextArea extends JTextArea {
     }
 
     /**
-     * <p>Use a TextArea with limited character entry as specified by the param.</p>
+     * Use a TextArea with limited character entry as specified by the limit-param.
      */
     public static KTextArea limitedEntry(int limit){
         final KTextArea controlArea = new KTextArea();
@@ -29,7 +28,6 @@ public class KTextArea extends JTextArea {
                 }
             }
         });
-
         return controlArea;
     }
 

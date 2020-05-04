@@ -12,15 +12,14 @@ import java.net.URL;
 import java.util.Formatter;
 
 /**
- * <h1>My Class</h1>
- * As the name implies, MyClass is a personal class for functions that
- * are not classifiable to the main classes.</p>
+ * As the name implies, MyClass is a extra class for functions that
+ * are not classifiable to the main classes.
  */
 public class MyClass {
 	public static final String fileSeparator = System.getProperty("file.separator");
 	public static final String rootDir = System.getProperty("user.home")+fileSeparator+"Dashboard";
 	public static final String serialsDir = rootDir+fileSeparator+"serials";
-	public static final String outputDir = rootDir+fileSeparator+"output";
+	public static final String outputDir = rootDir+fileSeparator+"outputs";
 
 	/**
 	 * Note! the exception generative by this call can be silenced.
@@ -56,6 +55,12 @@ public class MyClass {
 		}
 	}
 
+	/**
+	 * Dashboard depends, greatly, on this piece of call.
+	 * It handles its potential exceptions.
+	 * So caller must after-check if the returned-object is null before an attempt to use -
+	 * such is the convention.
+	 */
     public static Object deserialize(String serName){
         Object serObject = null;
         try {
@@ -66,7 +71,6 @@ public class MyClass {
         } catch (Exception e) {
 			System.err.println("Error deserializing file "+serName);
         }
-
         return serObject;
     }
 
@@ -131,10 +135,6 @@ public class MyClass {
 	}
 
 	public static void mountUserData(){
-		if (Dashboard.isTest) {
-			return;
-		}
-
 		serialize(System.getProperty("user.name"), "userName.ser");
 		placeReadMeFile();
 		placeUserDetails();

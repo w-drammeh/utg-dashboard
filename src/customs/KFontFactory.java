@@ -8,7 +8,7 @@ import java.awt.*;
  * making it easier, through its static methods, to bring a Font where needed without
  * instantiating the Font class directly.</p>
  */
-public class KFontFactory {
+public abstract class KFontFactory implements Preference {
     public static final String FONT_NAME = "Tahoma";
 
 

@@ -9,20 +9,19 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * <h1>class KLabel</h1>
- * <p>One of the custom classes. One of the most useful. KLabel extends javax.swing.JLabel
- * allowing it to be constructed in numerous ways.</p>
- * <p><i>It also overrides the toString function from the Object type, returning its text.</i></p>
+ * One of the custom classes. One of the most useful. KLabel extends javax.swing.JLabel
+ * allowing it to be constructed in numerous ways.
+ * It also overrides the toString() from the Object type, returning its text.
  */
-public class KLabel extends JLabel{
+public class KLabel extends JLabel implements Preference {
 
-
-    public KLabel(){
-        super();
-    }
 
     public KLabel(String text){
         super(text);
+    }
+
+    public KLabel(){
+        this("");
     }
 
     public KLabel(String text, Font font){
@@ -30,9 +29,9 @@ public class KLabel extends JLabel{
         this.setFont(font);
     }
 
-    public KLabel(String text, Font factory, Color fg){
+    public KLabel(String text, Font font, Color fg){
         super(text);
-        this.setFont(factory);
+        this.setFont(font);
         this.setForeground(fg);
     }
 
@@ -41,39 +40,39 @@ public class KLabel extends JLabel{
     }
 
     public static KLabel wantIconLabel(String iName, int iWidth, int iHeight){
-        return new KLabel(MyClass.scaleForMe(new App().getIconURL(iName), iWidth, iHeight));
+        return new KLabel(MyClass.scaleForMe(App.getIconURL(iName), iWidth, iHeight));
     }
 
     /**
-     * <p>Used to construct a predefined label. The text passed is always loaded or
-     * appended anytime setText(#) is invoked. The int determines the position (left or right)
-     * of this permanent text.</p>
+     * Used to construct a predefined-label. The text passed is always loaded or
+     * appended anytime setText(#) is invoked. The int-param determines the position (left or right)
+     * of this permanent-text.
+     * Giving any other than SwingConstants.LEFT or SwingConstants.RIGHT will provoke an IllegalArgumentException.
      */
     public static KLabel getPredefinedLabel(String permanentText, int position){
+        if (!(position == SwingConstants.LEFT || position == SwingConstants.RIGHT)) {
+            throw new IllegalArgumentException("Position must be one of SwingConstants.LEFT or SwingConstants.RIGHT");
+        }
+
         return new KLabel(permanentText){
             @Override
             public void setText(String text) {
                 if (position == SwingConstants.LEFT) {
                     super.setText(permanentText+text);
-                } else if (position == SwingConstants.RIGHT) {
+                } else {
                     super.setText(text+permanentText);
-                } else if (position == SwingConstants.CENTER) {
-                    super.setText(permanentText.split(":")[0]+text+permanentText.split(":")[1]);
                 }
-            }
-
-            @Override
-            public void setText(int integer) {
-                setText(String.valueOf(integer));
             }
         };
     }
 
+    /**
+     * Dashboard's standard toolTip for components.
+     */
     public static JToolTip preferredTip(){
         final JToolTip tip = new JToolTip();
         tip.setFont(KFontFactory.createPlainFont(14));
-        tip.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
-
+        tip.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
         return tip;
     }
 
@@ -83,23 +82,25 @@ public class KLabel extends JLabel{
     }
 
     /**
-     * <p>Underlines this label. The boolean param specifies whether the line is visible only on mouse-focus.</p>
-     * <p><i>Notice this call sets the layout Border, and puts the Separator beneath the component.
-     * Whence should not be called otherwise.</i></p>
-     * <p>The line uses the Color param as its foreground. If 'null', it will assume the
-     * caller's foreground instead.</p>
+     * Underlines this label.
+     * The separator is always shown beneath this label if 'alwaysVisible', otherwise only on mouseFocus.
+     * Notice this call sets the layout Border, and puts the Separator beneath the component.
+     * Whence should not be called otherwise.
+     * The line uses the Color-param as its foreground. If 'null', it will assume the
+     * caller's foreground instead.
      */
-    public void underline(Color bg, boolean onlyOnFocus){
+    public void underline(Color bg, boolean alwaysVisible){
         final KSeparator separator = new KSeparator(bg == null ? this.getForeground() : bg);
         this.setLayout(new BorderLayout());
         this.add(separator, BorderLayout.SOUTH);
-        if (onlyOnFocus) {
+        if (!alwaysVisible) {
             separator.setVisible(false);
             this.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     separator.setVisible(true);
                 }
+
                 @Override
                 public void mouseExited(MouseEvent e) {
                     separator.setVisible(false);
@@ -120,6 +121,11 @@ public class KLabel extends JLabel{
     @Override
     public String toString() {
         return this.getText();
+    }
+
+    @Override
+    public void setPreferences() {
+
     }
 
 }

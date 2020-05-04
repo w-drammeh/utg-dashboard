@@ -9,11 +9,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
 /**
- * <h1>class App / Application</h1>
- * It is the center for generalized concepts. Any attempt to point to an icon, sheets, etc, must directly
+ * It is the center for generalized concepts. Any attempt to point to an icon, a sheet, etc, must directly
  * call this class.
  *
- * As analogous to the {@link Globals} type which globalizes code operations, this class universalizes the
+ * As analogous to the Globals type which globalizes code operations, this class universalizes the
  * input output operations.
  */
 public class App {
@@ -119,7 +118,7 @@ public class App {
 
     /**
      * Should be called in the catch block of tries the failure of which dashboard cannot dispense.
-     * This subsequently cause the VM to quit.
+     * This subsequently causes the VM to quit.
      */
     public static void signalFatalError(Component parent, String title, String detail){
         signalError(parent == null ? Board.getRoot() : parent, title, detail);
@@ -134,7 +133,8 @@ public class App {
     }
 
     public static void reportMissingDriver(Component parent){
-        signalError(parent == null ? Board.getRoot() : parent, "No Driver","Sorry, setting up the driver doesn't complete normally.\n" +
+        signalError(parent == null ? Board.getRoot() : parent, "No Driver",
+                "Sorry, setting up the driver doesn't complete normally.\n" +
                 "Please make sure 'Firefox Browser' is installed and try again.");
     }
 
@@ -143,7 +143,8 @@ public class App {
     }
 
     public static void reportConnectionLost(Component parent) {
-        signalError(parent == null ? Board.getRoot() : parent,"Connection Lost", "Sorry, we're having troubles connecting to the portal.\n" +
+        signalError(parent == null ? Board.getRoot() : parent,"Connection Lost",
+                "Sorry, we're having troubles connecting to the portal.\n" +
                 "Please try again later.");
     }
 
@@ -152,7 +153,8 @@ public class App {
     }
 
     public static void reportNoInternet(Component parent) {
-        signalError(parent == null ? Board.getRoot() : parent, "No Internet", "Sorry, we're having troubles connecting to the internet.\n" +
+        signalError(parent == null ? Board.getRoot() : parent, "No Internet",
+                "Sorry, we're having troubles connecting to the internet.\n" +
                 "Please connect and try again.");
     }
 
@@ -162,7 +164,7 @@ public class App {
 
     public static void reportLoginAttemptFailed() {
         signalError(Board.getRoot(), "Login Failed","Dashboard has been denied access to your portal.\n" +
-                "Please refer to Home | Privacy & Settings | Customize Profile to make sure the right credentials are given.");
+                "Please go to 'Home | Privacy & Settings | Customize Profile' tab to make sure the right credentials are given.");
     }
 
     /**
@@ -186,18 +188,19 @@ public class App {
         promptWarning(null, title, message);
     }
 
-    public static void reportBusyPortal(Component parent) {
-        promptWarning(parent == null ? Board.getRoot() : parent, "Busy Portal","Sorry, scrapping is not possible since your portal requires 'Course Evaluation'.\n" +
+    public static void reportBusyPortal(Component parent){
+        promptWarning(parent == null ? Board.getRoot() : parent, "Busy Portal",
+                "Your portal is currently requesting 'Course Evaluations'.\n" +
                 "Please visit your portal to perform the evaluation and try again.");
     }
 
-    public static void reportBusyPortal() {
+    public static void reportBusyPortal(){
         reportBusyPortal(null);
     }
 
     public static void reportRefreshFailure(){
-        promptWarning(Board.getRoot(), "Refresh Failure","Dashboard could not refresh your portal - now reading a buffered instance since "+
-                MDate.formatFully(Portal.getLastLogin()));
+        promptWarning(Board.getRoot(), "Refresh Failure","Dashboard could not refresh your portal - " +
+                "now reading a buffered instance since "+MDate.formatFully(Portal.getLastLogin()));
     }
 
     public static void silenceException(Exception e){
@@ -206,21 +209,10 @@ public class App {
 
     /**
      * Convenient way of ignoring exceptions, and write the passed string to the console using the
-     * standard error reporter.
+     * standard error-reporter.
      */
     public static void silenceException(String note){
         System.err.println(note);
-    }
-
-    /**
-     * Dashboard's icon to be used by frames and dialogs
-     */
-    public static Image getIcon() {
-    	final URL iPath = getIconURL("dashboard.png");
-        if (iPath == null) {
-            signalFatalError(null, "Initialization Failure","Internal Error Encountered: Image file could not be located or loaded.\nThe Virtual Machine is set to quit!");
-        }
-        return Toolkit.getDefaultToolkit().getImage(iPath);
     }
 
     /**

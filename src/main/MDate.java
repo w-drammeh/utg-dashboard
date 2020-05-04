@@ -48,7 +48,6 @@ public class MDate {
         if (value == Calendar.MONTH) {
             return t.get(Calendar.MONTH) + 1;
         }
-
         return t.get(value);
     }
 
@@ -134,20 +133,19 @@ public class MDate {
         final Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.add(Calendar.DATE, days);
-
         return standardFormat.format(calendar.getTime());
     }
 
     /**
      * Returns true if the values presented by date1 and date2 fall in the same day.
-     * This method is rough, and time ignorant.
+     * This method / condition is rough, and time ignorant.
      */
     public static boolean sameDay(Date d1, Date d2) {
         return formatDateOnly(d1).equals(formatDateOnly(d2));
     }
 
     /**
-     * Notice! It is converting the long to int, so this method is limited!
+     * Notice! It is converting the long to int, so this method is limited to int.
      */
     public static int actualDayDifference(Date d1, Date d2){
         return (int) ChronoUnit.DAYS.between(d1.toInstant(), d2.toInstant());
@@ -155,7 +153,8 @@ public class MDate {
 
     public static int getTimeValue(Date d){
         return  (getPropertyFrom(d, Calendar.HOUR) + 12) * Globals.HOUR_IN_MILLI +
-                getPropertyFrom(d, Calendar.MINUTE) * Globals.MINUTE_IN_MILLI + getPropertyFrom(d, Calendar.SECOND) * Globals.SECOND_IN_MILLI;
+                getPropertyFrom(d, Calendar.MINUTE) * Globals.MINUTE_IN_MILLI +
+                getPropertyFrom(d, Calendar.SECOND) * Globals.SECOND_IN_MILLI;
     }
 
 }

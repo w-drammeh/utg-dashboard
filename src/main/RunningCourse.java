@@ -7,8 +7,8 @@ import java.awt.*;
 import java.io.Serializable;
 
 /**
- * <h1>class RunningCourse</h1>
- * A model for the registered courses
+ * A model for the registered courses.
+ * A weaker form with limited resources.
  */
 public class RunningCourse implements Serializable {
     private String code;

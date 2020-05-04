@@ -76,7 +76,6 @@ public class FirstLaunch extends KDialog {
         majorPanel.setLayout(new BoxLayout(majorPanel, BoxLayout.Y_AXIS));
         majorPanel.addAll(KPanel.wantDirectAddition(new KLabel("What's Your Major Code?", bigFont)), textPane, KPanel.wantDirectAddition(majorCodeField),
                 ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,nextButton));
-
         return majorPanel;
     }
 
@@ -129,9 +128,7 @@ public class FirstLaunch extends KDialog {
 
         final KButton prevButton = new KButton("Back");
         prevButton.setFont(KFontFactory.createPlainFont(15));
-        prevButton.addActionListener(e->{
-            CARDS.show(contentPane, "Major code");
-        });
+        prevButton.addActionListener(e-> CARDS.show(contentPane, "Major code"));
 
         nextButton.setFont(KFontFactory.createPlainFont(15));
         nextButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -162,7 +159,6 @@ public class FirstLaunch extends KDialog {
         minorPanel.setLayout(new BoxLayout(minorPanel, BoxLayout.Y_AXIS));
         minorPanel.addAll(KPanel.wantDirectAddition(new KLabel("Do You Minor a Program?", bigFont)), kPanel,
                 ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,prevButton, nextButton));
-
         return minorPanel;
     }
 
@@ -214,21 +210,16 @@ public class FirstLaunch extends KDialog {
 
         final KButton prevButton = new KButton("Back");
         prevButton.setFont(KFontFactory.createPlainFont(15));
-        prevButton.addActionListener(e->{
-            CARDS.show(contentPane, "Minor");
-        });
+        prevButton.addActionListener(e-> CARDS.show(contentPane, "Minor"));
 
         final KButton skipButton = new KButton("Skip");
         skipButton.setStyle(KFontFactory.createPlainFont(15), Color.RED);
-        skipButton.addActionListener(e->{
-            CARDS.show(contentPane, "Image icon");
-        });
+        skipButton.addActionListener(e-> CARDS.show(contentPane, "Image icon"));
 
         final KPanel emailPanel = new KPanel();
         emailPanel.setLayout(new BoxLayout(emailPanel, BoxLayout.Y_AXIS));
         emailPanel.addAll(KPanel.wantDirectAddition(new KLabel("Do you know you had a Student Mail?", bigFont)), kPanel,
                 ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,prevButton,skipButton,setButton));
-
         return emailPanel;
     }
 
@@ -242,7 +233,8 @@ public class FirstLaunch extends KDialog {
         final KPanel iPanel = new KPanel();
         iPanel.add(new KLabel(Student.getIcon()));
 
-        final KButton setButton = new KButton("Set Now",true);
+        final KButton setButton = new KButton("Set Now");
+        setButton.setFocusable(true);
         setButton.setFont(KFontFactory.createPlainFont(14));
         setButton.setForeground(Color.BLUE);
         setButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -259,9 +251,7 @@ public class FirstLaunch extends KDialog {
 
         final KButton prevButton = new KButton("Back");
         prevButton.setFont(KFontFactory.createPlainFont(15));
-        prevButton.addActionListener(e->{
-            CARDS.show(contentPane, "Student mail");
-        });
+        prevButton.addActionListener(e-> CARDS.show(contentPane, "Student mail"));
         final KButton finishButton = new KButton("Finish");
         finishButton.setFont(KFontFactory.createPlainFont(15));
         finishButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -275,7 +265,6 @@ public class FirstLaunch extends KDialog {
         imgPanel.setLayout(new BoxLayout(imgPanel, BoxLayout.Y_AXIS));
         imgPanel.addAll(KPanel.wantDirectAddition(new KLabel("You Look Nice!", bigFont)), nicePanel,
                 ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,prevButton,finishButton));
-
         return imgPanel;
     }
 
@@ -292,7 +281,8 @@ public class FirstLaunch extends KDialog {
         final KTextPane textPane = KTextPane.wantHtmlFormattedPane(mailText);
         textPane.setBackground(Color.WHITE);
 
-        final KButton startButton = new KButton("Start using Dashboard", true);
+        final KButton startButton = new KButton("Start using Dashboard");
+        startButton.setFocusable(true);
         startButton.setStyle(KFontFactory.createPlainFont(15), Color.BLUE);
         startButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         startButton.addActionListener(e-> FirstLaunch.this.dispose());
@@ -300,8 +290,7 @@ public class FirstLaunch extends KDialog {
         final KPanel welcomePanel = new KPanel();
         welcomePanel.setLayout(new BoxLayout(welcomePanel, BoxLayout.Y_AXIS));
         welcomePanel.addAll(KPanel.wantDirectAddition(new KLabel("Voila!", bigFont)), textPane,
-                KPanel.wantDirectAddition(new FlowLayout(),null,startButton), ComponentAssistant.provideBlankSpace(100, 50));
-
+                KPanel.wantDirectAddition(new FlowLayout(),null,startButton), Box.createVerticalStrut(50));
         return welcomePanel;
     }
 

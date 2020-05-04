@@ -3,10 +3,7 @@ package customs;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * <h1>class KSeparator</h1>
- */
-public class KSeparator extends JSeparator {
+public class KSeparator extends JSeparator implements Preference {
 
 
     public KSeparator(Color bg){
@@ -32,6 +29,11 @@ public class KSeparator extends JSeparator {
     public KSeparator(Dimension dimension) {
         super();
         this.setPreferredSize(dimension);
+    }
+
+    @Override
+    public void setPreferences() {
+
     }
 
 }

@@ -9,9 +9,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * <h1>class KButton</h1>
+ * The standard Dashboard button.
+ * It is a convention that buttons modify their toolTips based on their states (on or off) as appropriate.
  */
-public class KButton extends JButton {
+public class KButton extends JButton implements Preference {
     private String initialTip;
 
 
@@ -25,40 +26,27 @@ public class KButton extends JButton {
         this.setPreferences();
     }
 
-    public KButton(String text, boolean f){
-        super(text);
-        this.setPreferences();
-        this.setFocusable(f);
-    }
-
-    public KButton(String text, int width, int height){
-        super(text);
-        this.setPreferences();
-        this.setPreferredSize(new Dimension(width, height));
-    }
-
     /**
-     * Construct dressed iconified buttons
+     * Constructs an iconified buttons; which, by default or under most UIs, is "dressed".
      */
-    public KButton(Icon icon) {
+    public KButton(Icon icon){
         super(icon);
         this.setPreferences();
     }
 
     public static KButton getIconifiedButton(String  iconName, int iWidth, int iHeight){
-        KButton iconButton = new KButton(MyClass.scaleForMe(App.getIconURL(iconName), iWidth, iHeight));
+        final KButton iconButton = new KButton(MyClass.scaleForMe(App.getIconURL(iconName), iWidth, iHeight));
         iconButton.undress();
-
         return iconButton;
     }
 
-    public void setStyle(Font f, Color fg){
-        this.setFont(f);
-        this.setForeground(fg);
+    public void setStyle(Font font, Color foreground){
+        this.setFont(font);
+        this.setForeground(foreground);
     }
 
     /**
-     * Invoked to force undressing on buttons not constructed with getIconifiedButton(#)
+     * Invoked to force "undressing" on buttons not constructed with getIconifiedButton(#).
      */
     public void undress(){
         this.setBorderPainted(false);
@@ -70,19 +58,23 @@ public class KButton extends JButton {
         this.setContentAreaFilled(true);
     }
 
-    public void underline(Color bg, boolean visibleOnlyOnFocus){
-        final KSeparator separator = new KSeparator(bg == null ? this.getForeground() : bg);
+    /**
+     * See KLabel.underline(Color, boolean)
+     */
+    public void underline(Color background, boolean alwaysVisible){
+        final KSeparator separator = new KSeparator(background == null ? this.getForeground() : background);
         this.setLayout(new BorderLayout());
         this.add(separator, BorderLayout.SOUTH);
-        if (visibleOnlyOnFocus) {
+        if (!alwaysVisible) {
             separator.setVisible(false);
-            this.addMouseListener(new MouseAdapter() {
+            this.addMouseListener(new MouseAdapter(){
                 @Override
-                public void mouseEntered(MouseEvent e) {
+                public void mouseEntered(MouseEvent e){
                     separator.setVisible(true);
                 }
+
                 @Override
-                public void mouseExited(MouseEvent e) {
+                public void mouseExited(MouseEvent e){
                     separator.setVisible(false);
                 }
             });
@@ -93,14 +85,14 @@ public class KButton extends JButton {
         this.setText(Integer.toString(n));
     }
 
+    public void setToolTipText(int n) {
+        this.setToolTipText(Integer.toString(n));
+    }
+
     @Override
     public void setEnabled(boolean b) {
         super.setEnabled(b);
-        if (b) {
-            this.setToolTipText(initialTip);
-        } else {
-            this.setToolTipText(null);
-        }
+        this.setToolTipText(b ? initialTip : null);
     }
 
     @Override
@@ -111,16 +103,13 @@ public class KButton extends JButton {
         }
     }
 
-    public void setToolTipText(int n) {
-        this.setToolTipText(Integer.toString(n));
-    }
-
     @Override
     public JToolTip createToolTip(){
         return KLabel.preferredTip();
     }
 
-    private void setPreferences(){
+    @Override
+    public void setPreferences(){
         this.setFocusable(false);
     }
 

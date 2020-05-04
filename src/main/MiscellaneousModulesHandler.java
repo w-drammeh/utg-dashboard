@@ -7,14 +7,13 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.Serializable;
 import java.util.Objects;
 
-public class MiscellaneousModulesHandler implements Serializable {
+public class MiscellaneousModulesHandler {
+    private JPopupMenu jPopupMenu;
+    private KMenuItem detailsItem, editItem, removeItem, confirmItem, newItem;
     private static KTable miscTable;
     private static KDefaultTableModel miscModel;
-    private static JPopupMenu jPopupMenu;
-    private static JMenuItem detailsItem, editItem, removeItem, confirmItem, newItem;
 
 
     public MiscellaneousModulesHandler(){
@@ -23,14 +22,15 @@ public class MiscellaneousModulesHandler implements Serializable {
     }
 
     /**
-     * <p>Triggered by the list to signal addition is directed to miscellaneousTable.</p>
+     * Triggered by the monitor to signal addition is directed to miscellaneousTable.
      */
     public static void welcome(Course summerCourse){
-        miscModel.addRow(new String[] {summerCourse.getCode(),summerCourse.getName(),summerCourse.getLecturer(),summerCourse.getGrade(),summerCourse.getYear()});
+        miscModel.addRow(new String[] {summerCourse.getCode(), summerCourse.getName(), summerCourse.getLecturer(),
+                summerCourse.getGrade(), summerCourse.getYear()});
     }
 
     /**
-     * <p>Triggered by the list to signal removal is directed to miscellaneousTable.</p>
+     * Triggered by the monitor to signal removal is directed to miscellaneousTable.
      */
     public static void ridOf(Course summerCourse){
         miscModel.removeRow(miscModel.getRowOf(summerCourse.getCode()));
@@ -38,9 +38,8 @@ public class MiscellaneousModulesHandler implements Serializable {
 
     private void generateMiscTable(){
         miscModel = new KDefaultTableModel();
-        miscModel.setColumnIdentifiers(new String[] {"CODE","NAME","LECTURER","GRADE","YEAR"});
+        miscModel.setColumnIdentifiers(new String[] {"CODE", "NAME", "LECTURER", "GRADE", "YEAR"});
         ModulesHandler.models[9] = miscModel;
-
         miscTable = new KTable(miscModel);
         miscTable.setRowHeight(30);
         miscTable.getTableHeader().setFont(KFontFactory.createBoldFont(16));
@@ -58,78 +57,67 @@ public class MiscellaneousModulesHandler implements Serializable {
                     confirmItem.setEnabled(necessary);
                     newItem.setEnabled(miscTable.getRowCount() <= 15);
 
-                    jPopupMenu.show(miscTable,e.getX(),e.getY());
+                    jPopupMenu.show(miscTable, e.getX(), e.getY());
                 }
             }
-
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    final boolean necessary = miscTable.getSelectedRow() >= 0;
-
-                    detailsItem.setEnabled(necessary);
-                    editItem.setEnabled(necessary);
-                    removeItem.setEnabled(necessary);
-                    confirmItem.setEnabled(necessary);
-                    newItem.setEnabled(miscTable.getRowCount() <= 15);
-
-                    jPopupMenu.show(miscTable,e.getX(),e.getY());
-                }
+                mousePressed(e);
             }
         });
     }
 
     private void configurePopUp(){
-        detailsItem = new JMenuItem(ModulesHandler.detailsString);
-        detailsItem.setFont(KFontFactory.createPlainFont(15));
-        detailsItem.addActionListener(e -> {
-            SwingUtilities.invokeLater(()->{
+        detailsItem = new KMenuItem(ModulesHandler.DETAILS_STRING);
+        detailsItem.addActionListener(e -> SwingUtilities.invokeLater(()->{
+            final Course c = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(
+                    miscTable.getSelectedRow(), 0)));
+            try {
+                Course.exhibit(Board.getRoot(), Objects.requireNonNull(c));
+            } catch (NullPointerException npe){
+                App.silenceException("No such course in list");
+            }
+        }));
+
+        editItem = new KMenuItem(ModulesHandler.EDIT_STRING);
+        editItem.addActionListener(e -> {
+            final Course c = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
+            try {
+                SwingUtilities.invokeLater(() -> new MiscModuleEditor(Objects.requireNonNull(c)).setVisible(true));
+            } catch (NullPointerException npe) {
+                App.silenceException("No such course in list");
+            }
+        });
+
+        removeItem = new KMenuItem(ModulesHandler.DELETE_STRING);
+        removeItem.addActionListener(e -> {
+            final Course c = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
+            try {
+                Objects.requireNonNull(c);
+                if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+c.getName()+"\n" +
+                        "and that you wish to remove it from your summer collection?")) {
+                    ModulesHandler.getModulesMonitor().remove(c);
+                }
+            } catch (NullPointerException npe) {
+                App.silenceException("No such course in list");
+            }
+        });
+
+        confirmItem = new KMenuItem(ModulesHandler.CONFIRM_STRING);
+        confirmItem.addActionListener(e -> {
+            final Course c = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
+            new Thread(()-> {
                 try {
-                    Course.exhibit(Board.getRoot(), Objects.requireNonNull(ModulesHandler.getModuleByCode(miscModel.getValueAt(miscTable.getSelectedRow(), 0) + "")));
-                } catch (NullPointerException nil){
+                    Objects.requireNonNull(c);
+                    ModulesHandler.launchVerification(c);
+                } catch (NullPointerException npe) {
                     App.silenceException("No such course in list");
                 }
-            });
-        });
-
-        editItem = new JMenuItem(ModulesHandler.editString);
-        editItem.setFont(KFontFactory.createPlainFont(15));
-        editItem.addActionListener(e -> {
-            final Course t = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
-            if (t != null) {
-                SwingUtilities.invokeLater(()->{
-                    new MiscModuleEditor(t).setVisible(true);
-                });
-            }
-        });
-
-        removeItem = new JMenuItem(ModulesHandler.deleteString);
-        removeItem.setFont(KFontFactory.createPlainFont(15));
-        removeItem.addActionListener(e -> {
-            if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+miscModel.getValueAt(miscTable.getSelectedRow(),1)+",\nand that you wish to remove it from your summer collection?")) {
-                ModulesHandler.getModulesMonitor().remove(ModulesHandler.getModuleByCode(miscModel.getValueAt(miscTable.getSelectedRow(),0).toString()));
-            }
-        });
-
-        confirmItem = new JMenuItem(ModulesHandler.confirmString);
-        confirmItem.setFont(KFontFactory.createPlainFont(15));
-        confirmItem.addActionListener(e -> {
-            final Course t = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(),0)));
-            if (t == null) {
-                return;
-            }
-            new Thread(()-> {
-                ModulesHandler.launchVerification(t);
             }).start();
         });
 
-        newItem = new JMenuItem(ModulesHandler.addString);
-        newItem.setFont(KFontFactory.createPlainFont(15));
-        newItem.addActionListener(e -> {
-            SwingUtilities.invokeLater(()->{
-                new MiscModuleAdder().setVisible(true);
-            });
-        });
+        newItem = new KMenuItem(ModulesHandler.ADD_STRING);
+        newItem.addActionListener(e -> SwingUtilities.invokeLater(()-> new MiscModuleAdder().setVisible(true)));
 
         jPopupMenu = new JPopupMenu();
         jPopupMenu.add(detailsItem);
@@ -152,32 +140,18 @@ public class MiscellaneousModulesHandler implements Serializable {
                     removeItem.setEnabled(necessary);
                     confirmItem.setEnabled(necessary);
 
-                    jPopupMenu.show(miscScrollPane,e.getX(),e.getY());
+                    jPopupMenu.show(miscScrollPane, e.getX(), e.getY());
                 }
             }
-
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    final boolean necessary = miscTable.getSelectedRow() >= 0;
-
-                    detailsItem.setEnabled(necessary);
-                    editItem.setEnabled(necessary);
-                    removeItem.setEnabled(necessary);
-                    confirmItem.setEnabled(necessary);
-
-                    jPopupMenu.show(miscScrollPane,e.getX(),e.getY());
-                }
+                mousePressed(e);
             }
         });
 
         final KPanel present = new KPanel();
         present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-        present.add(ComponentAssistant.provideBlankSpace(800,10));
-        present.add(ComponentAssistant.provideBlankSpace(800,10));
-        present.add(miscScrollPane);
-        present.add(ComponentAssistant.provideBlankSpace(800,15));
-
+        present.addAll(Box.createVerticalStrut(15), miscScrollPane, Box.createVerticalStrut(10));
         return present;
     }
 
@@ -189,7 +163,7 @@ public class MiscellaneousModulesHandler implements Serializable {
             super(null,null);
             this.setTitle("New Miscellaneous Course");
 
-            this.semestersBox = new JComboBox<>(new String[] {Student.FIRST_SEMESTER,Student.SECOND_SEMESTER,Student.SUMMER_SEMESTER});
+            this.semestersBox = new JComboBox<>(new String[] {Student.FIRST_SEMESTER, Student.SECOND_SEMESTER, Student.SUMMER_SEMESTER});
             semestersBox.setFont(KFontFactory.createPlainFont(15));
             semesterPanel.removeLastChild();
             semesterPanel.add(KPanel.wantDirectAddition(this.semestersBox), BorderLayout.CENTER);
@@ -204,35 +178,48 @@ public class MiscellaneousModulesHandler implements Serializable {
                 if (Student.isValidAcademicYear(yearField.getText())) {
                     givenYear = yearField.getText();
                 } else {
-                    App.signalError("Invalid Format","Sorry, "+yearField.getText()+" is not a valid academic year. Dashboard reads years in the format: yyyy/yyyy, e.g 2016/2017");
+                    App.signalError("Invalid year format",
+                            "Sorry, "+yearField.getText()+" is not a valid academic year. Dashboard reads years in the format: yyyy/yyyy.\n" +
+                                    "E.g 2016/2017");
                     yearField.requestFocusInWindow();
                     return;
                 }
                 if (givenYear.equals(Student.firstAcademicYear())) {
-                    App.signalError("Error","Sorry, the year you provided ["+givenYear+"] corresponds your first academic year.\nBy convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\nIf you've done this module in your first year, add it in the appropriate place, else\nconsider changing the year.");
+                    App.signalError("Error",
+                            "Sorry, the year you provided ["+givenYear+"] corresponds your first academic year.\n" +
+                                    "By convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\n" +
+                                    "If you've done this module in your first year, consider adding it in the appropriate place.");
                     yearField.requestFocusInWindow();
                     return;
                 } else if (givenYear.equals(Student.secondAcademicYear())) {
-                    App.signalError("Error","Sorry, the year you provided ["+givenYear+"] corresponds your second academic year.\nBy convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\nIf you've done this module in your second year, add it in the appropriate place, else\nconsider changing the year.");
+                    App.signalError("Error",
+                            "Sorry, the year you provided ["+givenYear+"] corresponds your second academic year.\n" +
+                                    "By convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\n" +
+                                    "If you've done this module in your second year, consider adding it in the appropriate place.");
                     yearField.requestFocusInWindow();
                     return;
                 } else if (givenYear.equals(Student.thirdAcademicYear())) {
-                    App.signalError("Error","Sorry, the year you provided ["+givenYear+"] corresponds your third academic year.\nBy convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\nIf you've done this module in your third year, add it in the appropriate place, else\nconsider changing the year.");
+                    App.signalError("Error",
+                            "Sorry, the year you provided ["+givenYear+"] corresponds your third academic year.\n" +
+                                    "By convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\n" +
+                                    "If you've done this module in your third year, consider adding it in the appropriate place.");
                     yearField.requestFocusInWindow();
                     return;
                 } else if (givenYear.equals(Student.finalAcademicYear())) {
-                    App.signalError("Error","Sorry, the year you provided ["+givenYear+"] corresponds your fourth academic year.\nBy convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\nIf you've done this module in your fourth year, add it in the appropriate place, else\nconsider changing the year.");
+                    App.signalError("Error",
+                            "Sorry, the year you provided ["+givenYear+"] corresponds your fourth academic year.\n" +
+                                    "By convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\n" +
+                                    "If you've done this module in your fourth year, consider adding it in the appropriate place.");
                     yearField.requestFocusInWindow();
                     return;
                 }
-
-                if (Globals.isBlank(codeField.getText())) {
+                if (codeField.hasNoText()) {
                     App.signalError(MiscModuleAdder.this.getRootPane(), "No Code","Please provide the code of the course.");
                     codeField.requestFocusInWindow();
-                } else if (Globals.isBlank(nameField.getText())) {
+                } else if (nameField.hasNoText()) {
                     App.signalError(MiscModuleAdder.this.getRootPane(),"No Name","Please provide the name of the course.");
                     nameField.requestFocusInWindow();
-                } else if (Globals.isBlank(scoreField.getText())) {
+                } else if (scoreField.hasNoText()) {
                     App.signalError(MiscModuleAdder.this.getRootPane(),"Error","Please enter the score you get from this course.");
                     scoreField.requestFocusInWindow();
                 } else {
@@ -259,10 +246,10 @@ public class MiscellaneousModulesHandler implements Serializable {
                             String.valueOf(dayBox.getSelectedItem());
                     final String time = String.valueOf(timeBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
                             String.valueOf(timeBox.getSelectedItem());
-                    final Course course = new Course(givenYear,String.valueOf(semestersBox.getSelectedItem()),codeField.getText(),nameField.getText(),
-                            lecturerField.getText(),venueField.getText(),day,time,score,Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
+                    final Course course = new Course(givenYear, String.valueOf(semestersBox.getSelectedItem()),
+                            codeField.getText(), nameField.getText(), lecturerField.getText(), venueField.getText(),
+                            day, time, score, Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
                             String.valueOf(requirementBox.getSelectedItem()), false);
-
                     ModulesHandler.getModulesMonitor().add(course);
                     this.dispose();
                 }
@@ -311,34 +298,50 @@ public class MiscellaneousModulesHandler implements Serializable {
                 if (Student.isValidAcademicYear(yearField.getText())) {
                     givenYear = yearField.getText();
                 } else {
-                    App.signalError("Invalid Format","Sorry, "+yearField.getText()+" is not a valid academic year. Dashboard reads years in the format: yyyy/yyyy, e.g 2016/2017");
+                    App.signalError("Invalid Format",
+                            "Sorry, "+yearField.getText()+" is not a valid academic year. Dashboard reads years in the format: yyyy/yyyy.\n" +
+                                    "E.g 2016/2017");
                     yearField.requestFocusInWindow();
                     return;
                 }
                 if (givenYear.equals(Student.firstAcademicYear())) {
-                    App.signalError("Error","Sorry, the year you provided ["+givenYear+"] corresponds your first academic year.\nBy convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\nIf you've done this module in your first year, add it in the appropriate place, else\nconsider changing the year.");
+                    App.signalError("Error",
+                            "Sorry, the year you provided ["+givenYear+"] corresponds your first academic year.\n" +
+                                    "By convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\n" +
+                                    "If you've done this module in your first year, consider adding it in the appropriate place.");
                     yearField.requestFocusInWindow();
                     return;
                 } else if (givenYear.equals(Student.secondAcademicYear())) {
-                    App.signalError("Error","Sorry, the year you provided ["+givenYear+"] corresponds your second academic year.\nBy convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\nIf you've done this module in your second year, add it in the appropriate place, else\nconsider changing the year.");
+                    App.signalError("Error",
+                            "Sorry, the year you provided ["+givenYear+"] corresponds your second academic year.\n" +
+                                    "By convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\n" +
+                                    "If you've done this module in your second year, consider adding it in the appropriate place.");
                     yearField.requestFocusInWindow();
                     return;
                 } else if (givenYear.equals(Student.thirdAcademicYear())) {
-                    App.signalError("Error","Sorry, the year you provided ["+givenYear+"] corresponds your third academic year.\nBy convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\nIf you've done this module in your third year, add it in the appropriate place, else\nconsider changing the year.");
+                    App.signalError("Error",
+                            "Sorry, the year you provided ["+givenYear+"] corresponds your third academic year.\n" +
+                                    "By convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\n" +
+                                    "If you've done this module in your third year, consider adding it in the appropriate place.");
                     yearField.requestFocusInWindow();
                     return;
                 } else if (givenYear.equals(Student.finalAcademicYear())) {
-                    App.signalError("Error","Sorry, the year you provided ["+givenYear+"] corresponds your fourth academic year.\nBy convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\nIf you've done this module in your fourth year, add it in the appropriate place, else\nconsider changing the year.");
+                    App.signalError("Error",
+                            "Sorry, the year you provided ["+givenYear+"] corresponds your fourth academic year.\n" +
+                            "By convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\n" +
+                                    "If you've done this module in your fourth year, consider adding it in the appropriate place.");
                     yearField.requestFocusInWindow();
                     return;
                 }
-
-                if (Globals.isBlank(codeField.getText())) {
+                if (codeField.hasNoText()) {
                     App.signalError(this.getRootPane(),"No Code","Please provide the code of the course.");
                     codeField.requestFocusInWindow();
-                } else if (Globals.isBlank(nameField.getText())) {
+                } else if (nameField.hasNoText()) {
                     App.signalError(this.getRootPane(),"No Name","Please provide the name of the course.");
                     nameField.requestFocusInWindow();
+                } else if (scoreField.hasNoText()) {
+                    App.signalError(this.getRootPane(),"Error","Please enter the score you get from this course.");
+                    scoreField.requestFocusInWindow();
                 } else {
                     double score;
                     try {
@@ -353,8 +356,7 @@ public class MiscellaneousModulesHandler implements Serializable {
                         scoreField.requestFocusInWindow();
                         return;
                     }
-
-                    //Check for exclusive existence in this table first
+//                    Check for exclusive existence in this table first
                     for (int row = 0; row < miscModel.getRowCount(); row++) {
                         if (row == miscModel.getSelectedRow()) {
                             continue;
@@ -376,9 +378,10 @@ public class MiscellaneousModulesHandler implements Serializable {
                             String.valueOf(dayBox.getSelectedItem());
                     final String time = String.valueOf(timeBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
                             String.valueOf(timeBox.getSelectedItem());
-                    final Course course = new Course(yearField.getText(),String.valueOf(semestersBox.getSelectedItem()), codeField.getText(),nameField.getText(),
-                            "",venueField.getText(),day,time,score,Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
-                            String.valueOf(requirementBox.getSelectedItem()), target.isVerified());
+                    final Course course = new Course(yearField.getText(), String.valueOf(semestersBox.getSelectedItem()),
+                            codeField.getText(), nameField.getText(), "",venueField.getText(), day, time, score,
+                            Integer.parseInt(String.valueOf(creditBox.getSelectedItem())), String.valueOf(requirementBox.getSelectedItem()),
+                            target.isVerified());
                     course.setLecturer(lecturerField.getText(), lecturerField.isEditable());
                     ModulesHandler.substitute(target, course);
                     this.dispose();

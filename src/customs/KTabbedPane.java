@@ -2,10 +2,12 @@ package customs;
 
 import javax.swing.*;
 
-/**
- * <h1>class KTappedPane</h1>
- */
-public class KTabbedPane extends JTabbedPane {
+public class KTabbedPane extends JTabbedPane implements Preference {
 
+
+    @Override
+    public void setPreferences() {
+
+    }
 
 }

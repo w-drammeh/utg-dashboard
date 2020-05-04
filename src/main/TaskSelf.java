@@ -9,97 +9,26 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 /**
- * <h1>class TaskSelf</h1>
- *
- * <p>It specifies the task itself - provides description, dates, etc.</p>
- * <p><i>Now extends {@link KPanel} to provides the panel in which tasks are nicely fit.</i></p>
+ * It specifies the task itself - provides description, dates, etc.
  */
 public class TaskSelf {
 
-    public static void serializeAll(){
-        System.out.print("Serializing tasks... ");
-        MyClass.serialize(TasksGenerator.TodoHandler.TODOS, "todos.ser");
-        MyClass.serialize(TasksGenerator.ProjectsHandler.PROJECTS, "projects.ser");
-        MyClass.serialize(TasksGenerator.AssignmentsHandler.ASSIGNMENTS, "assignments.ser");
-        MyClass.serialize(TasksGenerator.EventsHandler.EVENTS, "events.ser");
-        System.out.println("Completed.");
-    }
-
-    public static void deSerializeAll(){
-        System.out.print("Deserializing tasks... ");
-        final ArrayList<TodoSelf> savedTasks = (ArrayList) MyClass.deserialize("todos.ser");
-        for (TodoSelf todoSelf : savedTasks) {
-            if (todoSelf.isActive) {//This only means it slept alive - we're to check if it's to wake alive or not
-                if (new Date().before(MDate.parse(todoSelf.dateExpectedToComplete))) {
-                    todoSelf.wakeAlive();
-                } else {
-                    todoSelf.wakeDead();
-                }
-            }
-            todoSelf.setUpUI();
-            TasksGenerator.TodoHandler.receiveFromSerials(todoSelf);
-        }
-
-        final ArrayList<ProjectSelf> savedProjects = (ArrayList) MyClass.deserialize("projects.ser");
-        for (ProjectSelf projectSelf : savedProjects) {
-            if (projectSelf.isLive) {
-                if (new Date().before(MDate.parse(projectSelf.dateExpectedToComplete))) {
-                    projectSelf.wakeLive();
-                    projectSelf.initializeUI();
-                } else {
-                    projectSelf.wakeDead();
-                    projectSelf.setUpDoneUI();
-                }
-            } else {
-                projectSelf.setUpDoneUI();
-            }
-            TasksGenerator.ProjectsHandler.receiveFromSerials(projectSelf);
-        }
-
-        final ArrayList<AssignmentSelf> savedAssignments = (ArrayList) MyClass.deserialize("assignments.ser");
-        for (AssignmentSelf assignmentSelf : savedAssignments) {
-            if (assignmentSelf.isOn) {
-                if (MDate.parse(MDate.formatDateOnly(new Date())+" 0:0:0").before(MDate.parse(assignmentSelf.deadLine+" 0:0:0"))) {
-                    assignmentSelf.wakeAlive();
-                } else {
-                    assignmentSelf.wakeDead();
-                }
-            }
-            assignmentSelf.setUpUI();
-            TasksGenerator.AssignmentsHandler.receiveFromSerials(assignmentSelf);
-        }
-
-        final ArrayList<EventSelf> savedEvents = (ArrayList) MyClass.deserialize("events.ser");
-        for (EventSelf eventSelf : savedEvents) {
-            if (eventSelf.isPending) {
-                if (MDate.parse(MDate.formatDateOnly(new Date()) + " 0:0:0").before(MDate.parse(eventSelf.dateDue + " 0:0:0"))) {
-                    eventSelf.wakeAlive();
-                } else {
-                    eventSelf.endState();
-                }
-            }
-            eventSelf.setUpUI();
-            TasksGenerator.EventsHandler.receiveFromSerials(eventSelf);
-        }
-
-        System.out.println("Completed.");
-    }
 
     public static class TodoSelf extends KPanel {
         private String description;
         private String startDate;
-        private int specifiedDuration;//in days !<5, !>30
-        private int totalTimeConsumed;//this has only 2 variations: 1. An ongoing task is marked done 2. A task completes normally
+        private int specifiedDuration;//In days !<5, !>30
+        private int totalTimeConsumed;//This has only 2 variations: 1. An ongoing task is marked done 2. A task completes normally
         private boolean isActive;
-        private String dateExpectedToComplete;//shown for running tasks only - set with the constructor
-        private String dateCompleted;//shown for completed #s only - set with ending, whether voluntary or time-due
+        private String dateExpectedToComplete;//Shown for running tasks only - set with the constructor
+        private String dateCompleted;//Shown for completed #s only - set with ending, whether voluntary or time-due
         private Timer timer;
         private KLabel togoLabel;
         private TaskExhibition.TodoExhibition exhibition;
         private boolean eveIsAlerted, doneIsAlerted;
 
         public TodoSelf(String desc, int duration){
-            setCoreProperties(desc,duration);
+            setCoreProperties(desc, duration);
             setUpUI();
         }
 
@@ -107,7 +36,7 @@ public class TaskSelf {
             this.startDate = MDate.now();
             this.description = desc;
             this.specifiedDuration = duration;
-            this.dateExpectedToComplete = MDate.daysAfter(new Date(),duration);
+            this.dateExpectedToComplete = MDate.daysAfter(new Date(), duration);
             this.setActive(true);
             this.initializeTimer(Globals.DAY_IN_MILLI);
         }
@@ -116,15 +45,15 @@ public class TaskSelf {
             this.timer = new Timer(Globals.DAY_IN_MILLI,null);
             this.timer.setInitialDelay(firstDelay);
             timer.addActionListener(e -> {
-                togoLabel.setText(Globals.checkPlurality(this.getDaysLeft(),"days")+" to go");
-                if (getDaysLeft() == 1) {//fire eve-day notification if was not fired already
+                togoLabel.setText(Globals.checkPlurality(this.getDaysLeft(), "days")+" to go");
+                if (getDaysLeft() == 1) {//Fire eve-day notification if was not fired already
                     togoLabel.setText("Less than a day to go");
                     signalEveNotice();
                 } else if (getDaysLeft() <= 0) {
                     if (exhibition != null && exhibition.isShowing()) {
                         exhibition.dispose();
                     }
-                    TasksGenerator.TodoHandler.transferTask(this,null,true);
+                    TasksGenerator.TodoHandler.transferTask(this, null, true);
                     signalDoneNotice();
                 }
             });
@@ -134,17 +63,16 @@ public class TaskSelf {
         private void setUpUI(){
             removeAll();
             final KPanel namePanel = new KPanel(new BorderLayout());
-            namePanel.add(new KLabel(this.description,KFontFactory.createBoldFont(16),Color.BLUE), BorderLayout.SOUTH);
+            namePanel.add(new KLabel(this.description, KFontFactory.createBoldFont(16), Color.BLUE), BorderLayout.SOUTH);
 
-            final KButton moreOptions = KButton.getIconifiedButton("options.png",20,20);
+            final KButton moreOptions = KButton.getIconifiedButton("options.png", 20, 20);
             moreOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             moreOptions.setToolTipText("About this Task");
-            moreOptions.addActionListener(e -> {
-                exhibition = new TaskExhibition.TodoExhibition(this);
-            });
+            moreOptions.addActionListener(e -> exhibition = new TaskExhibition.TodoExhibition(this));
 
             if (this.isActive) {
-                this.togoLabel = new KLabel(Globals.checkPlurality(this.getDaysLeft(), "days") + " to complete", KFontFactory.createPlainFont(16), Color.RED);
+                this.togoLabel = new KLabel(Globals.checkPlurality(this.getDaysLeft(), "days") + " to complete",
+                        KFontFactory.createPlainFont(16), Color.RED);
             } else {
                 this.togoLabel.setText("Completed "+this.dateCompleted);
                 this.togoLabel.setForeground(Color.BLUE);
@@ -152,8 +80,8 @@ public class TaskSelf {
             this.togoLabel.setOpaque(false);
 
             final KPanel quantaPanel = new KPanel(new FlowLayout(FlowLayout.RIGHT));
-            quantaPanel.addAll(new KLabel(this.specifiedDuration+" days task",KFontFactory.createPlainFont(16)),ComponentAssistant.provideBlankSpace(10,10),
-                    this.togoLabel,ComponentAssistant.provideBlankSpace(15,10),moreOptions);
+            quantaPanel.addAll(new KLabel(this.specifiedDuration+" days task", KFontFactory.createPlainFont(16)),
+                    Box.createRigidArea(new Dimension(10, 10)), this.togoLabel, Box.createRigidArea(new Dimension(15, 10)), moreOptions);
 
             this.setPreferredSize(new Dimension(1_000,35));
             this.setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
@@ -236,7 +164,7 @@ public class TaskSelf {
         }
 
         private void wakeAlive(){
-            togoLabel.setText(Globals.checkPlurality(this.getDaysLeft(),"days")+" to complete");
+            togoLabel.setText(Globals.checkPlurality(this.getDaysLeft(), "days")+" to complete");
             if (getDaysLeft() == 1) {
                 togoLabel.setText("Less than a day to complete");
                 this.signalEveNotice();
@@ -255,6 +183,7 @@ public class TaskSelf {
         }
     }
 
+
     public static class ProjectSelf extends KPanel {
         private String projectName;
         private String type;
@@ -272,7 +201,7 @@ public class TaskSelf {
         private boolean eveIsAlerted, completionIsAlerted;
 
         public ProjectSelf(String name, String type, int duration){
-            this.setCoreProperties(name,type,duration);
+            this.setCoreProperties(name, type, duration);
             this.initializeUI();
         }
 
@@ -307,9 +236,9 @@ public class TaskSelf {
         private void initializeUI(){
             removeAll();
             final KPanel namePanel = new KPanel(new BorderLayout());
-            namePanel.add(new KLabel(this.projectName,KFontFactory.createBoldFont(16),Color.BLUE), BorderLayout.CENTER);
+            namePanel.add(new KLabel(this.projectName, KFontFactory.createBoldFont(16), Color.BLUE), BorderLayout.CENTER);
 
-            final Dimension optionsDim = new Dimension(30,30);//the small-buttons actually
+            final Dimension optionsDim = new Dimension(30, 30);//the small-buttons actually
             if (projectProgression == null) {
                 projectProgression = new JProgressBar(this.getDaysTaken(), this.specifiedDuration) {
                     @Override
@@ -320,36 +249,32 @@ public class TaskSelf {
                 };
                 projectProgression.setPreferredSize(new Dimension(150, 20));
                 projectProgression.setForeground(Color.BLUE);
-                progressLabelPercentage = new KLabel(projectProgression.getString(),KFontFactory.createPlainFont(18),Color.BLUE);
+                progressLabelPercentage = new KLabel(projectProgression.getString(), KFontFactory.createPlainFont(18), Color.BLUE);
             } else {
                 projectProgression.setValue(this.getDaysTaken());
                 progressLabelPercentage.setOpaque(false);
             }
 
-            terminationButton = KButton.getIconifiedButton("terminate.png",15,15);
+            terminationButton = KButton.getIconifiedButton("terminate.png", 15, 15);
             terminationButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             terminationButton.setPreferredSize(optionsDim);
             terminationButton.setToolTipText("Remove Project");
             terminationButton.addActionListener(TasksGenerator.ProjectsHandler.removalListener(this));
 
-            completionButton = KButton.getIconifiedButton("mark.png",20,20);
+            completionButton = KButton.getIconifiedButton("mark.png", 20, 20);
             completionButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             completionButton.setPreferredSize(optionsDim);
             completionButton.setToolTipText("Mark as complete");
-            completionButton.addActionListener(e -> {
-                TasksGenerator.ProjectsHandler.performIComplete(this,false);
-            });
+            completionButton.addActionListener(e -> TasksGenerator.ProjectsHandler.performIComplete(this, false));
 
-            moreOptions = KButton.getIconifiedButton("options.png",20,20);
+            moreOptions = KButton.getIconifiedButton("options.png", 20, 20);
             moreOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             moreOptions.setToolTipText("About this Project");
-            moreOptions.addActionListener(e -> {
-                exhibition = new TaskExhibition.ProjectExhibition(this);
-            });
+            moreOptions.addActionListener(e -> exhibition = new TaskExhibition.ProjectExhibition(this));
 
             final KPanel quanterLayer = new KPanel(new FlowLayout(FlowLayout.RIGHT));
-            quanterLayer.addAll(new KLabel(this.getType()+" Project",KFontFactory.createPlainFont(16)), projectProgression, progressLabelPercentage, terminationButton, completionButton,
-                    ComponentAssistant.provideBlankSpace(15,10), moreOptions);
+            quanterLayer.addAll(new KLabel(this.getType()+" Project", KFontFactory.createPlainFont(16)), projectProgression,
+                    progressLabelPercentage, terminationButton, completionButton, Box.createRigidArea(new Dimension(15, 10)), moreOptions);
 
             this.setPreferredSize(new Dimension(1_000,35));
             this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
@@ -359,29 +284,27 @@ public class TaskSelf {
         public void setUpDoneUI(){
             removeAll();
             final KPanel namePanel = new KPanel(new BorderLayout());
-            namePanel.add(new KLabel(this.projectName,KFontFactory.createBoldFont(16),Color.BLUE), BorderLayout.CENTER);
+            namePanel.add(new KLabel(this.projectName, KFontFactory.createBoldFont(16), Color.BLUE), BorderLayout.CENTER);
 
             projectProgression.setValue(this.specifiedDuration);
             progressLabelPercentage.setOpaque(false);
 
-            terminationButton = KButton.getIconifiedButton("trash.png",20,20);
+            terminationButton = KButton.getIconifiedButton("trash.png", 20, 20);
             terminationButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            terminationButton.setPreferredSize(new Dimension(30,30));
+            terminationButton.setPreferredSize(new Dimension(30, 30));
             terminationButton.setToolTipText("Remove Project");
             terminationButton.addActionListener(TasksGenerator.ProjectsHandler.removalListener(this));
 
-            moreOptions = KButton.getIconifiedButton("options.png",20,20);
+            moreOptions = KButton.getIconifiedButton("options.png", 20, 20);
             moreOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             moreOptions.setToolTipText("About this Project");
-            moreOptions.addActionListener(e -> {
-                exhibition = new TaskExhibition.ProjectExhibition(this);
-            });
+            moreOptions.addActionListener(e -> exhibition = new TaskExhibition.ProjectExhibition(this));
 
             final KPanel quanterLayer = new KPanel(new FlowLayout(FlowLayout.RIGHT));
-            quanterLayer.addAll(new KLabel(this.getType()+" Project",KFontFactory.createPlainFont(16)), projectProgression, progressLabelPercentage, terminationButton,
-                    ComponentAssistant.provideBlankSpace(15,10), moreOptions);
+            quanterLayer.addAll(new KLabel(this.getType()+" Project", KFontFactory.createPlainFont(16)),
+                    projectProgression, progressLabelPercentage, terminationButton, Box.createRigidArea(new Dimension(10, 10)), moreOptions);
 
-            this.setPreferredSize(new Dimension(975,35));
+            this.setPreferredSize(new Dimension(1_000,35));
             this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
             this.addAll(namePanel, quanterLayer);
         }
@@ -480,11 +403,12 @@ public class TaskSelf {
         }
     }
 
+
     /**
-     * Please note that the assignment task type does not consider the time differences between date values
-     * as other types do.
-     * In fact, it assumes all time values to be the beginning of date. Computation with this is easier.
-     * Remember, this class only deals with dates of the form d-M-yyyy
+     * Please note that the assignment task type does not consider the time differences
+     * between date values as other types do.
+     * In fact, it assumes all time values to be the beginning of day.
+     * Computation with this is easier.
      */
     public static class AssignmentSelf extends KPanel {
         private String courseName;
@@ -505,7 +429,7 @@ public class TaskSelf {
         private boolean eveIsAlerted, submissionIsAlerted;
 
         public AssignmentSelf(String subject, String dueDate, String query, boolean groupWork, String submissionMode){
-            setCoreProperties(subject,dueDate,query,groupWork,submissionMode);
+            setCoreProperties(subject, dueDate, query, groupWork, submissionMode);
             setUpUI();
         }
 
@@ -533,7 +457,7 @@ public class TaskSelf {
                     if (deadlineEditor != null && deadlineEditor.isShowing()) {
                         deadlineEditor.dispose();
                     }
-                    TasksGenerator.AssignmentsHandler.transferAssignment(this,null,true);
+                    TasksGenerator.AssignmentsHandler.transferAssignment(this, null, true);
                     signalSubmissionNotice();
                 }
             });
@@ -543,11 +467,12 @@ public class TaskSelf {
         private void setUpUI(){
             removeAll();
         	final KPanel namePanel = new KPanel(new BorderLayout());
-        	namePanel.add(new KLabel(this.getCourseName()+" Assignment",KFontFactory.createBoldFont(16),Color.BLUE), BorderLayout.SOUTH);
+        	namePanel.add(new KLabel(this.getCourseName()+" Assignment", KFontFactory.createBoldFont(16),
+                    Color.BLUE), BorderLayout.SOUTH);
 
             if (this.isOn) {
-                deadlineIndicator = new KLabel("Deadline: "+this.deadLine,KFontFactory.createItalicFont(16),Color.RED);
-                deadlineIndicator.underline(null,true);
+                deadlineIndicator = new KLabel("Deadline: "+this.deadLine, KFontFactory.createItalicFont(16), Color.RED);
+                deadlineIndicator.underline(null,false);
                 deadlineIndicator.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 deadlineIndicator.addMouseListener(new MouseAdapter() {
                     @Override
@@ -575,32 +500,33 @@ public class TaskSelf {
                     public void mouseClicked(MouseEvent e) {
                         new MemberExhibitor(AssignmentSelf.this).setVisible(true);
                     }
+
                     @Override
                     public void mouseEntered(MouseEvent e) {
                         groupLabel.setForeground(Color.BLUE);
                     }
+
                     @Override
                     public void mouseExited(MouseEvent e) {
                         groupLabel.setForeground(null);
                     }
                 });
             } else {
-                groupLabel = KLabel.wantIconLabel("personal.png",20,20);
+                groupLabel = KLabel.wantIconLabel("personal.png", 20, 20);
                 groupLabel.setText("Personal");
             }
             groupLabel.setFont(KFontFactory.createPlainFont(16));
 
-            final KButton showButton = KButton.getIconifiedButton("options.png",20,20);
+            final KButton showButton = KButton.getIconifiedButton("options.png", 20, 20);
             showButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             showButton.setToolTipText("About this Assignment");
-            showButton.addActionListener(e -> {
-                assignmentExhibitor = new TaskExhibition.AssignmentExhibition(AssignmentSelf.this);
-            });
+            showButton.addActionListener(e -> assignmentExhibitor = new TaskExhibition.AssignmentExhibition(AssignmentSelf.this));
 
         	final KPanel quantaPanel = new KPanel(new FlowLayout(FlowLayout.RIGHT));
-        	quantaPanel.addAll(deadlineIndicator,ComponentAssistant.provideBlankSpace(10,10),groupLabel,ComponentAssistant.provideBlankSpace(10,15),showButton);
+        	quantaPanel.addAll(deadlineIndicator, Box.createRigidArea(new Dimension(10, 10)), groupLabel,
+                    Box.createRigidArea(new Dimension(10, 15)), showButton);
 
-            this.setPreferredSize(new Dimension(1_000,35));
+            this.setPreferredSize(new Dimension(1_000, 35));
         	this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         	this.addAll(namePanel, quantaPanel);
         }
@@ -709,7 +635,7 @@ public class TaskSelf {
             signalSubmissionNotice();
         }
 
-        //Inner-class of an inner-class... Wow
+        //Inner-class of an inner-class...
         private class DeadLineEditor extends KDialog{
 
             private DeadLineEditor(AssignmentSelf assignmentSelf){
@@ -721,15 +647,16 @@ public class TaskSelf {
                 final Date assignmentDeadline = MDate.parse(assignmentSelf.deadLine+" 0:0:0");
 
                 final KTextField dField = KTextField.newDayField();
-                dField.setText(MDate.getPropertyFrom(assignmentDeadline,Calendar.DATE));
+                dField.setText(MDate.getPropertyFrom(assignmentDeadline, Calendar.DATE));
                 final KTextField mField = KTextField.newMonthField();
-                mField.setText(MDate.getPropertyFrom(assignmentDeadline,Calendar.MONTH));
+                mField.setText(MDate.getPropertyFrom(assignmentDeadline, Calendar.MONTH));
                 final KTextField yField = KTextField.newYearField();
-                yField.setText(MDate.getPropertyFrom(assignmentDeadline,Calendar.YEAR));
+                yField.setText(MDate.getPropertyFrom(assignmentDeadline, Calendar.YEAR));
                 final KPanel datesPanel = new KPanel(new FlowLayout(FlowLayout.CENTER));
-                datesPanel.addAll(new KLabel("D",valsFont),dField,ComponentAssistant.provideBlankSpace(20, 30),new KLabel("M",valsFont),mField,ComponentAssistant.provideBlankSpace(20, 30),new KLabel("Y",valsFont),yField);
-                final KPanel deadLinePanel = new KPanel(new BorderLayout(),new Dimension(465,35));
-                deadLinePanel.add(KPanel.wantDirectAddition(new KLabel("New Deadline",KFontFactory.createBoldFont(15))),BorderLayout.WEST);
+                datesPanel.addAll(new KLabel("D", valsFont), dField, Box.createRigidArea(new Dimension(20, 30)),
+                        new KLabel("M", valsFont), mField, Box.createRigidArea(new Dimension(20, 30)), new KLabel("Y", valsFont), yField);
+                final KPanel deadLinePanel = new KPanel(new BorderLayout(), new Dimension(465, 35));
+                deadLinePanel.add(KPanel.wantDirectAddition(new KLabel("New Deadline", KFontFactory.createBoldFont(15))), BorderLayout.WEST);
                 deadLinePanel.add(datesPanel,BorderLayout.EAST);
 
                 final KButton setButton = new KButton("Set");
@@ -744,7 +671,7 @@ public class TaskSelf {
                         App.signalError(this.getRootPane(),"Error", "Please specify the year");
                         yField.requestFocusInWindow();
                     } else {
-                        final Date newDeadline = MDate.parse(dField.getText()+"-"+mField.getText()+"-"+yField.getText()+" 0:0:0");
+                        final Date newDeadline = MDate.parse(dField.getText()+"/"+mField.getText()+"/"+yField.getText()+" 0:0:0");
                         if (newDeadline == null) {
                             return;
                         }
@@ -758,22 +685,18 @@ public class TaskSelf {
                 });
                 this.getRootPane().setDefaultButton(setButton);
                 final KButton cancelButton = new KButton("Cancel");
-                cancelButton.addActionListener(e2 -> {
-                    this.dispose();
-                });
+                cancelButton.addActionListener(e2 -> this.dispose());
                 final KPanel bottomPlate = new KPanel(new FlowLayout(FlowLayout.RIGHT));
                 bottomPlate.addAll(cancelButton,setButton);
 
                 final KPanel allPlate = new KPanel();
                 allPlate.setLayout(new BoxLayout(allPlate, BoxLayout.Y_AXIS));
-                allPlate.addAll(deadLinePanel,ComponentAssistant.provideBlankSpace(100,25),bottomPlate);
+                allPlate.addAll(deadLinePanel,Box.createVerticalStrut(25),bottomPlate);
                 this.setContentPane(allPlate);
                 this.pack();
                 this.setMinimumSize(this.getPreferredSize());
                 this.setLocationRelativeTo(Board.getRoot());
-                SwingUtilities.invokeLater(()->{
-                    this.setVisible(true);
-                });
+                SwingUtilities.invokeLater(()-> this.setVisible(true));
             }
         }
 
@@ -786,7 +709,7 @@ public class TaskSelf {
 
             private MemberExhibitor(AssignmentSelf assignmentSelf){
                 this.setUndecorated(true);
-                this.setSize(500,500);
+                this.setSize(500, 500);
                 this.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
                 titleLabel = new KLabel("", KFontFactory.createPlainFont(15), Color.BLUE);
                 final KPanel upperBar = new KPanel(new FlowLayout(FlowLayout.CENTER));
@@ -799,11 +722,13 @@ public class TaskSelf {
                         pY = e.getY();
                         upperBar.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
                     }
+
                     @Override
                     public void mouseDragged(MouseEvent e) {
                         super.mouseDragged(e);
                         MemberExhibitor.this.setLocation(MemberExhibitor.this.getLocation().x + e.getX() - pX, MemberExhibitor.this.getLocation().y + e.getY() - pY);
                     }
+
                     @Override
                     public void mouseReleased(MouseEvent e) {
                         super.mouseReleased(e);
@@ -826,6 +751,7 @@ public class TaskSelf {
                         membersPanel.setPreferredSize(new Dimension(membersPanel.getPreferredSize().width,membersPanel.getPreferredSize().height+35));
                         return super.add(comp);
                     }
+
                     @Override
                     public void remove(Component comp) {
                         super.remove(comp);
@@ -839,9 +765,7 @@ public class TaskSelf {
                 final KScrollPane midScroll = new KScrollPane(membersPanel, false);
 
                 final KButton closeButton = new KButton("Close");
-                closeButton.addActionListener(e -> {
-                    this.dispose();
-                });
+                closeButton.addActionListener(e -> this.dispose());
 
                 memberAdder = new KButton("Add Member");
                 memberAdder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -878,7 +802,6 @@ public class TaskSelf {
                         appendNewMember(assignmentSelf.members.get(i), false);
                     }
                 }
-
                 titleLabel.setText(assignmentSelf.getCourseName()+" Assignment : "+assignmentSelf.groupLabel.getText());
             }
 
@@ -911,6 +834,7 @@ public class TaskSelf {
             }
         }
     }
+
 
     public static class EventSelf extends KPanel {
         private String title;
@@ -1042,6 +966,83 @@ public class TaskSelf {
             final int residue = Globals.DAY_IN_MILLI - MDate.getTimeValue(new Date());
             this.initializeTimer(residue);
         }
+    }
+
+
+    public static void serializeAll(){
+        System.out.print("Serializing tasks... ");
+        MyClass.serialize(TasksGenerator.TodoHandler.TODOS, "todos.ser");
+        MyClass.serialize(TasksGenerator.ProjectsHandler.PROJECTS, "projects.ser");
+        MyClass.serialize(TasksGenerator.AssignmentsHandler.ASSIGNMENTS, "assignments.ser");
+        MyClass.serialize(TasksGenerator.EventsHandler.EVENTS, "events.ser");
+        System.out.println("Completed.");
+    }
+
+    public static void deSerializeAll(){
+        System.out.print("Deserializing tasks... ");
+        final ArrayList<TodoSelf> savedTasks = (ArrayList) MyClass.deserialize("todos.ser");
+        if (savedTasks != null) {
+            for (TodoSelf todoSelf : savedTasks) {
+                if (todoSelf.isActive) {//This only means it slept alive - we're to check if it's to wake alive or not
+                    if (new Date().before(MDate.parse(todoSelf.dateExpectedToComplete))) {
+                        todoSelf.wakeAlive();
+                    } else {
+                        todoSelf.wakeDead();
+                    }
+                }
+                todoSelf.setUpUI();
+                TasksGenerator.TodoHandler.receiveFromSerials(todoSelf);
+            }
+        }
+
+        final ArrayList<ProjectSelf> savedProjects = (ArrayList) MyClass.deserialize("projects.ser");
+        if (savedProjects != null) {
+            for (ProjectSelf projectSelf : savedProjects) {
+                if (projectSelf.isLive) {
+                    if (new Date().before(MDate.parse(projectSelf.dateExpectedToComplete))) {
+                        projectSelf.wakeLive();
+                        projectSelf.initializeUI();
+                    } else {
+                        projectSelf.wakeDead();
+                        projectSelf.setUpDoneUI();
+                    }
+                } else {
+                    projectSelf.setUpDoneUI();
+                }
+                TasksGenerator.ProjectsHandler.receiveFromSerials(projectSelf);
+            }
+        }
+
+        final ArrayList<AssignmentSelf> savedAssignments = (ArrayList) MyClass.deserialize("assignments.ser");
+        if (savedAssignments != null) {
+            for (AssignmentSelf assignmentSelf : savedAssignments) {
+                if (assignmentSelf.isOn) {
+                    if (MDate.parse(MDate.formatDateOnly(new Date())+" 0:0:0").before(MDate.parse(assignmentSelf.deadLine+" 0:0:0"))) {
+                        assignmentSelf.wakeAlive();
+                    } else {
+                        assignmentSelf.wakeDead();
+                    }
+                }
+                assignmentSelf.setUpUI();
+                TasksGenerator.AssignmentsHandler.receiveFromSerials(assignmentSelf);
+            }
+        }
+
+        final ArrayList<EventSelf> savedEvents = (ArrayList) MyClass.deserialize("events.ser");
+        if (savedEvents != null) {
+            for (EventSelf eventSelf : savedEvents) {
+                if (eventSelf.isPending) {
+                    if (MDate.parse(MDate.formatDateOnly(new Date()) + " 0:0:0").before(MDate.parse(eventSelf.dateDue + " 0:0:0"))) {
+                        eventSelf.wakeAlive();
+                    } else {
+                        eventSelf.endState();
+                    }
+                }
+                eventSelf.setUpUI();
+                TasksGenerator.EventsHandler.receiveFromSerials(eventSelf);
+            }
+        }
+        System.out.println("Completed.");
     }
 
 }

@@ -7,36 +7,16 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * <h1>class Course</h1>
- * <p><b>Description</b>: The course model with almost all the concrete attributes of a course.</p>
- * <p><i>It has a generalized constructor, passing all the fields at that very instance of creation.
- * </i></p>
- * <p><i>A course may be verified in only two ways: those that are provided to the {@link Memory} by
- * {@link PrePortal} are automatically "true" set; those that are put into the table by the
- * user can be verified by the {@link Portal}.</i></p>
+ * The course model with almost all the concrete attributes of a course.
+ * It has a generalized constructor, passing all the fields at that very instance of creation.
+ * A course may be verified in only two ways: those that are provided to the Memory type by
+ * PrePortal are automatically "verified" set; those that are put into the table by the
+ * user can be verified through the Portal.
  */
 public class Course {
-    //Requirement options
-    public static final String
-            MAJOR_OBLIGATORY = "Major Obligatory",
-            MINOR_OBLIGATORY = "Minor Obligatory",
-            MAJOR_OPTIONAL = "Major Elective",
-            MINOR_OPTIONAL = "Minor Elective",
-            DIVISIONAL_REQUIREMENT = "Divisional Requirement",
-            GENERAL_REQUIREMENT = "General Requirement",
-            NONE = "None";
-    //Known divisional codes
-    public static final String DER = "DER",
-            GER = "GER";
-    //The 'Unknown' constant
-    public static final String UNKNOWN = "Unknown";
-    /**
-     * For separating multiple values in a single line serial data.
-     */
-    public static final String VALUE_SEPARATOR = "::";
-    /**
-     * And this is how they're passed to the constructor. This order should remain religious for backward-compatibility
-     * and de-serialization sake.
+    /*
+     * And this is how they're passed to the constructor. This order should remain religious
+     * for backward-compatibility sake and de-serialization.
      */
     private String year;
     private String semester;
@@ -51,10 +31,30 @@ public class Course {
     private String requirement;
     private boolean isValidated;
     private boolean tutorsNameIsCustomizable = true;
+//    Requirement options
+    public static final String MAJOR_OBLIGATORY = "Major Obligatory";
+    public static final String MINOR_OBLIGATORY = "Minor Obligatory";
+    public static final String MAJOR_OPTIONAL = "Major Elective";
+    public static final String MINOR_OPTIONAL = "Minor Elective";
+    public static final String DIVISIONAL_REQUIREMENT = "Divisional Requirement";
+    public static final String GENERAL_REQUIREMENT = "General Requirement";
+    public static final String NONE = Globals.NONE;
+//    Known divisional codes
+    public static final String DER = "DER";
+    public static final String GER = "GER";
+    /**
+     * The unknown constant
+     */
+    public static final String UNKNOWN = "Unknown";
+    /**
+     * For separating multiple values in a single line serial data.
+     */
+    public static final String VALUE_SEPARATOR = "::";
 
 
     /**
      * Do not give null to these args., give the empty string instead.
+     * At least for this implementation.
      */
     public Course(String year, String semester, String id, String name, String tutor, String place, String day, String time,
                   double score, int creditHours, String requirement, boolean validity){
@@ -87,13 +87,6 @@ public class Course {
                 App.silenceException("Malformed code -"+code+". Requirement could not be determined.");
             }
         }
-    }
-
-    /**
-     * This is to be used only by the experimentation on the {@link Memory} class. Do not use this elsewhere!
-     */
-    public Course(){
-        this("", "", "", "", "", "", "", "", 0.0, 0, "", true);
     }
 
     /**
@@ -131,11 +124,10 @@ public class Course {
     }
 
     /**
-     * <p>Gets a grade based on the score. The caller must pass its own score!</p>
+     * Gets a grade based on the score.
      */
     private static String gradeOf(double score) {
         String grade = "F";//0-39, 0
-
         if (score > 39 && score < 50) {
             grade = "D";//40-49, 1
         } else if (score > 49 && score < 54) {
@@ -162,8 +154,7 @@ public class Course {
     }
 
     /**
-     * <p>Assigns a comment to the grade/score. E.g "Excellent", "Fails", etc.
-     * The caller must pass its own score!</p>
+     * Assigns a comment to the grade / score. E.g "Excellent", "Fails", etc.
      */
     private static String gradeCommentOf(double score){
         if (score >= 70) {
@@ -180,11 +171,10 @@ public class Course {
     }
 
     /**
-     * <p>Gets a point based on the grade. The caller must pass its own grade!</p>
+     * Gets a point based on the grade.
      */
     private static double pointsOf(String grade){
         double point = 0;
-
         switch (grade) {
             case "D":
                 point = 1.0;
@@ -217,30 +207,31 @@ public class Course {
                 point = 4.3;
                 break;
         }
-
         return point;
     }
 
     public static String[] availableCoursePeriods(){
-        return new String[] {UNKNOWN,"8:00","8:30","9:00","11:00","11:30","14:00","14:30","15:00","17:00","17:30","20:00"};
+        return new String[] {UNKNOWN, "8:00", "8:30", "9:00", "11:00", "11:30", "14:00", "14:30", "15:00", "17:00",
+                "17:30", "20:00"};
     }
 
     public static String[] getWeekDays(){
-        return new String[]{UNKNOWN,"Mondays","Tuesdays","Wednesdays","Thursdays","Fridays","Saturdays","Sundays"};
+        return new String[]{UNKNOWN, "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays", "Sundays"};
     }
 
     /**
-     * <p>All requirement boxes must delegate this as their list of options!</p>
+     * All requirement boxes must delegate to this as their list of options.
      */
     public static String[] availableCourseRequirements(){
-        return new String[] {MAJOR_OBLIGATORY,MAJOR_OPTIONAL,MINOR_OBLIGATORY,MINOR_OPTIONAL,DIVISIONAL_REQUIREMENT,GENERAL_REQUIREMENT,NONE};
+        return new String[] {MAJOR_OBLIGATORY, MAJOR_OPTIONAL, MINOR_OBLIGATORY, MINOR_OPTIONAL, DIVISIONAL_REQUIREMENT,
+                GENERAL_REQUIREMENT, NONE};
     }
 
     /**
-     * <p>The elements returned herein are safe to be int-casted.</p>
+     * The elements returned herein are safe to be int-casted.
      */
     public static String[] availableCreditHours(){
-        return new String[] {"3","4"};
+        return new String[] {"3", "4"};
     }
 
     /**
@@ -257,7 +248,7 @@ public class Course {
     }
 
     /**
-     * <p>Nicely exhibits a course</p>
+     * Nicely exhibits a course. This is to be an instance-call in a future-release.
      */
     public static void exhibit(Component base, Course course){
         final KDialog exhibitDialog = new KDialog(course.getName()+(course.isMisc() ? " - Miscellaneous" : ""));
@@ -339,7 +330,6 @@ public class Course {
         exhibit(Board.getRoot(), c);
     }
 
-    //Instance calls...
     public String getYear() {
         return year;
     }
@@ -357,8 +347,8 @@ public class Course {
     }
 
     /**
-     * <p>Returns a compound-string of the year and semester. This is useful, especially
-     * in comparing if courses were done in the same semester</p>
+     * Returns a compound-string of the year and semester. This is useful, especially
+     * in comparing if courses were done in the same semester.
      */
     public String getAbsoluteSemesterName(){
         return this.getYear()+" "+this.getSemester();
@@ -384,38 +374,12 @@ public class Course {
         this.code = code;
     }
 
-    /**
-     * <p>Should be used as an option.</p>
-     * <p><i>However cannot be used for the printing-transcript!</i></p>
-     */
-    public String codeMask(){
-        final String dirtyCode = this.getCode();
-
-        if (dirtyCode.contains(",")) {
-            final String[] parts = dirtyCode.split(",");
-            final String binded = parts[0]+parts[1];
-            return binded.length() == 6 ? binded : binded.substring(0, binded.length() - 1);
-        } else if (dirtyCode.length() == 7) {
-            return dirtyCode.substring(0,dirtyCode.length()-1);
-        } else {
-            return dirtyCode;
-        }
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * <p>Should be used as an option.</p>
-     * <p><i>However cannot be used for the printing-transcript!</i></p>
-     */
-    public String nameMask(){
-        return Globals.toTitleCase(this.getName());
     }
 
     public String getAbsoluteName() {
@@ -472,7 +436,7 @@ public class Course {
     }
 
     /**
-     * <p>The only options passable are those defined in the {@link Course} type.</p>
+     * The only options passable are those defined in herein the Course type.
      */
     public void setRequirement(String newRequirement) {
         this.requirement = newRequirement;
@@ -518,8 +482,6 @@ public class Course {
         return score;
     }
 
-    //Other calls...
-
     public void setScore(double score) {
         this.score = score;
     }
@@ -549,13 +511,15 @@ public class Course {
     }
 
     /**
-     * <p>A lecturer's name of a module is changeable iff it was not actually scraped on the portal.
-     * </p>
+     * A lecturer's name of a module is changeable iff it was not actually found on the portal.
      */
     public boolean isTutorsNameCustomizable(){
-        return Globals.isBlank(lecturer) || tutorsNameIsCustomizable;
+        return Globals.hasText(lecturer) || tutorsNameIsCustomizable;
     }
 
+    /**
+     * Gets the list-index of this course. This is useful for substitution and editing.
+     */
     public int getListIndex(){
         final List<Course> list = ModulesHandler.getModulesMonitor();
         for (int i = 0; i < list.size(); i++) {
@@ -563,7 +527,6 @@ public class Course {
                 return i;
             }
         }
-
         return -1;
     }
 
@@ -591,8 +554,8 @@ public class Course {
     }
 
     /**
-     * <p>A course is marked <strong>misc</strong> if its year falls out of the student's
-     * four years bachelor's program specification.</p>
+     * A course is marked <strong>misc</strong> if its year falls out of the student's
+     * four years bachelor's program specification.
      */
     public boolean isMisc(){
         final String y = this.getYear();

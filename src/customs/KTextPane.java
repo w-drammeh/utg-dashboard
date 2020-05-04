@@ -2,7 +2,7 @@ package customs;
 
 import javax.swing.*;
 
-public class KTextPane extends JTextPane {
+public class KTextPane extends JTextPane implements Preference {
 
 
     public KTextPane(String type, String text){
@@ -20,10 +20,9 @@ public class KTextPane extends JTextPane {
         return new KTextPane("text/html", formattedText);
     }
 
-    private void setPreferences(){
+    public void setPreferences(){
         this.setEditable(false);
-        this.setBackground(null);
-        this.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         this.setFont(KFontFactory.createPlainFont(15));//In case of non-HTML
     }
 

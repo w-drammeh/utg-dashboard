@@ -1,17 +1,14 @@
 package customs;
 
-import main.App;
-
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <h1>class KDialog</h1>
- * <p><b>Description</b>: The standard dashboard dialog. All dialogs must extend this class.</p>
- * <p><i>By default, all dialogs are disposable, and resizable 'false'.</i></p>
+ * The standard dashboard dialog. All dialogs must inherit this class!
+ * By default, all dialogs are disposable, but not resizable.
  */
-public class KDialog extends JDialog{
+public class KDialog extends JDialog implements Preference {
     public static final List<KDialog> ALL_DIALOGS = new ArrayList<>();
 
 
@@ -25,15 +22,10 @@ public class KDialog extends JDialog{
         this.setPreferences();
     }
 
-    public KDialog(String title, int width, int length){
-        this.setTitle(title);
-        this.setSize(width, length);
-        this.setPreferences();
-    }
-
-    private void setPreferences(){
+    public void setPreferences(){
         this.setResizable(false);
-        this.setIconImage(App.getIcon());
+        this.setIconImage(KFrame.getIcon());
         ALL_DIALOGS.add(this);
     }
+
 }

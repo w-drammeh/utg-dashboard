@@ -8,10 +8,6 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-/**
- * <h1>class MyDashboard</h1>
- * <p></p>
- */
 public class MyDashboard extends KDialog {
     private final CardLayout midCard = new CardLayout();
     private KPanel midLayer;
@@ -44,7 +40,7 @@ public class MyDashboard extends KDialog {
     }
 
     /**
-     * <p>Provides the look of the bottom buttons</p>
+     * Provides the look of the bottom buttons.
      */
     private KButton newCardButton(String buttonText, String showingTitle, String showingComponent){
         final KButton cardButton = new KButton(buttonText);
@@ -53,7 +49,6 @@ public class MyDashboard extends KDialog {
             midCard.show(midLayer,showingComponent);
             this.setTitle(showingTitle);//which is hereby overridden
         });
-
         return cardButton;
     }
 
@@ -68,32 +63,29 @@ public class MyDashboard extends KDialog {
         dashboardLayer.add(KPanel.wantDirectAddition(new KLabel("A flexible and elegant student management system of the UTG",KFontFactory.createPlainFont(16))),BorderLayout.SOUTH);
 
         final KPanel javaLayer = new KPanel(new BorderLayout());
-        javaLayer.add(new KLabel(new ImageIcon(new App().getIconURL("splash.gif"))),BorderLayout.CENTER);
+        javaLayer.add(new KLabel(new ImageIcon(App.getIconURL("splash.gif"))),BorderLayout.CENTER);
         javaLayer.add(KPanel.wantDirectAddition(new KLabel("Dashboard is 100% Java and only Java!",KFontFactory.createPlainFont(16))),BorderLayout.SOUTH);
 
         final KPanel iconsLayer = new KPanel();
         iconsLayer.setLayout(new BoxLayout(iconsLayer, BoxLayout.Y_AXIS));
-        iconsLayer.addAll(dashboardLayer,javaLayer,ComponentAssistant.provideBlankSpace(100,50));
+        iconsLayer.addAll(dashboardLayer,javaLayer,Box.createVerticalStrut(50));
 
         final KPanel contactLayer = new KPanel();
         contactLayer.setLayout(new BoxLayout(contactLayer, BoxLayout.Y_AXIS));
         contactLayer.addAll(new KLabel("Version: "+ Dashboard.VERSION,KFontFactory.createPlainFont(15)),
                 new KLabel("Email: "+Mailer.DEVELOPERS_MAIL,KFontFactory.createPlainFont(15)),
-                new KLabel("Contact: +220 3413910",KFontFactory.createPlainFont(15)));
+                new KLabel("Contact: +220 3413910", KFontFactory.createPlainFont(15)));
 
         final KPanel aboutCard = new KPanel(new BorderLayout());
         aboutCard.add(KPanel.wantDirectAddition(new KLabel("University Student Dashboard",KFontFactory.createBoldFont(18))),BorderLayout.NORTH);
         aboutCard.add(iconsLayer,BorderLayout.CENTER);
         aboutCard.add(contactLayer,BorderLayout.SOUTH);
-
         return aboutCard;
     }
 
     private KPanel getCreditsCard(){
-        final KLabel waksLabel = KLabel.wantIconLabel("wdrammeh.jpg",140,150);
-        final ActionListener moreOfWask = e -> {
-            new SpecificExhibitor().exhibitAuthor();
-        };
+        final KLabel waksLabel = KLabel.wantIconLabel("muhammed.jpg",140,150);
+        final ActionListener moreOfWask = e -> new SpecificExhibitor().exhibitAuthor();
 
         final KPanel specialNamesLayer = new KPanel(){
             @Override
@@ -117,7 +109,6 @@ public class MyDashboard extends KDialog {
         final KPanel creditsCard = new KPanel(new BorderLayout());
         creditsCard.add(KPanel.wantDirectAddition(new KLabel("In the name of Allah - The Entirely Merciful, Especially  Merciful",KFontFactory.createBoldFont(17))),BorderLayout.NORTH);
         creditsCard.add(new KScrollPane(creditsPanel, new Dimension(this.getPreferredSize().width,530),false),BorderLayout.CENTER);
-
         return creditsCard;
     }
 
@@ -134,7 +125,7 @@ public class MyDashboard extends KDialog {
         moreButton.setPreferredSize(new Dimension(130, 30));
         moreButton.setStyle(KFontFactory.createPlainFont(14),Color.BLUE);
         moreButton.undress();
-        moreButton.underline(null, true);
+        moreButton.underline(null, false);
         moreButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         moreButton.addActionListener(moreListener);
 
@@ -151,7 +142,6 @@ public class MyDashboard extends KDialog {
         fineLayer.add(headLayer,BorderLayout.NORTH);
         fineLayer.add(finePane, BorderLayout.CENTER);
         fineLayer.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,moreButton),BorderLayout.SOUTH);
-
         return fineLayer;
     }
 
@@ -295,7 +285,7 @@ public class MyDashboard extends KDialog {
         bodySubstance.add(answerTextAreaScroll,BorderLayout.CENTER);
         final KPanel answerSubstance = new KPanel();
         answerSubstance.setLayout(new BoxLayout(answerSubstance, BoxLayout.Y_AXIS));
-        answerSubstance.addAll(titleSubstance,ComponentAssistant.provideBlankSpace(500,10),bodySubstance);
+        answerSubstance.addAll(titleSubstance,Box.createVerticalStrut(10),bodySubstance);
         final KPanel answerLayer = new KPanel();
         answerLayer.setLayout(new BoxLayout(answerLayer, BoxLayout.Y_AXIS));
         answerLayer.setBorder(lineBorder);
@@ -307,35 +297,33 @@ public class MyDashboard extends KDialog {
         bugTextAreaScroll.setBorder(spaceBorder);
         final String bugString = "In no more than 500 characters, kindly describe a problem (if there is any) you encountered while using Dashboard.";
         final KButton bugSender = newReviewSender();
-        bugSender.addActionListener(e -> {
-            new Thread(()->{
-                if (!Mailer.canSend()) {
-                    Mailer.reportQuickFeedbackDenial();
-                    return;
-                }
-                if (Globals.isBlank(bugTextArea.getText())) {
-                    App.signalError(MyDashboard.this.getRootPane(),"Error", "Cannot send blank review. Fill out the text-area first");
-                    bugTextArea.requestFocusInWindow();
-                } else {
-                    changeState(false, bugTextArea,bugSender);
-                    bugSender.setText("Reporting Bug...");
-                    if (InternetAvailabilityChecker.isInternetAvailable()) {
-                        final Mailer gMailer = new Mailer("Dashboard Feedback | A Bug Report | "+Student.getFullNamePostOrder(),bugTextArea.getText());
-                        if (gMailer.sendAs(Mailer.FEEDBACK)) {
-                            bugTextArea.setText(null);
-                        }
-                        bugTextArea.setEditable(true);
-                        bugSender.setEnabled(true);
-                        bugSender.setText("Send");
-                    } else {
-                        App.signalError(MyDashboard.this.getRootPane(), "No Internet","Sorry, internet connection is required to send the review.\n" +
-                                "Please connect and try again.");
+        bugSender.addActionListener(e -> new Thread(()->{
+            if (!Mailer.canSend()) {
+                Mailer.reportQuickFeedbackDenial();
+                return;
+            }
+            if (Globals.isBlank(bugTextArea.getText())) {
+                App.signalError(MyDashboard.this.getRootPane(),"Error", "Cannot send blank review. Fill out the text-area first");
+                bugTextArea.requestFocusInWindow();
+            } else {
+                changeState(false, bugTextArea,bugSender);
+                bugSender.setText("Reporting Bug...");
+                if (InternetAvailabilityChecker.isInternetAvailable()) {
+                    final Mailer gMailer = new Mailer("Dashboard Feedback | A Bug Report | "+Student.getFullNamePostOrder(),bugTextArea.getText());
+                    if (gMailer.sendAs(Mailer.FEEDBACK)) {
+                        bugTextArea.setText(null);
                     }
-                    changeState(true, bugTextArea,bugSender);
+                    bugTextArea.setEditable(true);
+                    bugSender.setEnabled(true);
                     bugSender.setText("Send");
+                } else {
+                    App.signalError(MyDashboard.this.getRootPane(), "No Internet","Sorry, internet connection is required to send the review.\n" +
+                            "Please connect and try again.");
                 }
-            }).start();
-        });
+                changeState(true, bugTextArea,bugSender);
+                bugSender.setText("Send");
+            }
+        }).start());
         final KPanel bugLayer = new KPanel();
         bugLayer.setLayout(new BoxLayout(bugLayer, BoxLayout.Y_AXIS));
         bugLayer.setBorder(lineBorder);
@@ -345,10 +333,9 @@ public class MyDashboard extends KDialog {
         final KPanel feedbackCard = new KPanel();
         feedbackCard.setBorder(spaceBorder);
         feedbackCard.setLayout(new BoxLayout(feedbackCard, BoxLayout.Y_AXIS));
-        feedbackCard.addAll(getANotePane(bettermentText,130),ComponentAssistant.provideBlankSpace(500,30),
-                reviewLayer, ComponentAssistant.provideBlankSpace(500,20), suggestionLayer, ComponentAssistant.provideBlankSpace(500,20), answerLayer,
-                ComponentAssistant.provideBlankSpace(500,20), bugLayer, ComponentAssistant.provideBlankSpace(500,15));
-
+        feedbackCard.addAll(getANotePane(bettermentText,130),Box.createVerticalStrut(30),
+                reviewLayer, Box.createVerticalStrut(20), suggestionLayer, Box.createVerticalStrut(20), answerLayer,
+                Box.createVerticalStrut(20), bugLayer, Box.createVerticalStrut(15));
         return feedbackCard;
     }
 
@@ -356,7 +343,6 @@ public class MyDashboard extends KDialog {
         final KButton rButton = new KButton("Send");
         rButton.setStyle(KFontFactory.createPlainFont(14),Color.BLUE);
         rButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
         return rButton;
     }
 
@@ -374,7 +360,6 @@ public class MyDashboard extends KDialog {
         final KPanel donationCard = new KPanel();
         donationCard.setLayout(new BoxLayout(donationCard, BoxLayout.Y_AXIS));
         donationCard.addAll(getANotePane(donationText,100));
-
         return donationCard;
     }
 
@@ -390,13 +375,12 @@ public class MyDashboard extends KDialog {
         final KPanel termsCard = new KPanel();
         termsCard.setLayout(new BoxLayout(termsCard, BoxLayout.Y_AXIS));
         termsCard.addAll(getANotePane(termsString,200));
-
         return termsCard;
     }
 
 
-    private class SpecificExhibitor extends KDialog{
-        final Font font = KFontFactory.createPlainFont(16);
+    private class SpecificExhibitor extends KDialog {
+        private final Font font = KFontFactory.createPlainFont(16);
 
         private SpecificExhibitor(){
             super("Dashboard Author");
@@ -438,9 +422,7 @@ public class MyDashboard extends KDialog {
             nationalityPanel.add(KPanel.wantDirectAddition(new KLabel("The Gambia",font)),BorderLayout.CENTER);
 
             final KButton closeButton = new KButton("Ok");
-            closeButton.addActionListener(e -> {
-                dispose();
-            });
+            closeButton.addActionListener(e -> dispose());
 
             final KPanel contentPanel = new KPanel();
             contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));

@@ -11,38 +11,36 @@ import java.util.ArrayList;
 import static java.awt.Color.BLUE;
 
 public class AnalysisGenerator implements ActivityAnswerer {
-    private static final CardLayout cardLayout = new CardLayout();
-    private static final Font valueFont = KFontFactory.createPlainFont(15), hintFont = KFontFactory.createBoldFont(15),
-            onFocusFont = KFontFactory.createBoldFont(16);
-    private static final Cursor onFocusCursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
-    private static KPanel analysisBase;
-    private static ArrayList<String> semestersList, yearsList;
-    private static ArrayList<Double> semesterScores;//as for the names, the 'semestersList' is enough - it's being static for this reason
-    private KPanel coursesBased, semestersBased, yearsBased;
-    //
     private KLabel aPlusTellerLabel, aNeutralTellerLabel, aMinusTellerLabel, bPlusTellerLabel, bNeutralTellerLabel, bMinusTellerLabel,
             cPlusTellerLabel, cNeutralTellerLabel, cMinusTellerLabel, dTellerLabel, fTellerLabel;
     private KLabel highestScoreTellerLabel, lowestScoreTellerLabel, highestMajorScoreTellerLabel, lowestMajorScoreTellerLabel,
             highestMinorScoreTellerLabel, lowestMinorScoreTellerLabel, highestDERScoreTellerLabel, lowestDERScoreTellerLabel, highestGERScoreTellerLabel, lowestGERScoreTellerLabel;
     private KLabel majorListTellerLabel, minorListTellerLabel, DERListTellerLabel, GERListTellerLabel, unclassifiedListTellerLabel;
     private KLabel allTellerLabel;
-    //
     private ArrayList<Course> aPlusList, aNeutralList, aMinusList, bPlusList, bNeutralList, bMinusList,
             cPlusList, cNeutralList, cMinusList, dList, fList;
     private ArrayList<Course> majorList, minorList, DERList, GERList, unclassifiedList;
-    //
     private Course highestScoreCourse, lowestScoreCourse, highestMajorScoreCourse, lowestMajorScoreCourse, highestMinorScoreCourse, lowestMinorScoreCourse,
             highestDERScoreCourse, lowestDERScoreCourse, highestGERScoreCourse, lowestGERScoreCourse;
+    private CardLayout cardLayout;
+    private KPanel coursesBased, semestersBased, yearsBased;
+
+    private static final Font valueFont = KFontFactory.createPlainFont(15),
+            hintFont = KFontFactory.createBoldFont(15),
+            onFocusFont = KFontFactory.createBoldFont(16);
+    private static final Cursor onFocusCursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+    private static ArrayList<String> semestersList, yearsList;
+    private static ArrayList<Double> semesterScores;//As for the names, the 'semestersList' is enough - it's being static for this reason?
 
 
     public AnalysisGenerator(){
-        analysisBase = new KPanel(cardLayout);
+        cardLayout = new CardLayout();
+        final KPanel analysisContents = new KPanel(cardLayout);
+        cardLayout.addLayoutComponent(analysisContents.add(new KScrollPane(coursesAnalysisBasement(),false)),"course-basement");
+        cardLayout.addLayoutComponent(analysisContents.add(new KScrollPane(initiateSemestersAnalysisBasement(),false)),"semester-basement");
+        cardLayout.addLayoutComponent(analysisContents.add(new KScrollPane(initiateYearlyAnalysisBasement(),false)),"year-basement");
 
-        cardLayout.addLayoutComponent(analysisBase.add(new KScrollPane(coursesAnalysisBasement(),false)),"course-basement");
-        cardLayout.addLayoutComponent(analysisBase.add(new KScrollPane(initiateSemestersAnalysisBasement(),false)),"semester-basement");
-        cardLayout.addLayoutComponent(analysisBase.add(new KScrollPane(initiateYearlyAnalysisBasement(),false)),"year-basement");
-
-        final JComboBox<String> optionsCombo = new JComboBox<String>(new String[] {"My Courses","Semesters","Academic Years"}){
+        final JComboBox<String> optionsCombo = new JComboBox<String>(new String[] {"My Courses", "Semesters", "Academic Years"}){
             @Override
             public JToolTip createToolTip() {
                 return KLabel.preferredTip();
@@ -54,24 +52,24 @@ public class AnalysisGenerator implements ActivityAnswerer {
         optionsCombo.setCursor(onFocusCursor);
         optionsCombo.addActionListener(e -> {
             if (optionsCombo.getSelectedIndex() == 0) {
-                cardLayout.show(analysisBase,"course-basement");
+                cardLayout.show(analysisContents, "course-basement");
             } else if (optionsCombo.getSelectedIndex() == 1) {
-                cardLayout.show(analysisBase,"semester-basement");
+                cardLayout.show(analysisContents, "semester-basement");
             } else if (optionsCombo.getSelectedIndex() == 2) {
-                cardLayout.show(analysisBase,"year-basement");
+                cardLayout.show(analysisContents, "year-basement");
             }
         });
 
         final KPanel sensitivePanel = new KPanel(new FlowLayout(FlowLayout.RIGHT));
-        sensitivePanel.addAll(new KLabel("Showing analysis based on:",KFontFactory.createPlainFont(15)),optionsCombo);
+        sensitivePanel.addAll(new KLabel("Showing analysis based on:", KFontFactory.createPlainFont(15)), optionsCombo);
 
         final KPanel northPanel = new KPanel(new BorderLayout());
-        northPanel.add(new KLabel("Analysis Center", KFontFactory.bodyHeaderFont()),BorderLayout.WEST);
-        northPanel.add(sensitivePanel,BorderLayout.EAST);
+        northPanel.add(new KLabel("Analysis Center", KFontFactory.bodyHeaderFont()), BorderLayout.WEST);
+        northPanel.add(sensitivePanel, BorderLayout.EAST);
 
-        KPanel analysisUI = new KPanel(new BorderLayout());
-        analysisUI.add(northPanel,BorderLayout.NORTH);
-        analysisUI.add(analysisBase,BorderLayout.CENTER);
+        final KPanel analysisUI = new KPanel(new BorderLayout());
+        analysisUI.add(northPanel, BorderLayout.NORTH);
+        analysisUI.add(analysisContents, BorderLayout.CENTER);
 
         Board.addCard(analysisUI, "Analysis");
     }
@@ -82,9 +80,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!aPlusTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()-> {
-                        new GlassPrompt("A+ Grades", aPlusList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("A+ Grades", aPlusList).setVisible(true));
                 }
             }
         });
@@ -94,9 +90,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!aNeutralTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("A Grades",aNeutralList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("A Grades",aNeutralList).setVisible(true));
                 }
             }
         });
@@ -106,9 +100,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!aMinusTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("A- Grades",aMinusList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("A- Grades",aMinusList).setVisible(true));
                 }
             }
         });
@@ -118,9 +110,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!bPlusTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("B+ Grades",bPlusList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("B+ Grades",bPlusList).setVisible(true));
                 }
             }
         });
@@ -130,9 +120,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!bNeutralTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("B Grades",bNeutralList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("B Grades",bNeutralList).setVisible(true));
                 }
             }
         });
@@ -142,9 +130,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!bMinusTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("B- Grades",bMinusList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("B- Grades",bMinusList).setVisible(true));
                 }
             }
         });
@@ -154,9 +140,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!cPlusTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("C+ Grades",cPlusList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("C+ Grades",cPlusList).setVisible(true));
                 }
             }
         });
@@ -166,9 +150,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!cNeutralTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("C Grades",cNeutralList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("C Grades",cNeutralList).setVisible(true));
                 }
             }
         });
@@ -178,9 +160,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!cMinusTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("C- Grades",cMinusList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("C- Grades",cMinusList).setVisible(true));
                 }
             }
         });
@@ -190,9 +170,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!dTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("D Grades",dList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("D Grades",dList).setVisible(true));
                 }
             }
         });
@@ -202,9 +180,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!fTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("F Grades",fList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("F Grades",fList).setVisible(true));
                 }
             }
         });
@@ -214,9 +190,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!highestScoreTellerLabel.getText().equals("...")) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(), highestScoreCourse);
-                    });
+                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(), highestScoreCourse));
                 }
             }
         });
@@ -226,9 +200,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!lowestScoreTellerLabel.getText().equals("...")) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(),lowestScoreCourse);
-                    });
+                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(),lowestScoreCourse));
                 }
             }
         });
@@ -238,9 +210,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!highestMajorScoreTellerLabel.getText().equals("...")) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(),highestMajorScoreCourse);
-                    });
+                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(),highestMajorScoreCourse));
                 }
             }
         });
@@ -250,9 +220,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!lowestMajorScoreTellerLabel.getText().equals("...")) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(),lowestMajorScoreCourse);
-                    });
+                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(),lowestMajorScoreCourse));
                 }
             }
         });
@@ -262,9 +230,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!highestMinorScoreTellerLabel.getText().equals("...")) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(),highestMinorScoreCourse);
-                    });
+                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(),highestMinorScoreCourse));
                 }
             }
         });
@@ -274,9 +240,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!lowestMinorScoreTellerLabel.getText().equals("...")) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(),lowestMinorScoreCourse);
-                    });
+                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(),lowestMinorScoreCourse));
                 }
             }
         });
@@ -286,9 +250,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!highestDERScoreTellerLabel.getText().equals("...")) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(),highestDERScoreCourse);
-                    });
+                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(),highestDERScoreCourse));
                 }
             }
         });
@@ -298,9 +260,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!lowestDERScoreTellerLabel.getText().equals("...")) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(),lowestDERScoreCourse);
-                    });
+                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(),lowestDERScoreCourse));
                 }
             }
         });
@@ -310,9 +270,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!highestGERScoreTellerLabel.getText().equals("...")) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(),highestGERScoreCourse);
-                    });
+                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(),highestGERScoreCourse));
                 }
             }
         });
@@ -322,9 +280,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!lowestGERScoreTellerLabel.getText().equals("...")) {
-                    SwingUtilities.invokeLater(()->{
-                        Course.exhibit(Board.getRoot(),lowestGERScoreCourse);
-                    });
+                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(),lowestGERScoreCourse));
                 }
             }
         });
@@ -334,9 +290,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!majorListTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("My Majors",majorList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("My Majors",majorList).setVisible(true));
                 }
             }
         });
@@ -346,9 +300,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!minorListTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("My Minors",minorList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("My Minors",minorList).setVisible(true));
                 }
             }
         });
@@ -358,9 +310,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!DERListTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("Divisional Educational Requirements",DERList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("Divisional Educational Requirements",DERList).setVisible(true));
                 }
             }
         });
@@ -370,9 +320,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!GERListTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("General Education Requirements",GERList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("General Education Requirements",GERList).setVisible(true));
                 }
             }
         });
@@ -382,22 +330,18 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!unclassifiedListTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()->{
-                        new GlassPrompt("Unknown Requirements",unclassifiedList).setVisible(true);
-                    });
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("Unknown Requirements",unclassifiedList).setVisible(true));
                 }
             }
         });
 
         allTellerLabel = new KLabel("",valueFont, BLUE);
-        allTellerLabel.underline(null,false);
+        allTellerLabel.underline(null,true);
         allTellerLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         allTellerLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                SwingUtilities.invokeLater(()->{
-                    new GlassPrompt("My Modules",Memory.listRequested()).setVisible(true);
-                });
+                SwingUtilities.invokeLater(()-> new GlassPrompt("My Modules",Memory.listRequested()).setVisible(true));
             }
         });
 
@@ -449,7 +393,6 @@ public class AnalysisGenerator implements ActivityAnswerer {
     private JComponent initiateSemestersAnalysisBasement(){
         semestersBased = new KPanel();
         semestersBased.setLayout(new BoxLayout(semestersBased, BoxLayout.Y_AXIS));
-
         return semestersBased;
     }
 
@@ -466,9 +409,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
                 promptLabel.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        SwingUtilities.invokeLater(()->{
-                            new GlassPrompt(semTex, fractionalSem).setVisible(true);
-                        });
+                        SwingUtilities.invokeLater(()-> new GlassPrompt(semTex, fractionalSem).setVisible(true));
                     }
                 });
                 if (fractionalSem.size() == 1) {
@@ -486,7 +427,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
                         newAnalysisPlate("CGPA Earned",cgTeller));
             }
             final KLabel totalLabel = new KLabel(Globals.checkPlurality(semestersList.size(),"Semesters"),valueFont, BLUE);
-            totalLabel.underline(null,false);
+            totalLabel.underline(null,true);
             semestersBased.addAll(newAnalysisHeader("Overall"),
                     newAnalysisPlate("All together",totalLabel),
                     newAnalysisPlate("Best Semester",new KLabel(Memory.traceBestSemester(true),valueFont, BLUE)),
@@ -499,7 +440,6 @@ public class AnalysisGenerator implements ActivityAnswerer {
     private JComponent initiateYearlyAnalysisBasement(){
         yearsBased = new KPanel();
         yearsBased.setLayout(new BoxLayout(yearsBased, BoxLayout.Y_AXIS));
-
         return yearsBased;
     }
 
@@ -510,14 +450,12 @@ public class AnalysisGenerator implements ActivityAnswerer {
         } else {
             for (String yearTex : yearsList) {
                 final ArrayList<Course> fractionalYear = Memory.getFractionByYear(yearTex);
-                final KLabel allPromptLabel = new KLabel("",valueFont, BLUE);
+                final KLabel allPromptLabel = new KLabel("", valueFont, BLUE);
                 allPromptLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 allPromptLabel.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        SwingUtilities.invokeLater(()-> {
-                            new GlassPrompt(yearTex,fractionalYear).setVisible(true);
-                        });
+                        SwingUtilities.invokeLater(()-> new GlassPrompt(yearTex,fractionalYear).setVisible(true));
                     }
                 });
                 final ArrayList<Course> yMajors = Memory.getMajorsByYear(yearTex), yMinors = Memory.getMinorsByYear(yearTex), yDERs = Memory.getDERsByYear(yearTex),
@@ -539,9 +477,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         if (!tutorsLabel.getText().equals("No Lecturers")) {
-                            SwingUtilities.invokeLater(()->{
-                                new GlassPrompt(yLectsList, yearTex).setVisible(true);
-                            });
+                            SwingUtilities.invokeLater(()-> new GlassPrompt(yLectsList, yearTex).setVisible(true));
                         }
                     }
                 });
@@ -562,15 +498,13 @@ public class AnalysisGenerator implements ActivityAnswerer {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (!totalTutorsLabel.getText().equals("No distinguished lecturers")) {
-                        SwingUtilities.invokeLater(()->{
-                            new GlassPrompt(lectsList).setVisible(true);
-                        });
+                        SwingUtilities.invokeLater(()-> new GlassPrompt(lectsList).setVisible(true));
                     }
                 }
             });
 
             final KLabel totalLabel = new KLabel(Globals.checkPlurality(yearsList.size(),"Academic years"),valueFont, BLUE);
-            totalLabel.underline(null,false);
+            totalLabel.underline(null,true);
             yearsBased.addAll(newAnalysisHeader("Overall"),
                     newAnalysisPlate("All together",totalLabel),
                     newAnalysisPlate("My Tutors",totalTutorsLabel),
@@ -584,13 +518,13 @@ public class AnalysisGenerator implements ActivityAnswerer {
     /**
      * Created and added in place of the analysis-basements to signify that analysis is not available.
      * Note: Caller should not let this panel assume its entire size.
-     * This can include icons in a future release.
+     * This can include an icon in a future release.
      */
     private KPanel createNoAnalysisPanel(){
         final KPanel noAnalysisPanel = new KPanel();
         noAnalysisPanel.setLayout(new BoxLayout(noAnalysisPanel, BoxLayout.Y_AXIS));
-        noAnalysisPanel.addAll(KPanel.wantDirectAddition(new KLabel("Analysis is not available",KFontFactory.createPlainFont(20))),
-                KPanel.wantDirectAddition(new KLabel("No Verified Courses Detected",KFontFactory.createPlainFont(15), Color.GRAY)));
+        noAnalysisPanel.addAll(KPanel.wantDirectAddition(new KLabel("Analysis is not available", KFontFactory.createPlainFont(20))),
+                KPanel.wantDirectAddition(new KLabel("No Verified Course detected", KFontFactory.createPlainFont(15), Color.GRAY)));
         noAnalysisPanel.setMaximumSize(noAnalysisPanel.getPreferredSize());
         return noAnalysisPanel;
     }
@@ -611,15 +545,13 @@ public class AnalysisGenerator implements ActivityAnswerer {
             }
         });
         attachActiveOnFocus(kLabel, "None");
-
         return kLabel;
     }
 
     private KPanel newAnalysisPlate(String hint, KLabel aLabel){
         final KPanel aPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         aPanel.add(KPanel.wantDirectAddition(new KLabel(hint, hintFont)));
-        aPanel.addAll(ComponentAssistant.provideBlankSpace(25,25), aLabel);
-
+        aPanel.addAll(Box.createHorizontalStrut(25), aLabel);
         return aPanel;
     }
 
@@ -627,7 +559,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
         vLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                vLabel.setFont(vLabel.getText().equals(except)? valueFont : onFocusFont);
+                vLabel.setFont(vLabel.getText().equals(except) ? valueFont : onFocusFont);
             }
 
             @Override
@@ -647,7 +579,6 @@ public class AnalysisGenerator implements ActivityAnswerer {
 
         };
         attachActiveOnFocus(vLabel, "None");
-
         return vLabel;
     }
 
@@ -660,35 +591,33 @@ public class AnalysisGenerator implements ActivityAnswerer {
             }
         };
         attachActiveOnFocus(singletonLabel, "...");
-
         return singletonLabel;
     }
 
     private KPanel newAnalysisHeader(String headerText){
         final KPanel hPanel = new KPanel();
         hPanel.add(new KLabel(">>"+headerText,KFontFactory.createBoldFont(17),Color.RED));
-
         return hPanel;
     }
 
     private void resetLists(){
-       aPlusList =  Memory.getFractionByGrade("A+");
-       aNeutralList = Memory.getFractionByGrade("A");
-       aMinusList = Memory.getFractionByGrade("A-");
-       bPlusList = Memory.getFractionByGrade("B+");
-       bNeutralList = Memory.getFractionByGrade("B");
-       bMinusList = Memory.getFractionByGrade("B-");
-       cPlusList = Memory.getFractionByGrade("C+");
-       cNeutralList = Memory.getFractionByGrade("C");
-       cMinusList = Memory.getFractionByGrade("C-");
-       dList = Memory.getFractionByGrade("D");
-       fList = Memory.getFractionByGrade("F");
+        aPlusList =  Memory.getFractionByGrade("A+");
+        aNeutralList = Memory.getFractionByGrade("A");
+        aMinusList = Memory.getFractionByGrade("A-");
+        bPlusList = Memory.getFractionByGrade("B+");
+        bNeutralList = Memory.getFractionByGrade("B");
+        bMinusList = Memory.getFractionByGrade("B-");
+        cPlusList = Memory.getFractionByGrade("C+");
+        cNeutralList = Memory.getFractionByGrade("C");
+        cMinusList = Memory.getFractionByGrade("C-");
+        dList = Memory.getFractionByGrade("D");
+        fList = Memory.getFractionByGrade("F");
 
-       majorList = Memory.getMajors();
-       minorList = Memory.getMinors();
-       DERList = Memory.getDERs();
-       GERList = Memory.getGERs();
-       unclassifiedList = Memory.getUnknowns();
+        majorList = Memory.getMajors();
+        minorList = Memory.getMinors();
+        DERList = Memory.getDERs();
+        GERList = Memory.getGERs();
+        unclassifiedList = Memory.getUnknowns();
 
         semestersList = Memory.filterSemesters();
         yearsList = Memory.filterAcademicYears();
@@ -719,7 +648,8 @@ public class AnalysisGenerator implements ActivityAnswerer {
         cMinusTellerLabel.setText(getProperValueText(cMinusList));
         dTellerLabel.setText(getProperValueText(dList));
         fTellerLabel.setText(getProperValueText(fList));
-        //singletons...
+
+//        Singletons...
         highestScoreTellerLabel.setText(getProperValueText(highestScoreCourse));
         lowestScoreTellerLabel.setText(getProperValueText(lowestScoreCourse));
         highestMajorScoreTellerLabel.setText(getProperValueText(highestMajorScoreCourse));
@@ -766,11 +696,13 @@ public class AnalysisGenerator implements ActivityAnswerer {
             resetCourses();
             resetLabels();
         });
-        Board.getBody().setPreferredSize(Board.BODYSIZE_NOSCROLLBARS);
         Board.showCard("Analysis");
     }
 
 
+    /**
+     * The responsibility of this inner-class is to prompt up the contents of an analysis-list.
+     */
     private static class GlassPrompt extends KDialog {
         public KPanel substancePanel;
 
@@ -840,15 +772,11 @@ public class AnalysisGenerator implements ActivityAnswerer {
         private void join(String lName) {
             final KButton dtlButton = KButton.getIconifiedButton("warn.png",25,25);
             dtlButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            dtlButton.addActionListener(e -> {
-                SwingUtilities.invokeLater(()->{
-                    new GlassPrompt(lName, Memory.getFractionByLecturer(lName), this.getRootPane()).setVisible(true);
-                });
-            });
+            dtlButton.addActionListener(e -> SwingUtilities.invokeLater(()-> new GlassPrompt(lName, Memory.getFractionByLecturer(lName), this.getRootPane()).setVisible(true)));
 
             final KPanel joinPanel = new KPanel(new BorderLayout());
             joinPanel.add(KPanel.wantDirectAddition(new KLabel(lName,KFontFactory.createPlainFont(15))),BorderLayout.WEST);
-            joinPanel.add(ComponentAssistant.provideBlankSpace(30,30),BorderLayout.CENTER);
+            joinPanel.add(Box.createRigidArea(new Dimension(30, 30)), BorderLayout.CENTER);
             joinPanel.add(dtlButton,BorderLayout.EAST);
 
             substancePanel.add(joinPanel);
@@ -857,18 +785,16 @@ public class AnalysisGenerator implements ActivityAnswerer {
         private void join(String tName, String yName) {
             final KButton dtlButton = KButton.getIconifiedButton("warn.png",25,25);
             dtlButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            dtlButton.addActionListener(e -> {
-                SwingUtilities.invokeLater(()->{
-                    final ArrayList<Course> tList = Memory.getFractionByLecturer(tName,yName);
-                    final GlassPrompt vPrompt = new GlassPrompt("", tList, this.getRootPane());
-                    vPrompt.setTitle(tName+" ["+ yName +": "+tList.size()+"]");
-                    vPrompt.setVisible(true);
-                });
-            });
+            dtlButton.addActionListener(e -> SwingUtilities.invokeLater(()->{
+                final ArrayList<Course> tList = Memory.getFractionByLecturer(tName,yName);
+                final GlassPrompt vPrompt = new GlassPrompt("", tList, this.getRootPane());
+                vPrompt.setTitle(tName+" ["+ yName +": "+tList.size()+"]");
+                vPrompt.setVisible(true);
+            }));
 
             final KPanel joinPanel = new KPanel(new BorderLayout());
             joinPanel.add(KPanel.wantDirectAddition(new KLabel(tName,KFontFactory.createPlainFont(15))),BorderLayout.WEST);
-            joinPanel.add(ComponentAssistant.provideBlankSpace(30,30),BorderLayout.CENTER);
+            joinPanel.add(Box.createRigidArea(new Dimension(30, 30)),BorderLayout.CENTER);
             joinPanel.add(dtlButton,BorderLayout.EAST);
 
             substancePanel.add(joinPanel);
@@ -877,17 +803,13 @@ public class AnalysisGenerator implements ActivityAnswerer {
         public void join(Course c){
             final KButton dtlButton = KButton.getIconifiedButton("warn.png",25,25);
             dtlButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            dtlButton.addActionListener(e -> {
-                Course.exhibit(this.getRootPane(),c);
-            });
+            dtlButton.addActionListener(e -> Course.exhibit(this.getRootPane(), c));
 
             final KPanel joinPanel = new KPanel(new BorderLayout());
             joinPanel.add(KPanel.wantDirectAddition(new KLabel(c.getName(),KFontFactory.createPlainFont(15))),BorderLayout.WEST);
-            joinPanel.add(dtlButton,BorderLayout.EAST);
-
+            joinPanel.add(dtlButton, BorderLayout.EAST);
             substancePanel.add(joinPanel);
         }
-
     }
 
 
@@ -900,16 +822,13 @@ public class AnalysisGenerator implements ActivityAnswerer {
         private RoughSketch(){
             if (semestersList.size() <= 1) {
                 this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-                this.addAll(new KLabel("No Sketch Available", KFontFactory.createPlainFont(20)),
-                        new KLabel("Student must complete at least 2 semesters", KFontFactory.createPlainFont(20)));
+                this.addAll(new KPanel(), KPanel.wantDirectAddition(new KLabel("No Sketch Available", KFontFactory.createPlainFont(20))),
+                        KPanel.wantDirectAddition(new KLabel("Student must complete at least two semesters", KFontFactory.createPlainFont(15), Color.GRAY)),
+                        new KPanel());
+                this.setMaximumSize(this.getPreferredSize());
             } else {
-                this.setPreferredSize(new Dimension(900,475));
+                this.setPreferredSize(new Dimension(900, 475));
             }
-        }
-
-        @Override
-        public Component add(Component comp) {
-            return super.add(KPanel.wantDirectAddition(comp));
         }
 
         @Override
@@ -919,13 +838,13 @@ public class AnalysisGenerator implements ActivityAnswerer {
                 final Graphics2D g2 = (Graphics2D)g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                final double x_scale = ((double) (this.getWidth() - (2 * PADDING)) / (semesterScores.size() - 1));
-                final double y_scale = ((double) (this.getHeight() - (2 * PADDING)) / (Y_MAX - 1));
+                final double xScale = ((double) (this.getWidth() - (2 * PADDING)) / (semesterScores.size() - 1));
+                final double yScale = ((double) (this.getHeight() - (2 * PADDING)) / (Y_MAX - 1));
 
                 final ArrayList<Point> points = new ArrayList<>();
                 for (int i = 0; i < semesterScores.size(); i++) {
-                    int x1 = (int) (i * x_scale + PADDING);
-                    int y1 = (int) ((Y_MAX - semesterScores.get(i)) * y_scale + PADDING);
+                    int x1 = (int) (i * xScale + PADDING);
+                    int y1 = (int) ((Y_MAX - semesterScores.get(i)) * yScale + PADDING);
                     points.add(new Point(x1, y1));
                 }
 
@@ -951,12 +870,14 @@ public class AnalysisGenerator implements ActivityAnswerer {
                     int y0 = getHeight() - (((i + 1) * (getHeight() - PADDING * 2)) / Y_COUNT + PADDING);
                     int y1 = y0;
                     g2.drawLine(x0, y0, x1, y1);
+
                     if (i == Y_COUNT - 1) {
                         g2.drawString("4.3",25,y0 + 5);
                     }
                 }
 
                 g2.setStroke(new BasicStroke(3F));
+
                 for (int i = 0; i < points.size() - 1; i++) {
                     int x1 = points.get(i).x;
                     int y1 = points.get(i).y;
@@ -968,6 +889,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
                 final Stroke oldStroke = g2.getStroke();
                 g2.setStroke(oldStroke);
                 g2.setColor(BLUE);
+
                 for (int i = 0; i < points.size(); i++) {
                     int x = points.get(i).x - POINTS_WIDTH / 2;
                     int y = points.get(i).y - POINTS_WIDTH / 2;

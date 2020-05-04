@@ -9,15 +9,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Objects;
 
-/**
- * <h1>class SummerModulesHandler</h1>
- *
- */
 public class SummerModulesHandler {
+    private JPopupMenu jPopupMenu;
+    private JMenuItem detailsItem, editItem, removeItem, confirmItem, newItem;
     private static KTable summerTable;
     private static KDefaultTableModel summerModel;
-    private static JPopupMenu jPopupMenu;
-    private static JMenuItem detailsItem, editItem, removeItem, confirmItem, newItem;
 
 
     public SummerModulesHandler(){
@@ -26,14 +22,15 @@ public class SummerModulesHandler {
     }
 
     /**
-     * <p>Triggered by the list to signal addition is directed to summerTable.</p>
+     * Triggered by the monitor to signal addition is directed to summerTable.
      */
     public static void welcome(Course summerCourse){
-        summerModel.addRow(new String[] {summerCourse.getCode(),summerCourse.getName(),summerCourse.getLecturer(),summerCourse.getGrade(),summerCourse.getYear()});
+        summerModel.addRow(new String[] {summerCourse.getCode(), summerCourse.getName(), summerCourse.getLecturer(),
+                summerCourse.getGrade(), summerCourse.getYear()});
     }
 
     /**
-     * <p>Triggered by the list to signal removal is directed to summerTable.</p>
+     * Triggered by the monitor to signal removal is directed to summerTable.
      */
     public static void ridOf(Course summerCourse){
         summerModel.removeRow(summerModel.getRowOf(summerCourse.getCode()));
@@ -41,7 +38,7 @@ public class SummerModulesHandler {
 
     private void generateSummerTable(){
         summerModel = new KDefaultTableModel();
-        summerModel.setColumnIdentifiers(new String[] {"CODE","NAME","LECTURER","GRADE","YEAR"});
+        summerModel.setColumnIdentifiers(new String[] {"CODE", "NAME", "LECTURER", "GRADE", "YEAR"});
         ModulesHandler.models[8] = summerModel;
 
         summerTable = new KTable(summerModel);
@@ -61,78 +58,70 @@ public class SummerModulesHandler {
                     confirmItem.setEnabled(necessary);
                     newItem.setEnabled(summerTable.getRowCount() <= 15);
 
-                    jPopupMenu.show(summerTable,e.getX(),e.getY());
+                    jPopupMenu.show(summerTable, e.getX(), e.getY());
                 }
             }
-
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    final boolean necessary = summerTable.getSelectedRow() >= 0;
-
-                    detailsItem.setEnabled(necessary);
-                    editItem.setEnabled(necessary);
-                    removeItem.setEnabled(necessary);
-                    confirmItem.setEnabled(necessary);
-                    newItem.setEnabled(summerTable.getRowCount() <= 15);
-
-                    jPopupMenu.show(summerTable,e.getX(),e.getY());
-                }
+                mousePressed(e);
             }
         });
     }
 
     private void configurePopUpOnSummerTable(){
-        detailsItem = new JMenuItem(ModulesHandler.detailsString);
+        detailsItem = new JMenuItem(ModulesHandler.DETAILS_STRING);
         detailsItem.setFont(KFontFactory.createPlainFont(15));
-        detailsItem.addActionListener(e -> {
-            SwingUtilities.invokeLater(()->{
-                try {
-                    Course.exhibit(Board.getRoot(), Objects.requireNonNull(ModulesHandler.getModuleByCode(summerModel.getValueAt(summerTable.getSelectedRow(), 0) + "")));
-                } catch (NullPointerException nil){
-                    App.silenceException("No such course in list");
-                }
-            });
-        });
+        detailsItem.addActionListener(e -> SwingUtilities.invokeLater(()->{
+            try {
+                Course.exhibit(Board.getRoot(), Objects.requireNonNull(ModulesHandler.getModuleByCode(
+                        String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(), 0))
+                )));
+            } catch (NullPointerException npe){
+                App.silenceException("No such course in list");
+            }
+        }));
 
-        editItem = new JMenuItem(ModulesHandler.editString);
+        editItem = new JMenuItem(ModulesHandler.EDIT_STRING);
         editItem.setFont(KFontFactory.createPlainFont(15));
         editItem.addActionListener(e -> {
-            final Course t = ModulesHandler.getModuleByCode(String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(), 0)));
-            if (t != null) {
-                SwingUtilities.invokeLater(()->{
-                    new SummerModuleEditor(t).setVisible(true);
-                });
+            final Course c = ModulesHandler.getModuleByCode(String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(), 0)));
+            try {
+                SwingUtilities.invokeLater(()-> new SummerModuleEditor(Objects.requireNonNull(c)).setVisible(true));
+            } catch (NullPointerException npe) {
+                App.silenceException("No such course in list");
             }
         });
 
-        removeItem = new JMenuItem(ModulesHandler.deleteString);
+        removeItem = new JMenuItem(ModulesHandler.DELETE_STRING);
         removeItem.setFont(KFontFactory.createPlainFont(15));
         removeItem.addActionListener(e -> {
-            if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+summerModel.getValueAt(summerTable.getSelectedRow(),1)+",\nand that you wish to remove it from your summer collection?")) {
-                ModulesHandler.getModulesMonitor().remove(ModulesHandler.getModuleByCode(summerModel.getValueAt(summerTable.getSelectedRow(),0).toString()));
+            final Course c = ModulesHandler.getModuleByCode(String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(),0)));
+            try {
+                Objects.requireNonNull(c);
+                if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+c.getName()+"\n" +
+                        "and that you wish to remove it from your summer collection?")) {
+                    ModulesHandler.getModulesMonitor().remove(c);
+                }
+            } catch (NullPointerException npe) {
+                App.silenceException("No such course in list");
             }
         });
 
-        confirmItem = new JMenuItem(ModulesHandler.confirmString);
+        confirmItem = new JMenuItem(ModulesHandler.CONFIRM_STRING);
         confirmItem.setFont(KFontFactory.createPlainFont(15));
         confirmItem.addActionListener(e -> {
-            final Course t = ModulesHandler.getModuleByCode(String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(),0)));
-            if (t == null) {
-                return;
+            final Course c = ModulesHandler.getModuleByCode(String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(),0)));
+            try {
+                Objects.requireNonNull(c);
+                ModulesHandler.launchVerification(c);
+            } catch (NullPointerException npe) {
+                App.silenceException("No such course in list");
             }
-            new Thread(()-> {
-                ModulesHandler.launchVerification(t);
-            }).start();
         });
 
-        newItem = new JMenuItem(ModulesHandler.addString);
+        newItem = new JMenuItem(ModulesHandler.ADD_STRING);
         newItem.setFont(KFontFactory.createPlainFont(15));
-        newItem.addActionListener(e -> {
-            SwingUtilities.invokeLater(()->{
-                new SummerModuleAdder().setVisible(true);
-            });
-        });
+        newItem.addActionListener(e -> SwingUtilities.invokeLater(()-> new SummerModuleAdder().setVisible(true)));
 
         jPopupMenu = new JPopupMenu();
         jPopupMenu.add(detailsItem);
@@ -156,33 +145,18 @@ public class SummerModulesHandler {
                     confirmItem.setEnabled(necessary);
                     newItem.setEnabled(summerTable.getRowCount() <= 15);
 
-                    jPopupMenu.show(summerScrollPane,e.getX(),e.getY());
+                    jPopupMenu.show(summerScrollPane, e.getX(), e.getY());
                 }
             }
-
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    final boolean necessary = summerTable.getSelectedRow() >= 0;
-
-                    detailsItem.setEnabled(necessary);
-                    editItem.setEnabled(necessary);
-                    removeItem.setEnabled(necessary);
-                    confirmItem.setEnabled(necessary);
-                    newItem.setEnabled(summerTable.getRowCount() <= 15);
-
-                    jPopupMenu.show(summerScrollPane,e.getX(),e.getY());
-                }
+                mousePressed(e);
             }
         });
 
         final KPanel present = new KPanel();
         present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-        present.add(ComponentAssistant.provideBlankSpace(800,10));
-        present.add(ComponentAssistant.provideBlankSpace(800,10));
-        present.add(summerScrollPane);
-        present.add(ComponentAssistant.provideBlankSpace(800,15));
-
+        present.addAll(Box.createVerticalStrut(15), summerScrollPane, Box.createVerticalStrut(10));
         return present;
     }
 
@@ -194,10 +168,11 @@ public class SummerModulesHandler {
             super(null, Student.SUMMER_SEMESTER);
             this.setTitle("New Summer Course");
 
-            this.availableYearsBox = new JComboBox<>(new String[] {Student.firstAcademicYear(),Student.secondAcademicYear(),Student.thirdAcademicYear(),Student.finalAcademicYear()});
+            this.availableYearsBox = new JComboBox<>(new String[] {Student.firstAcademicYear(), Student.secondAcademicYear(),
+                    Student.thirdAcademicYear(), Student.finalAcademicYear()});
             availableYearsBox.setFont(KFontFactory.createPlainFont(15));
             yearPanel.removeLastChild();
-            yearPanel.add(KPanel.wantDirectAddition(availableYearsBox),BorderLayout.CENTER);
+            yearPanel.add(KPanel.wantDirectAddition(availableYearsBox), BorderLayout.CENTER);
 
             actionButton.removeActionListener(actionButton.getActionListeners()[0]);
             actionButton.addActionListener(additionListener());
@@ -205,13 +180,13 @@ public class SummerModulesHandler {
 
         private ActionListener additionListener() {
             return e -> {
-                if (Globals.isBlank(codeField.getText())) {
+                if (codeField.hasNoText()) {
                     App.signalError(SummerModuleAdder.this.getRootPane(),"No Code","Please provide the code of the course.");
                     codeField.requestFocusInWindow();
-                } else if (Globals.isBlank(nameField.getText())) {
+                } else if (nameField.hasNoText()) {
                     App.signalError(SummerModuleAdder.this.getRootPane(),"No Name","Please provide the name of the course.");
                     nameField.requestFocusInWindow();
-                } else if (Globals.isBlank(scoreField.getText())) {
+                } else if (scoreField.hasNoText()) {
                     App.signalError(SummerModuleAdder.this.getRootPane(),"Error","Please enter the score you get from this course.");
                     scoreField.requestFocusInWindow();
                 } else {
@@ -238,9 +213,10 @@ public class SummerModulesHandler {
                             String.valueOf(dayBox.getSelectedItem());
                     final String time = String.valueOf(timeBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
                             String.valueOf(timeBox.getSelectedItem());
-                    final Course course = new Course(String.valueOf(availableYearsBox.getSelectedItem()),semesterField.getText(),codeField.getText(),
-                            nameField.getText(),lecturerField.getText(),venueField.getText(),day,time,score,Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
-                            String.valueOf(requirementBox.getSelectedItem()),false);
+                    final Course course = new Course(String.valueOf(availableYearsBox.getSelectedItem()),
+                            semesterField.getText(), codeField.getText(), nameField.getText(), lecturerField.getText(),
+                            venueField.getText(), day, time, score, Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
+                            String.valueOf(requirementBox.getSelectedItem()), false);
                     ModulesHandler.getModulesMonitor().add(course);
                     this.dispose();
                 }
@@ -285,12 +261,15 @@ public class SummerModulesHandler {
 
         private ActionListener editionListener() {
             return e-> {
-                if (Globals.isBlank(codeField.getText())) {
+                if (codeField.hasNoText()) {
                     App.signalError(this.getRootPane(),"No Code","Please provide the code of the course.");
                     codeField.requestFocusInWindow();
-                } else if (Globals.isBlank(nameField.getText())) {
+                } else if (nameField.hasNoText()) {
                     App.signalError(this.getRootPane(),"No Name","Please provide the name of the course.");
                     nameField.requestFocusInWindow();
+                } else if (scoreField.hasNoText()) {
+                    App.signalError(this.getRootPane(),"Error","Please enter the score you get from this course.");
+                    scoreField.requestFocusInWindow();
                 } else {
                     double score;
                     try {
@@ -305,7 +284,6 @@ public class SummerModulesHandler {
                         scoreField.requestFocusInWindow();
                         return;
                     }
-
                     //Check for exclusive existence in this table first
                     for (int row = 0; row < summerModel.getRowCount(); row++) {
                         if (row == summerModel.getSelectedRow()) {
@@ -328,11 +306,11 @@ public class SummerModulesHandler {
                             String.valueOf(dayBox.getSelectedItem());
                     final String time = String.valueOf(timeBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
                             String.valueOf(timeBox.getSelectedItem());
-                    final Course course = new Course(String.valueOf(availableYearsBox.getSelectedItem()), semesterField.getText(), codeField.getText(),nameField.getText(),
-                            "",venueField.getText(),day,time,score,Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
+                    final Course course = new Course(String.valueOf(availableYearsBox.getSelectedItem()),
+                            semesterField.getText(), codeField.getText(), nameField.getText(), "",
+                            venueField.getText(), day, time, score, Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
                             String.valueOf(requirementBox.getSelectedItem()), target.isVerified());
                     course.setLecturer(lecturerField.getText(), lecturerField.isEditable());
-
                     ModulesHandler.substitute(target, course);
                     this.dispose();
                 }

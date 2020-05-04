@@ -12,42 +12,41 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
- * <h1>class TasksGenerator</h1>
- * <p>This class packages all its data onto a panel, which is also added to the cardBoard Layout
- * in Board to make it come to sight at the corresponding big-button click.</p>
- * <p>It serves as the intermediary between all the so called-TaskSelf, Helpers, etc. and the {@link Board}.</p>
+ * This class packages all its data onto a panel, which is also added to the cardBoard Layout
+ * in Board to make it come to sight at the corresponding big-button click.
+ * It serves as the intermediary between all the so-called TaskSelf, Helpers, etc. and the Board.
  */
 public class TasksGenerator {
-    private static final int CONTENTS_POSITION = FlowLayout.LEFT;
+    private TodoHandler todoGuy = new TodoHandler();
+    private ProjectsHandler projectsGuy = new ProjectsHandler();
+    private AssignmentsHandler assignmentsGuy = new AssignmentsHandler();
+    private EventsHandler eventsGuy = new EventsHandler();
+    private CardLayout cardLayout = new CardLayout();
+    private KPanel inPanel = new KPanel(cardLayout);
+    private static KButton todoBigButton, projectBigButton, assignmentBigButton, eventBigButton;
+    private static KLabel hintLabel;
     private static final Font TASK_BUTTONS_FONT = KFontFactory.createPlainFont(14);
     private static final Font TASK_HEADERS_FONT = KFontFactory.createPlainFont(18);
-    private static KLabel hintLabel;
-    private static KButton todoBigButton, projectBigButton, assignmentBigButton, eventBigButton;
-    private final CardLayout cardLayout = new CardLayout();
-    private final KPanel inPanel = new KPanel(cardLayout);
-    //
-    private final TodoHandler todoGuy = new TodoHandler();
-    private final ProjectsHandler projectsGuy = new ProjectsHandler();
-    private final AssignmentsHandler assignmentsGuy = new AssignmentsHandler();
-    private final EventsHandler eventsGuy = new EventsHandler();
+    private static final int CONTENTS_POSITION = FlowLayout.LEFT;
 
-    public TasksGenerator(){//'home' is added with it
+
+    public TasksGenerator(){//'Home' is added with it
         hintLabel = KLabel.getPredefinedLabel("My Tasks",SwingConstants.LEFT);
         hintLabel.setStyle(KFontFactory.bodyHeaderFont(), Color.BLUE);
 
         final KPanel home = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        home.addAll(giveTodoButton(),ComponentAssistant.provideBlankSpace(25,150),
-                giveProjectsButton(),ComponentAssistant.provideBlankSpace(25,150),
-                giveAssignmentsButton(),ComponentAssistant.provideBlankSpace(25,150),
+        home.addAll(giveTodoButton(),Box.createRigidArea(new Dimension(25, 150)),
+                giveProjectsButton(),Box.createRigidArea(new Dimension(25, 150)),
+                giveAssignmentsButton(),Box.createRigidArea(new Dimension(25, 150)),
                 giveEventsButton());
 
         cardLayout.addLayoutComponent(inPanel.add(home),"Home");
     }
 
     /**
-     * <p>Basically, returns a big-button that'll be added to the home. And also configures
-     * its on-click action by adding its succeeding component to the card.</p>
-     * <p><i>The rest perform the same.</i></p>
+     * Basically, returns a big-button that'll be added to the home. And also configures
+     * its on-click action by adding its succeeding component to the card.
+     * The rest perform the same.
      */
     private KButton giveTodoButton(){
         todoBigButton = provideGeneralLook("TODO", TodoHandler.activeCount);
@@ -55,9 +54,7 @@ public class TasksGenerator {
             cardLayout.show(inPanel,"TODO");
             hintLabel.setText(" > TODO List");
         });
-
         cardLayout.addLayoutComponent(inPanel.add(todoGuy.todoComponent()),"TODO");
-
         return todoBigButton;
     }
 
@@ -67,22 +64,17 @@ public class TasksGenerator {
             cardLayout.show(inPanel,"Projects");
             hintLabel.setText(" > Projects");
         });
-
         cardLayout.addLayoutComponent(inPanel.add(projectsGuy.projectComponent()),"Projects");
-
         return projectBigButton;
     }
 
     private KButton giveAssignmentsButton(){
         assignmentBigButton = provideGeneralLook("Assignments", AssignmentsHandler.getDoingCount());
-
         assignmentBigButton.addActionListener(e -> {
             cardLayout.show(inPanel,"Assignments");
             hintLabel.setText(" > Assignments");
         });
-
         cardLayout.addLayoutComponent(inPanel.add(assignmentsGuy.assignmentsComponent()),"Assignments");
-
         return assignmentBigButton;
     }
 
@@ -92,23 +84,21 @@ public class TasksGenerator {
             cardLayout.show(inPanel,"Events");
             hintLabel.setText(" > Upcoming Events");
         });
-
         cardLayout.addLayoutComponent(inPanel.add(eventsGuy.eventsComponent()),"Events");
-
         return eventBigButton;
     }
 
     /**
-     * <p>Provides the shared look of these big-buttons.</p>
-     * <p>Note that the setText function of these buttons are forwarded to their inner-label
-     * numberText, which indicates the number of tasks running on each.</p>
+     * Provides the shared look of these big-buttons.
+     * Note that the setText function of these buttons are forwarded to their inner-label
+     * numberText, which indicates the number of tasks running on each.
      */
     private KButton provideGeneralLook(String label, int number){
         final KLabel lText = new KLabel(label, KFontFactory.createBoldFont(17));
-        lText.setPreferredSize(new Dimension(175,30));
+        lText.setPreferredSize(new Dimension(175, 30));
         lText.setHorizontalAlignment(KLabel.CENTER);
 
-        final KLabel numberText = new KLabel(Integer.toString(number),KFontFactory.createBoldFont(50));
+        final KLabel numberText = new KLabel(Integer.toString(number), KFontFactory.createBoldFont(50));
         numberText.setHorizontalAlignment(KLabel.CENTER);
 
         final KButton lookButton = new KButton(){
@@ -118,12 +108,11 @@ public class TasksGenerator {
                 ComponentAssistant.ready(numberText);
             }
         };
-        lookButton.setPreferredSize(new Dimension(175,150));
-        lookButton.setLayout(new BorderLayout(0,0));
+        lookButton.setPreferredSize(new Dimension(175, 150));
+        lookButton.setLayout(new BorderLayout(0, 0));
         lookButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        lookButton.add((lText),BorderLayout.NORTH);
-        lookButton.add(numberText,BorderLayout.CENTER);
-
+        lookButton.add((lText), BorderLayout.NORTH);
+        lookButton.add(numberText, BorderLayout.CENTER);
         return lookButton;
     }
 
@@ -131,23 +120,21 @@ public class TasksGenerator {
         final KButton returnButton = new KButton("< Back");
         returnButton.setFont(TASK_BUTTONS_FONT);
         returnButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        final ActionListener backwardListener = e -> {
+        returnButton.addActionListener(e -> {
             cardLayout.show(inPanel,"Home");
             hintLabel.setText("");
-        };
-        returnButton.addActionListener(backwardListener);
+        });
         returnButton.setMnemonic(KeyEvent.VK_BACK_SPACE);
         returnButton.setToolTipText("Return to Task Menu (Alt+Back_Space)");
         returnButton.doClick(0);
 
         final KPanel upPanel = new KPanel(new BorderLayout());
-        upPanel.add(hintLabel,BorderLayout.WEST);
-        upPanel.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,returnButton),BorderLayout.EAST);
+        upPanel.add(hintLabel, BorderLayout.WEST);
+        upPanel.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, returnButton), BorderLayout.EAST);
 
         final KPanel present = new KPanel(new BorderLayout());
-        present.add(upPanel,BorderLayout.NORTH);
+        present.add(upPanel, BorderLayout.NORTH);
         present.add(inPanel);
-
         return present;
     }
 
@@ -157,7 +144,6 @@ public class TasksGenerator {
     Like their immediate mother-class, they serve as the intermediary between their respective task-types
     and the Board. They provide UI and behavior as well.
      */
-
     public static class TodoHandler {
         public static final ArrayList<TaskSelf.TodoSelf> TODOS = new ArrayList<>();
         private static int activeCount, dormantCount;
@@ -173,11 +159,13 @@ public class TasksGenerator {
                     renewCount(1);
                     return super.add(comp);
                 }
+
                 @Override
                 public void remove(Component comp) {
                     super.remove(comp);
                     TODOS.remove(comp);
-                    activeContainer.setPreferredSize(new Dimension(activeContainer.getPreferredSize().width,activeContainer.getPreferredSize().height-40));
+                    activeContainer.setPreferredSize(new Dimension(activeContainer.getPreferredSize().width,
+                            activeContainer.getPreferredSize().height-40));
                     renewCount(-1);
                 }
             };
@@ -186,16 +174,19 @@ public class TasksGenerator {
             dormantContainer = new KPanel(){
                 @Override
                 public Component add(Component comp) {
-                    dormantContainer.setPreferredSize(new Dimension(dormantContainer.getPreferredSize().width,dormantContainer.getPreferredSize().height+40));
+                    dormantContainer.setPreferredSize(new Dimension(dormantContainer.getPreferredSize().width,
+                            dormantContainer.getPreferredSize().height+40));
                     TODOS.add((TaskSelf.TodoSelf) comp);
                     dormantCount++;
                     return super.add(comp);
                 }
+
                 @Override
                 public void remove(Component comp) {
                     super.remove(comp);
                     TODOS.remove(comp);
-                    dormantContainer.setPreferredSize(new Dimension(dormantContainer.getPreferredSize().width,dormantContainer.getPreferredSize().height-40));
+                    dormantContainer.setPreferredSize(new Dimension(dormantContainer.getPreferredSize().width,
+                            dormantContainer.getPreferredSize().height-40));
                     dormantCount--;
                 }
             };
@@ -203,11 +194,11 @@ public class TasksGenerator {
         }
 
         public static ActionListener additionWaiter(){
-            return e ->{
+            return e -> {
                 final String name = todoCreator.getDescriptionField().getText();
                 int givenDays = 0;
                 if (Globals.isBlank(name)) {
-                    App.signalError(todoCreator.getRootPane(),"Blank Name","Please specify a name for the task");
+                    App.signalError(todoCreator.getRootPane(), "Blank Name", "Please specify a name for the task");
                     todoCreator.getDescriptionField().requestFocusInWindow();
                 } else if (name.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
                     App.signalError("Error", "Sorry, description of a task must be at most "+TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters only.");
@@ -225,7 +216,9 @@ public class TasksGenerator {
                         givenDays = 30;
                     }
 
-                    if (App.showYesNoCancelDialog(todoCreator.getRootPane(), "Confirm Addition", "Do you wish to add the following task?\n-\nName:  " + name + "\nTo be completed in:  " + span + "\n")) {
+                    if (App.showYesNoCancelDialog(todoCreator.getRootPane(), "Confirm", "Do you wish to add the following task?\n-\n" +
+                            "Name:  " + name + "\n" +
+                            "To be completed in:  " + span)) {
                         activeContainer.add(new TaskSelf.TodoSelf(name, givenDays));
                         ComponentAssistant.ready(activeContainer);
                         todoCreator.dispose();
@@ -239,7 +232,7 @@ public class TasksGenerator {
                 oldSelf.setTotalTimeConsumed(oldSelf.getSpecifiedDuration());
             	finalizeTransfer(oldSelf);
             } else {
-                if (App.showYesNoDialog(dialog.getRootPane(),"Confirm Completion","Are you sure you've completed this task?")) {
+                if (App.showYesNoDialog(dialog.getRootPane(), "Confirm Completion", "Are you sure you've completed this task?")) {
                     oldSelf.setTotalTimeConsumed(oldSelf.getDaysTaken());
                 	finalizeTransfer(oldSelf);
                     dialog.dispose();
@@ -249,17 +242,17 @@ public class TasksGenerator {
 
         private static void finalizeTransfer(TaskSelf.TodoSelf oldSelf) {
         	oldSelf.setDateCompleted(MDate.now());
-            oldSelf.getTogoLabel().setText("Completed "+oldSelf.getDateCompleted());//which is that
+            oldSelf.getTogoLabel().setText("Completed "+oldSelf.getDateCompleted());//Which is that
             oldSelf.getTogoLabel().setForeground(Color.BLUE);
             oldSelf.setActive(false);
             activeContainer.remove(oldSelf);
             dormantContainer.add(oldSelf);
-            ComponentAssistant.ready(activeContainer,dormantContainer);
+            ComponentAssistant.ready(activeContainer, dormantContainer);
         }
 
         public static ActionListener removalWaiter(TaskSelf.TodoSelf task, KDialog dialog){
             return e -> {
-                if (App.showOkCancelDialog(dialog.getRootPane(),"Confirm", "Do you really want to remove this task?")) {
+                if (App.showYesNoCancelDialog(dialog.getRootPane(),"Confirm", "Do you really want to remove this task?")) {
                     if (task.isActive()) {
                         activeContainer.remove(task);
                         ComponentAssistant.ready(activeContainer);
@@ -287,16 +280,14 @@ public class TasksGenerator {
         }
 
         private JComponent todoComponent(){
-            final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,setUpRunningTasks(),setUpCompletedTasks());
+            final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, setUpRunningTasks(), setUpCompletedTasks());
             splitPane.setContinuousLayout(true);
             splitPane.setBorder(null);
+            splitPane.setDividerLocation(175);
 
             final KPanel todoComponent = new KPanel();
             todoComponent.setLayout(new BoxLayout(todoComponent,BoxLayout.Y_AXIS));
             todoComponent.add(splitPane);
-
-            splitPane.setDividerLocation(175);
-
             return todoComponent;
         }
 
@@ -312,14 +303,14 @@ public class TasksGenerator {
             });
 
             final KPanel labelPanelPlus = new KPanel(new BorderLayout());
-            labelPanelPlus.add(addButton,BorderLayout.WEST);
-            labelPanelPlus.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER),null,new KLabel("Active Tasks",TASK_HEADERS_FONT)),BorderLayout.CENTER);
+            labelPanelPlus.add(addButton, BorderLayout.WEST);
+            labelPanelPlus.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER), null,
+                    new KLabel("Active Tasks", TASK_HEADERS_FONT)), BorderLayout.CENTER);
 
             final KPanel runningTasksPanel = new KPanel(new BorderLayout());
-            runningTasksPanel.add(labelPanelPlus,BorderLayout.NORTH);
+            runningTasksPanel.add(labelPanelPlus, BorderLayout.NORTH);
             final KScrollPane aScroll = new KScrollPane(activeContainer, false);
-            runningTasksPanel.add(aScroll,BorderLayout.CENTER);
-
+            runningTasksPanel.add(aScroll, BorderLayout.CENTER);
             return runningTasksPanel;
         }
 
@@ -331,7 +322,7 @@ public class TasksGenerator {
             clearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             clearButton.addActionListener(e -> {
                 if (dormantContainer.getComponentCount() > 0) {
-                    if (App.showOkCancelDialog("Confirm","This action will remove all the completed tasks. Continue?")) {
+                    if (App.showOkCancelDialog("Confirm", "This action will remove all the completed tasks.")) {
                         for (Component c : dormantContainer.getComponents()) {
                             dormantContainer.remove(c);
                         }
@@ -341,14 +332,14 @@ public class TasksGenerator {
             });
 
             final KPanel labelPanelPlus = new KPanel(new BorderLayout());
-            labelPanelPlus.add(clearButton,BorderLayout.WEST);
-            labelPanelPlus.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER),null,new KLabel("Completed Tasks",TASK_HEADERS_FONT)),BorderLayout.CENTER);
+            labelPanelPlus.add(clearButton, BorderLayout.WEST);
+            labelPanelPlus.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER), null,
+                    new KLabel("Completed Tasks",TASK_HEADERS_FONT)), BorderLayout.CENTER);
 
             final KPanel completedTasksPanel = new KPanel(new BorderLayout());
-            completedTasksPanel.add(labelPanelPlus,BorderLayout.NORTH);
+            completedTasksPanel.add(labelPanelPlus, BorderLayout.NORTH);
             final KScrollPane cScroll = new KScrollPane(dormantContainer, false);
-            completedTasksPanel.add(cScroll,BorderLayout.CENTER);
-
+            completedTasksPanel.add(cScroll, BorderLayout.CENTER);
             return completedTasksPanel;
         }
 
@@ -368,7 +359,8 @@ public class TasksGenerator {
             projectsReside = new KPanel(){
                 @Override
                 public Component add(Component comp) {
-                    projectsReside.setPreferredSize(new Dimension(projectsReside.getPreferredSize().width,projectsReside.getPreferredSize().height+40));
+                    projectsReside.setPreferredSize(new Dimension(projectsReside.getPreferredSize().width,
+                            projectsReside.getPreferredSize().height+40));
                     PROJECTS.add((TaskSelf.ProjectSelf) comp);
                     return super.add(comp);
                 }
@@ -376,7 +368,8 @@ public class TasksGenerator {
                 public void remove(Component comp) {
                     super.remove(comp);
                     PROJECTS.remove(comp);
-                    projectsReside.setPreferredSize(new Dimension(projectsReside.getPreferredSize().width,projectsReside.getPreferredSize().height-40));
+                    projectsReside.setPreferredSize(new Dimension(projectsReside.getPreferredSize().width,
+                            projectsReside.getPreferredSize().height-40));
                 }
             };
             projectsReside.setLayout(new FlowLayout(CONTENTS_POSITION));
@@ -411,7 +404,10 @@ public class TasksGenerator {
                         givenDays = 180;
                     }
 
-                    if (App.showYesNoCancelDialog(projectCreator.getRootPane(), "Confirm Addition", "Do you wish to add the following project?\n-\nName:  " + name + "\nType:  " + projectCreator.getTheType() + " Project" + "\nDuration:  " + dDuration + "\n")) {
+                    if (App.showYesNoCancelDialog(projectCreator.getRootPane(), "Confirm Addition", "Do you wish to add the following project?\n-\n" +
+                            "Name:  " + name + "\n" +
+                            "Type:  " + projectCreator.getTheType() + " Project" + "\n" +
+                            "Duration:  " + dDuration)) {
                         projectsReside.add(new TaskSelf.ProjectSelf(name, projectCreator.getTheType(), givenDays));
                         projectCreator.dispose();
                         ComponentAssistant.ready(projectsReside);
@@ -428,7 +424,7 @@ public class TasksGenerator {
                 renewCount(-1);
                 completeCount++;
         	} else {
-        		if (App.showYesNoDialog("Confirm Completion","Are you sure you've completed this project before the specified time?")) {
+        		if (App.showYesNoDialog("Confirm Completion", "Are you sure you've completed this project before the specified time?")) {
                     project.setTotalTimeConsumed(project.getDaysTaken());
         			finalizeCompletion(project);
                     renewCount(-1);
@@ -452,7 +448,7 @@ public class TasksGenerator {
 
         public static ActionListener removalListener(TaskSelf.ProjectSelf project){
             return e -> {
-                if (App.showOkCancelDialog("Confirm","This Project will be cleared from your list. Continue?")) {
+                if (App.showOkCancelDialog("Confirm","This Project will be cleared from your list.")) {
                     if (project.isLive()) {
                         renewCount(-1);
                     } else {
@@ -491,15 +487,13 @@ public class TasksGenerator {
             });
 
             final KPanel labelPanelPlus = new KPanel(new BorderLayout());
-            labelPanelPlus.add(addButton,BorderLayout.WEST);
-            labelPanelPlus.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER),null,new KLabel("My Projects",TASK_HEADERS_FONT)),BorderLayout.CENTER);
+            labelPanelPlus.add(addButton, BorderLayout.WEST);
+            labelPanelPlus.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER), null,
+                    new KLabel("My Projects", TASK_HEADERS_FONT)), BorderLayout.CENTER);
 
             final KPanel projectComponent = new KPanel(new BorderLayout());
             projectComponent.add(labelPanelPlus,BorderLayout.NORTH);
-            final KScrollPane aScroll = new KScrollPane(projectsReside);
-            aScroll.setBorder(null);
-            projectComponent.add(aScroll,BorderLayout.CENTER);
-
+            projectComponent.add(new KScrollPane(projectsReside, false), BorderLayout.CENTER);
             return projectComponent;
         }
 
@@ -519,15 +513,16 @@ public class TasksGenerator {
         	activeReside = new KPanel(){
                 @Override
                 public Component add(Component comp) {
-                    activeReside.setPreferredSize(new Dimension(activeReside.getPreferredSize().width,activeReside.getPreferredSize().height+40));
+                    activeReside.setPreferredSize(new Dimension(activeReside.getPreferredSize().width, activeReside.getPreferredSize().height+40));
                     ASSIGNMENTS.add((TaskSelf.AssignmentSelf) comp);
                     renewCount(1);
                     return super.add(comp);
                 }
+
                 @Override
                 public void remove(Component comp) {
                     super.remove(comp);
-                    activeReside.setPreferredSize(new Dimension(activeReside.getPreferredSize().width,activeReside.getPreferredSize().height-40));
+                    activeReside.setPreferredSize(new Dimension(activeReside.getPreferredSize().width, activeReside.getPreferredSize().height-40));
                     renewCount(-1);
                     ASSIGNMENTS.remove(comp);
                 }
@@ -537,17 +532,18 @@ public class TasksGenerator {
             doneReside = new KPanel(){
                 @Override
                 public Component add(Component comp) {
-                    doneReside.setPreferredSize(new Dimension(doneReside.getPreferredSize().width,doneReside.getPreferredSize().height+40));
+                    doneReside.setPreferredSize(new Dimension(doneReside.getPreferredSize().width, doneReside.getPreferredSize().height+40));
                     ASSIGNMENTS.add((TaskSelf.AssignmentSelf) comp);
                     doneCount++;
                     return super.add(comp);
                 }
+
                 @Override
                 public void remove(Component comp) {
                     super.remove(comp);
                     ASSIGNMENTS.remove(comp);
                     doneCount--;
-                    doneReside.setPreferredSize(new Dimension(doneReside.getPreferredSize().width,doneReside.getPreferredSize().height-40));
+                    doneReside.setPreferredSize(new Dimension(doneReside.getPreferredSize().width, doneReside.getPreferredSize().height-40));
                 }
             };
             doneReside.setLayout(new FlowLayout(CONTENTS_POSITION));
@@ -557,13 +553,13 @@ public class TasksGenerator {
             return e -> {
                 final String name = assignmentCreator.getNameField().getText();
                 if (Globals.isBlank(name)) {
-                    App.signalError(assignmentCreator.getRootPane(),"Blank Name", "Please provide the name of the course");
+                    App.signalError(assignmentCreator.getRootPane(), "Blank Name", "Please provide the name of the course");
                     assignmentCreator.getNameField().requestFocusInWindow();
                 } else if (name.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
-                    App.signalError(assignmentCreator.getRootPane(),"Error", "Sorry, the subject name cannot exceed "+TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters.");
+                    App.signalError(assignmentCreator.getRootPane(), "Error", "Sorry, the subject name cannot exceed "+TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters.");
                     assignmentCreator.getNameField().requestFocusInWindow();
                 } else if (Globals.isBlank(assignmentCreator.getProvidedDeadLine())) {
-                    App.signalError(assignmentCreator.getRootPane(),"Deadline Error", "Please fill out all the fields for the deadline. You can change them later.");
+                    App.signalError(assignmentCreator.getRootPane(), "Deadline Error", "Please fill out all the fields for the deadline. You can change them later.");
                 } else {
                     final String type = assignmentCreator.isGroup() ? "Group Assignment" : "Individual Assignment";
                     final String question = assignmentCreator.getQuestion();
@@ -586,7 +582,11 @@ public class TasksGenerator {
                     } else {
                         mean = "Other Means";
                     }
-                    if (App.showYesNoCancelDialog(assignmentCreator.getRootPane(),"Confirm Addition", "Do you wish to add the following assignment?\n-\nSubject:  " + name + "\nType:  " + type + "\nTo be submitted on:  "+deadline+ "\nThrough:  "+mean)) {
+                    if (App.showYesNoCancelDialog(assignmentCreator.getRootPane(), "Confirm", "Do you wish to add the following assignment?\n-\n" +
+                            "Subject:  " + name + "\n" +
+                            "Type:  " + type + "\n" +
+                            "Submittion:  "+deadline+ "\n" +
+                            "Through:  "+mean)) {
                         activeReside.add(new TaskSelf.AssignmentSelf(name, deadline, question, assignmentCreator.isGroup(), mean));
                         ComponentAssistant.ready(activeReside);
                         assignmentCreator.dispose();
@@ -600,7 +600,7 @@ public class TasksGenerator {
                 assignmentSelf.setSubmissionDate(assignmentSelf.getDeadLine());
                 completeTransfer(assignmentSelf);
             } else {
-                if (App.showYesNoCancelDialog(assignmentExhibition.getRootPane(),"Confirm Submission", "Are you sure you have submitted this assignment?")) {
+                if (App.showYesNoCancelDialog(assignmentExhibition.getRootPane(),"Confirm", "Are you sure you have submitted this assignment?")) {
                     assignmentSelf.setSubmissionDate(MDate.formatDateOnly(new Date()));
                     completeTransfer(assignmentSelf);
                     assignmentExhibition.dispose();
@@ -660,14 +660,13 @@ public class TasksGenerator {
         }
 
         private JComponent assignmentsComponent(){
-        	final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,setUpActiveAssignments(),setUpDoneAssignments());
+        	final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, setUpActiveAssignments(), setUpDoneAssignments());
             splitPane.setContinuousLayout(true);
             splitPane.setDividerLocation(175);
 
             final KPanel assignmentComponent = new KPanel();
-            assignmentComponent.setLayout(new BoxLayout(assignmentComponent,BoxLayout.Y_AXIS));
+            assignmentComponent.setLayout(new BoxLayout(assignmentComponent, BoxLayout.Y_AXIS));
             assignmentComponent.add(splitPane);
-
             return assignmentComponent;
         }
 
@@ -684,14 +683,14 @@ public class TasksGenerator {
 
             final KPanel labelPanelPlus = new KPanel(new BorderLayout());
             labelPanelPlus.add(createButton,BorderLayout.WEST);
-            labelPanelPlus.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER),null,new KLabel("Assignments",TASK_HEADERS_FONT)),BorderLayout.CENTER);
+            labelPanelPlus.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER), null,
+                    new KLabel("Assignments", TASK_HEADERS_FONT)), BorderLayout.CENTER);
 
             final KPanel upperReside = new KPanel(new BorderLayout());
-            upperReside.add(labelPanelPlus,BorderLayout.NORTH);
+            upperReside.add(labelPanelPlus, BorderLayout.NORTH);
             final KScrollPane scrollPane = new KScrollPane(activeReside);
             scrollPane.setBorder(null);
-            upperReside.add(scrollPane,BorderLayout.CENTER);
-
+            upperReside.add(scrollPane, BorderLayout.CENTER);
             return upperReside;
         }
 
@@ -703,7 +702,7 @@ public class TasksGenerator {
             clearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             clearButton.addActionListener(e -> {
                 if (doneReside.getComponentCount() > 0) {
-                    if (App.showOkCancelDialog("Confirm","This action will remove all the assignments you're done with. Continue?")) {
+                    if (App.showYesNoCancelDialog("Confirm", "This action will remove all the assignments you're done with. Continue?")) {
                         for (Component c : doneReside.getComponents()) {
                             doneReside.remove(c);
                         }
@@ -713,15 +712,13 @@ public class TasksGenerator {
             });
 
             final KPanel labelPanelPlus = new KPanel(new BorderLayout());
-            labelPanelPlus.add(clearButton,BorderLayout.WEST);
-            labelPanelPlus.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER),null,new KLabel("Completed Assignments",TASK_HEADERS_FONT)),BorderLayout.CENTER);
+            labelPanelPlus.add(clearButton, BorderLayout.WEST);
+            labelPanelPlus.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER), null,
+                    new KLabel("Completed Assignments", TASK_HEADERS_FONT)), BorderLayout.CENTER);
 
             final KPanel lowerReside = new KPanel(new BorderLayout());
-            lowerReside.add(labelPanelPlus,BorderLayout.NORTH);
-            final KScrollPane cScroll = new KScrollPane(doneReside);
-            cScroll.setBorder(null);
-            lowerReside.add(cScroll,BorderLayout.CENTER);
-
+            lowerReside.add(labelPanelPlus, BorderLayout.NORTH);
+            lowerReside.add(new KScrollPane(doneReside, false), BorderLayout.CENTER);
             return lowerReside;
         }
     }
@@ -737,14 +734,15 @@ public class TasksGenerator {
             eventsReside = new KPanel(){
                 @Override
                 public Component add(Component comp) {
-                    eventsReside.setPreferredSize(new Dimension(eventsReside.getPreferredSize().width,eventsReside.getPreferredSize().height+35));
+                    eventsReside.setPreferredSize(new Dimension(eventsReside.getPreferredSize().width, eventsReside.getPreferredSize().height+35));
                     EVENTS.add((TaskSelf.EventSelf) comp);
                     return super.add(comp);
                 }
+
                 @Override
                 public void remove(Component comp) {
                     super.remove(comp);
-                    eventsReside.setPreferredSize(new Dimension(eventsReside.getPreferredSize().width,eventsReside.getPreferredSize().height-35));
+                    eventsReside.setPreferredSize(new Dimension(eventsReside.getPreferredSize().width, eventsReside.getPreferredSize().height-35));
                     EVENTS.remove(comp);
                 }
             };
@@ -759,13 +757,13 @@ public class TasksGenerator {
                 }
                 String tName = requiredCreator.getDescriptionField().getText();
                 if (Globals.isBlank(tName)) {
-                    App.signalError(requiredCreator.getRootPane(),"No Name","Please specify a name for the event.");
+                    App.signalError(requiredCreator.getRootPane(), "No Name", "Please specify a name for the event.");
                     requiredCreator.getDescriptionField().requestFocusInWindow();
                 } else if (tName.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
-                    App.signalError(requiredCreator.getRootPane(),"Error", "Sorry, the event's name should be at most "+TaskCreator.TASKS_DESCRIPTION_LIMIT+" characters.");
+                    App.signalError(requiredCreator.getRootPane(), "Error", "Sorry, the event's name should be at most "+TaskCreator.TASKS_DESCRIPTION_LIMIT+" characters.");
                     requiredCreator.getDescriptionField().requestFocusInWindow();
                 } else if (Globals.isBlank(requiredCreator.getProvidedDate())) {
-                    App.signalError(requiredCreator.getRootPane(),"Error", "Please provide all the fields for the date of the "+(requiredCreator.type()));
+                    App.signalError(requiredCreator.getRootPane(), "Error", "Please provide all the fields for the date of the "+(requiredCreator.type()));
                 } else {
                     final Date date = MDate.parse(requiredCreator.getProvidedDate() + " 0:0:0");
                     if (date == null) {
@@ -781,7 +779,9 @@ public class TasksGenerator {
                         tName = tName + " Examination";
                     }
                     final String dateString = MDate.formatDateOnly(date);
-                    if (App.showYesNoCancelDialog(requiredCreator.getRootPane(),"Confirm Addition", "Do you wish to add the following event?\n-\nTitle:  "+tName+"\nDate:  "+dateString)) {
+                    if (App.showYesNoCancelDialog(requiredCreator.getRootPane(),"Confirm", "Do you wish to add the following event?\n-\n" +
+                            "Title:  "+tName+"\n" +
+                            "Date:  "+dateString)) {
                         eventsReside.add(new TaskSelf.EventSelf(tName, dateString));
                         ComponentAssistant.ready(eventsReside);
                         requiredCreator.dispose();
@@ -824,23 +824,17 @@ public class TasksGenerator {
         }
 
         private JComponent eventsComponent(){
-            final JMenuItem testItem = new JMenuItem("Upcoming Test");
-            testItem.setFont(KFontFactory.createPlainFont(16));
-            testItem.addActionListener(actionEvent -> {
+            final KMenuItem testItem = new KMenuItem("Upcoming Test", e-> {
                 testCreator = new TaskCreator.EventCreator(TaskCreator.EventCreator.TEST);
                 testCreator.setVisible(true);
             });
 
-            final JMenuItem examItem = new JMenuItem("Upcoming Exam");
-            examItem.setFont(KFontFactory.createPlainFont(16));
-            examItem.addActionListener(actionEvent -> {
+            final KMenuItem examItem = new KMenuItem("Upcoming Exam", e->{
                 examCreator = new TaskCreator.EventCreator(TaskCreator.EventCreator.EXAM);
                 examCreator.setVisible(true);
             });
 
-            final JMenuItem otherItem = new JMenuItem("Other");
-            otherItem.setFont(KFontFactory.createPlainFont(16));
-            otherItem.addActionListener(actionEvent -> {
+            final KMenuItem otherItem = new KMenuItem("Other", e->{
                 othersCreator = new TaskCreator.EventCreator(TaskCreator.EventCreator.OTHER);
                 othersCreator.setVisible(true);
             });
@@ -853,20 +847,18 @@ public class TasksGenerator {
             final KButton popUpButton = new KButton("New Event");
             popUpButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             popUpButton.setFont(TASK_BUTTONS_FONT);
-            popUpButton.addActionListener(e -> {
-                jPopup.show(popUpButton,popUpButton.getX(),popUpButton.getY() + (popUpButton.getPreferredSize().height));
-            });
+            popUpButton.addActionListener(e -> jPopup.show(popUpButton, popUpButton.getX(), popUpButton.getY() + (popUpButton.getPreferredSize().height)));
 
             final KPanel labelPanelPlus = new KPanel(new BorderLayout());
-            labelPanelPlus.add(popUpButton,BorderLayout.WEST);
-            labelPanelPlus.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER),null,new KLabel("Events",TASK_HEADERS_FONT)),BorderLayout.CENTER);
+            labelPanelPlus.add(popUpButton, BorderLayout.WEST);
+            labelPanelPlus.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER), null,
+                    new KLabel("Events", TASK_HEADERS_FONT)), BorderLayout.CENTER);
 
             final KPanel eventsComponent = new KPanel(new BorderLayout());
-            eventsComponent.add(labelPanelPlus,BorderLayout.NORTH);
+            eventsComponent.add(labelPanelPlus, BorderLayout.NORTH);
             final KScrollPane aScroll = new KScrollPane(eventsReside);
             aScroll.setBorder(null);
-            eventsComponent.add(aScroll,BorderLayout.CENTER);
-
+            eventsComponent.add(aScroll, BorderLayout.CENTER);
             return eventsComponent;
         }
     }

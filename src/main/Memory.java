@@ -3,17 +3,16 @@ package main;
 import java.util.ArrayList;
 
 /**
- * <h1>class Memory</h1>
- * <p>It's the root center of student analysis.</p>
- * <p><i>Among the things it does is to keep track of verified courses, whence.</i></p>
+ * It's the root-center of student analysis.
+ * Among the things it does is to keep track of verified courses to be supplied in the transcript
+ * and analysis.
  */
 public class Memory {
     /**
-     * There should be no chance of adding unverified modules. Notice, modules were not checked before
-     * passing here!
-     * Accessors of this list, noticeably, the Transcript and Analysis, should refresh calls prior to
-     * any activity-answer.
-     * This list must remain updated by the monitor in {@link ModulesHandler} by consulting it at any modification.
+     * There should be no chance of adding unverified modules.
+     * Accessors of this list, noticeably, the Transcript and Analysis, should refresh calls
+     * prior to any activity-answer.
+     * This list must remain updated by the monitor in ModulesHandler.
      */
     private static final ArrayList<Course> VERIFIED_LIST = new ArrayList<Course>(){
         @Override
@@ -22,24 +21,23 @@ public class Memory {
         }
     };
 
-
-    //@Carefully access the list
+//    Carefully access the list
     /**
-     * <p>May be called only by the modulesMonitor at {@link ModulesHandler}</p>
+     * May be called only by the modulesMonitor at ModulesHandler
      */
     public static void mayRemember(Course incomingCourse){
         VERIFIED_LIST.add(incomingCourse);
     }
 
     /**
-     * <p>May be called only by the modulesMonitor at {@link ModulesHandler}</p>
+     * May be called only by the modulesMonitor at ModulesHandler
      */
     public static void mayForget(Course outgoingCourse){
         VERIFIED_LIST.remove(outgoingCourse);
     }
 
     /**
-     * <p>May be called only by the modulesMonitor at {@link ModulesHandler}</p>
+     * May be called only by the modulesMonitor at ModulesHandler
      */
     public static void mayReplace(Course oldOne, Course newOne){
         final int t = indexOf(oldOne.getCode());
@@ -54,7 +52,6 @@ public class Memory {
                 return i;
             }
         }
-
         return -1;
     }
 
@@ -62,16 +59,21 @@ public class Memory {
         return VERIFIED_LIST;
     }
 
+    /**
+     * Returns a course which can be used for experimentation by this class of experimentation.
+     */
+    private static Course newDefaultCourse(){
+        return new Course("", "", "", "", "", "", "", "", 0.0, 0, "", true);
+    }
 
-    //@Filterers -
+//    Filterers -
     public static ArrayList<String> filterAcademicYears(){
-        ArrayList<String> requiredList = new ArrayList<>();
+        final ArrayList<String> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
             if (!requiredList.contains(c.getYear())) {
                 requiredList.add(c.getYear());
             }
         }
-
         return requiredList;
     }
 
@@ -84,14 +86,12 @@ public class Memory {
                     break;
                 }
             }
-
             for (Course course : VERIFIED_LIST) {
                 if (course.isSecondSemester() && course.getYear().equals(yearName)) {
                     requiredList.add(yearName+" "+Student.SECOND_SEMESTER);
                     break;
                 }
             }
-
             for (Course course : VERIFIED_LIST) {
                 if (course.isSummerSemester() && course.getYear().equals(yearName)) {
                     requiredList.add(yearName+" "+Student.SUMMER_SEMESTER);
@@ -99,269 +99,244 @@ public class Memory {
                 }
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<String> filterLecturers(){
-        ArrayList<String> requiredList = new ArrayList<>();
+        final ArrayList<String> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
             if (!(requiredList.contains(c.getLecturer()) || Globals.isBlank(c.getLecturer()))) {
                 requiredList.add(c.getLecturer());
             }
         }
-
         return requiredList;
     }
 
-
-    //@Partitioners - Return a fraction of the list fitting a condition
-    //Some are, of course, little bit more specific. They may return empty-lists, never null
+//    Partitioners - return a fraction of the list fitting a condition
+//    Some are, of course, little bit more specific. They may return empty-lists, never null
     public static ArrayList<Course> getFractionByGrade(String grade){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
             if (c.getGrade().equals(grade)) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getMajors(){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
             if (c.isMajor()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getMajorsBySemester(String sName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : getFractionBySemester(sName)) {
             if (c.isMajor()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getMajorsByYear(String yName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : getFractionByYear(yName)) {
             if (c.isMajor()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getMinors(){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
             if (c.isMinor()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getMinorsBySemester(String sName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : getFractionBySemester(sName)) {
             if (c.isMinor()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getMinorsByYear(String yName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : getFractionByYear(yName)) {
             if (c.isMinor()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getDERs(){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
             if (c.isDivisional()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getDERsBySemester(String sName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : getFractionBySemester(sName)) {
             if (c.isDivisional()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getDERsByYear(String yName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : getFractionByYear(yName)) {
             if (c.isDivisional()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getGERs(){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
             if (c.isGeneral()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getGERsBySemester(String sName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : getFractionBySemester(sName)) {
             if (c.isGeneral()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getGERsByYear(String yName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : getFractionByYear(yName)) {
             if (c.isGeneral()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getUnknowns(){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
             if (c.isUnclassified()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getUnknownsBySemester(String sName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : getFractionBySemester(sName)) {
             if (c.isUnclassified()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getUnknownsByYear(String yName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : getFractionByYear(yName)) {
             if (c.isUnclassified()) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<String> getLecturersByYear(String yearName){
-        ArrayList<String> requiredList = new ArrayList<>();
+        final ArrayList<String> requiredList = new ArrayList<>();
         for (Course c : getFractionByYear(yearName)) {
             if (!(requiredList.contains(c.getLecturer()) || Globals.isBlank(c.getLecturer()))) {
                 requiredList.add(c.getLecturer());
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getFractionByLecturer(String lName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
             if (!Globals.isBlank(c.getLecturer()) && c.getLecturer().equals(lName)) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getFractionByLecturer(String lName, String yName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : getFractionByYear(yName)) {
             if (c.getLecturer().equals(lName)) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getFractionBySemester(String sName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
             if (c.getAbsoluteSemesterName().equals(sName)) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
     public static ArrayList<Course> getFractionByYear(String yName){
-        ArrayList<Course> requiredList = new ArrayList<>();
+        final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
             if (c.getYear().equals(yName)) {
                 requiredList.add(c);
             }
         }
-
         return requiredList;
     }
 
 
-    //@Tracers -
-    //These can give back null!
+//    Tracers -
+//    These can give back null
     public static Course traceHighestScore_Overall(){
         if (VERIFIED_LIST.isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = new Course();
+            Course requiredCourse = newDefaultCourse();
             for (Course someCourse : VERIFIED_LIST) {
                 if (someCourse.getScore() > requiredCourse.getScore()) {
                     requiredCourse = someCourse;
                 }
             }
-
             return requiredCourse;
         }
     }
@@ -370,14 +345,13 @@ public class Memory {
         if (VERIFIED_LIST.isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = new Course();
+            Course requiredCourse = newDefaultCourse();
             requiredCourse.setScore(100D);
             for (Course instantCourse : VERIFIED_LIST) {
                 if (instantCourse.getScore() < requiredCourse.getScore()) {
                     requiredCourse = instantCourse;
                 }
             }
-
             return requiredCourse;
         }
     }
@@ -386,13 +360,12 @@ public class Memory {
         if (getMajors().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = new Course();
+            Course requiredCourse = newDefaultCourse();
             for (Course someCourse : getMajors()) {
                 if (someCourse.getScore() > requiredCourse.getScore()) {
                     requiredCourse = someCourse;
                 }
             }
-
             return requiredCourse;
         }
     }
@@ -401,14 +374,13 @@ public class Memory {
         if (getMajors().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = new Course();
+            Course requiredCourse = newDefaultCourse();
             requiredCourse.setScore(100D);
             for (Course someCourse : getMajors()) {
                 if (someCourse.getScore() < requiredCourse.getScore()) {
                     requiredCourse = someCourse;
                 }
             }
-
             return requiredCourse;
         }
     }
@@ -417,13 +389,12 @@ public class Memory {
         if (getMinors().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = new Course();
+            Course requiredCourse = newDefaultCourse();
             for (Course someCourse : getMinors()) {
                 if (someCourse.getScore() > requiredCourse.getScore()) {
                     requiredCourse = someCourse;
                 }
             }
-
             return requiredCourse;
         }
     }
@@ -432,14 +403,13 @@ public class Memory {
         if (getMinors().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = new Course();
+            Course requiredCourse = newDefaultCourse();
             requiredCourse.setScore(100D);
             for (Course someCourse : getMinors()) {
                 if (someCourse.getScore() < requiredCourse.getScore()) {
                     requiredCourse = someCourse;
                 }
             }
-
             return requiredCourse;
         }
     }
@@ -448,13 +418,12 @@ public class Memory {
         if (getDERs().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = new Course();
+            Course requiredCourse = newDefaultCourse();
             for (Course someCourse : getDERs()) {
                 if (someCourse.getScore() > requiredCourse.getScore()) {
                     requiredCourse = someCourse;
                 }
             }
-
             return requiredCourse;
         }
     }
@@ -463,14 +432,13 @@ public class Memory {
         if (getDERs().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = new Course();
+            Course requiredCourse = newDefaultCourse();
             requiredCourse.setScore(100D);
             for (Course someCourse : getDERs()) {
                 if (someCourse.getScore() < requiredCourse.getScore()) {
                     requiredCourse = someCourse;
                 }
             }
-
             return requiredCourse;
         }
     }
@@ -479,13 +447,12 @@ public class Memory {
         if (getGERs().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = new Course();
+            Course requiredCourse = newDefaultCourse();
             for (Course someCourse : getGERs()) {
                 if (someCourse.getScore() > requiredCourse.getScore()) {
                     requiredCourse = someCourse;
                 }
             }
-
             return requiredCourse;
         }
     }
@@ -494,14 +461,13 @@ public class Memory {
         if (getGERs().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = new Course();
+            Course requiredCourse = newDefaultCourse();
             requiredCourse.setScore(100D);
             for (Course someCourse : getGERs()) {
                 if (someCourse.getScore() < requiredCourse.getScore()) {
                     requiredCourse = someCourse;
                 }
             }
-
             return requiredCourse;
         }
     }
@@ -518,7 +484,6 @@ public class Memory {
                     i++;
                 }
             }
-
             return totalCG/i;
         }
     }
@@ -535,8 +500,7 @@ public class Memory {
                     i++;
                 }
             }
-
-            return totalCG/i;
+            return totalCG / i;
         }
     }
 
@@ -550,7 +514,6 @@ public class Memory {
                 bestSem = semName;
             }
         }
-
         return getCG ? bestSem+" [CGPA="+ Globals.toFourth(bestCG)+"]" : bestSem;
     }
 
@@ -564,7 +527,6 @@ public class Memory {
                 worstSem = semName;
             }
         }
-
         return getCG ? worstSem+" [CGPA="+ Globals.toFourth(worstCG)+"]" : worstSem;
     }
 
@@ -578,7 +540,6 @@ public class Memory {
                 bestAcdYr = yrName;
             }
         }
-
         return getCG ? bestAcdYr+" [CGPA="+ Globals.toFourth(bestCG)+"]" : bestAcdYr;
     }
 
@@ -592,7 +553,6 @@ public class Memory {
                 worstAcdYr = yrName;
             }
         }
-
         return getCG ? worstAcdYr+" [CGPA="+ Globals.toFourth(worstCG)+"]" : worstAcdYr;
     }
 

@@ -1,7 +1,6 @@
 package utg;
 
-
-import main.MyDashboard;
+import main.MyClass;
 
 /**
  * <h1>class SpecificTester</h1>
@@ -23,7 +22,7 @@ public class SpecificTester {
     }
 
     public static void main(String[] args) {
-        new MyDashboard().setVisible(true);
+        MyClass.serialize(System.getProperty("user.name"), "userName.ser");
     }
 
 }

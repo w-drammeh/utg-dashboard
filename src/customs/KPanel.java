@@ -8,12 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <h1>class KPanel</h1>
- * <p><b>Description</b>: Panels as we know are basically the most fundamental of
- * swing gui builders.</p>
- * <p><i>The KPanel type has many useful constructors.</i></p>
+ * Panels as we know are basically the most fundamental of swing builders.
+ * The KPanel type has many useful constructors with centralized mechanism of background changes.
  */
-public class KPanel extends JPanel {
+public class KPanel extends JPanel implements Preference {
     public static final List<KPanel> ALL_PANELS = new ArrayList<>();
 
 
@@ -44,12 +42,12 @@ public class KPanel extends JPanel {
     }
 
     /**
-     * <p>A convenient way of calling wantDirectAddition(null, null, directComponent)</p>
-     * <p>Still respecting the default layout, this will add all the directComponents
-     * to the returned instance.</p>
-     * <p>Notice that the ability of this call to accept multiple param-components
+     * A convenient way of calling wantDirectAddition(null, null, directComponent).
+     * Still respecting the default-layout, this will add all the directComponents
+     * to the returned instance.
+     * Notice that the ability of this call to accept multiple param-components
      * will minimize declaration of panels for the sake of holding multiple components
-     * instead of direct addition.</p>
+     * instead of direct-addition.
      */
     public static KPanel wantDirectAddition(Component... directComponents){
         final KPanel panel = new KPanel();
@@ -61,12 +59,9 @@ public class KPanel extends JPanel {
     }
 
     /**
-     * <p>Returns a panel which, by the way, contains only one component - i.e this param.</p>
-     * <p><i>The layout and the dimension can be specified. If the layout is null, it uses the default Flow;
-     * If the dimension is null, UI is asked, off course.</i></p>
-     *
-     * <p><i>If you have the intention of using both params null, then use the alternative over-loaded call.</i></p>
-     * <p><i>Accepts one component.</i></p>
+     * The layout and the dimension can be specified. If the layout is null, it uses the default Flow;
+     * If the dimension is null, UI is asked, off course.
+     * If you have the intention of using both params null, then use the alternative over-loaded call.
      */
     public static KPanel wantDirectAddition(LayoutManager layout, Dimension dimension, JComponent... directComponents){
         final KPanel kPanel = new KPanel(layout == null ? new FlowLayout(FlowLayout.CENTER) : layout);
@@ -78,28 +73,27 @@ public class KPanel extends JPanel {
         return kPanel;
     }
 
-    public void removeLastChild(){
+    public void removeLastChild() {
         final int childrenCount = this.getComponentCount();
-        if (childrenCount >= 0) {
+        if (childrenCount >= 1) {
             this.remove(childrenCount - 1);
         }
     }
 
     /**
-     * <p>Directly adds a list of components to this instance.</p>
-     * <p><i>Since this function pays no heed to position, it cannot be used under certain
-     * layouts, especially, the beloved 'border'. However, very useful under certain other
-     * beloved layouts like 'flow', and 'box'.</i></p>
+     * Directly adds a list of components to this instance.
+     * Since this function pays no heed to position, it cannot be used under certain
+     * layouts, especially, the beloved 'Border'. However, very useful under certain other
+     * beloved layouts like 'flow', and 'box'.
      */
-    public void addAll(Component ... list){
-        for(Component c : list){
+    public void addAll(Component ... list) {
+        for (Component c : list) {
             this.add(c);
         }
-
     }
 
-    private void setPreferences(){
-        this.setBackground(SettingsCore.currentBackground());//Some are created on runtime, off course
+    public void setPreferences() {
+        this.setBackground(SettingsCore.currentBackground());//Since some are created at runtime
         ALL_PANELS.add(this);
     }
 

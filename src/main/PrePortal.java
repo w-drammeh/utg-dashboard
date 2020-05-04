@@ -7,21 +7,18 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <h1>class PrePortal</h1>
- * <p>As the name suggests, PrePortal is a once and for all class, technically
+ * As the name suggests, PrePortal is a once and for all class, technically
  * reserved for verification and collection of start-up data from the Portal which it'll send to the
- * {@link Student}, {@link Memory},  types.</p>
- *
+ * Student, Memory, and Course types.
  */
-public class PrePortal implements Serializable {
+public class PrePortal {
     private static ArrayList<String> portalDetails = new ArrayList<>();
     private static String email, password, temporaryName;
-    private static FirefoxDriver driver;//should deliver itself to Portal after task
+    private static FirefoxDriver driver;//Should be delivered to Portal after task
     private static WebDriverWait loadWaiter;
 
 
@@ -81,9 +78,6 @@ public class PrePortal implements Serializable {
         }
     }
 
-    /**
-     * <p>To be called since {@link Preview} to fix this driver in advance.</p>
-     */
     public static synchronized void startFixingDriver(){
         if (driver != null) {
             return;
@@ -91,7 +85,7 @@ public class PrePortal implements Serializable {
         driver = DriversPack.forgeNew(true);
     }
 
-    //since gate is opened, and the driver enters with the student details, if an error occurs, it'll quit before returning
+    //Since gate is opened, and the driver enters with the student details, if an error occurs, it'll quit before returning
     private static void gateOpened(){
         String firstName="", lastName="", matNumber="", program="", major="", school="", department="", nationality="", MOA="", YOA="", address="", mStatus="", DOB="", tel="", ongoingSemester="", level="", state="";
 

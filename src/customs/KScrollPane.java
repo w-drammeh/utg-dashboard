@@ -4,12 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * <h1>class KScrollPane</h1>
- * <p>The standard Scroller. Fantastic container for swing components</p>
- * <p><i>This class is unique in its constructors and other useful static methods embedded therein.</i></p>
+ * The standard Dashboard Scroller. Fantastic container for swing components.
+ * This class is unique in its constructors and other useful static methods embedded therein.
  */
-public class KScrollPane extends JScrollPane {
-//    public static List<KScrollPane> ALL_SCROLLERS = new ArrayList<>();
+public class KScrollPane extends JScrollPane implements Preference {
 
 
     public KScrollPane(Component insider){
@@ -18,39 +16,32 @@ public class KScrollPane extends JScrollPane {
     }
 
     /**
-     * <p>This obsoletes the default, since its more useful in direct painting of the border.</p>
-     * <p>Do not give any param if you wish to paint, for borders are, by default, painted.</p>
+     * This obsoletes the default, since its more useful in direct painting of the border.
      */
     public KScrollPane(Component insider, boolean paintBorders){
-        super(insider);
-        this.setPreferences();
-        if (!paintBorders) {
-            this.setBorder(null);
-        }
+        this(insider);
+        this.setBorder(paintBorders ? this.getBorder() : null);
     }
 
-    public KScrollPane(Component insider, Dimension prfSize, boolean paintBorders){
+    public KScrollPane(Component insider, Dimension dimension, boolean paintBorders){
         super(insider);
-        this.setPreferredSize(prfSize);
-        if (!paintBorders) {
-            this.setBorder(null);
-        }
+        this.setPreferredSize(dimension);
+        this.setBorder(paintBorders ? this.getBorder() : null);
         this.setPreferences();
     }
 
     /**
      * Surround TextAreas with this.
-     * If used, border modifications should be done on it, not the textArea.
+     * If used, border modifications should be done on it, and not the textArea.
      */
     public static KScrollPane getTextAreaScroller(KTextArea textArea, Dimension dimension){
         final KScrollPane housePane = new KScrollPane(textArea,dimension,true);
         housePane.setVerticalScrollBarPolicy(KScrollPane.VERTICAL_SCROLLBAR_NEVER);
-
         return housePane;
     }
 
     /**
-     * Typically, tables are surrounded with this
+     * Typically, tables are surrounded with this.
      */
     public static KScrollPane getSizeMatchingScrollPane(JComponent innerComponent, int extra){
         KScrollPane sizeTracer = new KScrollPane(innerComponent, false);
@@ -63,23 +54,20 @@ public class KScrollPane extends JScrollPane {
         }
 
         sizeTracer.setPreferredSize(iSize);
-
         return sizeTracer;
     }
 
     public static KScrollPane getAutoScroller(JComponent c){
         KScrollPane scrollPane = new KScrollPane(c);
-
         scrollPane.getVerticalScrollBar().addAdjustmentListener(e -> {
             Adjustable adjustable = e.getAdjustable();
             adjustable.setValue(adjustable.getMaximum());
         });
-
         return scrollPane;
     }
 
     /**
-     * <p>Called to remove the AdjustmentListener on the ScrollPane</p>
+     * Called to remove the AdjustmentListener on the ScrollPane.
      */
     public static void stopAutoScrollingOn(KScrollPane kScrollPane){
         final JScrollBar vScrollBar = kScrollPane.getVerticalScrollBar();
@@ -94,9 +82,8 @@ public class KScrollPane extends JScrollPane {
         this.getVerticalScrollBar().setValue(this.getVerticalScrollBar().getMaximum());
     }
 
-    private void setPreferences(){
-//        this.setBackground(SettingsCore.currentBackground());
-//        ALL_SCROLLERS.add(this);
+    public void setPreferences(){
+
     }
 
 }

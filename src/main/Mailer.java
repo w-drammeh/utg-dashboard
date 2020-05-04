@@ -13,12 +13,11 @@ import java.util.Properties;
  * <p>Actually the <b>G-mailer</b></p>
  */
 public class Mailer {
+    private String subject, content, senderMail, senderPsswd;
     public static final String DEVELOPERS_MAIL = "utgdashboard@gmail.com";
     public static final String FEEDBACK = "Feedback";
     public static final String DEVELOPERS_REQUEST = "Track";
     public static int REVIEWS_COUNT_TODAY;//it's reset @anotherDay() in Board
-    //
-    private String subject, content, senderMail, senderPsswd;
 
 
     public Mailer(String subject, String content){

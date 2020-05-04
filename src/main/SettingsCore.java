@@ -10,8 +10,8 @@ public class SettingsCore {
     public static UIManager.LookAndFeelInfo[] allLooksInfo;
     public static boolean noVerifyNeeded = false;
     public static boolean confirmExit = true;
-    public static boolean userType = true;//not used yet
-    public static String backgroundName = "Default";
+    public static boolean userType = true;//Not used yet
+    public static String backgroundName = Globals.NONE;
     public static String lookName = UIManager.getLookAndFeel().getName();
     private static Date serializationTime;//All serializations are done at same time, so this property needs not be relative
 
@@ -21,7 +21,6 @@ public class SettingsCore {
         for (int i = 0; i < array.length; i++) {
             array[i] = allLooksInfo[i].getName();
         }
-
         return array;
     }
 
@@ -48,7 +47,6 @@ public class SettingsCore {
         map.put("Green", Color.GREEN);
         map.put("Yellow", Color.YELLOW);
 //        map.put("Black", Color.BLACK);
-
         return map;
     }
 
@@ -58,7 +56,6 @@ public class SettingsCore {
         for (int i = 0; i < bgs.length; i++) {
             names[i] = (String) bgs[i];
         }
-
         return names;
     }
 

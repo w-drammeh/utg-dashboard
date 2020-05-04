@@ -10,25 +10,24 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-/**
- * <h1>class NotificationGenerator</h1>
- */
 public class NotificationGenerator {
-    private static int unreadCount;//with a technical mechanism of incrementing and decrementing it
+    private static int unreadCount;//With a technical mechanism of incrementing and decrementing it
     private static KPanel dashboardPanel, portalPanel;
     private static KButton clearingButton;
     private static FirefoxDriver portalNoticeDriver;
     private static KButton portalRefresher;
-    //and its related-rubbish comps...
+    //And its related-rubbish comps...
     private static KLabel admissionLabel, registrationLabel;
-    private final KLabel hint = KLabel.getPredefinedLabel("Notifications ", SwingConstants.LEFT);
-    private final CardLayout card = new CardLayout();
+    private KLabel hint;
+    private CardLayout card;
     private KPanel notificationPanel;
 
 
     public NotificationGenerator(){
+        card = new CardLayout();
         notificationPanel = new KPanel(card);
 
+        hint = KLabel.getPredefinedLabel("Notifications ", SwingConstants.LEFT);
         hint.setFont(KFontFactory.bodyHeaderFont());
 
         configureDashAlerts();
@@ -36,11 +35,9 @@ public class NotificationGenerator {
     }
 
     public static synchronized void trySettingNoticeDriver(){
-        if (portalNoticeDriver != null) {
-            return;
+        if (portalNoticeDriver == null) {
+            portalNoticeDriver = DriversPack.forgeNew(true);
         }
-
-        portalNoticeDriver = DriversPack.forgeNew(true);
     }
 
     public static void awareLookShift(){
@@ -51,12 +48,11 @@ public class NotificationGenerator {
     }
 
     /**
-     * <p>As alerts are passed here, they are forwarded to their respective panel.
-     * <p><i>Do not call this method directly! Call Notification.create(#) instead.</i></p>
-     *
+     * As alerts are passed here, they are forwarded to their respective panel.
+     * Do not call this method directly! Call Notification.create(#) instead.
      */
     public static void join(Notification newNotification){
-        dashboardPanel.add(newNotification);
+        dashboardPanel.add(newNotification.getLayer());
         if (!newNotification.isRead()) {
             effectCount(1);
         }
@@ -66,7 +62,7 @@ public class NotificationGenerator {
     public static ActionListener deletionListener(Notification notification){
         return e -> {
             notification.getShower().dispose();
-            dashboardPanel.remove(notification);
+            dashboardPanel.remove(notification.getLayer());
             ComponentAssistant.ready(dashboardPanel);
             Notification.NOTIFICATIONS.remove(notification);
         };
@@ -75,7 +71,10 @@ public class NotificationGenerator {
     public static ActionListener clearListener(){
         return e -> {
             if (dashboardPanel.getComponentCount() > 0) {
-                if (App.showOkCancelDialog("Warning","This action will remove all notifications, including unread."+(getUnreadCount() == 0 ? "" : " You have "+ Globals.checkPlurality(getUnreadCount(), "notifications")+" unread."))) {
+                if (App.showOkCancelDialog("Warning",
+                        "This action will remove all notifications, including unread.\n" +
+                                (getUnreadCount() == 0 ? "" : "You have "+ Globals.checkPlurality(getUnreadCount(),
+                                        "notifications")+" unread."))) {
                     dashboardPanel.removeAll();
                     effectCount(-getUnreadCount());
                     ComponentAssistant.ready(dashboardPanel);
@@ -86,20 +85,21 @@ public class NotificationGenerator {
     }
 
     /**
-     * <p>For all incoming or read alerts, this should be called eventually.</p>
-     * <p><i>If notification is coming(new) parse 1, else if it's being read, parse -1</i></p>
+     * For all incoming or read alerts, this should be called eventually.
+     * If notification is coming(new) parse 1, else if it's being read, parse -1
      *
-     * <p>This function will also renew the ToolTipText of the Board's big-button</p>
+     * This function will also renew the ToolTipText of the Board's big-button
      */
     public static void effectCount(int value){
         unreadCount += value;
-        final String sendingTip = getUnreadCount() == 0 ? null : Globals.checkPlurality(getUnreadCount(), "unread notifications");
+        final String sendingTip = getUnreadCount() == 0 ? null : Globals.checkPlurality(getUnreadCount(),
+                "unread notifications");
         Board.getNotificationButton().setToolTipText(sendingTip);
     }
 
     /**
-     * <p>This gets the 'unreadCount'. How may it be needed outside? As for the big-button, it's
-     * only the toolTip needed which is taken cared by renewCount(), herein</p>
+     * This gets the 'unreadCount'. How may it be needed outside? As for the big-button, it's
+     * only the toolTip needed which is taken cared by renewCount(), herein this class.
      */
     private static int getUnreadCount(){
         return unreadCount;
@@ -109,6 +109,7 @@ public class NotificationGenerator {
         if (!userRequested && !portalRefresher.isEnabled()) {
             return;
         }
+
         new Thread(()-> {
             portalRefresher.setEnabled(false);
             adjustNoticeComponents(false);
@@ -166,7 +167,6 @@ public class NotificationGenerator {
 
     public KPanel presentedContainer(){
         final KPanel bridgePanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-
         final JComboBox<String> alertOptions = new JComboBox<String>(new String[] {"Dashboard", "Portal"}){
             @Override
             public JToolTip createToolTip() {
@@ -208,7 +208,6 @@ public class NotificationGenerator {
         final KPanel present = new KPanel(new BorderLayout());
         present.add(upPanel, BorderLayout.NORTH);
         present.add(new KScrollPane(notificationPanel,false), BorderLayout.CENTER);
-
         return present;
     }
 
@@ -220,6 +219,7 @@ public class NotificationGenerator {
                 dashboardPanel.setPreferredSize(new Dimension(975,dashboardPanel.getPreferredSize().height+35));
                 return super.add(comp);
             }
+
             @Override
             public void remove(Component comp) {
                 super.remove(comp);
@@ -227,7 +227,6 @@ public class NotificationGenerator {
             }
         };
         dashboardPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-
         card.addLayoutComponent(notificationPanel.add(dashboardPanel),"Dashboard Alerts");
     }
 
@@ -241,9 +240,7 @@ public class NotificationGenerator {
         alertPanel_registration.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                SwingUtilities.invokeLater(()->{
-                    new NoticeExhibition(NoticeExhibition.REGISTRATION_NOTICE).setVisible(true);
-                });
+                SwingUtilities.invokeLater(()-> new NoticeExhibition(NoticeExhibition.REGISTRATION_NOTICE).setVisible(true));
             }
         });
         alertPanel_registration.add(new KLabel("REGISTRATION ALERT:",KFontFactory.createBoldFont(16),Color.BLUE),BorderLayout.WEST);
@@ -255,9 +252,7 @@ public class NotificationGenerator {
         alertPanel_admission.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                SwingUtilities.invokeLater(()->{
-                    new NoticeExhibition(NoticeExhibition.ADMISSION_NOTICE).setVisible(true);
-                });
+                SwingUtilities.invokeLater(()-> new NoticeExhibition(NoticeExhibition.ADMISSION_NOTICE).setVisible(true));
             }
         });
         alertPanel_admission.add(new KLabel("ADMISSION ALERT:",KFontFactory.createBoldFont(16),Color.BLUE),BorderLayout.WEST);
@@ -272,9 +267,7 @@ public class NotificationGenerator {
         };
         portalRefresher.setFont(KFontFactory.createPlainFont(15));
         portalRefresher.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        portalRefresher.addActionListener(e -> {
-            updateNotices(true);
-        });
+        portalRefresher.addActionListener(e -> updateNotices(true));
 
         portalPanel = new KPanel(){
             @Override
@@ -282,6 +275,7 @@ public class NotificationGenerator {
                 portalPanel.setPreferredSize(new Dimension(975,portalPanel.getPreferredSize().height+35));
                 return super.add(comp);
             }
+
             @Override
             public void remove(Component comp) {
                 super.remove(comp);
@@ -290,7 +284,6 @@ public class NotificationGenerator {
         };
         portalPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         portalPanel.addAll(alertPanel_registration, alertPanel_admission);
-
         card.addLayoutComponent(notificationPanel.add(portalPanel),"Portal Alerts");
     }
 
@@ -310,9 +303,7 @@ public class NotificationGenerator {
             noticePane.setPreferredSize(new Dimension(500, 125));
 
             final KButton disposeButton = new KButton("Ok");
-            disposeButton.addActionListener(e1 -> {
-                this.dispose();
-            });
+            disposeButton.addActionListener(e1 -> this.dispose());
 
             final KPanel lowerPart = new KPanel();
             lowerPart.setLayout(new BoxLayout(lowerPart,BoxLayout.Y_AXIS));

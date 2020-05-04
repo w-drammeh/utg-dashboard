@@ -1,15 +1,21 @@
 package customs;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.*;
 
-public class KPasswordField extends JPasswordField {
-    public static final List<KPasswordField> ALL_PSSWD_FIELDS = new ArrayList<>();
+/**
+ * Not particularly so used in this implementation.
+ */
+public class KPasswordField extends JPasswordField implements Preference {
 
 
     public KPasswordField(){
         this.setPreferences();
+    }
+
+    public KPasswordField(Dimension d){
+        this();
+        this.setPreferredSize(d);
     }
 
     public KPasswordField(String initial){
@@ -17,8 +23,10 @@ public class KPasswordField extends JPasswordField {
         this.setPreferences();
     }
 
-    private void setPreferences(){
-
+    public void setPreferences(){
+        this.setFont(KFontFactory.createPlainFont(15));
+        this.setAutoscrolls(true);
+        this.setHorizontalAlignment(SwingConstants.CENTER);
     }
 
 }

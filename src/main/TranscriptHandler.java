@@ -16,10 +16,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * <h1>class TranscriptHandler</h1>
- *
- * <p>While the generator type gets the components used by Board, this handles the print and export
- * actions.</p>
+ * While the generator type gets the components used by Board,
+ * this handles the print and export actions.
  */
 public class TranscriptHandler {
     public static final String UNCLASSIFIED = "None";
@@ -81,8 +79,7 @@ public class TranscriptHandler {
             final KPanel lastNotLeast = newDetailPanel(375, (scrollPane.getY()+scrollPane.getHeight()+10), 125, 200, 45,"AVERAGE","QUALITY POINT", " "+Student.getCGPA()+" ");
             lastNotLeast.setBounds(lastNotLeast.getX(),lastNotLeast.getY(),lastNotLeast.getWidth(),50);
             exportPanel.add(lastNotLeast);
-        }//then it shall be added later... (in secondary) to the secondaryExportPanel
-
+        }//Then it shall be added later... (in secondary) to the secondaryExportPanel
         repairDialog();
     }
 
@@ -107,14 +104,13 @@ public class TranscriptHandler {
     }
 
     private static void attachTitlePlus(){
-        final KLabel uLogo = KLabel.wantIconLabel("Logo_of_UTG.gif",75,100);
+        final KLabel uLogo = KLabel.wantIconLabel("UTGLogo.gif",75,100);
         uLogo.setBounds(50,30,100,100);
 
         final KPanel labelsPanel = new KPanel();
         labelsPanel.setBounds(175,40,375,75);
         labelsPanel.add(new KLabel("THE UNIVERSITY OF THE GAMBIA", KFontFactory.createBoldFont(17)));
         labelsPanel.add(new KLabel("STUDENT ACADEMIC RECORDS", KFontFactory.createBoldFont(17)));
-
         exportPanel.addAll(uLogo, labelsPanel);
     }
 

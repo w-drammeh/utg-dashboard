@@ -10,7 +10,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  * <p><b>Description</b>: One of the most useful swing components as long as Dashboard is concerned.</p>
  * <p><i> </i></p>
  */
-public class KTable extends JTable {
+public class KTable extends JTable implements Preference {
 
 
     public KTable(KDefaultTableModel defaultTableModel){
@@ -44,7 +44,7 @@ public class KTable extends JTable {
         }
     }
 
-    private void setPreferences(){
+    public void setPreferences(){
         this.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 

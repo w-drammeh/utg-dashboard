@@ -8,38 +8,37 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 /**
- * <h1>class Login</h1>
- * <p><b>Description</b>: The Login type provides the framework for the user to provide
- * details of email & password which it'll parse to a static function  of the {@link PrePortal} class, launchVerificationSequences,
- * for verification</p>
- * <p><b>GUI</b>: A sizable undecorated frame with a null-layout, as  specified by its contentPane
- * static instance - contents. </p>
+ * The Login type provides the UI for the user to provide details of email & password which it'll
+ * parse to a static function of the PrePortal class, launchVerificationSequences(), for verification.
  */
 public class Login extends KDialog {
-    private static final String initialHint = "Please enter your Email and Password in the fields provided above, respectively.";
+    private KTextField emailField;
+    private JPasswordField passwordField;
+    private Welcome welcome;
+    private static String initialHint;
     private static KButton loginButton, cancelButton;
-    private static Container contents;
     private static KPanel statusPanel;
     private static KPanel smallPanel;
     private static JRootPane rootPane;
     private static KScrollPane statusHolder;
     private static Login loginInstance;
-    private KTextField emailField;
-    private JPasswordField passwordField;
-    private Welcome welcome;
 
 
     public Login(Welcome welcome){
+        loginInstance = Login.this;
+        rootPane = this.getRootPane();
+
         this.welcome = welcome;
         this.setSize(720,425);
         this.setDefaultCloseOperation(Login.DO_NOTHING_ON_CLOSE);
         this.setUndecorated(true);
 
-        final KLabel bigText = new KLabel("LOGIN TO GET THE MOST OUT OF YOUR STUDENT-HOOD!", KFontFactory.createPlainFont(18),Color.WHITE);
+        final KLabel bigText = new KLabel("LOGIN TO GET THE MOST OUT OF YOUR STUDENT-HOOD!",
+                KFontFactory.createPlainFont(18),Color.WHITE);
         bigText.setBounds(15, 10, 625, 30);
         bigText.setBackground(null);
 
-        final KLabel utgLabel = KLabel.wantIconLabel("Logo_of_UTG.gif",50,50);
+        final KLabel utgLabel = KLabel.wantIconLabel("UTGLogo.gif",50,50);
         utgLabel.setBounds(645, 0, 100, 50);
         utgLabel.setBackground(null);
 
@@ -106,9 +105,7 @@ public class Login extends KDialog {
         cancelButton.setBounds(140, 160, 110, 30);
         cancelButton.addActionListener(e -> {
             Login.this.dispose();
-            SwingUtilities.invokeLater(() -> {
-                this.welcome.setVisible(true);
-            });
+            SwingUtilities.invokeLater(() -> this.welcome.setVisible(true));
         });
 
         smallPanel = new KPanel();
@@ -131,18 +128,17 @@ public class Login extends KDialog {
         statusHolder = KScrollPane.getAutoScroller(statusPanel);
         statusHolder.setBounds(5,275,710,145);
 
-        contents = this.getContentPane();
+        final Container contents = this.getContentPane();
         contents.setLayout(null);
         contents.setBackground(new Color(40, 40, 40));
         contents.add(bigText);
         contents.add(utgLabel);
         contents.add(smallPanel);
         contents.add(statusHolder);
-        rootPane = this.getRootPane();
 
+        initialHint = "Please enter your Email and Password in the fields provided above, respectively.";
         appendToStatus(initialHint);
 
-        loginInstance = Login.this;
         this.setLocationRelativeTo(null);
     }
 
@@ -182,11 +178,12 @@ public class Login extends KDialog {
     }
 
     /**
-     * <p>PrePortal should call this after it's done all its tasks...</p>
+     * PrePortal should call this after it's done all its tasks...
      */
     public static void notifyCompletion(){
         Login.appendToStatus("Now running Pre-Dashboard builds....... Please wait");
-        final KButton enter = new KButton("Launch Dashboard", true);
+        final KButton enter = new KButton("Launch Dashboard");
+        enter.setFocusable(true);
         SwingUtilities.invokeLater(()-> {
             final Board firstBoard = new Board();
             enter.addActionListener(e -> {
@@ -210,19 +207,17 @@ public class Login extends KDialog {
             return;
         }
 
-        final boolean permission = App.showYesNoCancelDialog(rootPane,"Permission Checkpoint","By clicking 'Login' you hereby permit Dashboard to go through your portal,\n" +
-                "and acknowledge the safety of your data with it. Continue?");
+        final boolean permission = App.showYesNoCancelDialog(rootPane,"Permission Checkpoint",
+                "By clicking Login you hereby permit Dashboard to go through your portal\n" +
+                "and acknowledge the safety of your data with it.");
         if (permission) {
             replaceLastUpdate("Thank you for your trust!");
             appendToStatus("Please hang-on while you're verified");
-        }else {
+        } else {
             return;
         }
-
         Login.setInputsState(false);
-        new Thread(() -> {
-            PrePortal.launchVerificationSequences(emailField.getText(),new String(passwordField.getPassword()));
-        }).start();
+        new Thread(() -> PrePortal.launchVerificationSequences(emailField.getText(), new String(passwordField.getPassword()))).start();
     }
 
 }

@@ -1,43 +1,13 @@
 package main;
 
-import customs.KPanel;
-
 import javax.swing.*;
 import java.awt.*;
-import java.io.Serializable;
 
-/**
- * <h1>class ComponentAssistant</h1>
- * <p><b>Description</b>: </p>
- */
-public class ComponentAssistant implements Serializable {
+public class ComponentAssistant {
 
 
-    //@null-layout container components
-    public static void reposition(JComponent c, int x, int y){
-        c.setLocation(x,y);
-    }
-
-    static void pushUp(JComponent c, int a){
-        c.setLocation(c.getX(), c.getY()-a);
-    }
-
-    static void pushDown(JComponent c, int a){
-        c.setLocation(c.getX(), c.getY()+a);
-    }
-
-    public static void pushLeft(JComponent c, int a){
-        c.setLocation(c.getX()-a, c.getY());
-    }
-
-    public static void pushRight(JComponent c, int a){
-        c.setLocation(c.getX()+a, c.getY());
-    }
-
-
-    //@
     /**
-     * <p>Removes everything from a component. Is that it?</p>
+     * Removes everything from a component. Is that it?
      */
     public static void repair(Container ... components){
         for (Container c : components) {
@@ -46,39 +16,38 @@ public class ComponentAssistant implements Serializable {
     }
 
     /**
-     * <p>Re-paints and Re-validates the components hierarchy after under-going runtime modifications.</p>
+     * Re-paints and Re-validates the components' hierarchy after undergoing runtime modifications.
      */
     public static void ready(Container ... components){
         for (Container c : components) {
-            c.revalidate();
             c.repaint();
+            c.revalidate();
         }
     }
 
-    /**
-     * <p>Convenient way of calling Box.createRigidArea(Dimension)</p>
-     */
-    public static Component provideBlankSpace(int width, int height){
-        return Box.createRigidArea(new Dimension(width,height));
+    // For null-layout containers
+    public static void reposition(Component c, int x, int y){
+        c.setLocation(x, y);
     }
 
-    /**
-     * <p>This does not return a rigid area as do by its alternative - provideBlankSpace.
-     * This returns a container(KPanel?) with the specified size and background.</p>
-     */
-    public static Component provideBlankSpace(Color bg, Dimension d){
-        final KPanel blankComponent = new KPanel(d);
-        blankComponent.setBackground(bg);
-
-        return blankComponent;
+    static void pushUp(JComponent c, int a){
+        c.setLocation(c.getX(), c.getY() - a);
     }
 
-    public static Component contentBottomGap(int width){
-        return provideBlankSpace(width,25);
+    static void pushDown(JComponent c, int a){
+        c.setLocation(c.getX(), c.getY() + a);
+    }
+
+    public static void pushLeft(JComponent c, int a){
+        c.setLocation(c.getX() - a, c.getY());
+    }
+
+    public static void pushRight(JComponent c, int a){
+        c.setLocation(c.getX() + a, c.getY());
     }
 
     public static Component contentBottomGap(){
-        return contentBottomGap(250);
+        return Box.createVerticalStrut(25);
     }
 
 
