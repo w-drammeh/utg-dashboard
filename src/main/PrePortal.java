@@ -339,7 +339,6 @@ public class PrePortal {
         } else if(!(key.equalsIgnoreCase("password") || key.equalsIgnoreCase("cgpa"))) {
             Login.appendToStatus(key+": "+value);
         }
-
         //It must however be.....
         portalDetails.add(value);
     }

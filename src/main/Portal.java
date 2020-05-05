@@ -13,10 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * <h1>class Portal</h1>
- * <p>The dashboard physical portal representative.</p>
- * <p><i>The functionalities of this class come to life after the student is verified.</i></p>
- *<p><i>Never forget to use it on a different thread!</i></p>
+ * The dashboard physical portal representative.
+ * The functionality of this class come to life after the student is verified.
+ * Never forget to use it on a different thread!
  */
 public class Portal {
     public static final String LOGIN_PAGE = "https://www.utg.gm/login";
@@ -70,9 +69,9 @@ public class Portal {
     }
 
     /**
-     * <p>Meant to launch the portal for the student, and that's all.</p>
-     * <p>To remedy a situation of multiple clicks, it accepts a nullable button, which if possible,
-     * will enable it after completing the pending charges.</p>
+     * Meant to launch the portal for the student, and that's all.
+     * To remedy a situation of multiple clicks, it accepts a nullable button, which if possible,
+     * will enable it after completing the pending charges.
      *
      */
     public static void showOpenPortal(Component kButton){
@@ -97,7 +96,7 @@ public class Portal {
     }
 
     /**
-     * <p>Should always be checked to make sure that the portal is not busy</p>
+     * Should always be checked to make sure that the portal is not busy.
      */
     public static boolean isPortalBusy(FirefoxDriver driver){
         try {
@@ -109,7 +108,7 @@ public class Portal {
     }
 
     /**
-     * <p>Successful operation herein shall induce all the notices to be re-assigned, also do the 'lastNoticeUpdate' todate.</p>
+     * Successful operation herein shall induce all the notices to be re-assigned, also do the 'lastNoticeUpdate' todate.
      */
     public static void startRenewingNotices(FirefoxDriver noticeDriver, boolean userRequested){
         if (isPortalBusy(noticeDriver)) {
@@ -143,29 +142,29 @@ public class Portal {
     }
 
     /**
-     * <p>Method call does not attempt to renew notice - hence returns the recently found notice</p>
+     * Method call does not attempt to renew notice - hence returns the recently found notice.
      */
     public static String getBufferedNotice_Admission(){
         return admissionNotice;
     }
 
     /**
-     * <p>Method call does not attempt to renew notice - hence returns the recently found notice</p>
+     * Method call does not attempt to renew notice - hence returns the recently found notice.
      */
     public static String getBufferedNotice_Registration(){
         return registrationNotice;
     }
 
     /**
-     * <p>Returns the last time a notice was updated.</p>
+     * Returns the last time a notice was updated.
      */
     public static String getLastNoticeUpdate(){
         return lastNoticeUpdate == null ? "Never" : MDate.formatFully(lastNoticeUpdate);
     }
 
     /**
-     * <p>Remains public for the sake of only {@link PrePortal} to set them during build.</p>
-     * <p><i>The non-null param(s) will be renewed to their respective types, and notify the components holding those.</i></p>
+     * Remains public for the sake of only PrePortal to set them during build.
+     * The non-null param(s) will be renewed to their respective types, and notify the components holding those.
      */
     public static void setNotices(String registration, String admission){
         if (registration != null) {
@@ -181,10 +180,10 @@ public class Portal {
     }
 
     /**
-     * <p>Auto-sync shall mean that courses will be verified as they are locally added to the tables,
-     * and .</p>
+     * Auto-sync shall mean that courses will be verified as they are locally added to the tables,
+     * notices will be renewed in the background, news updates, etc.
      *
-     * <p><i>The default is daily, but there should be options for the user in next compilations.</i></p>
+     * The default is daily, but there should be options for the user in next compilations.
      */
     public static void  setAutoSync(boolean sync){
         autoSync = sync;
@@ -203,8 +202,8 @@ public class Portal {
     }
 
     /**
-     * <p>This call is intended, purposely, for pre-scrapping actions.
-     * These include setting of semesters, levels, and other dynamic details.</p>
+     * This call is intended, purposely, for pre-scrapping actions.
+     * These include setting of semesters, levels, and other dynamic details.
      */
     public static void nowOnPortal(FirefoxDriver nowDriver){
         if (nowDriver.getCurrentUrl().equals(CONTENTS_PAGE)) {

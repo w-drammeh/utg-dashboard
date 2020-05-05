@@ -247,89 +247,6 @@ public class Course {
                 incomingIsLecturerSet);
     }
 
-    /**
-     * Nicely exhibits a course. This is to be an instance-call in a future-release.
-     */
-    public static void exhibit(Component base, Course course){
-        final KDialog exhibitDialog = new KDialog(course.getName()+(course.isMisc() ? " - Miscellaneous" : ""));
-        exhibitDialog.setResizable(true);
-        exhibitDialog.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
-
-        final Font hintFont = KFontFactory.createBoldFont(15);
-        final Font valueFont = KFontFactory.createPlainFont(15);
-
-        final KPanel codePanel = new KPanel(new BorderLayout());
-        codePanel.add(KPanel.wantDirectAddition(new KLabel("Code:",hintFont)),BorderLayout.WEST);
-        codePanel.add(KPanel.wantDirectAddition(new KLabel(course.getCode(),valueFont)),BorderLayout.CENTER);
-
-        final KPanel namePanel = new KPanel(new BorderLayout());
-        namePanel.add(KPanel.wantDirectAddition(new KLabel("Name:",hintFont)),BorderLayout.WEST);
-        namePanel.add(KPanel.wantDirectAddition(new KLabel(course.getName(),valueFont)),BorderLayout.CENTER);
-
-        final KPanel lectPanel = new KPanel(new BorderLayout());
-        lectPanel.add(KPanel.wantDirectAddition(new KLabel("Tutor:",hintFont)),BorderLayout.WEST);
-        lectPanel.add(KPanel.wantDirectAddition(new KLabel(course.getLecturer(),valueFont)),BorderLayout.CENTER);
-
-        final KPanel yearPanel = new KPanel(new BorderLayout());
-        yearPanel.add(KPanel.wantDirectAddition(new KLabel("Academic Year:",hintFont)),BorderLayout.WEST);
-        yearPanel.add(KPanel.wantDirectAddition(new KLabel(course.getYear(),valueFont)),BorderLayout.CENTER);
-
-        final KPanel semesterPanel = new KPanel(new BorderLayout());
-        semesterPanel.add(KPanel.wantDirectAddition(new KLabel("Semester:",hintFont)),BorderLayout.WEST);
-        semesterPanel.add(KPanel.wantDirectAddition(new KLabel(course.getSemester(),valueFont)),BorderLayout.CENTER);
-
-        final KPanel typePanel = new KPanel(new BorderLayout());
-        typePanel.add(KPanel.wantDirectAddition(new KLabel("Requirement:",hintFont)),BorderLayout.WEST);
-        typePanel.add(KPanel.wantDirectAddition(new KLabel(course.getRequirement(),valueFont)),BorderLayout.CENTER);
-
-        final KPanel schedulePanel = new KPanel(new BorderLayout());
-        schedulePanel.add(KPanel.wantDirectAddition(new KLabel("Schedule:",hintFont)),BorderLayout.WEST);
-        schedulePanel.add(KPanel.wantDirectAddition(new KLabel(course.schedule(),valueFont)),BorderLayout.CENTER);
-
-        final KPanel venuePanel = new KPanel(new BorderLayout());
-        venuePanel.add(KPanel.wantDirectAddition(new KLabel("Venue:",hintFont)),BorderLayout.WEST);
-        venuePanel.add(KPanel.wantDirectAddition(new KLabel(course.getVenue(),valueFont)),BorderLayout.CENTER);
-
-        final KPanel creditPanel = new KPanel(new BorderLayout());
-        creditPanel.add(KPanel.wantDirectAddition(new KLabel("Credit Hours:",hintFont)),BorderLayout.WEST);
-        creditPanel.add(KPanel.wantDirectAddition(new KLabel(course.getCreditHours()+"",valueFont)),BorderLayout.CENTER);
-
-        final KPanel scorePanel = new KPanel(new BorderLayout());
-        scorePanel.add(KPanel.wantDirectAddition(new KLabel("Final Score:",hintFont)),BorderLayout.WEST);
-        scorePanel.add(KPanel.wantDirectAddition(new KLabel(course.getScore()+"",valueFont)),BorderLayout.CENTER);
-
-        final KPanel gradePanel = new KPanel(new BorderLayout());
-        gradePanel.add(KPanel.wantDirectAddition(new KLabel("Grade:",hintFont)),BorderLayout.WEST);
-        gradePanel.add(KPanel.wantDirectAddition(new KLabel(course.getGrade()+"  ["+course.getGradeComment()+"]",valueFont)),BorderLayout.CENTER);
-
-        final KPanel gradeValuePanel = new KPanel(new BorderLayout());
-        gradeValuePanel.add(KPanel.wantDirectAddition(new KLabel("Grade Value:",hintFont)),BorderLayout.WEST);
-        gradeValuePanel.add(KPanel.wantDirectAddition(new KLabel(course.getQualityPoint()+"",valueFont)),BorderLayout.CENTER);
-
-        final KPanel statusPanel = new KPanel(new BorderLayout());
-        statusPanel.add(KPanel.wantDirectAddition(new KLabel("Status:",hintFont)),BorderLayout.WEST);
-        statusPanel.add(KPanel.wantDirectAddition(new KLabel(course.isVerified() ? "Confirmed" : "Unverified",valueFont,course.isVerified() ? Color.BLUE : Color.RED)),BorderLayout.CENTER);
-
-        final KButton closeButton = new KButton("Close");
-        closeButton.addActionListener(e -> exhibitDialog.dispose());
-
-        final KPanel contentPanel = new KPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.addAll(codePanel,namePanel,lectPanel,yearPanel,semesterPanel,schedulePanel,venuePanel,typePanel,creditPanel,scorePanel,gradePanel,gradeValuePanel,statusPanel,
-                ComponentAssistant.contentBottomGap(),KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,closeButton));
-
-        exhibitDialog.getRootPane().setDefaultButton(closeButton);
-        exhibitDialog.setContentPane(contentPanel);
-        exhibitDialog.pack();
-        exhibitDialog.setMinimumSize(exhibitDialog.getPreferredSize());
-        exhibitDialog.setLocationRelativeTo(base == null ? Board.getRoot() : base);
-        exhibitDialog.setVisible(true);
-    }
-
-    public static void exhibit(Course c){
-        exhibit(Board.getRoot(), c);
-    }
-
     public String getYear() {
         return year;
     }
@@ -554,12 +471,95 @@ public class Course {
     }
 
     /**
-     * A course is marked <strong>misc</strong> if its year falls out of the student's
+     * A course is marked misc if its year falls out of the student's
      * four years bachelor's program specification.
      */
     public boolean isMisc(){
         final String y = this.getYear();
         return !(y.equals(Student.firstAcademicYear()) || y.equals(Student.secondAcademicYear()) || y.equals(Student.thirdAcademicYear()) || y.equals(Student.finalAcademicYear()));
+    }
+
+    /**
+     * Nicely exhibits a course. This is to be an instance-call in a future-release.
+     */
+    public static void exhibit(Component base, Course course){
+        final KDialog exhibitDialog = new KDialog(course.getName()+(course.isMisc() ? " - Miscellaneous" : ""));
+        exhibitDialog.setResizable(true);
+        exhibitDialog.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
+
+        final Font hintFont = KFontFactory.createBoldFont(15);
+        final Font valueFont = KFontFactory.createPlainFont(15);
+
+        final KPanel codePanel = new KPanel(new BorderLayout());
+        codePanel.add(KPanel.wantDirectAddition(new KLabel("Code:",hintFont)),BorderLayout.WEST);
+        codePanel.add(KPanel.wantDirectAddition(new KLabel(course.getCode(),valueFont)),BorderLayout.CENTER);
+
+        final KPanel namePanel = new KPanel(new BorderLayout());
+        namePanel.add(KPanel.wantDirectAddition(new KLabel("Name:",hintFont)),BorderLayout.WEST);
+        namePanel.add(KPanel.wantDirectAddition(new KLabel(course.getName(),valueFont)),BorderLayout.CENTER);
+
+        final KPanel lectPanel = new KPanel(new BorderLayout());
+        lectPanel.add(KPanel.wantDirectAddition(new KLabel("Tutor:",hintFont)),BorderLayout.WEST);
+        lectPanel.add(KPanel.wantDirectAddition(new KLabel(course.getLecturer(),valueFont)),BorderLayout.CENTER);
+
+        final KPanel yearPanel = new KPanel(new BorderLayout());
+        yearPanel.add(KPanel.wantDirectAddition(new KLabel("Academic Year:",hintFont)),BorderLayout.WEST);
+        yearPanel.add(KPanel.wantDirectAddition(new KLabel(course.getYear(),valueFont)),BorderLayout.CENTER);
+
+        final KPanel semesterPanel = new KPanel(new BorderLayout());
+        semesterPanel.add(KPanel.wantDirectAddition(new KLabel("Semester:",hintFont)),BorderLayout.WEST);
+        semesterPanel.add(KPanel.wantDirectAddition(new KLabel(course.getSemester(),valueFont)),BorderLayout.CENTER);
+
+        final KPanel typePanel = new KPanel(new BorderLayout());
+        typePanel.add(KPanel.wantDirectAddition(new KLabel("Requirement:",hintFont)),BorderLayout.WEST);
+        typePanel.add(KPanel.wantDirectAddition(new KLabel(course.getRequirement(),valueFont)),BorderLayout.CENTER);
+
+        final KPanel schedulePanel = new KPanel(new BorderLayout());
+        schedulePanel.add(KPanel.wantDirectAddition(new KLabel("Schedule:",hintFont)),BorderLayout.WEST);
+        schedulePanel.add(KPanel.wantDirectAddition(new KLabel(course.schedule(),valueFont)),BorderLayout.CENTER);
+
+        final KPanel venuePanel = new KPanel(new BorderLayout());
+        venuePanel.add(KPanel.wantDirectAddition(new KLabel("Venue:",hintFont)),BorderLayout.WEST);
+        venuePanel.add(KPanel.wantDirectAddition(new KLabel(course.getVenue(),valueFont)),BorderLayout.CENTER);
+
+        final KPanel creditPanel = new KPanel(new BorderLayout());
+        creditPanel.add(KPanel.wantDirectAddition(new KLabel("Credit Hours:",hintFont)),BorderLayout.WEST);
+        creditPanel.add(KPanel.wantDirectAddition(new KLabel(course.getCreditHours()+"",valueFont)),BorderLayout.CENTER);
+
+        final KPanel scorePanel = new KPanel(new BorderLayout());
+        scorePanel.add(KPanel.wantDirectAddition(new KLabel("Final Score:",hintFont)),BorderLayout.WEST);
+        scorePanel.add(KPanel.wantDirectAddition(new KLabel(course.getScore()+"",valueFont)),BorderLayout.CENTER);
+
+        final KPanel gradePanel = new KPanel(new BorderLayout());
+        gradePanel.add(KPanel.wantDirectAddition(new KLabel("Grade:",hintFont)),BorderLayout.WEST);
+        gradePanel.add(KPanel.wantDirectAddition(new KLabel(course.getGrade()+"  ["+course.getGradeComment()+"]",valueFont)),BorderLayout.CENTER);
+
+        final KPanel gradeValuePanel = new KPanel(new BorderLayout());
+        gradeValuePanel.add(KPanel.wantDirectAddition(new KLabel("Grade Value:",hintFont)),BorderLayout.WEST);
+        gradeValuePanel.add(KPanel.wantDirectAddition(new KLabel(course.getQualityPoint()+"",valueFont)),BorderLayout.CENTER);
+
+        final KPanel statusPanel = new KPanel(new BorderLayout());
+        statusPanel.add(KPanel.wantDirectAddition(new KLabel("Status:",hintFont)),BorderLayout.WEST);
+        statusPanel.add(KPanel.wantDirectAddition(new KLabel(course.isVerified() ? "Confirmed" : "Unverified",valueFont,course.isVerified() ? Color.BLUE : Color.RED)),BorderLayout.CENTER);
+
+        final KButton closeButton = new KButton("Close");
+        closeButton.addActionListener(e -> exhibitDialog.dispose());
+
+        final KPanel contentPanel = new KPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.addAll(codePanel,namePanel,lectPanel,yearPanel,semesterPanel,schedulePanel,venuePanel,typePanel,creditPanel,scorePanel,gradePanel,gradeValuePanel,statusPanel,
+                ComponentAssistant.contentBottomGap(),KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,closeButton));
+
+        exhibitDialog.getRootPane().setDefaultButton(closeButton);
+        exhibitDialog.setContentPane(contentPanel);
+        exhibitDialog.pack();
+        exhibitDialog.setMinimumSize(exhibitDialog.getPreferredSize());
+        exhibitDialog.setLocationRelativeTo(base == null ? Board.getRoot() : base);
+        exhibitDialog.setVisible(true);
+    }
+
+    public static void exhibit(Course c){
+        exhibit(Board.getRoot(), c);
     }
 
 }

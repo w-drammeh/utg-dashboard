@@ -9,8 +9,7 @@ import javax.mail.internet.MimeMessage;
 import java.util.Properties;
 
 /**
- * <h1>class Mailer</h1>
- * <p>Actually the <b>G-mailer</b></p>
+ * Or G-mailer
  */
 public class Mailer {
     private String subject, content, senderMail, senderPsswd;
@@ -28,7 +27,7 @@ public class Mailer {
     }
 
     /**
-     * <p>Condition is checked for <b>Reviews / Feedbacks</b> only</p>
+     * Condition is checked for Reviews / Feedbacks only.
      */
     public static boolean canSend(){
         return REVIEWS_COUNT_TODAY <= 3;

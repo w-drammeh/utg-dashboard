@@ -22,7 +22,7 @@ public class MyClass {
 	public static final String outputDir = rootDir+fileSeparator+"outputs";
 
 	/**
-	 * Note! the exception generative by this call can be silenced.
+	 * Note! the exception generative by this call is silenced.
 	 * Under serious cases, where it requires attention,
 	 * take advantage of the fact that it returns 'null' when an exception occur
 	 */

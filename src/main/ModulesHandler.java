@@ -145,9 +145,9 @@ public class ModulesHandler {
      * It makes sure the list replaces the old with recent, and inflict
      * the changes on the appropriate table, thereafter.
      * This also cater for the case where the old might not exist for whatever reason,
-     * and halt the subsequent attempt for visual changes.
+     * and halt, int that case, the subsequent attempt for visual changes.
      *
-     * Do not call set() on the monitor! Call this.
+     * Do not call set(Course, Course) on the monitor! Call this.
      */
     public static void substitute(Course old, Course recent){
         if (existsInList(old.getCode())) {//Typically for editing. Or if it's from a sync / verification, the details should be merged prior to this call
@@ -1601,6 +1601,7 @@ public class ModulesHandler {
             };
         }
     }
+
 
     /**
      * Extends the Adding-dialog to make it an editing-one. Cool uh...

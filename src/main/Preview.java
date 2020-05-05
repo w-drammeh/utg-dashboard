@@ -8,9 +8,6 @@ import customs.KPanel;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * <h1>class Preview</h1>
- */
 public class Preview extends KDialog {
 
     public Preview(Component root){
@@ -21,7 +18,7 @@ public class Preview extends KDialog {
         kPanel.setBackground(Color.BLACK);
         kPanel.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1, true));
         kPanel.setLayout(new BoxLayout(kPanel, BoxLayout.Y_AXIS));
-        kPanel.addAll(KPanel.wantDirectAddition(new KLabel(new ImageIcon(new App().getIconURL("splash.gif")))),
+        kPanel.addAll(KPanel.wantDirectAddition(new KLabel(new ImageIcon(App.getIconURL("splash.gif")))),
                 KPanel.wantDirectAddition(new FlowLayout(FlowLayout.LEFT), null, new KLabel("Dashboard is starting... Please wait",
                         KFontFactory.createPlainFont(15), Color.WHITE)));
 

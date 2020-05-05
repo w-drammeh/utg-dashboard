@@ -2,12 +2,6 @@ package customs;
 
 import java.awt.*;
 
-/**
- * <h1>class KFontFactory</h1>
- * <p><b>Description</b>: One the custom classes of ease, the KFontFactory type inherits java.awt.Font, thus
- * making it easier, through its static methods, to bring a Font where needed without
- * instantiating the Font class directly.</p>
- */
 public abstract class KFontFactory implements Preference {
     public static final String FONT_NAME = "Tahoma";
 
@@ -28,9 +22,8 @@ public abstract class KFontFactory implements Preference {
         return new Font(FONT_NAME,Font.BOLD + Font.ITALIC,size);
     }
 
-
     /**
-     * <p>A font commonly used by all those big texts that appear at the top the the body</p>
+     * A font commonly used by all those big texts that appear at the top the the body.
      */
     public static Font bodyHeaderFont(){
         return createBoldFont(20);

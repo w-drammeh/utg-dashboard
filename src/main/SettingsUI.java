@@ -15,7 +15,7 @@ public class SettingsUI implements ActivityAnswerer{
     public static final KTextField studentMailField = new KTextField(Student.getStudentMail());
     public static final JPasswordField studentPsswdField = new JPasswordField(Student.getStudentPassword());
     public static final KTextArea descriptionArea = KTextArea.limitedEntry(1_000);
-    private static final String changeHint = "To effect this changes, you need to enter your matriculation number:\n \n";
+    private static final String changeHint = "Enter your Matriculation Number to effect this changes:\n \n";
     private static final LinkedHashMap<String, String> ADDITIONAL_DATA = new LinkedHashMap<>();
     private static final Font hFont = KFontFactory.createBoldFont(16);//generally for the hints
     private static final Font dFont = KFontFactory.createPlainFont(16);//values

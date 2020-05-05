@@ -7,10 +7,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Panels as we know are basically the most fundamental of swing builders.
- * The KPanel type has many useful constructors with centralized mechanism of background changes.
- */
 public class KPanel extends JPanel implements Preference {
     public static final List<KPanel> ALL_PANELS = new ArrayList<>();
 
@@ -54,7 +50,6 @@ public class KPanel extends JPanel implements Preference {
         for (Component comp : directComponents) {
             panel.add(comp);
         }
-
         return panel;
     }
 
@@ -69,7 +64,6 @@ public class KPanel extends JPanel implements Preference {
         for (JComponent directComponent : directComponents) {
             kPanel.add(directComponent);
         }
-
         return kPanel;
     }
 
