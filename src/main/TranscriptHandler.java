@@ -12,6 +12,8 @@ import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,6 +30,12 @@ public class TranscriptHandler {
     private static KPanel exportPanel;
     private static boolean secondaryExportNeeded;
     private static int secondaryStartIndex;
+    private static String exportTime;
+
+
+    static {
+        exportTime = new SimpleDateFormat("dd-MM-yyyy H:m:s").format(new Date());
+    }
 
     private static void setUpPrimaryExportation(){
         repairPanel();
@@ -187,7 +195,7 @@ public class TranscriptHandler {
         exportDialog.setVisible(true);
         final Document document = new Document();
         try{
-            final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath+"/transcript.pdf"));
+            final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath+"/transcript "+exportTime+".pdf"));
             document.open();
 
             final PdfContentByte contentByte = writer.getDirectContent();
@@ -205,8 +213,7 @@ public class TranscriptHandler {
                 App.promptPlain("Export Successful","Your Transcript exported successfully to "+savePath);
             }
         } catch (Exception e){
-            App.signalError("Error","Sorry, we experienced unusual problems during the export. Please, try again.\n" +
-                    "Error Message: "+e.getMessage());
+            reportExportError(e);
         } finally {
             exportDialog.dispose();
         }
@@ -245,7 +252,7 @@ public class TranscriptHandler {
         exportDialog.setVisible(true);
         final Document document = new Document();
         try {
-            final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath + "/transcript-part-2.pdf"));
+            final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath + "/transcript-part-2 "+exportTime+".pdf"));
             document.open();
 
             final PdfContentByte contentByte = writer.getDirectContent();
@@ -259,10 +266,15 @@ public class TranscriptHandler {
             exportDialog.dispose();
             App.promptPlain("Export Successful", "Your Transcript is been exported successfully to "+savePath);
         } catch (Exception e) {
-            App.signalError("Error", "Sorry, we experienced unusual problems during the export. Please, try again.\nError Message = " + e.getMessage());
+            reportExportError(e);
         } finally {
             exportDialog.dispose();
         }
+    }
+
+    private static void reportExportError(Exception e){
+        App.signalError("Error", "Sorry, we experienced unusual problems during the export.\n" +
+                "Please, try again.\nError Message = " + e.getMessage());
     }
 
 }

@@ -119,7 +119,7 @@ public class NewsGenerator {
         niceBox.add(readerWrap, BorderLayout.SOUTH);
         return KPanel.wantDirectAddition(niceBox);
     }
-
+    
     public void pushNewsIfAny(JComponent c){
         if (!NEWS_DATA.isEmpty()) {
             for (NewsSavior saved : NEWS_DATA) {
@@ -234,7 +234,7 @@ public class NewsGenerator {
                 NEWS_DATA.add(savior);
             }
             if (!savedNews.isEmpty()) {
-                accessTime = "Undefined";
+                accessTime = "Unknown";
             }
         }
         final Object accessObj = MyClass.deserialize("newsAccessTime.ser");

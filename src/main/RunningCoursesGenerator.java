@@ -639,7 +639,7 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
                     ACTIVE_COURSES.add(new RunningCourse(codeField.getText(), nameField.getText(), lecturerField.getText(), venueField.getText(), roomField.getText(), String.valueOf(daysBox.getSelectedItem()),
                             String.valueOf(hoursBox.getSelectedItem()), false));
                     this.dispose();
-                    SwingUtilities.invokeLater(()-> Notification.create("Local Registration", nameField.getText()+" is locally added, and may not be on your portal", generateNotificationWarning(nameField.getText()), null));
+                    SwingUtilities.invokeLater(()-> Notification.create("Local Registration", nameField.getText()+" is locally added, and may not be on your portal", generateNotificationWarning(nameField.getText())));
                 }
             });
 

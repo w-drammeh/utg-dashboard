@@ -4,7 +4,10 @@ import customs.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -93,8 +96,7 @@ public class TaskSelf {
             if (!eveIsAlerted) {
                 final String text = "Dear "+Student.getLastName()+", the Task you created on "+this.getStartDate()+", "+
                         this.getDescription()+", is to be completed in less than a day.";
-                Notification.create("Task Reminder","Task "+this.getDescription()+" is due tomorrow",
-                        text,this.generateNotificationButtonListener());
+                Notification.create("Task Reminder","Task "+this.getDescription()+" is due tomorrow", text);
                 eveIsAlerted = true;
             }
         }
@@ -103,14 +105,9 @@ public class TaskSelf {
             if (!doneIsAlerted) {
                 final String text = "Dear "+Student.getLastName()+", the Task you created on "+this.getStartDate()+", "+
                         this.getDescription()+", is now due. This Task is now considered done as per the given date limit.";
-                Notification.create("Task Completed","Task "+this.getDescription()+" is now completed",
-                        text,this.generateNotificationButtonListener());
+                Notification.create("Task Completed","Task "+this.getDescription()+" is now completed", text);
                 doneIsAlerted = true;
             }
-        }
-
-        private ActionListener generateNotificationButtonListener(){
-            return null;
         }
 
         public KLabel getTogoLabel(){
@@ -319,7 +316,7 @@ public class TaskSelf {
                 final String text = "Dear "+Student.getLastName()+", the "+this.getSpecifiedDuration()+" days "+
                         this.getType()+" Project you created, "+this.getProjectName()+", since "+this.getStartDate()+" is to be completed by tomorrow.";
                 Notification.create("Project Reminder","Specified duration for the "+this.getType()+" Project "+
-                        this.getProjectName()+" is running out",text,this.generateNotificationButtonListener());
+                        this.getProjectName()+" is running out",text);
                 eveIsAlerted = true;
             }
         }
@@ -329,13 +326,9 @@ public class TaskSelf {
                 final String text = "Dear "+Student.getLastName()+", the specified period of the "+
                         this.getType()+" Project you created, "+this.getProjectName()+", since "+this.getStartDate()+" is now attained.";
                 Notification.create("Project Completed","Specified duration for the "+this.getType()+" Project "+
-                        this.getProjectName()+" is reached",text,this.generateNotificationButtonListener());
+                        this.getProjectName()+" is reached",text);
                 completionIsAlerted = true;
             }
-        }
-
-        private ActionListener generateNotificationButtonListener(){
-            return null;
         }
 
         public String getProjectName() {
@@ -545,8 +538,7 @@ public class TaskSelf {
                 final String text = "Dear, "+Student.getLastName()+", the "+this.courseName+
                         (this.isGroup ? " Group Assignment" : " Assignment")+" is to be submitted in 24 hours. Submission Mode is "+this.modeOfSubmission+". " +
                         "If you have already submitted this assignment, mark it as 'submitted' to prevent further-notifications.";
-                Notification.create("Assignment Reminder",this.courseName+" Assignment is due tomorrow!",
-                        text,this.generateNotificationButtonListener());
+                Notification.create("Assignment Reminder",this.courseName+" Assignment is due tomorrow!", text);
                 eveIsAlerted = true;
             }
         }
@@ -555,14 +547,9 @@ public class TaskSelf {
             if (!submissionIsAlerted) {
                 final String text = "Dear, "+Student.getLastName()+", the submission date of the "+
                         this.courseName+(this.isGroup ? " Group Assignment" : " Assignment")+" is past. Submission Mode was "+this.modeOfSubmission+".";
-                Notification.create("Assignment Completed",this.courseName+" Assignment has reached submission date.",
-                        text, this.generateNotificationButtonListener());
+                Notification.create("Assignment Completed",this.courseName+" Assignment has reached submission date.", text);
                 submissionIsAlerted = true;
             }
-        }
-
-        private ActionListener generateNotificationButtonListener(){
-            return null;
         }
 
         public KLabel getDeadlineIndicator(){
@@ -930,8 +917,7 @@ public class TaskSelf {
         private void signalEveNotice(){
             if (!eveIsAlerted) {
                 final String eveText = "Dear "+Student.getLastName()+", "+this.title+" is just one day away from now.";
-                Notification.create("Event Reminder",Student.getLastName()+", "+this.getTitle()+" is at your door-step!",
-                        eveText,this.generateNotificationButtonListener());
+                Notification.create("Event Reminder",Student.getLastName()+", "+this.getTitle()+" is at your door-step!", eveText);
                 eveIsAlerted = true;
             }
         }
@@ -939,14 +925,9 @@ public class TaskSelf {
         private void signalTimeupNotice(){
             if (!timeupIsAlerted) {
                 final String timeupText = "Dear "+Student.getLastName()+", time is up for the event "+this.title+".";
-                Notification.create("Event Time-Up",Student.getLastName()+", "+this.getTitle()+" is due now!",
-                        timeupText,this.generateNotificationButtonListener());
+                Notification.create("Event Time-Up",Student.getLastName()+", "+this.getTitle()+" is due now!", timeupText);
                 timeupIsAlerted = true;
             }
-        }
-
-        private ActionListener generateNotificationButtonListener(){
-            return null;
         }
 
         public String getTitle(){

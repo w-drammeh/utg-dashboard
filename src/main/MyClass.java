@@ -51,7 +51,7 @@ public class MyClass {
 			out.writeObject(o);
 			out.close();
 		} catch (Exception e) {
-			System.err.println("Error serializing file "+serName);
+			App.silenceException("Error serializing file "+serName);
 		}
 	}
 
@@ -69,7 +69,7 @@ public class MyClass {
 			serObject = in.readObject();
             in.close();
         } catch (Exception e) {
-			System.err.println("Error deserializing file "+serName);
+			App.silenceException("Error deserializing file "+serName);
         }
         return serObject;
     }
@@ -89,7 +89,7 @@ public class MyClass {
 			formatter.format(readMe);
 			formatter.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			App.silenceException(e);
 		}
 	}
 
@@ -130,7 +130,7 @@ public class MyClass {
 			formatter.format(data);
 			formatter.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			App.silenceException(e);
 		}
 	}
 
