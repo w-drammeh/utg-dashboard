@@ -68,6 +68,7 @@ public class Dashboard {
             }
         }
 
+        preview.setVisible(false);
         final String matNumber = constantlyRequestInput();
         if (matNumber.equals(String.valueOf(Student.getMatNumber()))) {
             rebuildNow(false);
@@ -79,8 +80,8 @@ public class Dashboard {
     }
 
     private static String constantlyRequestInput(){
-        final String input = App.requestInput(preview, "UTG Dashboard", "This Dashboard belongs to "+Student.getFullNamePostOrder()+"\n" +
-                "You can enter your Matriculation Number to confirm it's you:\n \n");
+        final String input = App.requestInput(preview, "UTG Dashboard", "This Dashboard belongs to "+Student.getFullNamePostOrder()+".\n" +
+                "Please enter your Matriculation Number:");
         if (input == null) {
             System.exit(0);
         }
@@ -97,6 +98,8 @@ public class Dashboard {
                 forgeNew();
                 return;
             }
+        } else {
+            preview.setVisible(true);
         }
 
         try {
