@@ -191,15 +191,13 @@ public final class Board extends KFrame {
     }
 
     /**
-     * This call sets up the thorax region of the Dashboard.
+     * This call sets up the thorax-region of the Dashboard.
      *
      * Total height to be covered is 230, and the 30 is for the bigButtons to lie beneath.
-     * This is vertically partitioned into 3 sections with widths as follows:
+     * This is horizontally partitioned into 3 sections with widths as follows:
      * imagePart 300
      * detailsPart 375 and
      * midPart unset
-     *
-     * The so-called thorax, itself, is local to this block.
      */
     private void setUpThorax(){
         final KMenuItem resetOption = new KMenuItem("Reset", e -> Student.fireIconReset());
@@ -355,7 +353,7 @@ public final class Board extends KFrame {
         cardBoard.addLayoutComponent(bodyLayer.add(this.generateNewsPage()),"News");
         cardBoard.addLayoutComponent(bodyLayer.add(this.generateNotificationPage()),"Notifications");
 
-        boardContent.add(bodyLayer, BorderLayout.CENTER);
+        boardContent.add(new KScrollPane(bodyLayer), BorderLayout.CENTER);
     }
 
     private void attachUniversalKeys(){
