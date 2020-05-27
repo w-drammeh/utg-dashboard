@@ -358,6 +358,7 @@ public final class Board extends KFrame {
 
     private void attachUniversalKeys(){
         final KButton comeHomeButton = new KButton("Come Home");
+        comeHomeButton.setFocusable(true);
         comeHomeButton.addActionListener(e -> cardBoard.show(bodyLayer,"Home"));
         comeHomeButton.setMnemonic(KeyEvent.VK_H);
         boardRoot.add(comeHomeButton);
