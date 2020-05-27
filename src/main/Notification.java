@@ -72,7 +72,7 @@ public class Notification implements Serializable {
     }
 
 
-    private static class Exhibitor extends KDialog implements Serializable {
+    private static class Exhibitor extends KDialog {
 
         private  Exhibitor(Notification notification){
             super(notification.getHeading()+" - Dashboard Notification");
@@ -146,10 +146,11 @@ public class Notification implements Serializable {
         }
     }
 
+
     public static void serializeAll(){
         System.out.print("Serializing notifications... ");
         MyClass.serialize(NOTIFICATIONS, "alerts.ser");
-        System.out.println("Completed");
+        System.out.println("Completed.");
     }
 
     public static void deSerializeAll(){

@@ -18,6 +18,7 @@ public class TaskCreator {
         return Box.createRigidArea(new Dimension(w, h));
     }
 
+
     public static class TodoCreator extends KDialog {
         private KTextField descriptionField;
         private JComboBox<Object> durationBox;
@@ -71,6 +72,7 @@ public class TaskCreator {
         }
     }
 
+
     public static class ProjectCreator extends KDialog{
         private KTextField nameField;
         private JComboBox<Object> durationBox;
@@ -92,7 +94,7 @@ public class TaskCreator {
             namePanelPlus.add(KPanel.wantDirectAddition(new KLabel("Project Name:", labelsFont)), BorderLayout.WEST);
             namePanelPlus.add(KPanel.wantDirectAddition(nameField), BorderLayout.CENTER);
 
-            typeBox = new JComboBox<>(new String[]{"Java", "Python", "C / C++", "C#", "Database", "Web", "Other"});
+            typeBox = new JComboBox<>(new String[]{"Java", "Python", "C/C++", "C#", "Database", "Web", "Other"});
             typeBox.setFont(boxFont);
             typeBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             final KPanel typePanelPlus = new KPanel(new BorderLayout(),panelsDimension);

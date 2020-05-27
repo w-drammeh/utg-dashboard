@@ -117,7 +117,7 @@ public class TasksGenerator {
     }
 
     public KPanel presentedContainer(){
-        final KButton returnButton = new KButton("< Back");
+        final KButton returnButton = new KButton("Back");
         returnButton.setFont(TASK_BUTTONS_FONT);
         returnButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         returnButton.addActionListener(e -> {
@@ -125,7 +125,7 @@ public class TasksGenerator {
             hintLabel.setText("");
         });
         returnButton.setMnemonic(KeyEvent.VK_BACK_SPACE);
-        returnButton.setToolTipText("Return to Task Menu (Alt+Back_Space)");
+        returnButton.setToolTipText("Return (Alt+Back_Space)");
         returnButton.doClick(0);
 
         final KPanel upPanel = new KPanel(new BorderLayout());
@@ -144,6 +144,7 @@ public class TasksGenerator {
     Like their immediate mother-class, they serve as the intermediary between their respective task-types
     and the Board. They provide UI and behavior as well.
      */
+
     public static class TodoHandler {
         public static final ArrayList<TaskSelf.TodoSelf> TODOS = new ArrayList<>();
         private static int activeCount, dormantCount;
@@ -154,8 +155,8 @@ public class TasksGenerator {
             activeContainer = new KPanel(){
                 @Override
                 public Component add(Component comp) {
-                    TODOS.add((TaskSelf.TodoSelf) comp);
-                    activeContainer.setPreferredSize(new Dimension(activeContainer.getPreferredSize().width,activeContainer.getPreferredSize().height+40));
+                    activeContainer.setPreferredSize(new Dimension(activeContainer.getPreferredSize().width,
+                            activeContainer.getPreferredSize().height+40));
                     renewCount(1);
                     return super.add(comp);
                 }
@@ -163,7 +164,6 @@ public class TasksGenerator {
                 @Override
                 public void remove(Component comp) {
                     super.remove(comp);
-                    TODOS.remove(comp);
                     activeContainer.setPreferredSize(new Dimension(activeContainer.getPreferredSize().width,
                             activeContainer.getPreferredSize().height-40));
                     renewCount(-1);
@@ -176,7 +176,6 @@ public class TasksGenerator {
                 public Component add(Component comp) {
                     dormantContainer.setPreferredSize(new Dimension(dormantContainer.getPreferredSize().width,
                             dormantContainer.getPreferredSize().height+40));
-                    TODOS.add((TaskSelf.TodoSelf) comp);
                     dormantCount++;
                     return super.add(comp);
                 }
@@ -184,7 +183,6 @@ public class TasksGenerator {
                 @Override
                 public void remove(Component comp) {
                     super.remove(comp);
-                    TODOS.remove(comp);
                     dormantContainer.setPreferredSize(new Dimension(dormantContainer.getPreferredSize().width,
                             dormantContainer.getPreferredSize().height-40));
                     dormantCount--;
@@ -219,7 +217,9 @@ public class TasksGenerator {
                     if (App.showYesNoCancelDialog(todoCreator.getRootPane(), "Confirm", "Do you wish to add the following task?\n-\n" +
                             "Name:  " + name + "\n" +
                             "To be completed in:  " + span)) {
-                        activeContainer.add(new TaskSelf.TodoSelf(name, givenDays));
+                        final TaskSelf.TodoSelf incomingTodo = new TaskSelf.TodoSelf(name, givenDays);
+                        TODOS.add(incomingTodo);
+                        activeContainer.add(incomingTodo.getLayer());
                         ComponentAssistant.ready(activeContainer);
                         todoCreator.dispose();
                     }
@@ -232,7 +232,7 @@ public class TasksGenerator {
                 oldSelf.setTotalTimeConsumed(oldSelf.getSpecifiedDuration());
             	finalizeTransfer(oldSelf);
             } else {
-                if (App.showYesNoDialog(dialog.getRootPane(), "Confirm Completion", "Are you sure you've completed this task?")) {
+                if (App.showYesNoCancelDialog(dialog.getRootPane(), "Confirm", "Are you sure you've completed this task? It will be marked complete.")) {
                     oldSelf.setTotalTimeConsumed(oldSelf.getDaysTaken());
                 	finalizeTransfer(oldSelf);
                     dialog.dispose();
@@ -245,21 +245,24 @@ public class TasksGenerator {
             oldSelf.getTogoLabel().setText("Completed "+oldSelf.getDateCompleted());//Which is that
             oldSelf.getTogoLabel().setForeground(Color.BLUE);
             oldSelf.setActive(false);
-            activeContainer.remove(oldSelf);
-            dormantContainer.add(oldSelf);
+
+            final KPanel oldPanel = oldSelf.getLayer();
+            activeContainer.remove(oldPanel);
+            dormantContainer.add(oldPanel);
             ComponentAssistant.ready(activeContainer, dormantContainer);
         }
 
         public static ActionListener removalWaiter(TaskSelf.TodoSelf task, KDialog dialog){
             return e -> {
                 if (App.showYesNoCancelDialog(dialog.getRootPane(),"Confirm", "Do you really want to remove this task?")) {
+                    final KPanel outgoingPanel = task.getLayer();
                     if (task.isActive()) {
-                        activeContainer.remove(task);
-                        ComponentAssistant.ready(activeContainer);
+                        activeContainer.remove(outgoingPanel);
                     } else {
-                        dormantContainer.remove(task);
-                        ComponentAssistant.ready(dormantContainer);
+                        dormantContainer.remove(outgoingPanel);
                     }
+                    TODOS.remove(task);
+                    ComponentAssistant.ready(activeContainer, dormantContainer);
                     task.setActive(false);
                     dialog.dispose();
                 }
@@ -273,10 +276,11 @@ public class TasksGenerator {
         
         public static void receiveFromSerials(TaskSelf.TodoSelf dTodo){
             if (dTodo.isActive()) {
-                activeContainer.add(dTodo);
+                activeContainer.add(dTodo.getLayer());
             } else {
-                dormantContainer.add(dTodo);
+                dormantContainer.add(dTodo.getLayer());
             }
+            TODOS.add(dTodo);
         }
 
         private JComponent todoComponent(){
@@ -326,6 +330,7 @@ public class TasksGenerator {
                         for (Component c : dormantContainer.getComponents()) {
                             dormantContainer.remove(c);
                         }
+                        TODOS.removeIf(t -> !t.isActive());
                         ComponentAssistant.ready(dormantContainer);
                     }
                 }
@@ -361,13 +366,11 @@ public class TasksGenerator {
                 public Component add(Component comp) {
                     projectsReside.setPreferredSize(new Dimension(projectsReside.getPreferredSize().width,
                             projectsReside.getPreferredSize().height+40));
-                    PROJECTS.add((TaskSelf.ProjectSelf) comp);
                     return super.add(comp);
                 }
                 @Override
                 public void remove(Component comp) {
                     super.remove(comp);
-                    PROJECTS.remove(comp);
                     projectsReside.setPreferredSize(new Dimension(projectsReside.getPreferredSize().width,
                             projectsReside.getPreferredSize().height-40));
                 }
@@ -404,11 +407,13 @@ public class TasksGenerator {
                         givenDays = 180;
                     }
 
-                    if (App.showYesNoCancelDialog(projectCreator.getRootPane(), "Confirm Addition", "Do you wish to add the following project?\n-\n" +
+                    if (App.showYesNoCancelDialog(projectCreator.getRootPane(), "Confirm", "Do you wish to add the following project?\n-\n" +
                             "Name:  " + name + "\n" +
                             "Type:  " + projectCreator.getTheType() + " Project" + "\n" +
                             "Duration:  " + dDuration)) {
-                        projectsReside.add(new TaskSelf.ProjectSelf(name, projectCreator.getTheType(), givenDays));
+                        final TaskSelf.ProjectSelf incomingProject = new TaskSelf.ProjectSelf(name, projectCreator.getTheType(), givenDays);
+                        PROJECTS.add(incomingProject);
+                        projectsReside.add(incomingProject.getLayer());
                         projectCreator.dispose();
                         ComponentAssistant.ready(projectsReside);
                         renewCount(1);
@@ -424,7 +429,7 @@ public class TasksGenerator {
                 renewCount(-1);
                 completeCount++;
         	} else {
-        		if (App.showYesNoDialog("Confirm Completion", "Are you sure you've completed this project before the specified time?")) {
+        		if (App.showYesNoDialog("Confirm", "Are you sure you've completed this project before the specified time?")) {
                     project.setTotalTimeConsumed(project.getDaysTaken());
         			finalizeCompletion(project);
                     renewCount(-1);
@@ -437,12 +442,10 @@ public class TasksGenerator {
         private static void finalizeCompletion(TaskSelf.ProjectSelf project){
             project.setDateCompleted(MDate.now());
             project.setLive(false);
-            ComponentAssistant.repair(project);
             project.setUpDoneUI();
-            ComponentAssistant.ready(project);
-            //Respect that order of sorting... since the project generator does not use separator for arrangement
-            projectsReside.remove(project);
-            projectsReside.add(project);
+            //Respect that order of sorting... since the project generator does not use clear-cut separator
+            projectsReside.remove(project.getLayer());
+            projectsReside.add(project.getLayer());
             ComponentAssistant.ready(projectsReside);
         }
 
@@ -455,7 +458,8 @@ public class TasksGenerator {
                         completeCount--;
                     }
                     project.setLive(false);
-                    projectsReside.remove(project);
+                    projectsReside.remove(project.getLayer());
+                    PROJECTS.remove(project);
                     ComponentAssistant.ready(projectsReside);
                 }
             };
@@ -467,7 +471,8 @@ public class TasksGenerator {
         }
 
         public static void receiveFromSerials(TaskSelf.ProjectSelf dProject){
-            projectsReside.add(dProject);
+            projectsReside.add(dProject.getLayer());
+            PROJECTS.add(dProject);
             if (dProject.isLive()) {
                 renewCount(1);
             } else {
@@ -514,7 +519,6 @@ public class TasksGenerator {
                 @Override
                 public Component add(Component comp) {
                     activeReside.setPreferredSize(new Dimension(activeReside.getPreferredSize().width, activeReside.getPreferredSize().height+40));
-                    ASSIGNMENTS.add((TaskSelf.AssignmentSelf) comp);
                     renewCount(1);
                     return super.add(comp);
                 }
@@ -524,7 +528,6 @@ public class TasksGenerator {
                     super.remove(comp);
                     activeReside.setPreferredSize(new Dimension(activeReside.getPreferredSize().width, activeReside.getPreferredSize().height-40));
                     renewCount(-1);
-                    ASSIGNMENTS.remove(comp);
                 }
             };
             activeReside.setLayout(new FlowLayout(CONTENTS_POSITION));
@@ -533,7 +536,6 @@ public class TasksGenerator {
                 @Override
                 public Component add(Component comp) {
                     doneReside.setPreferredSize(new Dimension(doneReside.getPreferredSize().width, doneReside.getPreferredSize().height+40));
-                    ASSIGNMENTS.add((TaskSelf.AssignmentSelf) comp);
                     doneCount++;
                     return super.add(comp);
                 }
@@ -541,7 +543,6 @@ public class TasksGenerator {
                 @Override
                 public void remove(Component comp) {
                     super.remove(comp);
-                    ASSIGNMENTS.remove(comp);
                     doneCount--;
                     doneReside.setPreferredSize(new Dimension(doneReside.getPreferredSize().width, doneReside.getPreferredSize().height-40));
                 }
@@ -563,7 +564,7 @@ public class TasksGenerator {
                 } else {
                     final String type = assignmentCreator.isGroup() ? "Group Assignment" : "Individual Assignment";
                     final String question = assignmentCreator.getQuestion();
-                    final Date givenDate = MDate.parse(assignmentCreator.getProvidedDeadLine()+" 0:0:0");
+                    final Date givenDate = Objects.requireNonNull(MDate.parse(assignmentCreator.getProvidedDeadLine()+" 0:0:0"));
                     if (givenDate.before(new Date())) {
                         App.signalError(assignmentCreator.getRootPane(), "Invalid Deadline", "Sorry, the deadline cannot be at most today.");
                         return;
@@ -587,7 +588,10 @@ public class TasksGenerator {
                             "Type:  " + type + "\n" +
                             "Submittion:  "+deadline+ "\n" +
                             "Through:  "+mean)) {
-                        activeReside.add(new TaskSelf.AssignmentSelf(name, deadline, question, assignmentCreator.isGroup(), mean));
+                        final TaskSelf.AssignmentSelf incomingAssignment = new TaskSelf.AssignmentSelf(name, deadline,
+                                question, assignmentCreator.isGroup(), mean);
+                        ASSIGNMENTS.add(incomingAssignment);
+                        activeReside.add(incomingAssignment.getLayer());
                         ComponentAssistant.ready(activeReside);
                         assignmentCreator.dispose();
                     }
@@ -610,15 +614,14 @@ public class TasksGenerator {
         
         private static void completeTransfer(TaskSelf.AssignmentSelf aSelf){
             aSelf.getDeadlineIndicator().setText("Submitted: "+aSelf.getSubmissionDate());
-            aSelf.getDeadlineIndicator().setFont(KFontFactory.createPlainFont(16));
-            aSelf.getDeadlineIndicator().setForeground(Color.BLUE);
+            aSelf.getDeadlineIndicator().setStyle(KFontFactory.createPlainFont(16), Color.BLUE);
             aSelf.getDeadlineIndicator().setCursor(null);
             for (MouseListener l : aSelf.getDeadlineIndicator().getMouseListeners()) {
                 aSelf.getDeadlineIndicator().removeMouseListener(l);
             }
             aSelf.setOn(false);
-            activeReside.remove(aSelf);
-            doneReside.add(aSelf);
+            activeReside.remove(aSelf.getLayer());
+            doneReside.add(aSelf.getLayer());//come on... will only adding it in the 2nd not remove it from the first first?
             ComponentAssistant.ready(activeReside,doneReside);
         }
         
@@ -626,12 +629,12 @@ public class TasksGenerator {
             return e -> {
                 if (App.showYesNoCancelDialog(eDialog.getRootPane(), "Confirm","Are you sure you want to remove this assignment?")) {
                     if (assignmentSelf.isOn()) {
-                        activeReside.remove(assignmentSelf);
-                        ComponentAssistant.ready(activeReside);
+                        activeReside.remove(assignmentSelf.getLayer());
                     } else {
-                        doneReside.remove(assignmentSelf);
-                        ComponentAssistant.ready(doneReside);
+                        doneReside.remove(assignmentSelf.getLayer());
                     }
+                    ComponentAssistant.ready(activeReside, doneReside);
+                    ASSIGNMENTS.remove(assignmentSelf);
                     assignmentSelf.setOn(false);
                     eDialog.dispose();
                 }
@@ -653,10 +656,11 @@ public class TasksGenerator {
 
         public static void receiveFromSerials(TaskSelf.AssignmentSelf aSelf){
             if (aSelf.isOn()) {
-                activeReside.add(aSelf);
+                activeReside.add(aSelf.getLayer());
             } else {
-                doneReside.add(aSelf);
+                doneReside.add(aSelf.getLayer());
             }
+            ASSIGNMENTS.add(aSelf);
         }
 
         private JComponent assignmentsComponent(){
@@ -707,6 +711,7 @@ public class TasksGenerator {
                             doneReside.remove(c);
                         }
                         ComponentAssistant.ready(doneReside);
+                        ASSIGNMENTS.removeIf(a -> !a.isOn());
                     }
                 }
             });
@@ -735,7 +740,6 @@ public class TasksGenerator {
                 @Override
                 public Component add(Component comp) {
                     eventsReside.setPreferredSize(new Dimension(eventsReside.getPreferredSize().width, eventsReside.getPreferredSize().height+35));
-                    EVENTS.add((TaskSelf.EventSelf) comp);
                     return super.add(comp);
                 }
 
@@ -743,7 +747,6 @@ public class TasksGenerator {
                 public void remove(Component comp) {
                     super.remove(comp);
                     eventsReside.setPreferredSize(new Dimension(eventsReside.getPreferredSize().width, eventsReside.getPreferredSize().height-35));
-                    EVENTS.remove(comp);
                 }
             };
             eventsReside.setLayout(new FlowLayout(CONTENTS_POSITION));
@@ -782,7 +785,9 @@ public class TasksGenerator {
                     if (App.showYesNoCancelDialog(requiredCreator.getRootPane(),"Confirm", "Do you wish to add the following event?\n-\n" +
                             "Title:  "+tName+"\n" +
                             "Date:  "+dateString)) {
-                        eventsReside.add(new TaskSelf.EventSelf(tName, dateString));
+                        final TaskSelf.EventSelf incomingEvent = new TaskSelf.EventSelf(tName, dateString);
+                        EVENTS.add(incomingEvent);
+                        eventsReside.add(incomingEvent.getEventLayer());
                         ComponentAssistant.ready(eventsReside);
                         requiredCreator.dispose();
                         renewCount(1);
@@ -804,7 +809,8 @@ public class TasksGenerator {
         }
 
         public static void deleteEvent(TaskSelf.EventSelf event){
-            eventsReside.remove(event);
+            EVENTS.remove(event);
+            eventsReside.remove(event.getEventLayer());
             ComponentAssistant.ready(eventsReside);
             if (event.isPending()) {
                 TasksGenerator.EventsHandler.renewCount(-1);
@@ -817,10 +823,11 @@ public class TasksGenerator {
         }
 
         public static void receiveFromSerials(TaskSelf.EventSelf eventSelf) {
-            eventsReside.add(eventSelf);
+            eventsReside.add(eventSelf.getEventLayer());
             if (eventSelf.isPending()) {
                 renewCount(1);
             }
+            EVENTS.add(eventSelf);
         }
 
         private JComponent eventsComponent(){

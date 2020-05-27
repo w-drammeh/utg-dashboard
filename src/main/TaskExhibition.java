@@ -10,7 +10,8 @@ import java.awt.event.KeyEvent;
 /**
  * Like its co., TaskExhibition too has subclasses for all the separate task types.
  * for exhibiting them.
- * The event has no Exhibitor
+ * The event has no Exhibitor.
+ * TaskExhibitions are made visible at time of creation.
  */
 public class TaskExhibition {
 
@@ -56,7 +57,7 @@ public class TaskExhibition {
 
             final KPanel soFarLayer = new KPanel(new BorderLayout());
             soFarLayer.add(KPanel.wantDirectAddition(giveLabel("Time taken so far:")),BorderLayout.WEST);
-            soFarLayer.add(KPanel.wantDirectAddition(giveValueLabel(theTask.getDaysTaken() == 0 ? "Less than a day" : Globals.checkPlurality(theTask.getDaysTaken(), "days"))),BorderLayout.CENTER);
+            soFarLayer.add(KPanel.wantDirectAddition(giveValueLabel(theTask.getDaysTaken() == 0 ? "Less than a day" : Globals.checkPlurality(theTask.getDaysTaken(), "days"))), BorderLayout.CENTER);
 
             final KPanel remainingLayer = new KPanel(new BorderLayout());
             remainingLayer.add(KPanel.wantDirectAddition(giveLabel("Time remaining:")),BorderLayout.WEST);
