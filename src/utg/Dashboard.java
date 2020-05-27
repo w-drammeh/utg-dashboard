@@ -15,7 +15,7 @@ import java.io.File;
  * This class defines the normal process-flow of the Dashboard. Please read the logic.txt file.
  */
 public class Dashboard {
-    public static final String VERSION = "1.0.0 - LTS";
+    public static final String VERSION = "1.0.5 - LTS";
     public static boolean isTest;
     private static boolean isFirst;
     private static Preview preview;
