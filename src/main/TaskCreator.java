@@ -187,7 +187,8 @@ public class TaskCreator {
             yField = KTextField.newYearField();
 
             final KPanel deadLinePanel = new KPanel(new FlowLayout(FlowLayout.CENTER));
-            deadLinePanel.addAll(new KLabel("Deadline:",labelsFont),giveSpace(50,30),new KLabel("Day",hintsFont),dField,giveSpace(20,30),
+            deadLinePanel.addAll(new KLabel("Deadline:",labelsFont),giveSpace(50,30),new KLabel("Day",
+                            hintsFont),dField,giveSpace(20,30),
                     new KLabel("Month",hintsFont),mField,giveSpace(20,30),new KLabel("Year",hintsFont),yField);
 
             groupChoice = new JRadioButton("Group Work");
@@ -207,7 +208,7 @@ public class TaskCreator {
             groupPanel.add(KPanel.wantDirectAddition(new KLabel("Assignment Type:",labelsFont)),BorderLayout.WEST);
             groupPanel.add(KPanel.wantDirectAddition(choicesPlate),BorderLayout.CENTER);
 
-            modes = new JComboBox<>(new String[]{"To submit a hard copy","To submit a soft copy","Through an email address","Through a web site","Other"});
+            modes = new JComboBox<>(new String[]{"To submit a hard copy","To submit a soft copy", "Through an email address", "Through a web site", "Other"});
             modes.setFont(KFontFactory.createPlainFont(15));
             modes.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             modes.setFocusable(false);
@@ -388,7 +389,8 @@ public class TaskCreator {
             yearField = KTextField.newYearField();
 
             final KPanel dateFieldsPanel = new KPanel();
-            dateFieldsPanel.addAll(new KLabel("Day",labelsFont),dayField,giveSpace(10, 20),new KLabel("Month",labelsFont),monthField,giveSpace(10, 20),new KLabel("Year",labelsFont),yearField);
+            dateFieldsPanel.addAll(new KLabel("Day",labelsFont),dayField,giveSpace(10, 20),
+                    new KLabel("Month",labelsFont),monthField,giveSpace(10, 20),new KLabel("Year",labelsFont),yearField);
             final KPanel datesLayer = new KPanel(new BorderLayout(),typicalPanelsDimension);
             datesLayer.add(KPanel.wantDirectAddition(dateLabel),BorderLayout.WEST);
             datesLayer.add(dateFieldsPanel,BorderLayout.CENTER);

@@ -251,7 +251,8 @@ public final class Board extends KFrame {
         final KPanel horizontalWrapper = new KPanel();
         horizontalWrapper.setLayout(new BoxLayout(horizontalWrapper, BoxLayout.X_AXIS));
         horizontalWrapper.addAll(new KPanel(), toPortalButton, new KPanel());
-        midPart.add(horizontalWrapper);//Notice how the last space is automatically left blank. Besides, the height and the spaces do not seem to matter
+        midPart.add(horizontalWrapper);//Notice how the last space is automatically left blank.
+        // Besides, the height and the spaces do not seem to matter
 
         final KButton aUtgButton = new KButton("About UTG");
         aUtgButton.undress();

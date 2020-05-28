@@ -7,7 +7,6 @@ public class KTabbedPane extends JTabbedPane implements Preference {
 
     @Override
     public void setPreferences() {
-
     }
 
 }

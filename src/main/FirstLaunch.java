@@ -52,7 +52,8 @@ public class FirstLaunch extends KDialog {
                 "analysis on your <b>major courses</b>, and for that it uses this code to auto-index and filter out the courses " +
                 "that are your majors.</p>" +
                 "<p><b>If you are not sure, do not write anything in the field below!</b> Changes can always be made in Settings.</p>" +
-                "<p>For example, the known major-code for Mathematics program is <b>MTH</b>; Computer, <b>CPS</b>; Economics, <b>ECO</b>; Chemistry, <b>CHM</b>; Biology, <b>BIO</b>, etc.</p>";
+                "<p>For example, the known major-code for Mathematics program is <b>MTH</b>; Computer, <b>CPS</b>; Economics, <b>ECO</b>; " +
+                "Chemistry, <b>CHM</b>; Biology, <b>BIO</b>, etc.</p>";
         final KTextPane textPane = KTextPane.wantHtmlFormattedPane(majorCodeText);
         textPane.setBackground(Color.WHITE);
 
@@ -74,7 +75,8 @@ public class FirstLaunch extends KDialog {
 
         final KPanel majorPanel = new KPanel();
         majorPanel.setLayout(new BoxLayout(majorPanel, BoxLayout.Y_AXIS));
-        majorPanel.addAll(KPanel.wantDirectAddition(new KLabel("What's Your Major Code?", bigFont)), textPane, KPanel.wantDirectAddition(majorCodeField),
+        majorPanel.addAll(KPanel.wantDirectAddition(new KLabel("What's Your Major Code?", bigFont)), textPane,
+                KPanel.wantDirectAddition(majorCodeField),
                 ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,nextButton));
         return majorPanel;
     }
@@ -158,7 +160,8 @@ public class FirstLaunch extends KDialog {
         final KPanel minorPanel = new KPanel();
         minorPanel.setLayout(new BoxLayout(minorPanel, BoxLayout.Y_AXIS));
         minorPanel.addAll(KPanel.wantDirectAddition(new KLabel("Do You Minor a Program?", bigFont)), kPanel,
-                ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,prevButton, nextButton));
+                ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),
+                        null,prevButton, nextButton));
         return minorPanel;
     }
 
@@ -205,7 +208,7 @@ public class FirstLaunch extends KDialog {
 
         final KPanel kPanel = new KPanel();
         kPanel.setLayout(new BoxLayout(kPanel, BoxLayout.Y_AXIS));
-        kPanel.addAll(textPane, KPanel.wantDirectAddition(new KLabel("Email: ",KFontFactory.createBoldFont(16)),emailField),
+        kPanel.addAll(textPane, KPanel.wantDirectAddition(new KLabel("Email: ",KFontFactory.createBoldFont(16)), emailField),
                 KPanel.wantDirectAddition(new KLabel("Password: ",KFontFactory.createBoldFont(16)), psswdField));
 
         final KButton prevButton = new KButton("Back");
@@ -219,7 +222,8 @@ public class FirstLaunch extends KDialog {
         final KPanel emailPanel = new KPanel();
         emailPanel.setLayout(new BoxLayout(emailPanel, BoxLayout.Y_AXIS));
         emailPanel.addAll(KPanel.wantDirectAddition(new KLabel("Do you know you had a Student Mail?", bigFont)), kPanel,
-                ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,prevButton,skipButton,setButton));
+                ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),
+                        null,prevButton,skipButton,setButton));
         return emailPanel;
     }
 
@@ -264,7 +268,8 @@ public class FirstLaunch extends KDialog {
         final KPanel imgPanel = new KPanel();
         imgPanel.setLayout(new BoxLayout(imgPanel, BoxLayout.Y_AXIS));
         imgPanel.addAll(KPanel.wantDirectAddition(new KLabel("You Look Nice!", bigFont)), nicePanel,
-                ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,prevButton,finishButton));
+                ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),
+                        null,prevButton,finishButton));
         return imgPanel;
     }
 

@@ -7,12 +7,13 @@ import java.net.UnknownHostException;
 
 /**
  * A class which is lucky that its functionality is not integrated in other types.
+ * It is purposely meant for checking the availability of the internet. The algorithm is "rough".
  */
 public class InternetAvailabilityChecker {
 
 
     /**
-     * Calling this on the main thread can put Dashboard in a serious waiting state.
+     * Calling this on the main thread can put Dashboard in a serious waiting state!
      */
     public static boolean isInternetAvailable(){
         try {

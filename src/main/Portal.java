@@ -22,7 +22,11 @@ public class Portal {
     //do not call the contentsPage or profilePage on a driver that has not yet entered....!
     public static final String CONTENTS_PAGE = "https://www.utg.gm/course-registrations";
     public static final String PROFILE_PAGE = "https://www.utg.gm/profile";
-    public static final String HOME_PAGE = "https://www.utg.gm/home";//it's where the admission notice is. The same class reference will change to registrationNotice if on contentsPage
+    /**
+     * It's where the admission notice is.
+     * Notice: The same class reference of the admission-notice will change to registrationNotice on the contentsPage.
+     */
+    public static final String HOME_PAGE = "https://www.utg.gm/home";
     private static String registrationNotice = "Waiting for a successful sync...";
     private static String admissionNotice = registrationNotice;
     private static Date lastNoticeUpdate;
@@ -222,7 +226,6 @@ public class Portal {
     public static void receiveDriver(FirefoxDriver prePortalDriver) {
         Portal.portalDriver = prePortalDriver;
     }
-
 
     public static void serialize(){
         System.out.print("Serializing portal data... ");

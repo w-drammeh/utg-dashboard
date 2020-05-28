@@ -62,6 +62,7 @@ public class App {
         signalError(parent == null ? Board.getRoot() : parent,"Mat Error","That matriculation number does not match. Try again.");
     }
 
+    //The showXxx() calls:
     //Simplified methods that returns a boolean indicating that the user consents with a JOptionPane's dialog
     public static boolean showYesNoCancelDialog(Component parent, String title, String text){
         return JOptionPane.showConfirmDialog(parent == null ? Board.getRoot() : parent, dialogTextPanel(text),

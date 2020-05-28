@@ -146,9 +146,6 @@ public class MDate {
         return formatDateOnly(d1).equals(formatDateOnly(d2));
     }
 
-    /**
-     * Notice! It is converting the long to int, so this method is limited to int.
-     */
     public static int actualDayDifference(Date d1, Date d2){
         return (int) ChronoUnit.DAYS.between(d1.toInstant(), d2.toInstant());
     }

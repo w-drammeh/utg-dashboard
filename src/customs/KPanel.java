@@ -40,7 +40,7 @@ public class KPanel extends JPanel implements Preference {
     /**
      * A convenient way of calling wantDirectAddition(null, null, directComponent).
      * Still respecting the default-layout, this will add all the directComponents
-     * to the returned instance.
+     * to the returned-instance.
      * Notice that the ability of this call to accept multiple param-components
      * will minimize declaration of panels for the sake of holding multiple components
      * instead of direct-addition.
@@ -76,9 +76,9 @@ public class KPanel extends JPanel implements Preference {
 
     /**
      * Directly adds a list of components to this instance.
-     * Since this function pays no heed to position, it cannot be used under certain
-     * layouts, especially, the beloved 'Border'. However, very useful under certain other
-     * beloved layouts like 'flow', and 'box'.
+     * Since this function pays no heed to position, it cannot technically be used under certain
+     * layouts; especially, the beloved 'Border'. However, very useful under certain other
+     * beloved layouts like 'Flow', and 'Box'.
      */
     public void addAll(Component ... list) {
         for (Component c : list) {

@@ -67,8 +67,8 @@ public class Student {
     public static final String SECOND_SEMESTER = "Second Semester";
     public static final String SUMMER_SEMESTER = "Summer Semester";//These are but for uniformity
     private static final int iconWidth = 275, iconHeight = 200;
-    private static final ImageIcon emptyIcon = MyClass.scaleForMe(App.getIconURL("defaultUserIcon.png"),iconWidth,iconHeight);
-    private static final ImageIcon shooterIcon = MyClass.scaleForMe(App.getIconURL("shooter.png"),iconWidth,iconHeight);
+    private static final ImageIcon emptyIcon = MyClass.scaleForMe(App.getIconURL("defaultUserIcon.png"), iconWidth, iconHeight);
+    private static final ImageIcon shooterIcon = MyClass.scaleForMe(App.getIconURL("shooter.png"), iconWidth, iconHeight);
 
     /**
      * The format of the name shown at the top center
@@ -452,7 +452,8 @@ public class Student {
      */
     public static void reset(){
         firstName = lastName = program = major = minor = school = department = semester = state = level = address =
-                placeOfBirth = nationality = dateOfBirth = maritalStatue = portalMail = portalPassword = telephones = MAJOR_CODE = MINOR_CODE = "";
+                placeOfBirth = nationality = dateOfBirth = maritalStatue = portalMail = portalPassword = telephones =
+                        MAJOR_CODE = MINOR_CODE = "";
         matNumber = yearOfAdmission = monthOfAdmission = levelNumber = 0;
         CGPA = 0D;
         userIcon = null;

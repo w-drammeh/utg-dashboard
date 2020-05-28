@@ -91,12 +91,14 @@ public class HelpGenerator implements ActivityAnswerer {
                 "shall mean that you'll not be able to tamper with the details except the schedules. To verify a course that you " +
                 "already added locally, select it and click the <i>Confirm Button</i> therein.";
 
-        final String matchingTip = "If you want to see a photocopy of the Running table on your portal, just click <b>More Options</b> and select <i>Match Portal</i>. " +
+        final String matchingTip = "If you want to see a photocopy of the Running table on your portal, just click " +
+                "<b>More Options</b> and select <i>Match Portal</i>. " +
                 "Use this after you register all your courses. This is simpler and will bring all your courses.";
 
         final String modulesTip = "Under the 'Home | Modules Collection' activity, Dashboard does not miss a course you've treated! " +
                 "The courses are arranged according to their respective years and semesters, and so are they added to the tables in the same manner. " +
-                "Again, you can add your own courses here but will not be included in your analysis (and transcript) until they're confirmed on the portal. To add a course, right-click on the " +
+                "Again, you can add your own courses here but will not be included in your analysis (and transcript) until they're confirmed on the portal. " +
+                "To add a course, right-click on the " +
                 "respective table and select Add. You can also get the details of a course, delete it, confirm, etc. by selecting the course first " +
                 "right-clicking on it and choosing the right option from the Popup.";
 
@@ -116,9 +118,9 @@ public class HelpGenerator implements ActivityAnswerer {
 
         final String summerTip = "The courses that you've done during summer, should appear in this table under 'Home | Module Collection | Summer'.";
 
-        final String miscTableTip = "The <b>Miscellaneous</b> table is not intended to hold modules for <b>Undergraduate Level</b> students. Like to all the other tables, " +
-                "you can add miscellaneous courses but only outside your four-years specification at undergraduate level. If a bachelor student sees courses on the Misc. table " +
-                "automatically, then one or more of the following problems hold:" +
+        final String miscTableTip = "The <b>Miscellaneous</b> table is not intended to hold modules for <b>Undergraduate Level</b> students. " +
+                "Like to all the other tables, you can add miscellaneous courses but only outside your four-years specification at undergraduate level. " +
+                "If a bachelor student sees courses on the Misc. table automatically, then one or more of the following problems hold:" +
                 "<ol><li>There's a <b>conflict</b> between the <i>Year of Admission</i> of the student and the courses he/she is doing</li>" +
                 "<li>All the eight(8) tables refused to accommodate a particular course as per the inconsistency of its semester with the precise level of the student " +
                 "backed by the admission month - usually, September or February</li>" +
@@ -169,17 +171,24 @@ public class HelpGenerator implements ActivityAnswerer {
 
         final KPanel tipsPlace = new KPanel(new Dimension(975, 2_210));
         tipsPlace.setLayout(new BoxLayout(tipsPlace, BoxLayout.Y_AXIS));
-        tipsPlace.addAll(tipHeading("Running Courses"),tipWriting(runningTip),tipSubHeading("Verification"),tipWriting(verificationTip),tipSubHeading("Matching"), tipWriting(matchingTip),
-                tipHeading("Module Collection"),tipWriting(modulesTip),tipSubHeading("Modules Synchronization"),tipWriting(syncingTip),tipSubHeading("Course Verification"),tipWriting(confirmationTip),tipSubHeading("Summer"),tipWriting(summerTip),tipSubHeading("Miscellaneous Table"),tipWriting(miscTableTip),
-                tipHeading("Privacy & Settings"),tipWriting(settingsTip),tipSubHeading("User Icon"),tipWriting(iconTip),tipSubHeading("Major Code"),tipWriting(majCodeTip),tipSubHeading("Minor Code"),tipWriting(minCodeTip),tipSubHeading("Custom Detail"),tipWriting(customDTip),
+        tipsPlace.addAll(tipHeading("Running Courses"),tipWriting(runningTip),tipSubHeading("Verification"),
+                tipWriting(verificationTip),tipSubHeading("Matching"), tipWriting(matchingTip),
+                tipHeading("Module Collection"),tipWriting(modulesTip),tipSubHeading("Modules Synchronization"),
+                tipWriting(syncingTip),tipSubHeading("Course Verification"),tipWriting(confirmationTip),
+                tipSubHeading("Summer"),tipWriting(summerTip),tipSubHeading("Miscellaneous Table"),tipWriting(miscTableTip),
+                tipHeading("Privacy & Settings"),tipWriting(settingsTip),tipSubHeading("User Icon"),
+                tipWriting(iconTip),tipSubHeading("Major Code"),tipWriting(majCodeTip),tipSubHeading("Minor Code"),
+                tipWriting(minCodeTip),tipSubHeading("Custom Detail"),tipWriting(customDTip),
                 tipHeading("My Transcript"),tipWriting(transTip),tipSubHeading("Printing"),tipWriting(printTip),
                 tipHeading("Analysis"),tipWriting(analysisTip),
-                tipHeading("Other Tips and Universal Access"),tipSubHeading("Go Portal"),tipWriting(goPortalTip),tipSubHeading("Come Home"),tipWriting(comeHomeTip),tipSubHeading("About UTG"),tipWriting(utgTip));
+                tipHeading("Other Tips and Universal Access"),tipSubHeading("Go Portal"),tipWriting(goPortalTip),
+                tipSubHeading("Come Home"),tipWriting(comeHomeTip),tipSubHeading("About UTG"),tipWriting(utgTip));
         tipScrollPane = new KScrollPane(tipsPlace);
     }
 
     private KPanel tipHeading(String topic){
-        return KPanel.wantDirectAddition(new FlowLayout(FlowLayout.LEFT), null, new KLabel(topic,KFontFactory.createBoldFont(17),Color.BLUE));
+        return KPanel.wantDirectAddition(new FlowLayout(FlowLayout.LEFT), null, new KLabel(topic,
+                KFontFactory.createBoldFont(17),Color.BLUE));
     }
 
     private KPanel tipSubHeading(String subTopic){
@@ -213,7 +222,7 @@ public class HelpGenerator implements ActivityAnswerer {
                 "by giving it to us. Simply go to 'Home | Personal Dashboard | Feedback | Answer a FAQ'.";
         final KPanel downPanel = new KPanel(new Dimension(900,115));
         downPanel.setLayout(new BoxLayout(downPanel, BoxLayout.Y_AXIS));
-        downPanel.addAll(Box.createVerticalStrut(30),KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))),
+        downPanel.addAll(Box.createVerticalStrut(30),KPanel.wantDirectAddition(new KSeparator(Color.BLACK, new Dimension(800,1))),
                 newBlank(), insertedText(contributeString));
 
         final KPanel faqsPlace = new KPanel();

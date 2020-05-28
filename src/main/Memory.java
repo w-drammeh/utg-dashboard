@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 /**
  * It's the root-center of student analysis.
- * Among the things it does is to keep track of verified courses to be supplied in the transcript
- * and analysis.
+ * Among the things it does is to keep track of verified courses to be supplied in the Transcript
+ * and Analysis.
  */
 public class Memory {
     /**
      * There should be no chance of adding unverified modules.
-     * Accessors of this list, noticeably, the Transcript and Analysis, should refresh calls
+     * Accessors of this list - noticeably, the Transcript and Analysis - should refresh calls
      * prior to any activity-answer.
      * This list must remain updated by the monitor in ModulesHandler.
      */

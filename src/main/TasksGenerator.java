@@ -199,7 +199,8 @@ public class TasksGenerator {
                     App.signalError(todoCreator.getRootPane(), "Blank Name", "Please specify a name for the task");
                     todoCreator.getDescriptionField().requestFocusInWindow();
                 } else if (name.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
-                    App.signalError("Error", "Sorry, description of a task must be at most "+TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters only.");
+                    App.signalError("Error", "Sorry, description of a task must be at most "+
+                            TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters only.");
                 } else {
                     final String span = todoCreator.getDuration();
                     if (Objects.equals(span, "Five Days")) {
@@ -232,7 +233,8 @@ public class TasksGenerator {
                 oldSelf.setTotalTimeConsumed(oldSelf.getSpecifiedDuration());
             	finalizeTransfer(oldSelf);
             } else {
-                if (App.showYesNoCancelDialog(dialog.getRootPane(), "Confirm", "Are you sure you've completed this task? It will be marked complete.")) {
+                if (App.showYesNoCancelDialog(dialog.getRootPane(), "Confirm",
+                        "Are you sure you've completed this task? It will be marked complete.")) {
                     oldSelf.setTotalTimeConsumed(oldSelf.getDaysTaken());
                 	finalizeTransfer(oldSelf);
                     dialog.dispose();
@@ -386,7 +388,8 @@ public class TasksGenerator {
                     App.signalError("Blank Name","Please specify a name for the project");
                     projectCreator.getNameField().requestFocusInWindow();
                 } else if (name.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
-                    App.signalError("Error", "Sorry, name of a project must be at most "+TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters only.");
+                    App.signalError("Error", "Sorry, name of a project must be at most "+
+                            TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters only.");
                 } else {
                     final String dDuration = projectCreator.getTheDuration();
                     if (Objects.equals(dDuration, "Five Days")) {
@@ -518,7 +521,8 @@ public class TasksGenerator {
         	activeReside = new KPanel(){
                 @Override
                 public Component add(Component comp) {
-                    activeReside.setPreferredSize(new Dimension(activeReside.getPreferredSize().width, activeReside.getPreferredSize().height+40));
+                    activeReside.setPreferredSize(new Dimension(activeReside.getPreferredSize().width,
+                            activeReside.getPreferredSize().height+40));
                     renewCount(1);
                     return super.add(comp);
                 }
@@ -526,7 +530,8 @@ public class TasksGenerator {
                 @Override
                 public void remove(Component comp) {
                     super.remove(comp);
-                    activeReside.setPreferredSize(new Dimension(activeReside.getPreferredSize().width, activeReside.getPreferredSize().height-40));
+                    activeReside.setPreferredSize(new Dimension(activeReside.getPreferredSize().width,
+                            activeReside.getPreferredSize().height-40));
                     renewCount(-1);
                 }
             };
@@ -535,7 +540,8 @@ public class TasksGenerator {
             doneReside = new KPanel(){
                 @Override
                 public Component add(Component comp) {
-                    doneReside.setPreferredSize(new Dimension(doneReside.getPreferredSize().width, doneReside.getPreferredSize().height+40));
+                    doneReside.setPreferredSize(new Dimension(doneReside.getPreferredSize().width,
+                            doneReside.getPreferredSize().height+40));
                     doneCount++;
                     return super.add(comp);
                 }
@@ -557,7 +563,8 @@ public class TasksGenerator {
                     App.signalError(assignmentCreator.getRootPane(), "Blank Name", "Please provide the name of the course");
                     assignmentCreator.getNameField().requestFocusInWindow();
                 } else if (name.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
-                    App.signalError(assignmentCreator.getRootPane(), "Error", "Sorry, the subject name cannot exceed "+TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters.");
+                    App.signalError(assignmentCreator.getRootPane(), "Error", "Sorry, the subject name cannot exceed "+
+                            TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters.");
                     assignmentCreator.getNameField().requestFocusInWindow();
                 } else if (Globals.isBlank(assignmentCreator.getProvidedDeadLine())) {
                     App.signalError(assignmentCreator.getRootPane(), "Deadline Error", "Please fill out all the fields for the deadline. You can change them later.");
@@ -739,14 +746,16 @@ public class TasksGenerator {
             eventsReside = new KPanel(){
                 @Override
                 public Component add(Component comp) {
-                    eventsReside.setPreferredSize(new Dimension(eventsReside.getPreferredSize().width, eventsReside.getPreferredSize().height+35));
+                    eventsReside.setPreferredSize(new Dimension(eventsReside.getPreferredSize().width,
+                            eventsReside.getPreferredSize().height+35));
                     return super.add(comp);
                 }
 
                 @Override
                 public void remove(Component comp) {
                     super.remove(comp);
-                    eventsReside.setPreferredSize(new Dimension(eventsReside.getPreferredSize().width, eventsReside.getPreferredSize().height-35));
+                    eventsReside.setPreferredSize(new Dimension(eventsReside.getPreferredSize().width,
+                            eventsReside.getPreferredSize().height-35));
                 }
             };
             eventsReside.setLayout(new FlowLayout(CONTENTS_POSITION));
@@ -763,10 +772,12 @@ public class TasksGenerator {
                     App.signalError(requiredCreator.getRootPane(), "No Name", "Please specify a name for the event.");
                     requiredCreator.getDescriptionField().requestFocusInWindow();
                 } else if (tName.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
-                    App.signalError(requiredCreator.getRootPane(), "Error", "Sorry, the event's name should be at most "+TaskCreator.TASKS_DESCRIPTION_LIMIT+" characters.");
+                    App.signalError(requiredCreator.getRootPane(), "Error", "Sorry, the event's name should be at most "+
+                            TaskCreator.TASKS_DESCRIPTION_LIMIT+" characters.");
                     requiredCreator.getDescriptionField().requestFocusInWindow();
                 } else if (Globals.isBlank(requiredCreator.getProvidedDate())) {
-                    App.signalError(requiredCreator.getRootPane(), "Error", "Please provide all the fields for the date of the "+(requiredCreator.type()));
+                    App.signalError(requiredCreator.getRootPane(), "Error", "Please provide all the fields for the date of the "+
+                            (requiredCreator.type()));
                 } else {
                     final Date date = MDate.parse(requiredCreator.getProvidedDate() + " 0:0:0");
                     if (date == null) {

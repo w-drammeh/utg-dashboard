@@ -14,13 +14,15 @@ public class AnalysisGenerator implements ActivityAnswerer {
     private KLabel aPlusTellerLabel, aNeutralTellerLabel, aMinusTellerLabel, bPlusTellerLabel, bNeutralTellerLabel, bMinusTellerLabel,
             cPlusTellerLabel, cNeutralTellerLabel, cMinusTellerLabel, dTellerLabel, fTellerLabel;
     private KLabel highestScoreTellerLabel, lowestScoreTellerLabel, highestMajorScoreTellerLabel, lowestMajorScoreTellerLabel,
-            highestMinorScoreTellerLabel, lowestMinorScoreTellerLabel, highestDERScoreTellerLabel, lowestDERScoreTellerLabel, highestGERScoreTellerLabel, lowestGERScoreTellerLabel;
+            highestMinorScoreTellerLabel, lowestMinorScoreTellerLabel, highestDERScoreTellerLabel, lowestDERScoreTellerLabel,
+            highestGERScoreTellerLabel, lowestGERScoreTellerLabel;
     private KLabel majorListTellerLabel, minorListTellerLabel, DERListTellerLabel, GERListTellerLabel, unclassifiedListTellerLabel;
     private KLabel allTellerLabel;
     private ArrayList<Course> aPlusList, aNeutralList, aMinusList, bPlusList, bNeutralList, bMinusList,
             cPlusList, cNeutralList, cMinusList, dList, fList;
     private ArrayList<Course> majorList, minorList, DERList, GERList, unclassifiedList;
-    private Course highestScoreCourse, lowestScoreCourse, highestMajorScoreCourse, lowestMajorScoreCourse, highestMinorScoreCourse, lowestMinorScoreCourse,
+    private Course highestScoreCourse, lowestScoreCourse, highestMajorScoreCourse, lowestMajorScoreCourse,
+            highestMinorScoreCourse, lowestMinorScoreCourse,
             highestDERScoreCourse, lowestDERScoreCourse, highestGERScoreCourse, lowestGERScoreCourse;
     private CardLayout cardLayout;
     private KPanel coursesBased, semestersBased, yearsBased;
@@ -36,8 +38,8 @@ public class AnalysisGenerator implements ActivityAnswerer {
     public AnalysisGenerator(){
         cardLayout = new CardLayout();
         final KPanel analysisContents = new KPanel(cardLayout);
-        cardLayout.addLayoutComponent(analysisContents.add(new KScrollPane(coursesAnalysisBasement(),false)),"course-basement");
-        cardLayout.addLayoutComponent(analysisContents.add(new KScrollPane(initiateSemestersAnalysisBasement(),false)),"semester-basement");
+        cardLayout.addLayoutComponent(analysisContents.add(new KScrollPane(coursesAnalysisBasement(),false)), "course-basement");
+        cardLayout.addLayoutComponent(analysisContents.add(new KScrollPane(initiateSemestersAnalysisBasement(),false)), "semester-basement");
         cardLayout.addLayoutComponent(analysisContents.add(new KScrollPane(initiateYearlyAnalysisBasement(),false)),"year-basement");
 
         final JComboBox<String> optionsCombo = new JComboBox<String>(new String[] {"My Courses", "Semesters", "Academic Years"}){
@@ -310,7 +312,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!DERListTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()-> new GlassPrompt("Divisional Educational Requirements",DERList).setVisible(true));
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("Divisional Educational Requirements", DERList).setVisible(true));
                 }
             }
         });
@@ -320,7 +322,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!GERListTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()-> new GlassPrompt("General Education Requirements",GERList).setVisible(true));
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("General Education Requirements", GERList).setVisible(true));
                 }
             }
         });
@@ -330,7 +332,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!unclassifiedListTellerLabel.getText().equals("None")) {
-                    SwingUtilities.invokeLater(()-> new GlassPrompt("Unknown Requirements",unclassifiedList).setVisible(true));
+                    SwingUtilities.invokeLater(()-> new GlassPrompt("Unknown Requirements", unclassifiedList).setVisible(true));
                 }
             }
         });
@@ -355,7 +357,10 @@ public class AnalysisGenerator implements ActivityAnswerer {
         if (Memory.listRequested().isEmpty()) {
             coursesBased.addAll(new KPanel(), createNoAnalysisPanel(), new KPanel());
         } else {
-            allTellerLabel.setText(Globals.checkPlurality(Memory.listRequested().size(),"Courses")+" ["+ Globals.checkPlurality(majorList.size(),"Majors")+", "+ Globals.checkPlurality(minorList.size(),"Minors")+", "+ Globals.checkPlurality(DERList.size(),"DERs")+", "+ Globals.checkPlurality(GERList.size(),"GERs")+", and "+ Globals.checkPlurality(unclassifiedList.size(),"Un-classifications")+"]");
+            allTellerLabel.setText(Globals.checkPlurality(Memory.listRequested().size(),"Courses")+" ["+
+                    Globals.checkPlurality(majorList.size(),"Majors")+", "+ Globals.checkPlurality(minorList.size(),
+                    "Minors")+", "+ Globals.checkPlurality(DERList.size(),"DERs")+", "+ Globals.checkPlurality(GERList.size(),
+                    "GERs")+", and "+ Globals.checkPlurality(unclassifiedList.size(),"Un-classifications")+"]");
             coursesBased.addAll(newAnalysisHeader("By Grade"),
                     newAnalysisPlate("A+",aPlusTellerLabel),
                     newAnalysisPlate("A",aNeutralTellerLabel),
@@ -416,7 +421,12 @@ public class AnalysisGenerator implements ActivityAnswerer {
                     promptLabel.setText(fractionalSem.get(0).getAbsoluteName());
                 } else {
                     final int i = fractionalSem.size();
-                    promptLabel.setText(Globals.checkPlurality(i,"Courses")+" ["+ Globals.checkPlurality(Memory.getMajorsBySemester(semTex).size(),"Majors")+", "+ Globals.checkPlurality(Memory.getMinorsBySemester(semTex).size(),"Minors")+", "+ Globals.checkPlurality(Memory.getDERsBySemester(semTex).size(),"DERs")+", "+ Globals.checkPlurality(Memory.getGERsBySemester(semTex).size(),"GERs")+", and "+ Globals.checkPlurality(Memory.getUnknownsBySemester(semTex).size(),"Un-classifications")+"]");
+                    promptLabel.setText(Globals.checkPlurality(i,"Courses")+" ["+
+                            Globals.checkPlurality(Memory.getMajorsBySemester(semTex).size(),"Majors")+", "+
+                            Globals.checkPlurality(Memory.getMinorsBySemester(semTex).size(),"Minors")+", "+
+                            Globals.checkPlurality(Memory.getDERsBySemester(semTex).size(),"DERs")+", "+
+                            Globals.checkPlurality(Memory.getGERsBySemester(semTex).size(),"GERs")+", and "+
+                            Globals.checkPlurality(Memory.getUnknownsBySemester(semTex).size(),"Un-classifications")+"]");
                 }
                 attachActiveOnFocus(promptLabel, null);
 
@@ -458,14 +468,19 @@ public class AnalysisGenerator implements ActivityAnswerer {
                         SwingUtilities.invokeLater(()-> new GlassPrompt(yearTex,fractionalYear).setVisible(true));
                     }
                 });
-                final ArrayList<Course> yMajors = Memory.getMajorsByYear(yearTex), yMinors = Memory.getMinorsByYear(yearTex), yDERs = Memory.getDERsByYear(yearTex),
-                        yGERs = Memory.getGERsByYear(yearTex), yNons = Memory.getUnknownsByYear(yearTex);
+                final ArrayList<Course> yMajors = Memory.getMajorsByYear(yearTex), yMinors = Memory.getMinorsByYear(yearTex),
+                        yDERs = Memory.getDERsByYear(yearTex), yGERs = Memory.getGERsByYear(yearTex), yNons = Memory.getUnknownsByYear(yearTex);
                 if (fractionalYear.size() == 1) {
                     final Course onlyCourse = fractionalYear.get(0);
                     allPromptLabel.setText(onlyCourse.getAbsoluteName()+" ["+onlyCourse.getSemester()+"]");
                 } else {
                     final int i = fractionalYear.size();
-                    allPromptLabel.setText(Globals.checkPlurality(i,"Courses")+" ["+ Globals.checkPlurality(yMajors.size(),"Majors")+", "+ Globals.checkPlurality(yMinors.size(),"Minors")+", "+ Globals.checkPlurality(yDERs.size(),"DERs")+", "+ Globals.checkPlurality(yGERs.size(),"GERs")+", and "+ Globals.checkPlurality(yNons.size(),"Un-classifications")+"]");
+                    allPromptLabel.setText(Globals.checkPlurality(i,"Courses")+" ["+
+                            Globals.checkPlurality(yMajors.size(),"Majors")+", "+
+                            Globals.checkPlurality(yMinors.size(),"Minors")+", "+
+                            Globals.checkPlurality(yDERs.size(),"DERs")+", "+
+                            Globals.checkPlurality(yGERs.size(),"GERs")+", and "+
+                            Globals.checkPlurality(yNons.size(),"Un-classifications")+"]");
                 }
                 attachActiveOnFocus(allPromptLabel, null);
 
@@ -487,12 +502,13 @@ public class AnalysisGenerator implements ActivityAnswerer {
                         newAnalysisPlate("DERs",specificYearLabel("DERs",yDERs,yearTex)),
                         newAnalysisPlate("GERs",specificYearLabel("GERs",yGERs,yearTex)),
                         newAnalysisPlate("Lecturers",tutorsLabel),
-                        newAnalysisPlate("CGPA Earned",new KLabel(Globals.toFourth(Memory.getCGPAByYear(yearTex)),valueFont, BLUE)));
+                        newAnalysisPlate("CGPA Earned",new KLabel(Globals.toFourth(Memory.getCGPAByYear(yearTex)), valueFont, BLUE)));
             }
 
             final ArrayList<String> lectsList = Memory.filterLecturers();
-            final KLabel totalTutorsLabel = new KLabel(Globals.checkPlurality(lectsList.size(),"distinguished lecturers"),valueFont, BLUE);
-            totalTutorsLabel.setCursor(totalTutorsLabel.getText().equals("No distinguished lecturers") ? null : Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            final KLabel totalTutorsLabel = new KLabel(Globals.checkPlurality(lectsList.size(),"distinguished lecturers"), valueFont, BLUE);
+            totalTutorsLabel.setCursor(totalTutorsLabel.getText().equals("No distinguished lecturers") ? null :
+                    Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             attachActiveOnFocus(totalTutorsLabel, "No distinguished lecturers");
             totalTutorsLabel.addMouseListener(new MouseAdapter() {
                 @Override
@@ -503,14 +519,14 @@ public class AnalysisGenerator implements ActivityAnswerer {
                 }
             });
 
-            final KLabel totalLabel = new KLabel(Globals.checkPlurality(yearsList.size(),"Academic years"),valueFont, BLUE);
+            final KLabel totalLabel = new KLabel(Globals.checkPlurality(yearsList.size(),"Academic years"), valueFont, BLUE);
             totalLabel.underline(null,true);
             yearsBased.addAll(newAnalysisHeader("Overall"),
                     newAnalysisPlate("All together",totalLabel),
                     newAnalysisPlate("My Tutors",totalTutorsLabel),
                     newAnalysisPlate("Best Year",new KLabel(Memory.traceBestYear(true),valueFont, BLUE)),
                     newAnalysisPlate("Worst Year",new KLabel(Memory.traceWorstYear(true),valueFont, BLUE)),
-                    newAnalysisPlate("Current CGPA",new KLabel(Student.getCGPA()+" ["+Student.upperDivision()+"]",valueFont, BLUE)));
+                    newAnalysisPlate("Current CGPA",new KLabel(Student.getCGPA()+" ["+Student.upperDivision()+"]", valueFont, BLUE)));
         }
         ComponentAssistant.ready(yearsBased);
     }
@@ -772,7 +788,8 @@ public class AnalysisGenerator implements ActivityAnswerer {
         private void join(String lName) {
             final KButton dtlButton = KButton.getIconifiedButton("warn.png",25,25);
             dtlButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            dtlButton.addActionListener(e -> SwingUtilities.invokeLater(()-> new GlassPrompt(lName, Memory.getFractionByLecturer(lName), this.getRootPane()).setVisible(true)));
+            dtlButton.addActionListener(e -> SwingUtilities.invokeLater(()-> new GlassPrompt(lName,
+                    Memory.getFractionByLecturer(lName), this.getRootPane()).setVisible(true)));
 
             final KPanel joinPanel = new KPanel(new BorderLayout());
             joinPanel.add(KPanel.wantDirectAddition(new KLabel(lName,KFontFactory.createPlainFont(15))),BorderLayout.WEST);
@@ -793,7 +810,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             }));
 
             final KPanel joinPanel = new KPanel(new BorderLayout());
-            joinPanel.add(KPanel.wantDirectAddition(new KLabel(tName,KFontFactory.createPlainFont(15))),BorderLayout.WEST);
+            joinPanel.add(KPanel.wantDirectAddition(new KLabel(tName,KFontFactory.createPlainFont(15))), BorderLayout.WEST);
             joinPanel.add(Box.createRigidArea(new Dimension(30, 30)),BorderLayout.CENTER);
             joinPanel.add(dtlButton,BorderLayout.EAST);
 
@@ -806,7 +823,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             dtlButton.addActionListener(e -> Course.exhibit(this.getRootPane(), c));
 
             final KPanel joinPanel = new KPanel(new BorderLayout());
-            joinPanel.add(KPanel.wantDirectAddition(new KLabel(c.getName(),KFontFactory.createPlainFont(15))),BorderLayout.WEST);
+            joinPanel.add(KPanel.wantDirectAddition(new KLabel(c.getName(),KFontFactory.createPlainFont(15))), BorderLayout.WEST);
             joinPanel.add(dtlButton, BorderLayout.EAST);
             substancePanel.add(joinPanel);
         }

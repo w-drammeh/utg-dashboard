@@ -1,6 +1,6 @@
 package utg;
 
-import main.MyClass;
+import main.MyDashboard;
 
 /**
  * This type is intended for testing a specific component / functionality of the project.
@@ -21,7 +21,7 @@ public class SpecificTester {
     }
 
     public static void main(String[] args) {
-        MyClass.serialize(System.getProperty("user.name"), "userName.ser");
+        new MyDashboard().setVisible(true);
     }
 
 }

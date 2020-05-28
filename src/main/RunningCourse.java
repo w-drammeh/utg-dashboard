@@ -171,7 +171,8 @@ public class RunningCourse implements Serializable {
 
         final KPanel statusPanel = new KPanel(new BorderLayout());
         statusPanel.add(KPanel.wantDirectAddition(new KLabel("Status:",hintFont)),BorderLayout.WEST);
-        statusPanel.add(KPanel.wantDirectAddition(new KLabel((activeCourse.isConfirmed ? "Confirmed" : "Unknown"), valueFont, (activeCourse.isConfirmed ? Color.BLUE : Color.RED))),BorderLayout.CENTER);
+        statusPanel.add(KPanel.wantDirectAddition(new KLabel((activeCourse.isConfirmed ? "Confirmed" : "Unknown"), valueFont,
+                (activeCourse.isConfirmed ? Color.BLUE : Color.RED))),BorderLayout.CENTER);
 
         final KButton closeButton = new KButton("Close");
         closeButton.addActionListener(e -> exhibitDialog.dispose());

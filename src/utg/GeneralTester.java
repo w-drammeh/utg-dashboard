@@ -8,7 +8,7 @@ import javax.swing.*;
  * This class runs Dashboard as if the user is already verified and it's intended for testing only!
  * This class simply jumps into the 'Build Sequence' by providing temporary data as specified in the
  * forgeXxx() calls thereby by-passing main.PrePortal and main.FirstLaunch mechanisms of initializing data.
- * These data is then used to build Dashboard letting the user see a runtime-instance of the system, yet
+ * These data are then used to build Dashboard letting the user see a runtime-instance of the system, yet
  * not verified.
  *
  * Since it's intended for testing only, by default, the 'Collapse Sequence' does not perform any serialization

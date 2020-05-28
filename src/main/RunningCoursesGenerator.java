@@ -204,7 +204,8 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
             while (!allRows.get(match).getText().equals(Student.getSemester())){
                 final List<WebElement> instantData = allRows.get(match).findElements(By.tagName("td"));
                 if (instantData.get(0).getText().equals(targetCode)) {
-                    final RunningCourse foundCourse = new RunningCourse(instantData.get(0).getText(), instantData.get(1).getText(), instantData.get(2).getText(),
+                    final RunningCourse foundCourse = new RunningCourse(instantData.get(0).getText(),
+                            instantData.get(1).getText(), instantData.get(2).getText(),
                             instantData.get(3).getText(), instantData.get(4).getText(),targetCourse.getDay(),targetCourse.getTime(), true);
                     final int index = getIndexOf(targetCourse);
                     if (index >= 0) {//Still present?
@@ -212,7 +213,8 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
                     } else {//Deleted?
                         ACTIVE_COURSES.add(foundCourse);
                     }
-                    App.promptPlain("Verification Successful","The attempt to search for the registered module: "+targetCourse.getName()+" was successful.\n" +
+                    App.promptPlain("Verification Successful","The attempt to search for the registered module: "+
+                            targetCourse.getName()+" was successful.\n" +
                             "It is now confirmed set. You can use Exhibit to view the its details.");
                     found = true;
                     break;
@@ -344,7 +346,8 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
                     final StringBuilder informationBuilder = new StringBuilder("Matching completed successfully:\n-\n");
                     while (!allRows.get(match).getText().equalsIgnoreCase(Student.getSemester())){
                         final List<WebElement> data = allRows.get(match).findElements(By.tagName("td"));
-                        final RunningCourse incoming = new RunningCourse(data.get(0).getText(), data.get(1).getText(), data.get(2).getText(), data.get(3).getText(),data.get(4).getText(),
+                        final RunningCourse incoming = new RunningCourse(data.get(0).getText(), data.get(1).getText(),
+                                data.get(2).getText(), data.get(3).getText(),data.get(4).getText(),
                                 "","", true);
                         final RunningCourse present = getByCode(incoming.getCode());
                         if (present == null) {//Does not exist at all
@@ -613,7 +616,8 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
             hoursBox = new JComboBox<>(Course.availableCoursePeriods());
             hoursBox.setFont(daysBox.getFont());
             final KPanel scheduleLayer = new KPanel(new FlowLayout(FlowLayout.CENTER));
-            scheduleLayer.addAll(dialogLabel("Day:"),daysBox,Box.createRigidArea(new Dimension(50,30)),dialogLabel("Time:"),hoursBox);
+            scheduleLayer.addAll(dialogLabel("Day:"), daysBox, Box.createRigidArea(new Dimension(50, 30)),
+                    dialogLabel("Time:"),hoursBox);
 
             final KButton cancelButton = new KButton("Cancel");
             cancelButton.addActionListener(e -> RunningCourseAdder.this.dispose());
@@ -632,14 +636,17 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
                 } else {
                     for (int i = 0; i < runningModel.getRowCount(); i++) {
                         if (runningModel.getValueAt(i,0).equals(codeField.getText().toUpperCase())) {
-                            App.signalError("Duplicate Code","Cannot add this code "+codeField.getText().toUpperCase()+" - already assigned to a course in the list.");
+                            App.signalError("Duplicate Code","Cannot add this code "+
+                                    codeField.getText().toUpperCase()+" - already assigned to a course in the list.");
                             return;
                         }
                     }
-                    ACTIVE_COURSES.add(new RunningCourse(codeField.getText(), nameField.getText(), lecturerField.getText(), venueField.getText(), roomField.getText(), String.valueOf(daysBox.getSelectedItem()),
+                    ACTIVE_COURSES.add(new RunningCourse(codeField.getText(), nameField.getText(), lecturerField.getText(),
+                            venueField.getText(), roomField.getText(), String.valueOf(daysBox.getSelectedItem()),
                             String.valueOf(hoursBox.getSelectedItem()), false));
                     this.dispose();
-                    SwingUtilities.invokeLater(()-> Notification.create("Local Registration", nameField.getText()+" is locally added, and may not be on your portal", generateNotificationWarning(nameField.getText())));
+                    SwingUtilities.invokeLater(()-> Notification.create("Local Registration", nameField.getText()+
+                            " is locally added, and may not be on your portal", generateNotificationWarning(nameField.getText())));
                 }
             });
 
@@ -649,7 +656,8 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
             this.getRootPane().setDefaultButton(doneButton);
             layers = new KPanel();
             layers.setLayout(new BoxLayout(layers, BoxLayout.Y_AXIS));
-            layers.addAll(codeLayer, nameLayer, lecturerLayer, placeLayer, roomLayer, scheduleLayer, ComponentAssistant.contentBottomGap(), buttonsLayer);
+            layers.addAll(codeLayer, nameLayer, lecturerLayer, placeLayer, roomLayer, scheduleLayer,
+                    ComponentAssistant.contentBottomGap(), buttonsLayer);
             this.setContentPane(layers);
             this.pack();
             this.setMinimumSize(this.getPreferredSize());
@@ -694,14 +702,16 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
                     App.signalError(RunningCourseEditor.this.getRootPane(),"No Lecturer","Please provide the name of the lecturer.");
                     lecturerField.requestFocusInWindow();
                 } else {
-                    final RunningCourse refracted = new RunningCourse(codeField.getText(), nameField.getText(), lecturerField.getText(), venueField.getText(), roomField.getText(), String.valueOf(daysBox.getSelectedItem()),
+                    final RunningCourse refracted = new RunningCourse(codeField.getText(), nameField.getText(), lecturerField.getText(),
+                            venueField.getText(), roomField.getText(), String.valueOf(daysBox.getSelectedItem()),
                             String.valueOf(hoursBox.getSelectedItem()), runningCourse.isConfirmed());
                     for (int row = 0; row < runningModel.getRowCount(); row++) {
                         if (row == runningTable.getSelectedRow()) {
                             continue;
                         }
                         if (runningModel.getValueAt(row ,0).toString().equalsIgnoreCase(codeField.getText())) {
-                            App.signalError("Duplicate Code","Cannot add this code "+codeField.getText().toUpperCase()+" - already assigned to a course in the list.");
+                            App.signalError("Duplicate Code","Cannot add this code "+codeField.getText().toUpperCase()+
+                                    " - already assigned to a course in the list.");
                             return;
                         }
                     }

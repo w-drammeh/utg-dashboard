@@ -52,7 +52,8 @@ public class TranscriptHandler {
                 break;
             }
             final Course c = l.get(i);
-            primaryModel.addRow(new String[] {c.getCode(),c.getName(),Integer.toString(c.getCreditHours()),c.getGrade(),Double.toString(c.getQualityPoint())});
+            primaryModel.addRow(new String[] {c.getCode(),c.getName(),Integer.toString(c.getCreditHours()),
+                    c.getGrade(),Double.toString(c.getQualityPoint())});
         }
 
         if (secondaryExportNeeded) {
@@ -61,7 +62,8 @@ public class TranscriptHandler {
                 int t = secondaryStartIndex;
                 for (; t < (secondaryStartIndex + 4); t++) {
                     final Course c = l.get(t);
-                    primaryModel.addRow(new String[] {c.getCode(),c.getName(),Integer.toString(c.getCreditHours()),c.getGrade(),Double.toString(c.getQualityPoint())});
+                    primaryModel.addRow(new String[] {c.getCode(),c.getName(),Integer.toString(c.getCreditHours()),
+                            c.getGrade(),Double.toString(c.getQualityPoint())});
                 }
                 secondaryStartIndex = t;
             }
@@ -84,7 +86,8 @@ public class TranscriptHandler {
         exportPanel.add(scrollPane);
 
         if (!secondaryExportNeeded) {
-            final KPanel lastNotLeast = newDetailPanel(375, (scrollPane.getY()+scrollPane.getHeight()+10), 125, 200, 45,"AVERAGE","QUALITY POINT", " "+Student.getCGPA()+" ");
+            final KPanel lastNotLeast = newDetailPanel(375, (scrollPane.getY()+scrollPane.getHeight()+10),
+                    125, 200, 45,"AVERAGE","QUALITY POINT", " "+Student.getCGPA()+" ");
             lastNotLeast.setBounds(lastNotLeast.getX(),lastNotLeast.getY(),lastNotLeast.getWidth(),50);
             exportPanel.add(lastNotLeast);
         }//Then it shall be added later... (in secondary) to the secondaryExportPanel
@@ -225,7 +228,8 @@ public class TranscriptHandler {
         final List<Course> l = Memory.listRequested();
         for (int i = secondaryStartIndex; i < l.size(); i++) {
             final Course c = l.get(i);
-            secondaryModel.addRow(new String[] {c.getCode(),c.getName(),Integer.toString(c.getCreditHours()),c.getGrade(),Double.toString(c.getQualityPoint())});
+            secondaryModel.addRow(new String[] {c.getCode(),c.getName(),Integer.toString(c.getCreditHours()),c.getGrade(),
+                    Double.toString(c.getQualityPoint())});
         }
 
         final KTable secondaryTable = new KTable(secondaryModel);
@@ -242,7 +246,8 @@ public class TranscriptHandler {
         final KScrollPane scrollPane = KScrollPane.getSizeMatchingScrollPane(secondaryTable,3);
         scrollPane.setBounds(20,30, scrollPane.getPreferredSize().width, scrollPane.getPreferredSize().height);
 
-        final KPanel lastNotLeast = newDetailPanel(350,(scrollPane.getY()+scrollPane.getHeight()+10),115,230, 45, "AVERAGE","QUALITY POINT", " "+Student.getCGPA()+" ");
+        final KPanel lastNotLeast = newDetailPanel(350,(scrollPane.getY()+scrollPane.getHeight()+10),115,
+                230, 45, "AVERAGE","QUALITY POINT", " "+Student.getCGPA()+" ");
         lastNotLeast.setBounds(lastNotLeast.getX(),lastNotLeast.getY(),lastNotLeast.getWidth(),50);
 
         repairPanel();
@@ -252,7 +257,7 @@ public class TranscriptHandler {
         exportDialog.setVisible(true);
         final Document document = new Document();
         try {
-            final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath + "/transcript-part-2 "+exportTime+".pdf"));
+            final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath+"/transcript-part-2 "+exportTime+".pdf"));
             document.open();
 
             final PdfContentByte contentByte = writer.getDirectContent();
