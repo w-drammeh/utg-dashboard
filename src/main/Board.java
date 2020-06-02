@@ -49,15 +49,7 @@ public final class Board extends KFrame {
     private static KButton toPortalButton;
     private static KButton notificationButton;
     private static Board appInstance;
-    public static final ArrayList<Runnable> postProcesses = new ArrayList<Runnable>(){
-        @Override
-        public boolean add(Runnable runnable) {
-            if (isAppReady()) {
-                throw new UnsupportedOperationException("Cannot assign processes - Dashboard is done building.");
-            }
-            return super.add(runnable);
-        }
-    };
+    public static final ArrayList<Runnable> postProcesses = new ArrayList<Runnable>();
     public static final Thread shutDownThread = new Thread(MyClass::mountUserData);
 
 
