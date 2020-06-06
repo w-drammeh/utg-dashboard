@@ -37,6 +37,9 @@ public class Globals {
         return !(t == null || isBlank(t));
     }
 
+    /**
+     * The approach used by this method is to be deprecated in a future release.
+     */
     public static boolean isBlank(String t){
         if (t == null) {
             throw new NullPointerException();

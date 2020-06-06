@@ -1592,9 +1592,11 @@ public class ModulesHandler {
                             String.valueOf(dayBox.getSelectedItem());
                     final String time = String.valueOf(timeBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
                             String.valueOf(timeBox.getSelectedItem());
-                    final Course incomingCourse = new Course(yearName,semesterName,codeField.getText(),nameField.getText(),lecturerField.getText(),
-                            venueField.getText(),day,time,score,Integer.parseInt(String.valueOf(creditBox.getSelectedItem())), String.valueOf(requirementBox.getSelectedItem()),false);
-
+                    final String lecturerName = lecturerField.getText();
+                    final Course incomingCourse = new Course(yearName, semesterName, codeField.getText(), nameField.getText(),
+                            lecturerName, venueField.getText(), day, time, score, Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
+                            String.valueOf(requirementBox.getSelectedItem()), false);
+                    incomingCourse.setLecturer(lecturerName, true);
                     modulesMonitor.add(incomingCourse);
                     this.dispose();
                 }

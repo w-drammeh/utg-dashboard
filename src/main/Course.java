@@ -30,7 +30,7 @@ public class Course {
     private int creditHours;
     private String requirement;
     private boolean isValidated;
-    private boolean tutorsNameIsCustomizable = true;
+    private boolean tutorsNameIsCustomizable;
 //    Requirement options
     public static final String MAJOR_OBLIGATORY = "Major Obligatory";
     public static final String MINOR_OBLIGATORY = "Minor Obligatory";
@@ -431,7 +431,7 @@ public class Course {
      * A lecturer's name of a module is changeable iff it was not actually found on the portal.
      */
     public boolean isTutorsNameCustomizable(){
-        return Globals.hasText(lecturer) || tutorsNameIsCustomizable;
+        return !Globals.hasText(lecturer) || tutorsNameIsCustomizable;
     }
 
     /**
