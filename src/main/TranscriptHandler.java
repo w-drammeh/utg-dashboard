@@ -12,8 +12,6 @@ import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,12 +28,7 @@ public class TranscriptHandler {
     private static KPanel exportPanel;
     private static boolean secondaryExportNeeded;
     private static int secondaryStartIndex;
-    private static String exportTime;
 
-
-    static {
-        exportTime = new SimpleDateFormat("dd-MM-yyyy H:m:s").format(new Date());
-    }
 
     private static void setUpPrimaryExportation(){
         repairPanel();
@@ -198,7 +191,7 @@ public class TranscriptHandler {
         exportDialog.setVisible(true);
         final Document document = new Document();
         try{
-            final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath+"/transcript "+exportTime+".pdf"));
+            final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath+"/transcript.pdf"));
             document.open();
 
             final PdfContentByte contentByte = writer.getDirectContent();
@@ -257,7 +250,7 @@ public class TranscriptHandler {
         exportDialog.setVisible(true);
         final Document document = new Document();
         try {
-            final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath+"/transcript-part-2 "+exportTime+".pdf"));
+            final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath+"/transcript-part-2.pdf"));
             document.open();
 
             final PdfContentByte contentByte = writer.getDirectContent();
