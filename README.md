@@ -13,7 +13,7 @@ This project does not use any frameworks - only and only the core java in conjun
 ##### "A journey of thousand miles begins with a single step"
 Dashboard is an ambitious project aimed at relating to the students fundamentals of desktop development. Thus, allowing independent developers to easily integrate whatever they're building for the students of the UTG.
 
-For ease of access and use, and platform-independence reasons, Dashboard is distributed as a JAR file. Download it through the following link - https://drive.google.com/file/d/18kEhy5nxSeyKIXVz6p9PZm-ARLkmvw46/view?usp=sharing.
+For ease of access and use, and platform-independence reasons, Dashboard is distributed as a JAR file. Download it through the following link - https://drive.google.com/file/d/1nDEXNZmBpuYjpQSLe1pAkHMafb831Idg/view?usp=sharing.
 Feel free to share it across the UTG fraternity.
 
 This project is made available by the Developer Student Clubs UTG. Its LICENCE, or 'terms of use' must comply unconditionally with the restrictions placed, if any, by this community.
