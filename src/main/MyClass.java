@@ -112,7 +112,7 @@ public class MyClass {
 				"Minor Code: "+Student.getMinorCode()+"\n" +
 				"Program: "+Student.getProgram()+"\n" +
 				"School: School of "+Student.getSchool()+"\n" +
-				"Department: Department of "+Student.getDepartment()+"\n" +
+				"Department: Division of "+Student.getDivision()+"\n" +
 				"Address: "+Student.getAddress()+"\n" +
 				"Telephone: "+Student.getTelephone()+"\n" +
 				"Nationality: "+Student.getNationality()+"\n" +

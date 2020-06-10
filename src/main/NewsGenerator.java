@@ -227,7 +227,7 @@ public class NewsGenerator {
     }
 
     public static void deSerializeData(){
-        System.out.print("Deserializing news...");
+        System.out.print("Deserializing news... ");
         final ArrayList<NewsSavior> savedNews = (ArrayList<NewsSavior>) MyClass.deserialize("news.ser");
         if (!(savedNews == null)) {
             for (NewsSavior savior : savedNews) {

@@ -80,7 +80,7 @@ public class KTextField extends JTextField implements Preference {
     }
 
     public boolean hasText(){
-        return Globals.hasText(this.getText());
+        return Globals.hasText(getText());
     }
 
     public boolean hasNoText(){

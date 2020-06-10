@@ -49,7 +49,15 @@ public final class Board extends KFrame {
     private static KButton toPortalButton;
     private static KButton notificationButton;
     private static Board appInstance;
-    public static final ArrayList<Runnable> postProcesses = new ArrayList<Runnable>();
+    public static final ArrayList<Runnable> postProcesses = new ArrayList<Runnable>(){
+        @Override
+        public boolean add(Runnable runnable) {
+            if (isAppReady()) {
+                System.out.println("Warning: Dashboard is done building - this task may never execute.");
+            }
+            return super.add(runnable);
+        }
+    };
     public static final Thread shutDownThread = new Thread(MyClass::mountUserData);
 
 
@@ -275,12 +283,12 @@ public final class Board extends KFrame {
         final KLabel labelIcon = KLabel.wantIconLabel("UTGLogo.gif", 125, 85);
 
         final KLabel schoolLabel = new KLabel("School of "+Student.getSchool(), KFontFactory.createBoldFont(17));
-        final KLabel divLabel = new KLabel("Department of "+Student.getDepartment(), KFontFactory.createBoldFont(17));
         if (Student.getSchool().contains("Unknown")) {
             schoolLabel.setText("Unknown School");
         }
-        if (Student.getDepartment().contains("Unknown")) {
-            divLabel.setText("Unknown Department");
+        final KLabel divLabel = new KLabel("Division of "+Student.getDivision(), KFontFactory.createBoldFont(17));
+        if (Student.getDivision().contains("Unknown")) {
+            divLabel.setText("Unknown Division");
         }
 
         semesterIndicator = new KLabel(Student.getSemester(), KFontFactory.createBoldFont(17));
@@ -389,11 +397,11 @@ public final class Board extends KFrame {
             postProcesses.add(SettingsUI::loadDefaults);
         } else {
             SettingsUI.rememberPreferences();
+            postProcesses.add(()-> {
+                RunningCoursesGenerator.uploadInitials();
+                ModulesHandler.uploadModules();
+            });
         }
-        postProcesses.add(()->{
-            RunningCoursesGenerator.uploadInitials();
-            ModulesHandler.uploadModules();
-        });
     }
 
     private JComponent generateHomePage(){
@@ -469,34 +477,29 @@ public final class Board extends KFrame {
 
         final NewsGenerator newsGenerator = new NewsGenerator();
 
-        final KButton refreshButton = new KButton("Refresh News");
+        final KButton refreshButton = new KButton("Refresh");
         refreshButton.setFont(KFontFactory.createPlainFont(15));
-        refreshButton.setToolTipText("Update news feeds (Alt+R)");
         refreshButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         refreshButton.setMnemonic(KeyEvent.VK_R);
-        refreshButton.addActionListener(e -> new Thread(() -> {
+        refreshButton.setToolTipText("Update news feeds (Alt+R)");
+        refreshButton.addActionListener(e -> new Thread(()-> {
             refreshButton.setEnabled(false);
             newsGenerator.packAllIn(palace, true);
             refreshButton.setEnabled(true);
         }).start());
         if (Dashboard.isFirst()) {
-            postProcesses.add(() -> newsGenerator.packAllIn(palace, false));
+            new Thread(()-> newsGenerator.packAllIn(palace, false)).start();
         } else {
-            EventQueue.invokeLater(()-> newsGenerator.pushNewsIfAny(palace));
+            postProcesses.add(()-> newsGenerator.pushNewsIfAny(palace));
         }
 
-        final KLabel hintLabel = new KLabel("News Feeds", KFontFactory.bodyHeaderFont());
-
         final KPanel northernPanel = new KPanel(new BorderLayout());
-        northernPanel.add(hintLabel, BorderLayout.WEST);
+        northernPanel.add(new KLabel("News Feeds", KFontFactory.bodyHeaderFont()), BorderLayout.WEST);
         northernPanel.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, refreshButton), BorderLayout.EAST);
 
-        final KScrollPane newsPlaceScrollPane = new KScrollPane(palace, false);
-
         final KPanel pageItself = new KPanel(new BorderLayout());
-        pageItself.add(northernPanel,BorderLayout.NORTH);
-        pageItself.add(newsPlaceScrollPane,BorderLayout.CENTER);
-
+        pageItself.add(northernPanel, BorderLayout.NORTH);
+        pageItself.add(new KScrollPane(palace, false), BorderLayout.CENTER);
         return pageItself;
     }
 

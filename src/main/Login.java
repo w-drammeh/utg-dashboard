@@ -151,6 +151,8 @@ public class Login extends KDialog {
             Thread.sleep(250);
             if (update.equals("-")) {
                 SwingUtilities.invokeLater(()-> KScrollPane.stopAutoScrollingOn(statusHolder));
+                RunningCoursesGenerator.uploadInitials();
+                ModulesHandler.uploadModules();
             }
         } catch (InterruptedException e) {
             App.silenceException(e);
@@ -211,7 +213,6 @@ public class Login extends KDialog {
                 "By clicking Login you hereby permit Dashboard to go through your portal\n" +
                 "and acknowledge the safety of your data with it.");
         if (permission) {
-            replaceLastUpdate("Thank you for your trust!");
             appendToStatus("Please hang-on while you're verified");
         } else {
             return;

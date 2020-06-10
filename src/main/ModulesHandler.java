@@ -475,43 +475,80 @@ public class ModulesHandler {
     }
 
     /**
-     * This method and its co should:
+     * This method should:
      * - Affect only the obligatory program courses
-     * - Spare courses which were requirement set by the user save majorObligatory
+     * - Spare courses which were requirement-set by the user save majorObligatory
+     *
+     * The algorithm is in two-phase form: the first stage involves revoking all previous requirements
+     * of the code followed by resetting, if necessary, new requirements as per the code.
      */
     public static void effectMajorCodeChanges(String from, String to) {
-        new Thread(()->{
-            for (Course t : modulesMonitor) {
-                try {
-                    if (t.getCode().substring(0, 3).equalsIgnoreCase(from) && t.isMajorObligatory()) {
-                        t.setRequirement(Course.NONE);
-                    }
-                    //Yes, they are independent
-                    if (t.getCode().substring(0, 3).equalsIgnoreCase(to) && t.isUnclassified()) {
-                        t.setRequirement(Course.MAJOR_OBLIGATORY);
-                    }
-                } catch (StringIndexOutOfBoundsException i) {
-                    App.silenceException(i);
-                }
-            }
+        new Thread(()-> {
+            revokeMajors(from);
+            if (Globals.hasText(to)) {
+                resetMajors(to);
+            }//else, a mere reset is intended
         }).start();
+    }
+
+    /**
+     * Called to relief all major-courses based on this param:from
+     */
+    private static void revokeMajors(String from){
+        for (Course course : modulesMonitor) {
+            try {
+                final String courseCode = course.getCode().substring(0, 3);
+                if (courseCode.equalsIgnoreCase(from) && course.isMajorObligatory()) {
+                    course.setRequirement(Course.NONE);
+                }
+            } catch (StringIndexOutOfBoundsException ignored) {
+            }
+        }
+    }
+
+    private static void resetMajors(String to){
+        for (Course course : modulesMonitor) {
+            try {
+                final String courseCode = course.getCode().substring(0, 3);
+                if (courseCode.equalsIgnoreCase(to) && course.isUnclassified()) {
+                    course.setRequirement(Course.MAJOR_OBLIGATORY);
+                }
+            } catch (StringIndexOutOfBoundsException ignored) {
+            }
+        }
     }
 
     public static void effectMinorCodeChanges(String from, String to) {
         new Thread(() -> {
-            for (Course t : modulesMonitor) {
-                try {
-                    if (t.getCode().substring(0, 3).equalsIgnoreCase(from) && t.isMinorObligatory()) {
-                        t.setRequirement(Course.NONE);
-                    }
-                    if (t.getCode().substring(0, 3).equalsIgnoreCase(to) && t.isUnclassified()) {
-                        t.setRequirement(Course.MINOR_OBLIGATORY);
-                    }
-                } catch (StringIndexOutOfBoundsException i) {
-                    App.silenceException(i);
-                }
+            revokeMinors(from);
+            if (Globals.hasText(to)) {
+                resetMinors(to);
             }
         }).start();
+    }
+
+    private static void revokeMinors(String from){
+        for (Course course : modulesMonitor) {
+            try {
+                final String courseCode = course.getCode().substring(0, 3);
+                if (courseCode.equalsIgnoreCase(from) && course.isMinorObligatory()) {
+                    course.setRequirement(Course.NONE);
+                }
+            } catch (StringIndexOutOfBoundsException ignored) {
+            }
+        }
+    }
+
+    private static void resetMinors(String to){
+        for (Course course : modulesMonitor) {
+            try {
+                final String courseCode = course.getCode().substring(0, 3);
+                if (courseCode.equalsIgnoreCase(to) && course.isUnclassified()) {
+                    course.setRequirement(Course.MINOR_OBLIGATORY);
+                }
+            } catch (StringIndexOutOfBoundsException ignored) {
+            }
+        }
     }
 
     public static void reportScoreInvalid(String invalidScore, Container root){

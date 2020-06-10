@@ -39,7 +39,7 @@ public class FirstLaunch extends KDialog {
         Student.setAbout("My name is "+Student.getFullNamePostOrder()+"\n" +
                 "The University of the Gambia\n" +
                 "School of "+Student.getSchool()+"\n" +
-                "Department of "+Student.getDepartment()+"\n" +
+                "Division of "+Student.getDivision()+"\n" +
                 Student.getMajor()+" program\n" +
                 String.join(" - ", String.valueOf(Student.getYearOfAdmission()),
                         String.valueOf(Student.getExpectedYearOfGraduation())));
@@ -68,8 +68,7 @@ public class FirstLaunch extends KDialog {
         nextButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         nextButton.addActionListener(e-> {
             final String majorCode = majorCodeField.getText().toUpperCase();
-            Student.setMajorCode(majorCode, true);
-            SettingsUI.majorCodeField.setText(majorCode);
+            Student.setMajorCode(majorCode);
             CARDS.show(contentPane, "Minor");
         });
 
@@ -100,7 +99,7 @@ public class FirstLaunch extends KDialog {
         minorCodeField.setPreferredSize(new Dimension(125, 30));
         minorCodeField.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2, true));
         minorCodeField.setEditable(false);
-        minorCodeField.addActionListener(e->{
+        minorCodeField.addActionListener(e-> {
             if (minorNameField.hasText()) {
                 nextButton.doClick();
             } else {
@@ -145,12 +144,8 @@ public class FirstLaunch extends KDialog {
                     App.promptWarning("Warning", "You have not set the code for your minor program - "+minorName+".\n" +
                             "Set this later in the Settings for Dashboard to detect your minor courses.");
                 }
-
-                SettingsUI.minorLabel.setText(minorName);
-                SettingsUI.minorField.setText(minorName);
-
-                Student.setMinorCode(minorCode, true);
-                SettingsUI.minorCodeField.setText(minorCode);
+                Student.setMinor(minorName);
+                Student.setMinorCode(minorCode);
             } else {
                 Student.setMinor("");
             }

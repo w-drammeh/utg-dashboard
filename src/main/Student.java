@@ -20,7 +20,7 @@ public class Student {
     private static String major;
     private static String minor;
     private static String school;
-    private static String department;
+    private static String division;
     /**
      * Determines the currently running semester. Initially provided by PrePortal but always auto-renewed.
      */
@@ -43,8 +43,8 @@ public class Student {
     private static String portalPassword;
     private static String studentMail;
     private static String studentPassword;
-    private static String MAJOR_CODE;
-    private static String MINOR_CODE;
+    private static String majorCode;
+    private static String minorCode;
     private static String about;
 
     private static int matNumber;
@@ -53,7 +53,7 @@ public class Student {
     /**
      * Deals with the level in 'cents'
      *
-     * Dashboard records levels in 50s.</p>
+     * Dashboard records levels in 50s.
      * 50 = first semester; 100 = second semester; 150 = 2nd year, first semester; so on and so forth.
      * The same way 300 implies 3rd year, 2nd semester.
      */
@@ -115,18 +115,12 @@ public class Student {
 
     public static void setMinor(String minor){
         Student.minor = minor;
-        if (Globals.isBlank(minor)) {
-            if (Board.isAppReady()) {
-                resetMinorCode();
-            } else {
-                Board.postProcesses.add(Student::resetMinorCode);
-            }
-        }
-    }
+        SettingsUI.minorLabel.setText(minor);
+        SettingsUI.minorField.setText(minor);
 
-    private static void resetMinorCode(){
-        setMinorCode("", true);
-        SettingsUI.minorCodeField.setText(minor);
+        if (Globals.isBlank(minor)) {
+            setMinorCode("");
+        }
     }
 
     public static String getSchool() {
@@ -134,15 +128,15 @@ public class Student {
     }
 
     public static void setSchool(String school) {
-        Student.school = school.replace("School of ", "");
+        Student.school = school;
     }
 
-    public static String getDepartment(){
-        return department;
+    public static String getDivision(){
+        return division;
     }
 
-    public static void setDepartment(String department) {
-        Student.department = department.replace("Department of ", "");
+    public static void setDivision(String division) {
+        Student.division = division;
     }
 
     public static String getAddress() {
@@ -292,30 +286,26 @@ public class Student {
      * Blank param may be given to signify reset.
      * Null is not to be given to this, or its co.
      */
-    public static void setMajorCode(String majCode, boolean immediateEffect){
-        if (immediateEffect) {
-            ModulesHandler.effectMajorCodeChanges(MAJOR_CODE, majCode);
-        } else {
-            Board.postProcesses.add(()-> ModulesHandler.effectMajorCodeChanges(MAJOR_CODE, majCode));
-        }
-        MAJOR_CODE = majCode.toUpperCase();
+    public static void setMajorCode(String majorCode){
+        majorCode = majorCode.toUpperCase();
+        SettingsUI.majorCodeField.setText(majorCode);
+        ModulesHandler.effectMajorCodeChanges(Student.majorCode, majorCode);
+        Student.majorCode = majorCode;
     }
 
     public static String getMajorCode(){
-        return MAJOR_CODE;
+        return majorCode;
     }
 
-    public static void setMinorCode(String minCode, boolean immediateEffect){
-        if (immediateEffect) {
-            ModulesHandler.effectMinorCodeChanges(MINOR_CODE, minCode);
-        } else {
-            Board.postProcesses.add(()-> ModulesHandler.effectMinorCodeChanges(MINOR_CODE, minCode));
-        }
-        MINOR_CODE = minCode.toUpperCase();
+    public static void setMinorCode(String minorCode){
+        minorCode = minorCode.toUpperCase();
+        SettingsUI.minorCodeField.setText(minorCode);
+        ModulesHandler.effectMinorCodeChanges(Student.minorCode, minorCode);
+        Student.minorCode = minorCode;
     }
 
     public static String getMinorCode(){
-        return MINOR_CODE;
+        return minorCode;
     }
 
     public static String getSemester() {
@@ -417,7 +407,7 @@ public class Student {
         }
         setMajor(String.valueOf(initials[4]));
         setSchool(String.valueOf(initials[5]));
-        setDepartment(String.valueOf(initials[6]));
+        setDivision(String.valueOf(initials[6]));
         setNationality(String.valueOf(initials[7]));
         try {
             setMonthOfAdmission(Integer.parseInt(String.valueOf(initials[8])));
@@ -451,9 +441,9 @@ public class Student {
      * after log-out to prevent clash of details?.
      */
     public static void reset(){
-        firstName = lastName = program = major = minor = school = department = semester = state = level = address =
+        firstName = lastName = program = major = minor = school = division = semester = state = level = address =
                 placeOfBirth = nationality = dateOfBirth = maritalStatue = portalMail = portalPassword = telephones =
-                        MAJOR_CODE = MINOR_CODE = "";
+                        majorCode = minorCode = "";
         matNumber = yearOfAdmission = monthOfAdmission = levelNumber = 0;
         CGPA = 0D;
         userIcon = null;
@@ -699,12 +689,12 @@ public class Student {
         dataMap.put("lName", lastName);
         dataMap.put("mat", matNumber+"");
         dataMap.put("major", major);
-        dataMap.put("majCode", MAJOR_CODE);
+        dataMap.put("majCode", majorCode);
         dataMap.put("minor", minor);
-        dataMap.put("minCode", MINOR_CODE);
+        dataMap.put("minCode", minorCode);
         dataMap.put("program", program);
         dataMap.put("school", "School of "+school);
-        dataMap.put("dept", "Department of "+department);
+        dataMap.put("div", division);
         dataMap.put("address", address);
         dataMap.put("tels", telephones);
         dataMap.put("nationality", nationality);
@@ -737,7 +727,7 @@ public class Student {
             setMatNumber(Integer.parseInt(dataMap.get("mat")));
             setMajor(dataMap.get("major"));
             setSchool(dataMap.get("school"));
-            setDepartment(dataMap.get("dept"));
+            setDivision(dataMap.get("div"));
             setNationality(dataMap.get("nationality"));
             setMonthOfAdmission(Integer.parseInt(dataMap.get("moa")));
             setYearOfAdmission(Integer.parseInt(dataMap.get("yoa")));
@@ -754,9 +744,9 @@ public class Student {
             setSemester(dataMap.get("semester"));
             setState(dataMap.get("state"));
 
-            setMajorCode(dataMap.get("majCode"), false);
-            setMinor(dataMap.get("minor"));
-            setMinorCode(dataMap.get("minCode"), false);
+            Student.majorCode = dataMap.get("majCode");
+            Student.minor = dataMap.get("minor");
+            Student.minorCode = dataMap.get("minCode");
             setPlaceOfBirth(dataMap.get("pob"));
             setAbout(dataMap.get("aboutMe"));
             setNameFormat(dataMap.get("nameFormat"));

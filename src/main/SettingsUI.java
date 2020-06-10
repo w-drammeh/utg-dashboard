@@ -20,13 +20,7 @@ public class SettingsUI implements ActivityAnswerer{
     private static final Font hFont = KFontFactory.createBoldFont(16);//generally for the hints
     private static final Font dFont = KFontFactory.createPlainFont(16);//values
     //
-    public static final KLabel minorLabel = new KLabel(Student.getMinor(),dFont){
-        @Override
-        public void setText(String newText) {
-            super.setText(newText);
-            Student.setMinor(newText);
-        }
-    };
+    public static final KLabel minorLabel = new KLabel(Student.getMinor(), dFont);
     private static KPanel detailsWrapper;
     /**
      * For technical harboring of the contacts as labels. An attempt to add a component to this panel other than a KLabel
@@ -99,7 +93,7 @@ public class SettingsUI implements ActivityAnswerer{
 
         final KPanel depPanel = new KPanel(new BorderLayout());
         depPanel.add(KPanel.wantDirectAddition(new KLabel("Department / Faculty:",hFont)),BorderLayout.WEST);
-        depPanel.add(KPanel.wantDirectAddition(new KLabel(Student.getDepartment(),dFont)),BorderLayout.CENTER);
+        depPanel.add(KPanel.wantDirectAddition(new KLabel(Student.getDivision(),dFont)),BorderLayout.CENTER);
 
         final KPanel progPanel = new KPanel(new BorderLayout());
         progPanel.add(KPanel.wantDirectAddition(new KLabel("Program:",hFont)),BorderLayout.WEST);
@@ -107,7 +101,7 @@ public class SettingsUI implements ActivityAnswerer{
 
         final KPanel minPanel = new KPanel(new BorderLayout());
         minPanel.add(KPanel.wantDirectAddition(new KLabel("Minor:",hFont)),BorderLayout.WEST);
-        minPanel.add(KPanel.wantDirectAddition(minorLabel),BorderLayout.CENTER);
+        minPanel.add(KPanel.wantDirectAddition(minorLabel), BorderLayout.CENTER);
 
         final KPanel yoaPanel = new KPanel(new BorderLayout());
         yoaPanel.add(KPanel.wantDirectAddition(new KLabel("Year of Admission:",hFont)),BorderLayout.WEST);
@@ -341,8 +335,7 @@ public class SettingsUI implements ActivityAnswerer{
 
             final int vInt = App.verifyUser(changeHint);
             if (vInt == App.VERIFICATION_TRUE) {
-                Student.setMajorCode(newMajorCode.toUpperCase(), true);
-                majorCodeField.setText(Student.getMajorCode());
+                Student.setMajorCode(newMajorCode.toUpperCase());
             } else if (vInt == App.VERIFICATION_FALSE) {
                 App.reportMatError();
             }
@@ -360,8 +353,7 @@ public class SettingsUI implements ActivityAnswerer{
             }
             final int vInt = App.verifyUser(changeHint);
             if (vInt == App.VERIFICATION_TRUE) {
-                minorLabel.setText(newMinor);
-                minorField.setText(Student.getMinor());
+                Student.setMinor(newMinor);
             } else if (vInt == App.VERIFICATION_FALSE) {
                 App.reportMatError();
             }
@@ -398,9 +390,7 @@ public class SettingsUI implements ActivityAnswerer{
 
             final int vInt = App.verifyUser(changeHint);
             if (vInt == App.VERIFICATION_TRUE) {
-                Student.setMinorCode(newMinorCode.toUpperCase(), true);
-                ModulesHandler.effectMinorCodeChanges(Student.getMinorCode(), newMinorCode);
-                minorCodeField.setText(Student.getMinorCode());
+                Student.setMinorCode(newMinorCode.toUpperCase());
             } else if (vInt == App.VERIFICATION_FALSE) {
                 App.reportMatError();
             }
@@ -536,7 +526,6 @@ public class SettingsUI implements ActivityAnswerer{
                 dialPanel, KPanel.wantDirectAddition(new FlowLayout(FlowLayout.CENTER),null,
                         new KSeparator(new Dimension(875,1))),craftPanel,aboutPanel);
         profileUI.add(ComponentAssistant.contentBottomGap());
-
         return profileUI;
     }
 

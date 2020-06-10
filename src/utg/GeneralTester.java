@@ -41,13 +41,10 @@ public class GeneralTester {
         Student.setLastName("Your name");
         Student.setMatNumber(29786751);
         Student.setMajor("Major");
-//        Student.setMajorCode("", false);
-        Student.setMinor("Minor");
-//        Student.setMinorCode("", false);
         Student.setCGPA(3.954);
         Student.setProgram("Bachelor of .. in ..");
-        Student.setSchool("School of ..");
-        Student.setDepartment("Department of ..");
+        Student.setSchool("...");
+        Student.setDivision("...");
         Student.setAddress("Address");
         Student.resetTelephones("3413910");
         Student.setNationality("Gambia");
@@ -58,6 +55,12 @@ public class GeneralTester {
 //        Student.setPlaceOfBirth("");
         Student.setLevel("Undergraduate".toUpperCase());
         Student.setState("Running".toUpperCase());
+        //
+        Board.postProcesses.add(()-> {
+            Student.setMajorCode("MTH");
+            Student.setMinor("Minor");
+            Student.setMinorCode("");
+        });
     }
 
     /**

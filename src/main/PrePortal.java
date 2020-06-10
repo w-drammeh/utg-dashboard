@@ -52,7 +52,7 @@ public class PrePortal {
         }
 
         Login.appendToStatus("Connections established successfully with utg.gm");
-        Login.appendToStatus("Waiting for the server respond to "+email+".......");
+        Login.appendToStatus("Waiting for server's response to "+email+".......");
         try {
             new WebDriverWait(driver,5).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".alert-danger")));
             Login.appendToStatus("Verification failed : No student found matching");
@@ -87,7 +87,7 @@ public class PrePortal {
 
     //Since gate is opened, and the driver enters with the student details, if an error occurs, it'll quit before returning
     private static void gateOpened(){
-        String firstName="", lastName="", matNumber="", program="", major="", school="", department="", nationality="", MOA="", YOA="", address="", mStatus="", DOB="", tel="", ongoingSemester="", level="", state="";
+        String firstName="", lastName="", matNumber="", program="", major="", school="", division="", nationality="", MOA="", YOA="", address="", mStatus="", DOB="", tel="", ongoingSemester="", level="", state="";
 
         if (Portal.isPortalBusy(driver)) {
             Login.appendToStatus("Busy portal : Course Evaluation needed");
@@ -139,11 +139,13 @@ public class PrePortal {
         major = program.contains("Unknown") ? "Unknown" : program.split(" ")[4];
         try {
             school = iGroup.get(1).getText().split("\n")[1];
+            school = school.replace("School of ", "");
         } catch (Exception e) {
             App.silenceException("School not found");
         }
         try {
-            department = iGroup.get(0).getText().split("\n")[1];
+            division = iGroup.get(0).getText().split("\n")[1];
+            division = division.replace("Division of ", "");
         } catch (Exception e) {
             App.silenceException("Department not found");
         }
@@ -221,7 +223,7 @@ public class PrePortal {
         enlistDetail("Mat#",matNumber);
         enlistDetail("Major",major);
         enlistDetail("School",school);
-        enlistDetail("Department",department);
+        enlistDetail("Division",division);
         enlistDetail("Nationality",nationality);
         enlistDetail("Month of Admission",MOA);
         enlistDetail("Year of Admission",YOA);

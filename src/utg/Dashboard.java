@@ -73,8 +73,7 @@ public class Dashboard {
         if (matNumber.equals(String.valueOf(Student.getMatNumber()))) {
             rebuildNow(false);
         } else {
-            App.signalError(preview, "Error", "That Mat. Number does not match "+Student.getFullNamePostOrder()+".\n" +
-                    "Try again.");
+            App.signalError(preview, "Error", "That Matriculation Number is incorrect. Try again.");
             verifyUser(false);
         }
     }

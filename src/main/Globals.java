@@ -33,16 +33,16 @@ public class Globals {
         }
     }
 
+    /**
+     * Convenient way of !Globals.isBlank(String)
+     */
     public static boolean hasText(String t){
-        return !(t == null || isBlank(t));
+        return !isBlank(t);
     }
 
-    /**
-     * The approach used by this method is to be deprecated in a future release.
-     */
     public static boolean isBlank(String t){
         if (t == null) {
-            throw new NullPointerException();
+            return true;
         }
         for (char c : t.toCharArray()) {
             if (!Character.isWhitespace(c)) {
