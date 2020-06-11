@@ -29,16 +29,16 @@ public class Login extends KDialog {
         rootPane = this.getRootPane();
 
         this.welcome = welcome;
-        this.setSize(720,425);
+        this.setSize(720, 425);
         this.setDefaultCloseOperation(Login.DO_NOTHING_ON_CLOSE);
         this.setUndecorated(true);
 
         final KLabel bigText = new KLabel("LOGIN TO GET THE MOST OUT OF YOUR STUDENT-HOOD!",
-                KFontFactory.createPlainFont(18),Color.WHITE);
+                KFontFactory.createPlainFont(18), Color.WHITE);
         bigText.setBounds(15, 10, 625, 30);
         bigText.setBackground(null);
 
-        final KLabel utgLabel = KLabel.wantIconLabel("UTGLogo.gif",50,50);
+        final KLabel utgLabel = KLabel.wantIconLabel("UTGLogo.gif", 50, 50);
         utgLabel.setBounds(645, 0, 100, 50);
         utgLabel.setBackground(null);
 
@@ -90,10 +90,10 @@ public class Login extends KDialog {
         loginButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         loginButton.addActionListener(e -> {
             if (Globals.isBlank(emailField.getText())) {
-                App.signalError(rootPane,"Error","Email field cannot be blank. Please try again.");
+                App.signalError(rootPane,"Error","Email Field cannot be blank. Please try again.");
                 emailField.requestFocusInWindow();
             } else if (Globals.isBlank(new String(passwordField.getPassword()))) {
-                App.signalError(rootPane,"Error","Password field cannot be blank. Please try again.");
+                App.signalError(rootPane,"Error", "Password Field cannot be blank. Please try again.");
                 passwordField.requestFocusInWindow();
             } else {
                 onNext();
@@ -126,7 +126,7 @@ public class Login extends KDialog {
         statusPanel.setBackground(new Color(40, 40, 40));
 
         statusHolder = KScrollPane.getAutoScroller(statusPanel);
-        statusHolder.setBounds(5,275,710,145);
+        statusHolder.setBounds(5, 275, 710, 145);
 
         final Container contents = this.getContentPane();
         contents.setLayout(null);
@@ -169,7 +169,6 @@ public class Login extends KDialog {
             ComponentAssistant.repair(statusPanel);
             appendToStatus(initialHint);
         }
-
         for (Component c : smallPanel.getComponents()) {
             c.setEnabled(enable);
         }
@@ -213,7 +212,7 @@ public class Login extends KDialog {
                 "By clicking Login you hereby permit Dashboard to go through your portal\n" +
                 "and acknowledge the safety of your data with it.");
         if (permission) {
-            appendToStatus("Please hang-on while you're verified");
+            appendToStatus("Hang on while you're verified");
         } else {
             return;
         }

@@ -566,11 +566,11 @@ public class Student {
     }
 
     public static String predictedStudentMailAddress(){
-        return String.valueOf(lastName.charAt(0)+firstName.charAt(0)+matNumber).toLowerCase()+"@utg.edu.gm";
+        return (lastName.charAt(0)+""+firstName.charAt(0)+matNumber).toLowerCase()+"@utg.edu.gm";
     }
 
     public static String predictedStudentPassword(){
-        return String.valueOf(matNumber);
+        return "student@utg";
     }
 
     public static void mayReportIncoming(){

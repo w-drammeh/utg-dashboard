@@ -162,12 +162,12 @@ public class FirstLaunch extends KDialog {
 
     private Component emailComponent(){
         final String mailText = "Well, every enrolled student is automatically assigned an email address known as the <b>Student mail</b>." +
-                "<p>It is a mean through which UTG reaches out to you. Unfortunately, some students will came to know about this overdue. " +
+                "<p>It is a mean through which UTG reaches out to you. Unfortunately, most students will only came to know about this overdue. " +
                 "So, Dashboard has loaded the predicted credentials in the fields below. It's through this Student mail that " +
-                "you can contact the developers, send reviews, and give feedbacks.</p>" +
-                "<p>If you don't want Dashboard to keep track of your Student mail, <b>skip</b> this dialog.</p>" +
+                "you can contact the developers, send reviews, and give feedback.</p>" +
                 "<p>If you've already being using your Student mail, and made changes to either the Email or Password, " +
-                "then make the changes to the fields below, and click <b>Set</b>.</p>";
+                "then make the changes to the fields below, and click <b>Set</b>.</p>" +
+                "<p>If you don't want Dashboard to keep track of your Student mail, <b>skip</b> this dialog.</p>";
         final KTextPane textPane = KTextPane.wantHtmlFormattedPane(mailText);
         textPane.setBackground(Color.WHITE);
 
