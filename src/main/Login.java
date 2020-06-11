@@ -136,7 +136,7 @@ public class Login extends KDialog {
         contents.add(smallPanel);
         contents.add(statusHolder);
 
-        initialHint = "Please enter your Email and Password in the fields provided above, respectively.";
+        initialHint = "Enter your Email and Password in the fields provided above, respectively.";
         appendToStatus(initialHint);
 
         this.setLocationRelativeTo(null);
@@ -212,7 +212,7 @@ public class Login extends KDialog {
                 "By clicking Login you hereby permit Dashboard to go through your portal\n" +
                 "and acknowledge the safety of your data with it.");
         if (permission) {
-            appendToStatus("Hang on while you're verified");
+            appendToStatus("Please hang on while you're verified");
         } else {
             return;
         }
