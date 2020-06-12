@@ -682,18 +682,18 @@ public class Student {
     public static void serializeData(){
         System.out.print("Serializing student's data... ");
         final LinkedHashMap<String, String> dataMap = new LinkedHashMap<>();
-        dataMap.put("moa", monthOfAdmission+"");
-        dataMap.put("yoa", yearOfAdmission+"");
+        dataMap.put("moa", String.valueOf(monthOfAdmission));
+        dataMap.put("yoa", String.valueOf(yearOfAdmission));
         dataMap.put("semester", semester.toUpperCase());
         dataMap.put("fName", firstName);
         dataMap.put("lName", lastName);
-        dataMap.put("mat", matNumber+"");
+        dataMap.put("mat", String.valueOf(matNumber));
         dataMap.put("major", major);
         dataMap.put("majCode", majorCode);
         dataMap.put("minor", minor);
         dataMap.put("minCode", minorCode);
         dataMap.put("program", program);
-        dataMap.put("school", "School of "+school);
+        dataMap.put("school", school);
         dataMap.put("div", division);
         dataMap.put("address", address);
         dataMap.put("tels", telephones);

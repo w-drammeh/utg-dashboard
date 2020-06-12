@@ -494,7 +494,7 @@ public class TaskSelf {
 
         private void setUpUI(){
         	final KPanel namePanel = new KPanel(new BorderLayout());
-        	namePanel.add(new KLabel(this.getCourseName()+" Assignment", KFontFactory.createBoldFont(16),
+        	namePanel.add(new KLabel(this.getCourseName(), KFontFactory.createBoldFont(16),
                     Color.BLUE), BorderLayout.SOUTH);
 
         	deadlineIndicator = new KLabel();
