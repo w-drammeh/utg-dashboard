@@ -671,7 +671,7 @@ public class SettingsUI implements ActivityAnswerer{
         outButton.underline(null, true);
         outButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         outButton.addActionListener(e-> {
-            if (App.showOkCancelDialog("Sign out?", "By signing out, all your data will be lost, continue?")) {
+            if (App.showOkCancelDialog("Sign out?", "By signing out, all your data will be lost.")) {
                 final int vInt = App.verifyUser("Please enter your matriculation number below\n \n" +
                         "A successful Sign-out will take you back to the Welcome activity\n" +
                         "Every subsequent launch will take you there until there be a login again\n \n" +

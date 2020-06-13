@@ -4,8 +4,6 @@ import customs.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 
 /**
  * The Login type provides the UI for the user to provide details of email & password which it'll
@@ -27,7 +25,6 @@ public class Login extends KDialog {
     public Login(Welcome welcome){
         loginInstance = Login.this;
         rootPane = this.getRootPane();
-
         this.welcome = welcome;
         this.setSize(720, 425);
         this.setDefaultCloseOperation(Login.DO_NOTHING_ON_CLOSE);
@@ -36,11 +33,11 @@ public class Login extends KDialog {
         final KLabel bigText = new KLabel("LOGIN TO GET THE MOST OUT OF YOUR STUDENT-HOOD!",
                 KFontFactory.createPlainFont(18), Color.WHITE);
         bigText.setBounds(15, 10, 625, 30);
-        bigText.setBackground(null);
+        bigText.setOpaque(false);
 
         final KLabel utgLabel = KLabel.wantIconLabel("UTGLogo.gif", 50, 50);
         utgLabel.setBounds(645, 0, 100, 50);
-        utgLabel.setBackground(null);
+        utgLabel.setOpaque(false);
 
         final KLabel logHint = new KLabel("LOGIN",KFontFactory.createBoldFont(20),Color.BLACK);
         logHint.setBounds(205, 5, 100, 30);
@@ -55,34 +52,15 @@ public class Login extends KDialog {
         emailField.setBounds(105, 45, 315, 30);
         emailField.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2, true));
         emailField.setToolTipText("Insert your Email here");
-        emailField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    passwordField.requestFocusInWindow();
-                }
-            }
-        });
+        emailField.addActionListener(e-> passwordField.requestFocusInWindow());
 
-        passwordField = new JPasswordField(){
-            @Override
-            public JToolTip createToolTip() {
-                return KLabel.preferredTip();
-            }
-        };
+        passwordField = new JPasswordField();
         passwordField.setBorder(emailField.getBorder());
         passwordField.setHorizontalAlignment(emailField.getHorizontalAlignment());
         passwordField.setFont(emailField.getFont());
         passwordField.setBounds(105, 100, 315, 30);
         passwordField.setToolTipText("Insert your Password here");
-        passwordField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    loginButton.doClick(0);
-                }
-            }
-        });
+        passwordField.addActionListener(e-> loginButton.doClick());
 
         loginButton = new KButton("LOGIN");
         loginButton.setStyle(KFontFactory.createPlainFont(15), Color.BLUE);
@@ -110,35 +88,25 @@ public class Login extends KDialog {
 
         smallPanel = new KPanel();
         smallPanel.setBackground(new Color(240, 240, 240));
-        smallPanel.setLayout(null);
-        smallPanel.setBounds(120, 55, 500, 210);
         smallPanel.setBorder(BorderFactory.createLineBorder(smallPanel.getBackground(),5,true));
-        smallPanel.add(logHint);
-        smallPanel.add(studentLabel);
-        smallPanel.add(passwordLabel);
-        smallPanel.add(emailField);
-        smallPanel.add(passwordField);
-        smallPanel.add(loginButton);
-        smallPanel.add(cancelButton);
+        smallPanel.setBounds(120, 50, 500, 210);
+        smallPanel.setLayout(null);
+        smallPanel.addAll(logHint, studentLabel, passwordLabel, emailField, passwordField, loginButton, cancelButton);
 
         statusPanel = new KPanel();
         statusPanel.setLayout(new BoxLayout(statusPanel,BoxLayout.Y_AXIS));
         statusPanel.setBackground(new Color(40, 40, 40));
 
         statusHolder = KScrollPane.getAutoScroller(statusPanel);
-        statusHolder.setBounds(5, 275, 710, 145);
+        statusHolder.setBounds(1, 270, 718, 154);
 
-        final Container contents = this.getContentPane();
-        contents.setLayout(null);
-        contents.setBackground(new Color(40, 40, 40));
-        contents.add(bigText);
-        contents.add(utgLabel);
-        contents.add(smallPanel);
-        contents.add(statusHolder);
+        final KPanel contentsPanel = new KPanel();
+        contentsPanel.setBackground(new Color(40, 40, 40));
+        contentsPanel.setLayout(null);
+        contentsPanel.addAll(bigText, utgLabel, smallPanel, statusHolder);
+        this.setContentPane(contentsPanel);
 
-        initialHint = "Enter your Email and Password in the fields provided above, respectively.";
-        appendToStatus(initialHint);
-
+        appendToStatus(initialHint = "Enter your Email and Password in the fields provided above, respectively.");
         this.setLocationRelativeTo(null);
     }
 
@@ -165,10 +133,8 @@ public class Login extends KDialog {
     }
 
     public static void setInputsState(boolean enable){
-        if (enable) {
-            ComponentAssistant.repair(statusPanel);
-            appendToStatus(initialHint);
-        }
+        ComponentAssistant.repair(statusPanel);
+        appendToStatus(enable ? initialHint : "Please hang on while you're verified");
         for (Component c : smallPanel.getComponents()) {
             c.setEnabled(enable);
         }
@@ -203,7 +169,7 @@ public class Login extends KDialog {
 
     private void onNext(){
         if (!InternetAvailabilityChecker.isInternetAvailable()) {
-            App.signalError(rootPane,"Internet Error","Sorry, internet connection is required to set up Dashboard.\n" +
+            App.signalError(rootPane,"Internet Error","Internet connection is required to set up Dashboard.\n" +
                     "Please connect to the internet and try again.");
             return;
         }
@@ -212,11 +178,10 @@ public class Login extends KDialog {
                 "By clicking Login you hereby permit Dashboard to go through your portal\n" +
                 "and acknowledge the safety of your data with it.");
         if (permission) {
-            appendToStatus("Please hang on while you're verified");
+            Login.setInputsState(false);
         } else {
             return;
         }
-        Login.setInputsState(false);
         new Thread(() -> PrePortal.launchVerificationSequences(emailField.getText(), new String(passwordField.getPassword()))).start();
     }
 

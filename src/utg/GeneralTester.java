@@ -11,16 +11,9 @@ import javax.swing.*;
  * These data are then used to build Dashboard letting the user see a runtime-instance of the system, yet
  * not verified.
  *
- * Since it's intended for testing only, by default, the 'Collapse Sequence' does not perform any serialization
- * whenever this class is engaged in a run. So, do not use it anywhere outside!
- *
  * For testing of a specific functionality, use utg.SpecificTester instead.
  */
 public class GeneralTester {
-
-    static {
-        Dashboard.isTest = true;
-    }
 
     public static void main(String[] args) {
         Student.reset();
