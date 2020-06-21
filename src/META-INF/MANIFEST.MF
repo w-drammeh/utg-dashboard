@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: utg.Dashboard
-Created-By: Muhammed W. Drammeh

@@ -1,6 +1,7 @@
 package main;
 
 import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfTemplate;
 import com.lowagie.text.pdf.PdfWriter;
@@ -11,6 +12,7 @@ import java.awt.*;
 import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +28,7 @@ public class TranscriptHandler {
     public static final String FIRST_CLASS = "\"Summa Cum laude\" - With Greatest Honor!";
     private static KDialog exportDialog;
     private static KPanel exportPanel;
+    private static LookAndFeel currentLookAndFeel;
     private static boolean secondaryExportNeeded;
     private static int secondaryStartIndex;
 
@@ -108,11 +111,11 @@ public class TranscriptHandler {
     }
 
     private static void attachTitlePlus(){
-        final KLabel uLogo = KLabel.wantIconLabel("UTGLogo.gif",75,100);
+        final KLabel uLogo = KLabel.wantIconLabel("UTGLogo.gif", 75, 95);
         uLogo.setBounds(50,30,100,100);
 
         final KPanel labelsPanel = new KPanel();
-        labelsPanel.setBounds(175,40,375,75);
+        labelsPanel.setBounds(175, 40, 375, 75);
         labelsPanel.add(new KLabel("THE UNIVERSITY OF THE GAMBIA", KFontFactory.createBoldFont(17)));
         labelsPanel.add(new KLabel("STUDENT ACADEMIC RECORDS", KFontFactory.createBoldFont(17)));
         exportPanel.addAll(uLogo, labelsPanel);
@@ -167,14 +170,14 @@ public class TranscriptHandler {
         lr.add(l, BorderLayout.WEST);
         lr.add(new KSeparator(KSeparator.VERTICAL, Color.BLACK), BorderLayout.CENTER);
         lr.add(r, BorderLayout.EAST);
-
         return lr;
     }
 
-
+    /**
+     * The only public call; the gate-way to the functionality of this class.
+     */
     public static void exportNow(){
-        setUpPrimaryExportation();
-
+        currentLookAndFeel = UIManager.getLookAndFeel();
         File savePath;
         final String homeDir = System.getProperty("user.home"),
                 documentsDir = homeDir+"/Documents";
@@ -188,16 +191,20 @@ public class TranscriptHandler {
             return;
         }
 
+        try {//This look change is visibly-silent as it does not update the component-tree-UI on already visible containers
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+        } catch (Exception ignored) {
+        }
+        setUpPrimaryExportation();
         exportDialog.setVisible(true);
         final Document document = new Document();
-        try{
+        try {
             final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath+"/transcript.pdf"));
             document.open();
-
             final PdfContentByte contentByte = writer.getDirectContent();
             final PdfTemplate template = contentByte.createTemplate(595.0F, 842.0F);
             final Graphics2D graphics = template.createGraphicsShapes(595.0F, 842.0F);
-            contentByte.addTemplate(template,0,0);
+            contentByte.addTemplate(template, 0, 0);
 
             exportPanel.printAll(graphics);
             graphics.dispose();
@@ -205,9 +212,8 @@ public class TranscriptHandler {
             exportDialog.dispose();
             if (secondaryExportNeeded) {
                 launchSecondaryExport(savePath);
-            } else {
-                App.promptPlain("Export Successful","Your Transcript exported successfully to "+savePath);
             }
+            reportExportSuccessful(savePath);
         } catch (Exception e){
             reportExportError(e);
         } finally {
@@ -215,7 +221,7 @@ public class TranscriptHandler {
         }
     }
 
-    private static void launchSecondaryExport(File savePath){
+    private static void launchSecondaryExport(File savePath) throws FileNotFoundException, DocumentException {
         final KDefaultTableModel secondaryModel = new KDefaultTableModel();
         secondaryModel.setColumnIdentifiers(TranscriptGenerator.HEADS);
         final List<Course> l = Memory.listRequested();
@@ -249,28 +255,24 @@ public class TranscriptHandler {
 
         exportDialog.setVisible(true);
         final Document document = new Document();
-        try {
-            final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath+"/transcript-part-2.pdf"));
-            document.open();
+        final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(savePath+"/transcript-part-2.pdf"));
+        document.open();
+        final PdfContentByte contentByte = writer.getDirectContent();
+        final PdfTemplate template = contentByte.createTemplate(595.0F, 842.0F);
+        final Graphics2D graphics = template.createGraphicsShapes(595.0F, 842.0F);
+        contentByte.addTemplate(template, 0, 0);
+        exportPanel.printAll(graphics);
+        graphics.dispose();
+        document.close();
+    }
 
-            final PdfContentByte contentByte = writer.getDirectContent();
-            final PdfTemplate template = contentByte.createTemplate(595.0F, 842.0F);
-            final Graphics2D graphics = template.createGraphicsShapes(595.0F, 842.0F);
-            contentByte.addTemplate(template, 0, 0);
-
-            exportPanel.printAll(graphics);
-            graphics.dispose();
-            document.close();
-            exportDialog.dispose();
-            App.promptPlain("Export Successful", "Your Transcript is been exported successfully to "+savePath);
-        } catch (Exception e) {
-            reportExportError(e);
-        } finally {
-            exportDialog.dispose();
-        }
+    private static void reportExportSuccessful(File file){
+        SettingsUI.setLookTo(currentLookAndFeel.getName());
+        App.promptPlain("Export Successful", "Your Transcript is been successfully exported to "+file);
     }
 
     private static void reportExportError(Exception e){
+        SettingsUI.setLookTo(currentLookAndFeel.getName());
         App.signalError("Error", "Sorry, we experienced unusual problems during the export.\n" +
                 "Please, try again.\nError Message = " + e.getMessage());
     }

@@ -5,9 +5,6 @@ import main.App;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 
-/**
- * One of the most useful swing components as long as Dashboard is concerned.
- */
 public class KTable extends JTable implements Preference {
 
 
@@ -19,13 +16,13 @@ public class KTable extends JTable implements Preference {
     }
 
     public void centerAlignColumns(int... columns){
+        final DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
         for (int t : columns) {
             try {
-                final DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-                centerRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
                 this.getColumnModel().getColumn(t).setCellRenderer(centerRenderer);
             } catch (Exception e) {
-                App.silenceException("Error centering column "+t);
+                App.silenceException(e);
             }
         }
     }

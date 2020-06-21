@@ -69,7 +69,7 @@ public class TranscriptGenerator implements ActivityAnswerer {
 
         final KPanel transcriptUI = new KPanel(new BorderLayout());
         transcriptUI.add(headLiner(),BorderLayout.NORTH);
-        transcriptUI.add(new KScrollPane(transcriptFace),BorderLayout.CENTER);
+        transcriptUI.add(new KScrollPane(transcriptFace), BorderLayout.CENTER);
         transcriptUI.add(bottomLiner(),BorderLayout.SOUTH);
 
         Board.addCard(transcriptUI, "Transcript");
@@ -85,13 +85,6 @@ public class TranscriptGenerator implements ActivityAnswerer {
         downloadButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         downloadButton.addActionListener(actionEvent -> {
             downloadButton.setEnabled(false);
-            if (!SettingsUI.isDefaultLookSet() && !App.showOkCancelDialog("Notice",
-                    "You're currently not using the 'Metal' Look and Feel.\n" +
-                            "It is recommended that you set the Default Look for exportation of the transcript,\n" +
-                            "because different looks render components differently. Continue anyway?")) {
-                downloadButton.setEnabled(true);
-                return;
-            }
             TranscriptHandler.exportNow();
             downloadButton.setEnabled(true);
         });

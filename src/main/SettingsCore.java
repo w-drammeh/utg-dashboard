@@ -12,7 +12,7 @@ public class SettingsCore {
     public static boolean confirmExit = true;
     public static boolean userType = true;//Not used yet
     public static String backgroundName = Globals.NONE;
-    public static String lookName = UIManager.getLookAndFeel().getName();
+    public static String lookName = UIManager.getLookAndFeel() == null ? "Metal" : UIManager.getLookAndFeel().getName();
     private static Date serializationTime;//All serializations are done at same time, so this property needs not be relative
 
 

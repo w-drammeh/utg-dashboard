@@ -748,7 +748,7 @@ public class SettingsUI implements ActivityAnswerer{
         effectBackgroundChanges();
     }
 
-    private static void setLookTo(String lookName){
+    public static void setLookTo(String lookName) {
         for (UIManager.LookAndFeelInfo lookAndFeelInfo : SettingsCore.allLooksInfo) {
             if (lookAndFeelInfo.getName().equals(lookName)) {
                 try {
@@ -766,7 +766,6 @@ public class SettingsUI implements ActivityAnswerer{
                     App.signalError(e1.getClass().getSimpleName(), "Unexpected error occurred setting the the UI to "+lookName+"\n" +
                             "Error Message = "+e1.getMessage());
                 }
-
                 break;
             }
         }
@@ -785,7 +784,7 @@ public class SettingsUI implements ActivityAnswerer{
         return SettingsCore.currentLookName().equals("Metal");
     }
 
-    public static void loadDefaults(){
+    public static void loadDefaults() {
         userChecking.setSelected(true);
         SettingsCore.noVerifyNeeded = false;
         exitChecking.setSelected(true);
@@ -796,7 +795,7 @@ public class SettingsUI implements ActivityAnswerer{
         ToolTipManager.sharedInstance().setDismissDelay(4_000);
         syncChecking.setSelected(false);
         Portal.setAutoSync(false);
-        SwingUtilities.invokeLater(()->{
+        SwingUtilities.invokeLater(()-> {
             nameFormatBox.setSelectedIndex(0);
             looksBox.setSelectedIndex(0);
             bgBox.setSelectedIndex(0);
