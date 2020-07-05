@@ -477,11 +477,11 @@ public final class Board extends KFrame {
 
         final NewsGenerator newsGenerator = new NewsGenerator();
 
-        final KButton refreshButton = new KButton("Refresh");
+        final KButton refreshButton = new KButton("Refresh Feeds");
         refreshButton.setFont(KFontFactory.createPlainFont(15));
         refreshButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        refreshButton.setMnemonic(KeyEvent.VK_R);
-        refreshButton.setToolTipText("Update news feeds (Alt+R)");
+        refreshButton.setMnemonic(KeyEvent.VK_F);
+        refreshButton.setToolTipText("Update news feeds (Alt+F)");
         refreshButton.addActionListener(e -> new Thread(()-> {
             refreshButton.setEnabled(false);
             newsGenerator.packAllIn(palace, true);
