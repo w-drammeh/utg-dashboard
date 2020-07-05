@@ -6,6 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  * Like its co., TaskExhibition too has subclasses for all the separate task types.
@@ -182,15 +184,14 @@ public class TaskExhibition {
     }
 
 
-    public static class AssignmentExhibition extends KDialog{
+    public static class AssignmentExhibition extends KDialog {
+//        private KTextArea questionArea;
+
 
         public AssignmentExhibition(TaskSelf.AssignmentSelf assignment){
             this.setTitle(assignment.getCourseName()+" - "+(assignment.isGroup() ? "Group Assignment" : "Personal Assignment"));
             this.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
             this.setResizable(true);
-
-            final KPanel assignmentPane = new KPanel();
-            assignmentPane.setLayout(new BoxLayout(assignmentPane, BoxLayout.Y_AXIS));
 
             final KPanel subjectPanel = new KPanel(new BorderLayout());
             subjectPanel.add(KPanel.wantDirectAddition(giveLabel("Subject:")),BorderLayout.WEST);
@@ -218,30 +219,36 @@ public class TaskExhibition {
                     " to submit")),BorderLayout.CENTER);
 
             final KPanel modePanel = new KPanel(new BorderLayout());
-            modePanel.add(KPanel.wantDirectAddition(giveLabel("Mode of submission:")),BorderLayout.WEST);
-            modePanel.add(KPanel.wantDirectAddition(giveValueLabel(assignment.getModeOfSubmission())),BorderLayout.CENTER);
+            modePanel.add(KPanel.wantDirectAddition(giveLabel("Mode of submission:")), BorderLayout.WEST);
+            modePanel.add(KPanel.wantDirectAddition(giveValueLabel(assignment.getModeOfSubmission())), BorderLayout.CENTER);
 
             final KPanel questionPanel = new KPanel(new BorderLayout());
-            questionPanel.add(KPanel.wantDirectAddition(giveLabel("Question(s):")),BorderLayout.WEST);
+            questionPanel.add(KPanel.wantDirectAddition(giveLabel("Question(s):")), BorderLayout.WEST);
             final KTextArea questionArea = new KTextArea();
             questionArea.setText(assignment.getQuestion());
-            questionArea.addKeyListener(new KeyAdapter() {
-                @Override
-                public void keyReleased(KeyEvent e) {
-                    assignment.setQuestion(questionArea.getText());
-                }
-            });
-            questionArea.setEditable(assignment.isOn());
             final KScrollPane scrollPane = KScrollPane.getTextAreaScroller(questionArea, new Dimension(475,150));
-            scrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY,2,true));
-            questionPanel.add(scrollPane,BorderLayout.CENTER);
+            scrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY,1,false));
+            questionPanel.add(scrollPane, BorderLayout.CENTER);
 
+            final KPanel contentPanel = new KPanel();
+            contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
             if (assignment.isOn()) {
+                AssignmentExhibition.this.addWindowListener(new WindowAdapter() {
+                    public void windowClosed(WindowEvent e) {
+                        assignment.setQuestion(questionArea.getText());
+                    }
+                });
                 questionPanel.add(new KLabel("Question(s) wont be editable after assignments are submitted.",
-                        KFontFactory.createPlainFont(15),Color.RED), BorderLayout.SOUTH);
-                assignmentPane.addAll(subjectPanel, statusPanel, startPanel, deadlinePanel, remainPanel, modePanel, questionPanel);
+                        KFontFactory.createPlainFont(15), Color.RED), BorderLayout.SOUTH);
+                contentPanel.addAll(subjectPanel, statusPanel, startPanel, deadlinePanel, remainPanel, modePanel, questionPanel);
             } else {
-                assignmentPane.addAll(subjectPanel, statusPanel, startPanel, submittedPanel, deadlinePanel, modePanel, questionPanel);
+                questionArea.addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
+                        e.consume();
+                    }
+                });
+                contentPanel.addAll(subjectPanel, statusPanel, startPanel, submittedPanel, deadlinePanel, modePanel, questionPanel);
             }
 
             final KButton submitButton = new KButton("Mark as Submit");
@@ -263,9 +270,10 @@ public class TaskExhibition {
                 buttonsContainer.addAll(removeButton, closeButton);
             }
 
-            assignmentPane.addAll(ComponentAssistant.contentBottomGap(), buttonsContainer);
+            contentPanel.addAll(ComponentAssistant.contentBottomGap(), buttonsContainer);
+
             this.getRootPane().setDefaultButton(closeButton);
-            this.setContentPane(assignmentPane);
+            this.setContentPane(contentPanel);
             this.pack();
             this.setMinimumSize(this.getPreferredSize());
             this.setLocationRelativeTo(Board.getRoot());

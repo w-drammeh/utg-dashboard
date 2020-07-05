@@ -3,6 +3,8 @@ package customs;
 import javax.swing.*;
 
 public class KTextPane extends JTextPane implements Preference {
+    public static final String PLAIN_TYPE = "text/plain";
+    public static final String HTML_TYPE = "text/html";
 
 
     public KTextPane(String type, String text){

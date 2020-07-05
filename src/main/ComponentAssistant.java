@@ -46,6 +46,9 @@ public class ComponentAssistant {
         c.setLocation(c.getX() + a, c.getY());
     }
 
+    /**
+     * This is particularly ideal under box-layouts
+     */
     public static Component contentBottomGap(){
         return Box.createVerticalStrut(25);
     }
