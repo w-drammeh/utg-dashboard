@@ -439,6 +439,8 @@ public class Student {
      * Resets all fields.
      * Invoked to avoid null-pointer exceptions;
      * after log-out to prevent clash of details?.
+     *
+     * This is deprecated!
      */
     public static void reset(){
         firstName = lastName = program = major = minor = school = division = semester = state = level = address =
@@ -717,41 +719,42 @@ public class Student {
         System.out.println("Completed.");
     }
 
-    public static void deserializeData(){
+    public static void deserializeData() {
         System.out.print("Deserializing student's data... ");
         final LinkedHashMap<String, String> dataMap = (LinkedHashMap) MyClass.deserialize("core.ser");
-        if (!(dataMap == null)) {
-            setFirstName(dataMap.get("fName"));
-            setLastName(dataMap.get("lName"));
-            setProgram(dataMap.get("program"));
-            setMatNumber(Integer.parseInt(dataMap.get("mat")));
-            setMajor(dataMap.get("major"));
-            setSchool(dataMap.get("school"));
-            setDivision(dataMap.get("div"));
-            setNationality(dataMap.get("nationality"));
-            setMonthOfAdmission(Integer.parseInt(dataMap.get("moa")));
-            setYearOfAdmission(Integer.parseInt(dataMap.get("yoa")));
-            setAddress(dataMap.get("address"));
-            setMaritalStatue(dataMap.get("marital"));
-            setDateOfBirth(dataMap.get("dob"));
-            resetTelephones(dataMap.get("tels"));
-            setPortalMail(dataMap.get("portalMail"));
-            setPortalPassword(dataMap.get("portalPsswd"));
-            setStudentMail(dataMap.get("studentMail"));
-            setStudentPassword(dataMap.get("studentPsswd"));
-            setCGPA(Double.parseDouble(dataMap.get("cg")));
-            setLevel(dataMap.get("level"));
-            setSemester(dataMap.get("semester"));
-            setState(dataMap.get("state"));
-
-            Student.majorCode = dataMap.get("majCode");
-            Student.minor = dataMap.get("minor");
-            Student.minorCode = dataMap.get("minCode");
-            setPlaceOfBirth(dataMap.get("pob"));
-            setAbout(dataMap.get("aboutMe"));
-            setNameFormat(dataMap.get("nameFormat"));
-            isReported = Boolean.parseBoolean(dataMap.get("isReported"));
+        if (dataMap == null) {
+            throw new NullPointerException("User core details missing");
         }
+        setFirstName(dataMap.get("fName"));
+        setLastName(dataMap.get("lName"));
+        setProgram(dataMap.get("program"));
+        setMatNumber(Integer.parseInt(dataMap.get("mat")));
+        setMajor(dataMap.get("major"));
+        setSchool(dataMap.get("school"));
+        setDivision(dataMap.get("div"));
+        setNationality(dataMap.get("nationality"));
+        setMonthOfAdmission(Integer.parseInt(dataMap.get("moa")));
+        setYearOfAdmission(Integer.parseInt(dataMap.get("yoa")));
+        setAddress(dataMap.get("address"));
+        setMaritalStatue(dataMap.get("marital"));
+        setDateOfBirth(dataMap.get("dob"));
+        resetTelephones(dataMap.get("tels"));
+        setPortalMail(dataMap.get("portalMail"));
+        setPortalPassword(dataMap.get("portalPsswd"));
+        setStudentMail(dataMap.get("studentMail"));
+        setStudentPassword(dataMap.get("studentPsswd"));
+        setCGPA(Double.parseDouble(dataMap.get("cg")));
+        setLevel(dataMap.get("level"));
+        setSemester(dataMap.get("semester"));
+        setState(dataMap.get("state"));
+
+        Student.majorCode = dataMap.get("majCode");
+        Student.minor = dataMap.get("minor");
+        Student.minorCode = dataMap.get("minCode");
+        setPlaceOfBirth(dataMap.get("pob"));
+        setAbout(dataMap.get("aboutMe"));
+        setNameFormat(dataMap.get("nameFormat"));
+        isReported = Boolean.parseBoolean(dataMap.get("isReported"));
 
         final ImageIcon serialIcon = (ImageIcon) MyClass.deserialize("icon.ser");
         setUserIcon(serialIcon == null ? emptyIcon : serialIcon);

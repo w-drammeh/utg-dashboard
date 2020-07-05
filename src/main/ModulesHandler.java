@@ -468,8 +468,7 @@ public class ModulesHandler {
             final int foundCount = rows.size();
             final int semesterCount = semCaptions.size();
             App.promptPlain("Sync Successful", "Synchronization of the modules completed successfully:\n" +
-                    Globals.checkPlurality(foundCount, "courses")+" were found in "+ Globals.checkPlurality(semesterCount, "semesters"));
-
+                    Globals.checkPlurality(foundCount, "courses")+" were found in "+ Globals.checkPlurality(semesterCount, "semesters."));
             syncButton.setEnabled(true);
         }
     }

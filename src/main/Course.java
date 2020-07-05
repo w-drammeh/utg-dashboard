@@ -243,8 +243,9 @@ public class Course {
         incoming.setVenue(outgoing.getVenue());
         incoming.setRequirement(outgoing.getRequirement());
         final boolean incomingIsLecturerSet = Globals.hasText(incoming.getLecturer());
-        incoming.setLecturer(incomingIsLecturerSet ? incoming.getLecturer() : outgoing.getLecturer(),
-                incomingIsLecturerSet);
+        if (!incomingIsLecturerSet) {
+            incoming.setLecturer(outgoing.getLecturer(), true);
+        }
     }
 
     public String getYear() {

@@ -8,7 +8,7 @@ import java.io.File;
 /**
  * @author Muhammed W. Drammeh
  *
- * This is the actual runner type of the project.
+ * This is the actual runner type.
  * In a nutshell, it may read from a serializable state if existed, or triggers a new instance if not -
  * or otherwise found inconsistent.
  *
@@ -55,8 +55,8 @@ public class Dashboard {
 
     private static void verifyUser(boolean deserialize){
         if (deserialize) {
+            Student.reset();
             try {
-                Student.reset();
                 Student.deserializeData();
             } catch (Exception e) {
                 App.silenceException(e);
@@ -86,8 +86,8 @@ public class Dashboard {
 
     private static void rebuildNow(boolean deserialize){
         if (deserialize) {
+            Student.reset();
             try {
-                Student.reset();
                 Student.deserializeData();
             } catch (Exception e) {
                 App.silenceException(e);
@@ -140,7 +140,6 @@ public class Dashboard {
             } catch (Exception e) {
                 App.silenceException(e);
             }
-
             preview.dispose();
             lastBoard.setVisible(true);
         });
