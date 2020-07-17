@@ -99,7 +99,7 @@ public class MyClass {
 			path.mkdirs();
 		}
 		final String data = "\t\t<-----This file shall contain the fundamental details of the student / user----->\n" +
-				"Do not border modify this file - all modifications are discarded at every \"collapse\".\n\n" +
+				"Do not bother modify this file - all modifications are discarded at every \"collapse\".\n\n" +
 				"Month of Admission: "+ Student.getMonthOfAdmission_Extended()+"\n" +
 				"Year of Admission: "+Student.getYearOfAdmission()+"\n" +
 				"Current Semester: "+Student.getSemester().toUpperCase()+"\n" +
