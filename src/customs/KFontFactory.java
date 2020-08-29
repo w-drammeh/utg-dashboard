@@ -6,12 +6,12 @@ public abstract class KFontFactory implements Preference {
     public static final String FONT_NAME = "Tahoma";
 
 
-    public static Font createBoldFont(int size){
-        return new Font(FONT_NAME, Font.BOLD, size);
-    }
-
     public static Font createPlainFont(int size){
         return new Font(FONT_NAME, Font.PLAIN, size);
+    }
+
+    public static Font createBoldFont(int size){
+        return new Font(FONT_NAME, Font.BOLD, size);
     }
 
     public static Font createItalicFont(int size){
@@ -19,7 +19,7 @@ public abstract class KFontFactory implements Preference {
     }
 
     public static Font createBoldItalic(int size){
-        return new Font(FONT_NAME,Font.BOLD + Font.ITALIC,size);
+        return new Font(FONT_NAME, Font.BOLD + Font.ITALIC, size);
     }
 
     /**

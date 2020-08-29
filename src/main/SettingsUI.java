@@ -14,7 +14,7 @@ public class SettingsUI implements ActivityAnswerer{
     public static final KTextField minorCodeField = KTextField.rangeControlField(3);
     public static final KTextField studentMailField = new KTextField(Student.getStudentMail());
     public static final JPasswordField studentPsswdField = new JPasswordField(Student.getStudentPassword());
-    public static final KTextArea descriptionArea = KTextArea.limitedEntry(1_000);
+    public static final KTextArea descriptionArea = KTextArea.getLimitedEntryArea(1_000);
     private static final String changeHint = "Enter your Matriculation Number to effect this changes:\n \n";
     private static final LinkedHashMap<String, String> ADDITIONAL_DATA = new LinkedHashMap<>();
     private static final Font hFont = KFontFactory.createBoldFont(16);//generally for the hints
@@ -34,7 +34,7 @@ public class SettingsUI implements ActivityAnswerer{
 
 
     public SettingsUI(){
-        final KTabbedPane settingsTab = new KTabbedPane();
+        final JTabbedPane settingsTab = new JTabbedPane();
         settingsTab.add(new KScrollPane(userTabComponent(),false));
         settingsTab.add(new KScrollPane(profileTabComponent(),false));
         settingsTab.add(dashboardTabComponent());
@@ -45,7 +45,7 @@ public class SettingsUI implements ActivityAnswerer{
         settingsTab.setTabComponentAt(2, new KLabel("Customize Dashboard", tabFont));
 
         final KPanel settingsUI = new KPanel(new BorderLayout());
-        settingsUI.add(KPanel.wantDirectAddition(new KLabel("Personalization",
+        settingsUI.add(new KPanel(new KLabel("Personalization",
                 KFontFactory.createPlainFont(20), Color.BLUE)), BorderLayout.NORTH);
         settingsUI.add(settingsTab,BorderLayout.CENTER);
 
@@ -72,56 +72,56 @@ public class SettingsUI implements ActivityAnswerer{
         final KPanel buttonsPanel = new KPanel(new FlowLayout(FlowLayout.CENTER));
         buttonsPanel.addAll(changeButton, resetButton);
         final KPanel imgOptoinsPanel = new KPanel(new BorderLayout());
-        imgOptoinsPanel.add(KPanel.wantDirectAddition(new KLabel("Image Options", hFont)), BorderLayout.WEST);
+        imgOptoinsPanel.add(new KPanel(new KLabel("Image Options", hFont)), BorderLayout.WEST);
         imgOptoinsPanel.add(buttonsPanel, BorderLayout.CENTER);
 
         final KPanel fNamePanel = new KPanel(new BorderLayout());
-        fNamePanel.add(KPanel.wantDirectAddition(new KLabel("First Name:",hFont)),BorderLayout.WEST);
-        fNamePanel.add(KPanel.wantDirectAddition(new KLabel(Student.getFirstName(),dFont)),BorderLayout.CENTER);
+        fNamePanel.add(new KPanel(new KLabel("First Name:",hFont)),BorderLayout.WEST);
+        fNamePanel.add(new KPanel(new KLabel(Student.getFirstName(),dFont)),BorderLayout.CENTER);
 
         final KPanel lNamePanel = new KPanel(new BorderLayout());
-        lNamePanel.add(KPanel.wantDirectAddition(new KLabel("Last Name:",hFont)),BorderLayout.WEST);
-        lNamePanel.add(KPanel.wantDirectAddition(new KLabel(Student.getLastName(),dFont)),BorderLayout.CENTER);
+        lNamePanel.add(new KPanel(new KLabel("Last Name:",hFont)),BorderLayout.WEST);
+        lNamePanel.add(new KPanel(new KLabel(Student.getLastName(),dFont)),BorderLayout.CENTER);
 
         final KPanel natPanel = new KPanel(new BorderLayout());
-        natPanel.add(KPanel.wantDirectAddition(new KLabel("Nationality:",hFont)),BorderLayout.WEST);
-        natPanel.add(KPanel.wantDirectAddition(new KLabel(Student.getNationality(),dFont)),BorderLayout.CENTER);
+        natPanel.add(new KPanel(new KLabel("Nationality:",hFont)),BorderLayout.WEST);
+        natPanel.add(new KPanel(new KLabel(Student.getNationality(),dFont)),BorderLayout.CENTER);
 
         final KPanel schoolPanel = new KPanel(new BorderLayout());
-        schoolPanel.add(KPanel.wantDirectAddition(new KLabel("School:",hFont)),BorderLayout.WEST);
-        schoolPanel.add(KPanel.wantDirectAddition(new KLabel(Student.getSchool(),dFont)),BorderLayout.CENTER);
+        schoolPanel.add(new KPanel(new KLabel("School:",hFont)),BorderLayout.WEST);
+        schoolPanel.add(new KPanel(new KLabel(Student.getSchool(),dFont)),BorderLayout.CENTER);
 
         final KPanel depPanel = new KPanel(new BorderLayout());
-        depPanel.add(KPanel.wantDirectAddition(new KLabel("Department / Faculty:",hFont)),BorderLayout.WEST);
-        depPanel.add(KPanel.wantDirectAddition(new KLabel(Student.getDivision(),dFont)),BorderLayout.CENTER);
+        depPanel.add(new KPanel(new KLabel("Department / Faculty:",hFont)),BorderLayout.WEST);
+        depPanel.add(new KPanel(new KLabel(Student.getDivision(),dFont)),BorderLayout.CENTER);
 
         final KPanel progPanel = new KPanel(new BorderLayout());
-        progPanel.add(KPanel.wantDirectAddition(new KLabel("Program:",hFont)),BorderLayout.WEST);
-        progPanel.add(KPanel.wantDirectAddition(new KLabel(Student.getMajor(),dFont)),BorderLayout.CENTER);
+        progPanel.add(new KPanel(new KLabel("Program:",hFont)),BorderLayout.WEST);
+        progPanel.add(new KPanel(new KLabel(Student.getMajor(),dFont)),BorderLayout.CENTER);
 
         final KPanel minPanel = new KPanel(new BorderLayout());
-        minPanel.add(KPanel.wantDirectAddition(new KLabel("Minor:",hFont)),BorderLayout.WEST);
-        minPanel.add(KPanel.wantDirectAddition(minorLabel), BorderLayout.CENTER);
+        minPanel.add(new KPanel(new KLabel("Minor:",hFont)),BorderLayout.WEST);
+        minPanel.add(new KPanel(minorLabel), BorderLayout.CENTER);
 
         final KPanel yoaPanel = new KPanel(new BorderLayout());
-        yoaPanel.add(KPanel.wantDirectAddition(new KLabel("Year of Admission:",hFont)),BorderLayout.WEST);
-        yoaPanel.add(KPanel.wantDirectAddition(new KLabel(Student.getYearOfAdmission()+"",dFont)),BorderLayout.CENTER);
+        yoaPanel.add(new KPanel(new KLabel("Year of Admission:",hFont)),BorderLayout.WEST);
+        yoaPanel.add(new KPanel(new KLabel(Student.getYearOfAdmission()+"",dFont)),BorderLayout.CENTER);
 
         final KPanel moaPanel = new KPanel(new BorderLayout());
-        moaPanel.add(KPanel.wantDirectAddition(new KLabel("Month of Admission:",hFont)),BorderLayout.WEST);
-        moaPanel.add(KPanel.wantDirectAddition(new KLabel(Student.getMonthOfAdmission_Extended(),dFont)),BorderLayout.CENTER);
+        moaPanel.add(new KPanel(new KLabel("Month of Admission:",hFont)),BorderLayout.WEST);
+        moaPanel.add(new KPanel(new KLabel(Student.getMonthOfAdmission_Extended(),dFont)),BorderLayout.CENTER);
 
         final KPanel eygPanel = new KPanel(new BorderLayout());
-        eygPanel.add(KPanel.wantDirectAddition(new KLabel("Expected Year of Graduation:",hFont)),BorderLayout.WEST);
-        eygPanel.add(KPanel.wantDirectAddition(new KLabel(Student.getExpectedYearOfGraduation()+"",dFont)),BorderLayout.CENTER);
+        eygPanel.add(new KPanel(new KLabel("Expected Year of Graduation:",hFont)),BorderLayout.WEST);
+        eygPanel.add(new KPanel(new KLabel(Student.getExpectedYearOfGraduation()+"",dFont)),BorderLayout.CENTER);
 
         final KPanel levelPanel = new KPanel(new BorderLayout());
-        levelPanel.add(KPanel.wantDirectAddition(new KLabel("Level:",hFont)),BorderLayout.WEST);
-        levelPanel.add(KPanel.wantDirectAddition(new KLabel(Student.getLevel()+"",dFont)),BorderLayout.CENTER);
+        levelPanel.add(new KPanel(new KLabel("Level:",hFont)),BorderLayout.WEST);
+        levelPanel.add(new KPanel(new KLabel(Student.getLevel()+"",dFont)),BorderLayout.CENTER);
 
         final KPanel bdPanel = new KPanel(new BorderLayout());
-        bdPanel.add(KPanel.wantDirectAddition(new KLabel("Birthday:",hFont)),BorderLayout.WEST);
-        bdPanel.add(KPanel.wantDirectAddition(new KLabel(Student.getDateOfBirth(),dFont)),BorderLayout.CENTER);
+        bdPanel.add(new KPanel(new KLabel("Birthday:",hFont)),BorderLayout.WEST);
+        bdPanel.add(new KPanel(new KLabel(Student.getDateOfBirth(),dFont)),BorderLayout.CENTER);
 
         pobLabel = new KLabel(Student.getPlaceOfBirth(),dFont){
             @Override
@@ -131,12 +131,12 @@ public class SettingsUI implements ActivityAnswerer{
             }
         };
         final KPanel bpPanel = new KPanel(new BorderLayout());
-        bpPanel.add(KPanel.wantDirectAddition(new KLabel("Place of Birth:",hFont)),BorderLayout.WEST);
-        bpPanel.add(KPanel.wantDirectAddition(pobLabel),BorderLayout.CENTER);
+        bpPanel.add(new KPanel(new KLabel("Place of Birth:",hFont)),BorderLayout.WEST);
+        bpPanel.add(new KPanel(pobLabel),BorderLayout.CENTER);
 
         final KPanel addressPanel = new KPanel(new BorderLayout());
-        addressPanel.add(KPanel.wantDirectAddition(new KLabel("Address:",hFont)),BorderLayout.WEST);
-        addressPanel.add(KPanel.wantDirectAddition(new KLabel(Student.getAddress(),dFont)),BorderLayout.CENTER);
+        addressPanel.add(new KPanel(new KLabel("Address:",hFont)),BorderLayout.WEST);
+        addressPanel.add(new KPanel(new KLabel(Student.getAddress(),dFont)),BorderLayout.CENTER);
 
         msLabel = new KLabel(Student.getMaritalStatue(),dFont){
             @Override
@@ -146,8 +146,8 @@ public class SettingsUI implements ActivityAnswerer{
             }
         };
         final KPanel msPanel = new KPanel(new BorderLayout());
-        msPanel.add(KPanel.wantDirectAddition(new KLabel("Marital Status:",hFont)),BorderLayout.WEST);
-        msPanel.add(KPanel.wantDirectAddition(msLabel),BorderLayout.CENTER);
+        msPanel.add(new KPanel(new KLabel("Marital Status:",hFont)),BorderLayout.WEST);
+        msPanel.add(new KPanel(msLabel),BorderLayout.CENTER);
 
         telsPlate = new KPanel(new FlowLayout(FlowLayout.CENTER)){
             @Override
@@ -157,7 +157,7 @@ public class SettingsUI implements ActivityAnswerer{
                     final KLabel label = new KLabel(" "+t+" ");
                     label.setFont(dFont);
                     label.setForeground(Color.BLUE);
-                    label.underline(null,false);
+                    label.underline(false);
                     label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                     label.addMouseListener(new MouseAdapter() {
                         @Override
@@ -184,8 +184,8 @@ public class SettingsUI implements ActivityAnswerer{
             }
         }
         final KPanel telPanel = new KPanel(new BorderLayout());
-        telPanel.add(KPanel.wantDirectAddition(new KLabel("Telephones:",hFont)),BorderLayout.WEST);
-        telPanel.add(KPanel.wantDirectAddition(telsPlate),BorderLayout.CENTER);
+        telPanel.add(new KPanel(new KLabel("Telephones:",hFont)),BorderLayout.WEST);
+        telPanel.add(new KPanel(telsPlate),BorderLayout.CENTER);
 
         detailsWrapper = new KPanel();
         detailsWrapper.setLayout(new BoxLayout(detailsWrapper, BoxLayout.Y_AXIS));
@@ -209,9 +209,9 @@ public class SettingsUI implements ActivityAnswerer{
                 ADDITIONAL_DATA.remove(detailKey);
             }
         });
-        newPanel.add(KPanel.wantDirectAddition(new KLabel(detailKey,hFont)), BorderLayout.WEST);
-        newPanel.add(KPanel.wantDirectAddition(new KLabel(detailValue,dFont)), BorderLayout.CENTER);
-        newPanel.add(KPanel.wantDirectAddition(removeButton), BorderLayout.EAST);
+        newPanel.add(new KPanel(new KLabel(detailKey,hFont)), BorderLayout.WEST);
+        newPanel.add(new KPanel(new KLabel(detailValue,dFont)), BorderLayout.CENTER);
+        newPanel.add(new KPanel(removeButton), BorderLayout.EAST);
 
         detailsWrapper.removeLastChild();
         detailsWrapper.add(newPanel);
@@ -241,7 +241,7 @@ public class SettingsUI implements ActivityAnswerer{
         };
         final KPanel portalMailPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         portalMailPanel.addAll(new KLabel("Portal Email:", hFont),
-                KPanel.wantDirectAddition(portalMailField, newIconifiedEditButton(portalMailEditorListener,null)));
+                new KPanel(portalMailField, newIconifiedEditButton(portalMailEditorListener,null)));
 
         final JPasswordField portalPsswdField = new JPasswordField(Student.getPortalPassword());
         portalPsswdField.setPreferredSize(new Dimension(325, 30));
@@ -265,7 +265,7 @@ public class SettingsUI implements ActivityAnswerer{
         };
         final KPanel portalPsswdPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         portalPsswdPanel.addAll(new KLabel("Portal Password:", hFont),
-                KPanel.wantDirectAddition(portalPsswdField, newIconifiedEditButton(portalPsswdEditorListener, null)));
+                new KPanel(portalPsswdField, newIconifiedEditButton(portalPsswdEditorListener, null)));
 
         studentMailField.setPreferredSize(new Dimension(325, 30));
         studentMailField.setEditable(false);
@@ -289,7 +289,7 @@ public class SettingsUI implements ActivityAnswerer{
         };
         final KPanel studentMailPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         studentMailPanel.addAll(new KLabel("Student Mail:", hFont),
-                KPanel.wantDirectAddition(studentMailField, newIconifiedEditButton(studentMailEditorListener,null)));
+                new KPanel(studentMailField, newIconifiedEditButton(studentMailEditorListener,null)));
 
         studentPsswdField.setPreferredSize(new Dimension(325, 30));
         studentPsswdField.setHorizontalAlignment(SwingConstants.CENTER);
@@ -310,7 +310,7 @@ public class SettingsUI implements ActivityAnswerer{
         };
         final KPanel studentPsswdPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         studentPsswdPanel.addAll(new KLabel("Student Mail Password:", hFont),
-                KPanel.wantDirectAddition(studentPsswdField, newIconifiedEditButton(studentPsswdEditorListener, null)));
+                new KPanel(studentPsswdField, newIconifiedEditButton(studentPsswdEditorListener, null)));
 
         majorCodeField.setPreferredSize(new Dimension(150, 30));
         majorCodeField.setText(Student.getMajorCode());
@@ -342,7 +342,7 @@ public class SettingsUI implements ActivityAnswerer{
         };
         final KPanel majorCodePanel = new KPanel(new FlowLayout(FlowLayout.LEFT), null);
         majorCodePanel.addAll(new KLabel("Major Code:", hFont),
-                KPanel.wantDirectAddition(majorCodeField, newIconifiedEditButton(majorCodeEditorListener, null)));
+                new KPanel(majorCodeField, newIconifiedEditButton(majorCodeEditorListener, null)));
 
         minorField.setText(Student.getMinor());
         minorField.setEditable(false);
@@ -360,7 +360,7 @@ public class SettingsUI implements ActivityAnswerer{
         };
         final KPanel minorPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         minorPanel.addAll(new KLabel("Minor:", hFont),
-                KPanel.wantDirectAddition(minorField, newIconifiedEditButton(minorEditorListener, null)));
+                new KPanel(minorField, newIconifiedEditButton(minorEditorListener, null)));
 
         minorCodeField.setPreferredSize(new Dimension(150, 30));
         minorCodeField.setText(Student.getMinorCode());
@@ -397,7 +397,7 @@ public class SettingsUI implements ActivityAnswerer{
         };
         final KPanel minorCodePanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         minorCodePanel.addAll(new KLabel("Minor Code:", hFont),
-                KPanel.wantDirectAddition(minorCodeField, newIconifiedEditButton(minorCodeEditorListener, null)));
+                new KPanel(minorCodeField, newIconifiedEditButton(minorCodeEditorListener, null)));
 
         final KTextField msField = new KTextField(Student.getMaritalStatue());
         msField.setPreferredSize(new Dimension(320, 30));
@@ -421,7 +421,7 @@ public class SettingsUI implements ActivityAnswerer{
         };
         final KPanel msPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         msPanel.addAll(new KLabel("Marital Status:", hFont),
-                KPanel.wantDirectAddition(msField, newIconifiedEditButton(maritalStatusEditorListener, null)));
+                new KPanel(msField, newIconifiedEditButton(maritalStatusEditorListener, null)));
 
         final KTextField pobField = new KTextField(Student.getPlaceOfBirth());
         pobField.setPreferredSize(new Dimension(320, 30));
@@ -444,7 +444,7 @@ public class SettingsUI implements ActivityAnswerer{
         };
         final KPanel pobPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         pobPanel.addAll(new KLabel("Place of Birth:", hFont),
-                KPanel.wantDirectAddition(pobField, newIconifiedEditButton(pobEditorListener, null)));
+                new KPanel(pobField, newIconifiedEditButton(pobEditorListener, null)));
 
         final KTextField dialField = KTextField.digitPlusRangeControlField(15);
         dialField.setPreferredSize(new Dimension(320, 30));
@@ -475,7 +475,7 @@ public class SettingsUI implements ActivityAnswerer{
         };
         final KPanel dialPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         dialPanel.addAll(new KLabel("Add Contact:",hFont),
-                KPanel.wantDirectAddition(dialField,newIconifiedEditButton(contactAdditionListener, "Add a new Dial")));
+                new KPanel(dialField,newIconifiedEditButton(contactAdditionListener, "Add a new Dial")));
 
         final KTextField valueField = new KTextField();
         valueField.setPreferredSize(new Dimension(330, 30));
@@ -501,8 +501,8 @@ public class SettingsUI implements ActivityAnswerer{
         });
         valueField.addActionListener(keyField.getActionListeners()[0]);
         final KPanel craftPanel = new KPanel(new BorderLayout());
-        craftPanel.add(KPanel.wantDirectAddition(new KLabel("Add a Custom Detail:",hFont)), BorderLayout.WEST);
-        craftPanel.add(KPanel.wantDirectAddition(new KLabel("Key", dFont), keyField, Box.createRigidArea(new Dimension(30,25)),
+        craftPanel.add(new KPanel(new KLabel("Add a Custom Detail:",hFont)), BorderLayout.WEST);
+        craftPanel.add(new KPanel(new KLabel("Key", dFont), keyField, Box.createRigidArea(new Dimension(30,25)),
                 new KLabel("Value", dFont), valueField), BorderLayout.CENTER);
 
         descriptionArea.setText(Student.getAbout());
@@ -668,7 +668,7 @@ public class SettingsUI implements ActivityAnswerer{
         outButton.setPreferredSize(new Dimension(125, 30));
         outButton.setStyle(KFontFactory.createBoldFont(15), Color.BLUE);
         outButton.undress();
-        outButton.underline(null, true);
+        outButton.underline(true);
         outButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         outButton.addActionListener(e-> {
             if (App.showOkCancelDialog("Sign out?", "By signing out, all your data will be lost.")) {
@@ -678,7 +678,7 @@ public class SettingsUI implements ActivityAnswerer{
                         "We hope this tool has been of great help to you\n \n");
 
                 if (vInt == App.VERIFICATION_TRUE) {
-                    if (MyClass.unMountUserData()) {
+                    if (Serializer.unMountUserData()) {
                         Board.getInstance().dispose();
                         if (Runtime.getRuntime().removeShutdownHook(Board.shutDownThread)) {
                             Runtime.getRuntime().exit(0);
@@ -722,21 +722,6 @@ public class SettingsUI implements ActivityAnswerer{
         dashUI.add(restPanel,BorderLayout.SOUTH);
 
         return dashUI;
-    }
-
-    public static void serialize(){
-        System.out.print("Serializing settingsUI... ");
-        MyClass.serialize(ADDITIONAL_DATA, "settingsUI.ser");
-        System.out.println("Completed.");
-    }
-
-    public static void deSerialize(){
-        System.out.print("Deserializing settingsUI... ");
-        final LinkedHashMap<String, String> uglyMap = (LinkedHashMap<String, String>) MyClass.deserialize("settingsUI.ser");
-        for (String s : uglyMap.keySet()) {
-            acceptUserDetail(s, uglyMap.get(s));
-        }
-        System.out.println("Completed.");
     }
 
     /**
@@ -805,6 +790,25 @@ public class SettingsUI implements ActivityAnswerer{
     @Override
     public void answerActivity() {
         Board.showCard("Settings");
+    }
+
+    public static void serialize(){
+        System.out.print("Serializing SettingsUI... ");
+        Serializer.toDisk(ADDITIONAL_DATA, "settingsUI.ser");
+        System.out.println("Completed.");
+    }
+
+    public static void deSerialize(){
+        System.out.print("Deserializing SettingsUI... ");
+        final LinkedHashMap<String, String> uglyMap = (LinkedHashMap<String, String>) Serializer.fromDisk("settingsUI.ser");
+        if (uglyMap == null) {
+            System.err.println("Unsuccessful.");
+            return;
+        }
+        for (String s : uglyMap.keySet()) {
+            acceptUserDetail(s, uglyMap.get(s));
+        }
+        System.out.println("Completed successfully.");
     }
 
 }

@@ -52,7 +52,7 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
 
 
     public RunningCoursesGenerator(){
-        noticeLabel.setText(Portal.getBufferedNotice_Registration()+ ("    [Last updated: "+Portal.getLastNoticeUpdate()+"]"));
+        noticeLabel.setText(Portal.getRegistrationNotice()+ ("    [Last updated: "+Portal.getLastRegistrationNoticeUpdate()+"]"));
         semesterBigLabel.setText(Student.getSemester());
 
         matchItem = new KMenuItem("Match Portal", e -> startMatching(true));
@@ -78,11 +78,11 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
 
         semesterBigLabel.setPreferredSize(new Dimension(925,35));
         semesterBigLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        semesterBigLabel.underline(null,true);
+        semesterBigLabel.underline(true);
 
         final KPanel upperPanel = new KPanel(new BorderLayout());
         upperPanel.add(popUpButton, BorderLayout.WEST);
-        upperPanel.add(KPanel.wantDirectAddition(semesterBigLabel), BorderLayout.CENTER);
+        upperPanel.add(new KPanel(semesterBigLabel), BorderLayout.CENTER);
         upperPanel.add(Box.createRigidArea(new Dimension(975, 10)), BorderLayout.SOUTH);
 
         final KPanel runningContainer = new KPanel(new BorderLayout());
@@ -554,25 +554,6 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
         Board.showCard("Running Courses");
     }
 
-    public static void serializeModules(){
-        System.out.print("Serializing registered courses... ");
-        final String[] runningCourses = new String[ACTIVE_COURSES.size()];
-        for (int i = 0; i < runningCourses.length; i++) {
-            runningCourses[i] = ACTIVE_COURSES.get(i).exportContent();
-        }
-        MyClass.serialize(runningCourses, "runCourses.ser");
-        System.out.println("Completed.");
-    }
-
-    public static void deserializeModules(){
-        System.out.print("Deserializing registered courses... ");
-        final String[] runningCourses = (String[]) MyClass.deserialize("runCourses.ser");
-        for (String line : runningCourses) {
-            ACTIVE_COURSES.add(RunningCourse.importFromSerial(line));
-        }
-        System.out.println("Completed.");
-    }
-
 
     private static class RunningCourseAdder extends KDialog {
         KPanel layers;
@@ -588,28 +569,28 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
             codeField = KTextField.rangeControlField(10);
             codeField.setPreferredSize(new Dimension(150, 30));
             final KPanel codeLayer = new KPanel(new BorderLayout());
-            codeLayer.add(KPanel.wantDirectAddition(dialogLabel("Course Code:")),BorderLayout.WEST);
-            codeLayer.add(KPanel.wantDirectAddition(codeField),BorderLayout.CENTER);
+            codeLayer.add(new KPanel(dialogLabel("Course Code:")),BorderLayout.WEST);
+            codeLayer.add(new KPanel(codeField),BorderLayout.CENTER);
 
             nameField = new KTextField(new Dimension(325,30));
             final KPanel nameLayer = new KPanel(new BorderLayout());
-            nameLayer.add(KPanel.wantDirectAddition(dialogLabel("Course Name:")),BorderLayout.WEST);
-            nameLayer.add(KPanel.wantDirectAddition(nameField),BorderLayout.CENTER);
+            nameLayer.add(new KPanel(dialogLabel("Course Name:")),BorderLayout.WEST);
+            nameLayer.add(new KPanel(nameField),BorderLayout.CENTER);
 
             lecturerField = new KTextField(new Dimension(325,30));
             final KPanel lecturerLayer = new KPanel(new BorderLayout());
-            lecturerLayer.add(KPanel.wantDirectAddition(dialogLabel("Lecturer's Name:")),BorderLayout.WEST);
-            lecturerLayer.add(KPanel.wantDirectAddition(lecturerField),BorderLayout.CENTER);
+            lecturerLayer.add(new KPanel(dialogLabel("Lecturer's Name:")),BorderLayout.WEST);
+            lecturerLayer.add(new KPanel(lecturerField),BorderLayout.CENTER);
 
             venueField = new KTextField(new Dimension(275,30));
             final KPanel placeLayer = new KPanel(new BorderLayout());
-            placeLayer.add(KPanel.wantDirectAddition(dialogLabel("Venue / Campus:")),BorderLayout.WEST);
-            placeLayer.add(KPanel.wantDirectAddition(venueField),BorderLayout.CENTER);
+            placeLayer.add(new KPanel(dialogLabel("Venue / Campus:")),BorderLayout.WEST);
+            placeLayer.add(new KPanel(venueField),BorderLayout.CENTER);
 
             roomField = new KTextField(new Dimension(325, 30));
             final KPanel roomLayer = new KPanel(new BorderLayout());
-            roomLayer.add(KPanel.wantDirectAddition(dialogLabel("Lecture Room:")),BorderLayout.WEST);
-            roomLayer.add(KPanel.wantDirectAddition(roomField),BorderLayout.CENTER);
+            roomLayer.add(new KPanel(dialogLabel("Lecture Room:")),BorderLayout.WEST);
+            roomLayer.add(new KPanel(roomField),BorderLayout.CENTER);
 
             daysBox = new JComboBox<>(Course.getWeekDays());
             daysBox.setFont(KFontFactory.createPlainFont(15));
@@ -720,6 +701,30 @@ public class RunningCoursesGenerator implements ActivityAnswerer {
                 }
             });
         }
+    }
+
+
+    public static void serializeModules(){
+        System.out.print("Serializing Registered Courses... ");
+        final String[] runningCourses = new String[ACTIVE_COURSES.size()];
+        for (int i = 0; i < runningCourses.length; i++) {
+            runningCourses[i] = ACTIVE_COURSES.get(i).exportContent();
+        }
+        Serializer.toDisk(runningCourses, "runCourses.ser");
+        System.out.println("Completed.");
+    }
+
+    public static void deserializeModules(){
+        System.out.print("Deserializing Registered Courses... ");
+        final String[] runningCourses = (String[]) Serializer.fromDisk("runCourses.ser");
+        if (runningCourses == null) {
+            System.err.println("Unsuccessful.");
+            return;
+        }
+        for (String line : runningCourses) {
+            ACTIVE_COURSES.add(RunningCourse.importFromSerial(line));
+        }
+        System.out.println("Completed successfully.");
     }
 
 }

@@ -41,7 +41,7 @@ public class HelpGenerator implements ActivityAnswerer {
 
         final KPanel northPanel = new KPanel(new BorderLayout());
         northPanel.add(showingLabel, BorderLayout.WEST);
-        northPanel.add(KPanel.wantDirectAddition(helpBox),BorderLayout.EAST);
+        northPanel.add(new KPanel(helpBox),BorderLayout.EAST);
 
         final KPanel allHelpPlace = new KPanel(new BorderLayout());
         allHelpPlace.add(northPanel, BorderLayout.NORTH);
@@ -169,7 +169,7 @@ public class HelpGenerator implements ActivityAnswerer {
         final String utgTip = "You can visit the UTG official site to learn more about the University of the Gambia. To do this, click the About UTG " +
                 "Button appearing at the top-right of your Dashboard.";
 
-        final KPanel tipsPlace = new KPanel(new Dimension(975, 2_210));
+        final KPanel tipsPlace = new KPanel(975, 2_210);
         tipsPlace.setLayout(new BoxLayout(tipsPlace, BoxLayout.Y_AXIS));
         tipsPlace.addAll(tipHeading("Running Courses"),tipWriting(runningTip),tipSubHeading("Verification"),
                 tipWriting(verificationTip),tipSubHeading("Matching"), tipWriting(matchingTip),
@@ -192,7 +192,7 @@ public class HelpGenerator implements ActivityAnswerer {
     }
 
     private KPanel tipSubHeading(String subTopic){
-        return KPanel.wantDirectAddition(new KLabel(subTopic, KFontFactory.createPlainFont(16), Color.BLUE));
+        return new KPanel(new KLabel(subTopic, KFontFactory.createPlainFont(16), Color.BLUE));
     }
 
     private KTextPane tipWriting(String tNote){
@@ -220,9 +220,9 @@ public class HelpGenerator implements ActivityAnswerer {
         final String contributeString = "Do you know an answer to a problem faced by you or any other student " +
                 "which is not stated above? Then do not hesitate to let your brothers and sisters benefit from it " +
                 "by giving it to us. Simply go to 'Home | Personal Dashboard | Feedback | Answer a FAQ'.";
-        final KPanel downPanel = new KPanel(new Dimension(900,115));
+        final KPanel downPanel = new KPanel(900,115);
         downPanel.setLayout(new BoxLayout(downPanel, BoxLayout.Y_AXIS));
-        downPanel.addAll(Box.createVerticalStrut(30),KPanel.wantDirectAddition(new KSeparator(Color.BLACK, new Dimension(800,1))),
+        downPanel.addAll(Box.createVerticalStrut(30),new KPanel(new KSeparator(new Dimension(800,1), Color.BLACK)),
                 newBlank(), insertedText(contributeString));
 
         final KPanel faqsPlace = new KPanel();
@@ -239,19 +239,19 @@ public class HelpGenerator implements ActivityAnswerer {
 
         final KPanel quesPanel = new KPanel(new BorderLayout());
         quesPanel.setBackground(Color.WHITE);
-        final KPanel wrapper = KPanel.wantDirectAddition(new KLabel("Question:", hFont));
+        final KPanel wrapper = new KPanel(new KLabel("Question:", hFont));
         wrapper.setBackground(Color.WHITE);
         quesPanel.add(wrapper, BorderLayout.WEST);
         quesPanel.add(insertedText(problem), BorderLayout.CENTER);
 
         final KPanel ansPanel = new KPanel(new BorderLayout());
         ansPanel.setBackground(Color.WHITE);
-        final KPanel wrapper1 = KPanel.wantDirectAddition(new KLabel("Answer:", hFont));
+        final KPanel wrapper1 = new KPanel(new KLabel("Answer:", hFont));
         wrapper1.setBackground(Color.WHITE);
         ansPanel.add(wrapper1, BorderLayout.WEST);
         ansPanel.add(insertedText(answer), BorderLayout.CENTER);
 
-        final KPanel onePanel = new KPanel(dms);
+        final KPanel onePanel = new KPanel(dms.width, dms.height);
         onePanel.setBackground(Color.WHITE);
         onePanel.setBorder(BorderFactory.createLineBorder(Color.BLUE,2,true));
         onePanel.setLayout(new BoxLayout(onePanel, BoxLayout.Y_AXIS));

@@ -46,7 +46,7 @@ public class NewsGenerator {
     public NewsGenerator(){
         accessLabel = KLabel.getPredefinedLabel("Last accessed: ", SwingConstants.LEFT);
         accessLabel.setStyle(KFontFactory.createPlainFont(15), Color.RED);
-        accessPanel = KPanel.wantDirectAddition(accessLabel);
+        accessPanel = new KPanel(accessLabel);
     }
 
     /**
@@ -117,7 +117,7 @@ public class NewsGenerator {
         final KPanel readerWrap = KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, extendedReader);
         readerWrap.setBackground(Color.WHITE);
         niceBox.add(readerWrap, BorderLayout.SOUTH);
-        return KPanel.wantDirectAddition(niceBox);
+        return new KPanel(niceBox);
     }
     
     public void pushNewsIfAny(JComponent c){
@@ -220,28 +220,30 @@ public class NewsGenerator {
     }
 
     public static void serializeData(){
-        System.out.print("Serializing news... ");
-        MyClass.serialize(NEWS_DATA, "news.ser");
-        MyClass.serialize(accessTime, "newsAccessTime.ser");
+        System.out.print("Serializing News updates... ");
+        Serializer.toDisk(NEWS_DATA, "news.ser");
+        Serializer.toDisk(accessTime, "newsAccessTime.ser");
         System.out.println("Completed.");
     }
 
     public static void deSerializeData(){
-        System.out.print("Deserializing news... ");
-        final ArrayList<NewsSavior> savedNews = (ArrayList<NewsSavior>) MyClass.deserialize("news.ser");
-        if (!(savedNews == null)) {
-            for (NewsSavior savior : savedNews) {
-                NEWS_DATA.add(savior);
-            }
-            if (!savedNews.isEmpty()) {
-                accessTime = "Unknown";
-            }
+        System.out.print("Deserializing News updates... ");
+        final ArrayList<NewsSavior> savedNews = (ArrayList<NewsSavior>) Serializer.fromDisk("news.ser");
+        if (savedNews == null) {
+            System.err.println("Unsuccessful.");
+            return;
         }
-        final Object accessObj = MyClass.deserialize("newsAccessTime.ser");
+        for (NewsSavior savior : savedNews) {
+            NEWS_DATA.add(savior);
+        }
+        if (!savedNews.isEmpty()) {
+            accessTime = "Unknown";
+        }
+        final Object accessObj = Serializer.fromDisk("newsAccessTime.ser");
         if (!(accessObj == null || "Never".equals(accessObj))) {
             accessTime = accessObj.toString();
         }
-        System.out.println("Completed.");
+        System.out.println("Completed successfully.");
     }
 
 }

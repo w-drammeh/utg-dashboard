@@ -11,12 +11,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class NotificationGenerator {
-    private static int unreadCount;//With a technical mechanism of incrementing and decrementing it
+    private static int unreadCount;//with a technical mechanism of incrementing and decrementing it
     private static KPanel dashboardPanel, portalPanel;
     private static KButton clearingButton;
     private static FirefoxDriver portalNoticeDriver;
     private static KButton portalRefresher;
-    //And its related-rubbish comps...
+    //and its related-rubbish components
     private static KLabel admissionLabel, registrationLabel;
     private KLabel hint;
     private CardLayout card;
@@ -156,8 +156,8 @@ public class NotificationGenerator {
 
     private static void adjustNoticeComponents(boolean responsive){
         if (responsive) {
-            registrationLabel.setText(Portal.getBufferedNotice_Registration());
-            admissionLabel.setText(Portal.getBufferedNotice_Admission());
+            registrationLabel.setText(Portal.getRegistrationNotice());
+            admissionLabel.setText(Portal.getAdmissionNotice());
         } else {
             final String waitingText = "Contacting portal... Please wait";
             registrationLabel.setText(waitingText);
@@ -234,7 +234,7 @@ public class NotificationGenerator {
     private void configurePortalAlerts(){
         final Dimension iDimension = new Dimension(1_000,30);
 
-        registrationLabel = new KLabel(Portal.getBufferedNotice_Registration(),KFontFactory.createPlainFont(16));
+        registrationLabel = new KLabel(Portal.getRegistrationNotice(),KFontFactory.createPlainFont(16));
         final KPanel alertPanel_registration = new KPanel(new BorderLayout(), iDimension);
         alertPanel_registration.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         alertPanel_registration.addMouseListener(new MouseAdapter() {
@@ -244,9 +244,9 @@ public class NotificationGenerator {
             }
         });
         alertPanel_registration.add(new KLabel("REGISTRATION ALERT:",KFontFactory.createBoldFont(16),Color.BLUE),BorderLayout.WEST);
-        alertPanel_registration.add(KPanel.wantDirectAddition(registrationLabel),BorderLayout.CENTER);
+        alertPanel_registration.add(new KPanel(registrationLabel),BorderLayout.CENTER);
 
-        admissionLabel = new KLabel(Portal.getBufferedNotice_Admission(),KFontFactory.createPlainFont(16));
+        admissionLabel = new KLabel(Portal.getAdmissionNotice(),KFontFactory.createPlainFont(16));
         final KPanel alertPanel_admission = new KPanel(new BorderLayout(), iDimension);
         alertPanel_admission.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         alertPanel_admission.addMouseListener(new MouseAdapter() {
@@ -256,7 +256,7 @@ public class NotificationGenerator {
             }
         });
         alertPanel_admission.add(new KLabel("ADMISSION ALERT:",KFontFactory.createBoldFont(16),Color.BLUE),BorderLayout.WEST);
-        alertPanel_admission.add(KPanel.wantDirectAddition(admissionLabel),BorderLayout.CENTER);
+        alertPanel_admission.add(new KPanel(admissionLabel),BorderLayout.CENTER);
 
         portalRefresher = new KButton("Update Alerts"){
             @Override
@@ -296,8 +296,8 @@ public class NotificationGenerator {
             this.setModalityType(Dialog.DEFAULT_MODALITY_TYPE);
             this.setResizable(true);
 
-            final String noticeText = noticeTitle.equals(REGISTRATION_NOTICE) ? Portal.getBufferedNotice_Registration() :
-                    Portal.getBufferedNotice_Admission();
+            final String noticeText = noticeTitle.equals(REGISTRATION_NOTICE) ? Portal.getRegistrationNotice() :
+                    Portal.getAdmissionNotice();
             final KTextPane noticePane = KTextPane.wantHtmlFormattedPane(noticeText);
             noticePane.setBackground(Color.WHITE);
             noticePane.setPreferredSize(new Dimension(500, 125));
@@ -307,8 +307,9 @@ public class NotificationGenerator {
 
             final KPanel lowerPart = new KPanel();
             lowerPart.setLayout(new BoxLayout(lowerPart,BoxLayout.Y_AXIS));
-            lowerPart.add(KPanel.wantDirectAddition(new KLabel("Last updated: ", KFontFactory.createBoldFont(16)),
-                    new KLabel(Portal.getLastNoticeUpdate(),KFontFactory.createPlainFont(16))));
+            lowerPart.add(new KPanel(new KLabel("Last updated: ", KFontFactory.createBoldFont(16)),
+                    new KLabel(noticeTitle.equals(REGISTRATION_NOTICE) ? Portal.getLastRegistrationNoticeUpdate() :
+                            Portal.getLastAdmissionNoticeUpdate(), KFontFactory.createPlainFont(16))));
             lowerPart.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,disposeButton));
 
             this.getRootPane().setDefaultButton(disposeButton);

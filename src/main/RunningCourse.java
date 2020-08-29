@@ -146,32 +146,32 @@ public class RunningCourse implements Serializable {
         final Font valueFont = KFontFactory.createPlainFont(15);
 
         final KPanel codePanel = new KPanel(new BorderLayout());
-        codePanel.add(KPanel.wantDirectAddition(new KLabel("Code:",hintFont)),BorderLayout.WEST);
-        codePanel.add(KPanel.wantDirectAddition(new KLabel(activeCourse.code,valueFont)),BorderLayout.CENTER);
+        codePanel.add(new KPanel(new KLabel("Code:",hintFont)),BorderLayout.WEST);
+        codePanel.add(new KPanel(new KLabel(activeCourse.code,valueFont)),BorderLayout.CENTER);
 
         final KPanel namePanel = new KPanel(new BorderLayout());
-        namePanel.add(KPanel.wantDirectAddition(new KLabel("Name:",hintFont)),BorderLayout.WEST);
-        namePanel.add(KPanel.wantDirectAddition(new KLabel(activeCourse.name,valueFont)),BorderLayout.CENTER);
+        namePanel.add(new KPanel(new KLabel("Name:",hintFont)),BorderLayout.WEST);
+        namePanel.add(new KPanel(new KLabel(activeCourse.name,valueFont)),BorderLayout.CENTER);
 
         final KPanel lectPanel = new KPanel(new BorderLayout());
-        lectPanel.add(KPanel.wantDirectAddition(new KLabel("Lecturer:",hintFont)),BorderLayout.WEST);
-        lectPanel.add(KPanel.wantDirectAddition(new KLabel(activeCourse.lecturer,valueFont)),BorderLayout.CENTER);
+        lectPanel.add(new KPanel(new KLabel("Lecturer:",hintFont)),BorderLayout.WEST);
+        lectPanel.add(new KPanel(new KLabel(activeCourse.lecturer,valueFont)),BorderLayout.CENTER);
 
         final KPanel schedulePanel = new KPanel(new BorderLayout());
-        schedulePanel.add(KPanel.wantDirectAddition(new KLabel("Schedule:",hintFont)),BorderLayout.WEST);
-        schedulePanel.add(KPanel.wantDirectAddition(new KLabel(activeCourse.schedule(),valueFont)),BorderLayout.CENTER);
+        schedulePanel.add(new KPanel(new KLabel("Schedule:",hintFont)),BorderLayout.WEST);
+        schedulePanel.add(new KPanel(new KLabel(activeCourse.schedule(),valueFont)),BorderLayout.CENTER);
 
         final KPanel venuePanel = new KPanel(new BorderLayout());
-        venuePanel.add(KPanel.wantDirectAddition(new KLabel("Venue:",hintFont)),BorderLayout.WEST);
-        venuePanel.add(KPanel.wantDirectAddition(new KLabel(activeCourse.venue,valueFont)),BorderLayout.CENTER);
+        venuePanel.add(new KPanel(new KLabel("Venue:",hintFont)),BorderLayout.WEST);
+        venuePanel.add(new KPanel(new KLabel(activeCourse.venue,valueFont)),BorderLayout.CENTER);
 
         final KPanel roomPanel = new KPanel(new BorderLayout());
-        roomPanel.add(KPanel.wantDirectAddition(new KLabel("Room:",hintFont)),BorderLayout.WEST);
-        roomPanel.add(KPanel.wantDirectAddition(new KLabel(activeCourse.room,valueFont)),BorderLayout.CENTER);
+        roomPanel.add(new KPanel(new KLabel("Room:",hintFont)),BorderLayout.WEST);
+        roomPanel.add(new KPanel(new KLabel(activeCourse.room,valueFont)),BorderLayout.CENTER);
 
         final KPanel statusPanel = new KPanel(new BorderLayout());
-        statusPanel.add(KPanel.wantDirectAddition(new KLabel("Status:",hintFont)),BorderLayout.WEST);
-        statusPanel.add(KPanel.wantDirectAddition(new KLabel((activeCourse.isConfirmed ? "Confirmed" : "Unknown"), valueFont,
+        statusPanel.add(new KPanel(new KLabel("Status:",hintFont)),BorderLayout.WEST);
+        statusPanel.add(new KPanel(new KLabel((activeCourse.isConfirmed ? "Confirmed" : "Unknown"), valueFont,
                 (activeCourse.isConfirmed ? Color.BLUE : Color.RED))),BorderLayout.CENTER);
 
         final KButton closeButton = new KButton("Close");

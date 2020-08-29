@@ -17,17 +17,15 @@ public class KFrame extends JFrame implements Preference {
         this.setPreferences();
     }
 
-    public KFrame(){
-        this("");
-    }
-
     /**
-     * Gets the icon used by frames and dialogs. The native system also use this as a launcher icon.
+     * Gets the icon used by frames and dialogs. Native systems use this as a launcher icon.
      */
     public static Image getIcon() {
         final URL iPath = App.getIconURL("dashboard.png");
         if (iPath == null) {
-            App.signalFatalError(null, "Initialization Failure","Internal Error Encountered: Image file could not be located or loaded.\nThe Virtual Machine is set to quit!");
+            App.signalFatalError(null, "Initialization Error",
+                    "Internal Error Encountered: Image file could not be located or loaded.\n" +
+                            "The Virtual Machine is set to quit!");
         }
         return Toolkit.getDefaultToolkit().getImage(iPath);
     }

@@ -1,35 +1,32 @@
 package main;
 
 public class Globals {
-    //Milli-seconds equivalent to these measures
-    public static final int SECOND_IN_MILLI = 1_000;
-    public static final int MINUTE_IN_MILLI = 60 * SECOND_IN_MILLI;
-    public static final int HOUR_IN_MILLI = 60 * MINUTE_IN_MILLI;
-    public static final int DAY_IN_MILLI = 24 * HOUR_IN_MILLI;
-    public static final int PORTAL_WAIT_TIME = 50;
+//    Milli-seconds equivalent to these measures
+    public static final int SECOND = 1_000;
+    public static final int MINUTE = 60 * SECOND;
+    public static final int HOUR = 60 * MINUTE;
+    public static final int DAY = 24 * HOUR;
+    public static final int PORTAL_WAIT_TIME = 25;//intended in seconds
     public static final String NONE = "None";
+    public static final String UNKNOWN = "Unknown";
 
 
-    /**
-     * This is intended for CGPs in the analysis only!
-     * Dashboard does not compute the real CGP, remember?
-     */
     public static String toFourth(double cgp){
         final String t = String.valueOf(cgp);
         return t.length() <= 6 ? t : t.substring(0,6);
     }
 
     /**
-     * The passed string must be in plural!
-     * This is only compatible with words ending with 's' as their plural form
+     * The passed string must be in plural format!
+     * This is only compatible with words ending with 's' in plural form.
      */
-    public static String checkPlurality(int i, String pluralText) {
+    public static String checkPlurality(int i, String text) {
         if (i == 0) {
-            return "No "+pluralText;
+            return "No "+text;
         } else if (i == 1) {
-            return "1 " + pluralText.substring(0, pluralText.length() - 1);
+            return "1 " + text.substring(0, text.length() - 1);
         } else {
-            return String.join(" ", String.valueOf(i), pluralText);
+            return String.join(" ", String.valueOf(i), text);
         }
     }
 

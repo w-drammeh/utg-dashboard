@@ -122,12 +122,12 @@ public class Notification implements Serializable {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             this.addMouseListener(forgeListener(this));
             this.setLayout(new BorderLayout());
-            this.add(KPanel.wantDirectAddition(new KLabel(this.notification.heading.toUpperCase(),
+            this.add(new KPanel(new KLabel(this.notification.heading.toUpperCase(),
                     KFontFactory.createBoldFont(16), Color.BLUE)), BorderLayout.WEST);
             this.innerLabel = new KLabel(this.notification.text, KFontFactory.createPlainFont(16),
                     this.notification.isRead ? null : Color.RED);
-            this.add(KPanel.wantDirectAddition(this.innerLabel), BorderLayout.CENTER);
-            this.add(KPanel.wantDirectAddition(new KLabel(MDate.formatFully(this.notification.time),
+            this.add(new KPanel(this.innerLabel), BorderLayout.CENTER);
+            this.add(new KPanel(new KLabel(MDate.formatFully(this.notification.time),
                     KFontFactory.createPlainFont(16), Color.GRAY)), BorderLayout.EAST);
         }
 
@@ -148,15 +148,17 @@ public class Notification implements Serializable {
 
 
     public static void serializeAll(){
-        System.out.print("Serializing notifications... ");
-        MyClass.serialize(NOTIFICATIONS, "alerts.ser");
+        System.out.print("Serializing Notifications... ");
+        Serializer.toDisk(NOTIFICATIONS, "alerts.ser");
         System.out.println("Completed.");
     }
 
     public static void deSerializeAll(){
-        System.out.print("Deserializing notifications... ");
-        final ArrayList<Notification> savedAlerts = (ArrayList<Notification>) MyClass.deserialize("alerts.ser");
-        if (savedAlerts != null) {
+        System.out.print("Deserializing Notifications... ");
+        final ArrayList<Notification> savedAlerts = (ArrayList<Notification>) Serializer.fromDisk("alerts.ser");
+        if (savedAlerts == null) {
+            System.err.println("Unsuccessful.");
+        } else {
             for (Notification alert : savedAlerts) {
                 alert.shower = new Exhibitor(alert);
                 alert.layer = new NotificationLayer(alert);

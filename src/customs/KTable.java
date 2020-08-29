@@ -34,7 +34,7 @@ public class KTable extends JTable implements Preference {
                 centerRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
                 this.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
             } catch (Exception e) {
-                App.silenceException("Error centering column "+i);
+                App.silenceException(e);
             }
         }
     }

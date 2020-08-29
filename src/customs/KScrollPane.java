@@ -2,6 +2,7 @@ package customs;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.AdjustmentListener;
 
 /**
  * The standard Dashboard Scroller. Fantastic container for swing components.
@@ -15,19 +16,14 @@ public class KScrollPane extends JScrollPane implements Preference {
         this.setPreferences();
     }
 
-    /**
-     * This obsoletes the default, since its more useful in direct painting of the border.
-     */
     public KScrollPane(Component insider, boolean paintBorders){
         this(insider);
         this.setBorder(paintBorders ? this.getBorder() : null);
     }
 
-    public KScrollPane(Component insider, Dimension dimension, boolean paintBorders){
-        super(insider);
-        this.setPreferredSize(dimension);
-        this.setBorder(paintBorders ? this.getBorder() : null);
-        this.setPreferences();
+    public KScrollPane(Component insider, Dimension size, boolean paintBorders){
+        this(insider, paintBorders);
+        this.setPreferredSize(size);
     }
 
     /**
@@ -35,7 +31,7 @@ public class KScrollPane extends JScrollPane implements Preference {
      * If used, border modifications should be done on it, and not the textArea.
      */
     public static KScrollPane getTextAreaScroller(KTextArea textArea, Dimension dimension){
-        final KScrollPane housePane = new KScrollPane(textArea,dimension,true);
+        final KScrollPane housePane = new KScrollPane(textArea, dimension,true);
         housePane.setVerticalScrollBarPolicy(KScrollPane.VERTICAL_SCROLLBAR_NEVER);
         return housePane;
     }
@@ -44,23 +40,22 @@ public class KScrollPane extends JScrollPane implements Preference {
      * Typically, tables are surrounded with this.
      */
     public static KScrollPane getSizeMatchingScrollPane(JComponent innerComponent, int extra){
-        KScrollPane sizeTracer = new KScrollPane(innerComponent, false);
-        final Dimension iSize = innerComponent.getPreferredSize();
-
+        final KScrollPane sizeTracer = new KScrollPane(innerComponent, false);
+        final Dimension dimension = innerComponent.getPreferredSize();
         if (innerComponent instanceof KTable) {
-            iSize.setSize(iSize.width,iSize.height+((KTable) innerComponent).getTableHeader().getPreferredSize().height+extra);
+            dimension.setSize(dimension.width,dimension.height+(
+                    (KTable)innerComponent).getTableHeader().getPreferredSize().height + extra);
         } else {
-            iSize.setSize(iSize.width,iSize.height+extra);
+            dimension.setSize(dimension.width,dimension.height + extra);
         }
-
-        sizeTracer.setPreferredSize(iSize);
+        sizeTracer.setPreferredSize(dimension);
         return sizeTracer;
     }
 
     public static KScrollPane getAutoScroller(JComponent c){
-        KScrollPane scrollPane = new KScrollPane(c);
+        final KScrollPane scrollPane = new KScrollPane(c);
         scrollPane.getVerticalScrollBar().addAdjustmentListener(e -> {
-            Adjustable adjustable = e.getAdjustable();
+            final Adjustable adjustable = e.getAdjustable();
             adjustable.setValue(adjustable.getMaximum());
         });
         return scrollPane;
@@ -69,21 +64,25 @@ public class KScrollPane extends JScrollPane implements Preference {
     /**
      * Called to remove the AdjustmentListener on the ScrollPane.
      */
-    public static void stopAutoScrollingOn(KScrollPane kScrollPane){
-        final JScrollBar vScrollBar = kScrollPane.getVerticalScrollBar();
-        vScrollBar.removeAdjustmentListener(vScrollBar.getAdjustmentListeners()[0]);
+    public void stopAutoScrolling(){
+        final JScrollBar verticalBar = this.getVerticalScrollBar();
+        final AdjustmentListener[] adjustmentListeners = verticalBar.getAdjustmentListeners();
+        if (adjustmentListeners.length > 0) {
+            verticalBar.removeAdjustmentListener(adjustmentListeners[0]);
+        }
     }
 
+//    seems to have no effect until visible
     public void toTop(){
         this.getVerticalScrollBar().setValue(this.getVerticalScrollBar().getMinimum());
     }
 
+//    seems to have no effect until visible
     public void toBottom(){
         this.getVerticalScrollBar().setValue(this.getVerticalScrollBar().getMaximum());
     }
 
     public void setPreferences(){
-
     }
 
 }

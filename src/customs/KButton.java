@@ -1,7 +1,7 @@
 package customs;
 
 import main.App;
-import main.MyClass;
+import main.ComponentAssistant;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,8 +9,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * The standard Dashboard button.
- * It is a convention that buttons modify their toolTips based on their states (on or off) as appropriate.
+ * The standard Dashboard Button.
+ * It is a convention that buttons modify their toolTips based on their states
+ * (on or off) as appropriate.
  */
 public class KButton extends JButton implements Preference {
     private String initialTip;
@@ -27,15 +28,15 @@ public class KButton extends JButton implements Preference {
     }
 
     /**
-     * Constructs an iconified buttons; which, by default or under most UIs, is "dressed".
+     * Constructs an iconified button; which, by default or under most UIs, is "dressed".
      */
     public KButton(Icon icon){
         super(icon);
         this.setPreferences();
     }
 
-    public static KButton getIconifiedButton(String  iconName, int iWidth, int iHeight){
-        final KButton iconButton = new KButton(MyClass.scaleForMe(App.getIconURL(iconName), iWidth, iHeight));
+    public static KButton getIconifiedButton(String iconName, int iWidth, int iHeight){
+        final KButton iconButton = new KButton(ComponentAssistant.scale(App.getIconURL(iconName), iWidth, iHeight));
         iconButton.undress();
         return iconButton;
     }
@@ -53,7 +54,7 @@ public class KButton extends JButton implements Preference {
         this.setContentAreaFilled(false);
     }
 
-    public void dress(){
+    public void redress(){
         this.setBorderPainted(true);
         this.setContentAreaFilled(true);
     }
@@ -61,8 +62,8 @@ public class KButton extends JButton implements Preference {
     /**
      * See KLabel.underline(Color, boolean)
      */
-    public void underline(Color background, boolean alwaysVisible){
-        final KSeparator separator = new KSeparator(background == null ? this.getForeground() : background);
+    public void underline(Color fg, boolean alwaysVisible){
+        final KSeparator separator = new KSeparator(fg == null ? this.getForeground() : fg);
         this.setLayout(new BorderLayout());
         this.add(separator, BorderLayout.SOUTH);
         if (!alwaysVisible) {
@@ -72,13 +73,16 @@ public class KButton extends JButton implements Preference {
                 public void mouseEntered(MouseEvent e){
                     separator.setVisible(true);
                 }
-
                 @Override
                 public void mouseExited(MouseEvent e){
                     separator.setVisible(false);
                 }
             });
         }
+    }
+
+    public void underline(boolean alwaysVisible){
+        this.underline(null, alwaysVisible);
     }
 
     public void setText(int n){

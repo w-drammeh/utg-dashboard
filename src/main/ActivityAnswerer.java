@@ -7,11 +7,13 @@ package main;
 interface ActivityAnswerer {
 
     /**
-     * Whenever this method is invoked, the calling-class should own the 'bodyLayer' in its own way, with
-     * possible pre- and, or post-tasks.
-     * E.g: the AnalysisGenerator type answers by making pre-tasks; while the TranscriptGenerator, post-tasks.
-     * The consequence of this must not only be the result of a home-panel click.
+     * Whenever this method is invoked, the calling-class should own the 'bodyLayer' in its own way,
+     * with possible pre- and, or post-tasks.
+     * E.g: the main.AnalysisGenerator type answers by making pre-tasks;
+     * while the main.TranscriptGenerator, post-tasks.
+     * The consequence of this must not only be the result of a home-panel click,
+     * as it traditionally use to be.
      */
-    void answerActivity();
+    public void answerActivity();
 
 }

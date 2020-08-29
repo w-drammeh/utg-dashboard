@@ -46,11 +46,11 @@ public class TaskSelf {
             this.specifiedDuration = duration;
             this.dateExpectedToComplete = MDate.daysAfter(new Date(), duration);
             this.setActive(true);
-            this.initializeTimer(Globals.DAY_IN_MILLI);
+            this.initializeTimer(Globals.DAY);
         }
 
         private void initializeTimer(int firstDelay){
-            this.timer = new Timer(Globals.DAY_IN_MILLI,null);
+            this.timer = new Timer(Globals.DAY,null);
             this.timer.setInitialDelay(firstDelay);
             this.timer.addActionListener(e -> {
                 this.togoLabel.setText(Globals.checkPlurality(this.getDaysLeft(), "days")+" to go");
@@ -95,7 +95,7 @@ public class TaskSelf {
             if (layerPanel == null) {
                 this.layerPanel = new KPanel(1_000, 35);
             } else {
-                ComponentAssistant.repair(layerPanel);
+                ComponentAssistant.empty(layerPanel);
             }
             this.layerPanel.setLayout(new BoxLayout(this.layerPanel, BoxLayout.X_AXIS));
             this.layerPanel.addAll(namePanel, quantaPanel);
@@ -187,7 +187,7 @@ public class TaskSelf {
             }
             int residue = MDate.getTimeValue(MDate.parse(this.dateExpectedToComplete)) - MDate.getTimeValue(new Date());
             if (residue < 0) {//reverse it then...
-                residue = Globals.DAY_IN_MILLI - Math.abs(residue);
+                residue = Globals.DAY - Math.abs(residue);
             }
             this.initializeTimer(residue);
         }
@@ -229,11 +229,11 @@ public class TaskSelf {
             this.specifiedDuration = duration;
             this.setLive(true);
             this.dateExpectedToComplete = MDate.daysAfter(new Date(), duration);
-            this.initializeTimer(Globals.DAY_IN_MILLI);
+            this.initializeTimer(Globals.DAY);
         }
 
         private void initializeTimer(int firstDelay){
-            this.timer = new Timer(Globals.DAY_IN_MILLI,null);
+            this.timer = new Timer(Globals.DAY,null);
             this.timer.setInitialDelay(firstDelay);
             this.timer.addActionListener(e -> {
                 this.projectProgression.setValue(this.getDaysTaken());
@@ -327,7 +327,7 @@ public class TaskSelf {
                 projectLayer = new KPanel(1_000, 35);
                 this.projectLayer.setLayout(new BoxLayout(this.projectLayer, BoxLayout.X_AXIS));
             } else {
-                ComponentAssistant.repair(projectLayer);
+                ComponentAssistant.empty(projectLayer);
             }
             this.projectLayer.addAll(namePanel, quantaLayer);
             ComponentAssistant.ready(projectLayer);
@@ -418,7 +418,7 @@ public class TaskSelf {
             }
             int residue = MDate.getTimeValue(MDate.parse(this.dateExpectedToComplete)) - MDate.getTimeValue(new Date());
             if (residue < 0) {
-                residue = Globals.DAY_IN_MILLI - Math.abs(residue);
+                residue = Globals.DAY - Math.abs(residue);
             }
             this.initializeTimer(residue);
         }
@@ -469,11 +469,11 @@ public class TaskSelf {
             this.isGroup = groupWork;
             this.modeOfSubmission = submissionMode;
             this.setOn(true);
-            this.initializeTimer(Globals.DAY_IN_MILLI);
+            this.initializeTimer(Globals.DAY);
         }
 
         private void initializeTimer(int firstDelay){
-            this.timer = new Timer(Globals.DAY_IN_MILLI,null);
+            this.timer = new Timer(Globals.DAY,null);
             this.timer.setInitialDelay(firstDelay);
             timer.addActionListener(e -> {
                 if (getTimeRemaining() == 1) {
@@ -501,7 +501,7 @@ public class TaskSelf {
             if (this.isOn) {
                 deadlineIndicator.setText("Deadline: "+deadLine);
                 deadlineIndicator.setStyle(KFontFactory.createItalicFont(16), Color.RED);
-                deadlineIndicator.underline(null,false);
+                deadlineIndicator.underline(false);
                 deadlineIndicator.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 deadlineIndicator.addMouseListener(new MouseAdapter() {
                     @Override
@@ -657,7 +657,7 @@ public class TaskSelf {
             if (getTimeRemaining() == 1) {
                 signalEveNotice();
             }
-            final int residue = Globals.DAY_IN_MILLI - MDate.getTimeValue(new Date());
+            final int residue = Globals.DAY - MDate.getTimeValue(new Date());
             this.initializeTimer(residue);
         }
 
@@ -689,7 +689,7 @@ public class TaskSelf {
                         new KLabel("M", valsFont), mField, Box.createRigidArea(new Dimension(20, 30)),
                         new KLabel("Y", valsFont), yField);
                 final KPanel deadLinePanel = new KPanel(new BorderLayout(), new Dimension(465, 35));
-                deadLinePanel.add(KPanel.wantDirectAddition(new KLabel("New Deadline", KFontFactory.createBoldFont(15))), BorderLayout.WEST);
+                deadLinePanel.add(new KPanel(new KLabel("New Deadline", KFontFactory.createBoldFont(15))), BorderLayout.WEST);
                 deadLinePanel.add(datesPanel,BorderLayout.EAST);
 
                 final KButton setButton = new KButton("Set");
@@ -848,7 +848,7 @@ public class TaskSelf {
                 removeButton.undress();
 
                 final KPanel namePanel = new KPanel(new BorderLayout(),new Dimension(480,30));
-                namePanel.add(KPanel.wantDirectAddition(nameLabel),BorderLayout.WEST);
+                namePanel.add(new KPanel(nameLabel),BorderLayout.WEST);
                 namePanel.add(removeButton, BorderLayout.EAST);
                 namePanel.setBackground(Color.WHITE);//except head and toe, the dialog is to be white
                 namePanel.getComponent(0).setBackground(Color.WHITE);
@@ -891,11 +891,11 @@ public class TaskSelf {
             this.isPending = true;
             this.title = eName;
             this.dateDue = eDate;
-            this.initializeTimer(Globals.DAY_IN_MILLI);
+            this.initializeTimer(Globals.DAY);
         }
 
         private void initializeTimer(int iDelay){
-            timer = new Timer(Globals.DAY_IN_MILLI,null);
+            timer = new Timer(Globals.DAY,null);
             timer.setInitialDelay(iDelay);
             timer.addActionListener(e -> {
                 final Calendar eveCalendar = Calendar.getInstance();
@@ -938,11 +938,11 @@ public class TaskSelf {
             this.stateIndicator = new KLabel("Pending : "+dateDue, KFontFactory.createBoldFont(16));
             this.stateIndicator.setOpaque(false);
 
-            this.eventLayer = new KPanel(new Dimension(1_000,30));//this is 30
+            this.eventLayer = new KPanel(1_000,30);//this is 30
             this.eventLayer.setLayout(new BorderLayout());
-            this.eventLayer.add(KPanel.wantDirectAddition(new KLabel(this.getTitle(), KFontFactory.createBoldFont(16), Color.BLUE)),
+            this.eventLayer.add(new KPanel(new KLabel(this.getTitle(), KFontFactory.createBoldFont(16), Color.BLUE)),
                     BorderLayout.WEST);
-            this.eventLayer.add(KPanel.wantDirectAddition(stateIndicator), BorderLayout.CENTER);
+            this.eventLayer.add(new KPanel(stateIndicator), BorderLayout.CENTER);
             this.eventLayer.add(canceller, BorderLayout.EAST);
         }
 
@@ -1001,25 +1001,27 @@ public class TaskSelf {
             if (MDate.sameDay(eveCalendar.getTime(), new Date())) {
                 signalEveNotice();
             }
-            final int residue = Globals.DAY_IN_MILLI - MDate.getTimeValue(new Date());
+            final int residue = Globals.DAY - MDate.getTimeValue(new Date());
             this.initializeTimer(residue);
         }
     }
 
 
     public static void serializeAll(){
-        System.out.print("Serializing tasks... ");
-        MyClass.serialize(TasksGenerator.TodoHandler.TODOS, "todos.ser");
-        MyClass.serialize(TasksGenerator.ProjectsHandler.PROJECTS, "projects.ser");
-        MyClass.serialize(TasksGenerator.AssignmentsHandler.ASSIGNMENTS, "assignments.ser");
-        MyClass.serialize(TasksGenerator.EventsHandler.EVENTS, "events.ser");
+        System.out.print("Serializing Tasks... ");
+        Serializer.toDisk(TasksGenerator.TodoHandler.TODOS, "todos.ser");
+        Serializer.toDisk(TasksGenerator.ProjectsHandler.PROJECTS, "projects.ser");
+        Serializer.toDisk(TasksGenerator.AssignmentsHandler.ASSIGNMENTS, "assignments.ser");
+        Serializer.toDisk(TasksGenerator.EventsHandler.EVENTS, "events.ser");
         System.out.println("Completed.");
     }
 
     public static void deSerializeAll(){
-        System.out.print("Deserializing tasks... ");
-        final ArrayList<TodoSelf> savedTasks = (ArrayList) MyClass.deserialize("todos.ser");
-        if (savedTasks != null) {
+        System.out.print("Deserializing Tasks... ");
+        final ArrayList<TodoSelf> savedTasks = (ArrayList) Serializer.fromDisk("todos.ser");
+        if (savedTasks == null) {
+            System.err.println("Error reading TODO Tasks;");
+        } else {
             for (TodoSelf todoSelf : savedTasks) {
                 if (todoSelf.isActive) {//This only means it slept alive - we're to check if it's to wake alive or not
                     if (new Date().before(MDate.parse(todoSelf.dateExpectedToComplete))) {
@@ -1033,8 +1035,10 @@ public class TaskSelf {
             }
         }
 
-        final ArrayList<ProjectSelf> savedProjects = (ArrayList) MyClass.deserialize("projects.ser");
-        if (savedProjects != null) {
+        final ArrayList<ProjectSelf> savedProjects = (ArrayList) Serializer.fromDisk("projects.ser");
+        if (savedProjects == null) {
+            System.err.println("Error reading Projects;");
+        } else {
             for (ProjectSelf projectSelf : savedProjects) {
                 if (projectSelf.isLive) {
                     if (new Date().before(MDate.parse(projectSelf.dateExpectedToComplete))) {
@@ -1051,8 +1055,10 @@ public class TaskSelf {
             }
         }
 
-        final ArrayList<AssignmentSelf> savedAssignments = (ArrayList) MyClass.deserialize("assignments.ser");
-        if (savedAssignments != null) {
+        final ArrayList<AssignmentSelf> savedAssignments = (ArrayList) Serializer.fromDisk("assignments.ser");
+        if (savedAssignments == null) {
+            System.err.println("Error reading Assignments;");
+        } else {
             for (AssignmentSelf assignmentSelf : savedAssignments) {
                 if (assignmentSelf.isOn) {
                     if (MDate.parse(MDate.formatDateOnly(new Date())+" 0:0:0").before(MDate.parse(assignmentSelf.deadLine+" 0:0:0"))) {
@@ -1066,8 +1072,10 @@ public class TaskSelf {
             }
         }
 
-        final ArrayList<EventSelf> savedEvents = (ArrayList) MyClass.deserialize("events.ser");
-        if (savedEvents != null) {
+        final ArrayList<EventSelf> savedEvents = (ArrayList) Serializer.fromDisk("events.ser");
+        if (savedEvents == null) {
+            System.err.println("Error reading Evevnts;");
+        } else {
             for (EventSelf eventSelf : savedEvents) {
                 if (eventSelf.isPending) {
                     if (MDate.parse(MDate.formatDateOnly(new Date()) + " 0:0:0").before(MDate.parse(eventSelf.dateDue + " 0:0:0"))) {

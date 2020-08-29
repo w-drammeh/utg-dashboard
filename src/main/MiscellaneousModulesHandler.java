@@ -166,7 +166,7 @@ public class MiscellaneousModulesHandler {
             this.semestersBox = new JComboBox<>(new String[] {Student.FIRST_SEMESTER, Student.SECOND_SEMESTER, Student.SUMMER_SEMESTER});
             semestersBox.setFont(KFontFactory.createPlainFont(15));
             semesterPanel.removeLastChild();
-            semesterPanel.add(KPanel.wantDirectAddition(this.semestersBox), BorderLayout.CENTER);
+            semesterPanel.add(new KPanel(this.semestersBox), BorderLayout.CENTER);
 
             actionButton.removeActionListener(actionButton.getActionListeners()[0]);
             actionButton.addActionListener(additionListener());

@@ -9,14 +9,14 @@ import java.util.List;
 /**
  * The course model with almost all the concrete attributes of a course.
  * It has a generalized constructor, passing all the fields at that very instance of creation.
- * A course may be verified in only two ways: those that are provided to the Memory type by
- * PrePortal are automatically "verified" set; those that are put into the table by the
+ * A course may be verified in two ways: those that are provided to the main.Memory type by
+ * main.PrePortal are automatically "verified" set; those that are put into the table by the
  * user can be verified through the Portal.
  */
 public class Course {
     /*
      * And this is how they're passed to the constructor. This order should remain religious
-     * for backward-compatibility sake and de-serialization.
+     * for backward-compatibility and de-serialization sake.
      */
     private String year;
     private String semester;
@@ -45,11 +45,11 @@ public class Course {
     /**
      * The unknown constant
      */
-    public static final String UNKNOWN = "Unknown";
+    public static final String UNKNOWN = Globals.UNKNOWN;
     /**
      * For separating multiple values in a single line serial data.
      */
-    public static final String VALUE_SEPARATOR = "::";
+    public static final String VALUE_SEPARATOR = "<>";
 
 
     /**
@@ -149,7 +149,6 @@ public class Course {
         } else if (score > 89 && score < 101) {
             grade = "A+";//90-100, 4.3
         }
-
         return grade;
     }
 
@@ -492,56 +491,56 @@ public class Course {
         final Font valueFont = KFontFactory.createPlainFont(15);
 
         final KPanel codePanel = new KPanel(new BorderLayout());
-        codePanel.add(KPanel.wantDirectAddition(new KLabel("Code:",hintFont)),BorderLayout.WEST);
-        codePanel.add(KPanel.wantDirectAddition(new KLabel(course.getCode(),valueFont)),BorderLayout.CENTER);
+        codePanel.add(new KPanel(new KLabel("Code:",hintFont)),BorderLayout.WEST);
+        codePanel.add(new KPanel(new KLabel(course.getCode(),valueFont)),BorderLayout.CENTER);
 
         final KPanel namePanel = new KPanel(new BorderLayout());
-        namePanel.add(KPanel.wantDirectAddition(new KLabel("Name:",hintFont)),BorderLayout.WEST);
-        namePanel.add(KPanel.wantDirectAddition(new KLabel(course.getName(),valueFont)),BorderLayout.CENTER);
+        namePanel.add(new KPanel(new KLabel("Name:",hintFont)),BorderLayout.WEST);
+        namePanel.add(new KPanel(new KLabel(course.getName(),valueFont)),BorderLayout.CENTER);
 
         final KPanel lectPanel = new KPanel(new BorderLayout());
-        lectPanel.add(KPanel.wantDirectAddition(new KLabel("Tutor:",hintFont)),BorderLayout.WEST);
-        lectPanel.add(KPanel.wantDirectAddition(new KLabel(course.getLecturer(),valueFont)),BorderLayout.CENTER);
+        lectPanel.add(new KPanel(new KLabel("Tutor:",hintFont)),BorderLayout.WEST);
+        lectPanel.add(new KPanel(new KLabel(course.getLecturer(),valueFont)),BorderLayout.CENTER);
 
         final KPanel yearPanel = new KPanel(new BorderLayout());
-        yearPanel.add(KPanel.wantDirectAddition(new KLabel("Academic Year:",hintFont)),BorderLayout.WEST);
-        yearPanel.add(KPanel.wantDirectAddition(new KLabel(course.getYear(),valueFont)),BorderLayout.CENTER);
+        yearPanel.add(new KPanel(new KLabel("Academic Year:",hintFont)),BorderLayout.WEST);
+        yearPanel.add(new KPanel(new KLabel(course.getYear(),valueFont)),BorderLayout.CENTER);
 
         final KPanel semesterPanel = new KPanel(new BorderLayout());
-        semesterPanel.add(KPanel.wantDirectAddition(new KLabel("Semester:",hintFont)),BorderLayout.WEST);
-        semesterPanel.add(KPanel.wantDirectAddition(new KLabel(course.getSemester(),valueFont)),BorderLayout.CENTER);
+        semesterPanel.add(new KPanel(new KLabel("Semester:",hintFont)),BorderLayout.WEST);
+        semesterPanel.add(new KPanel(new KLabel(course.getSemester(),valueFont)),BorderLayout.CENTER);
 
         final KPanel typePanel = new KPanel(new BorderLayout());
-        typePanel.add(KPanel.wantDirectAddition(new KLabel("Requirement:",hintFont)),BorderLayout.WEST);
-        typePanel.add(KPanel.wantDirectAddition(new KLabel(course.getRequirement(),valueFont)),BorderLayout.CENTER);
+        typePanel.add(new KPanel(new KLabel("Requirement:",hintFont)),BorderLayout.WEST);
+        typePanel.add(new KPanel(new KLabel(course.getRequirement(),valueFont)),BorderLayout.CENTER);
 
         final KPanel schedulePanel = new KPanel(new BorderLayout());
-        schedulePanel.add(KPanel.wantDirectAddition(new KLabel("Schedule:",hintFont)),BorderLayout.WEST);
-        schedulePanel.add(KPanel.wantDirectAddition(new KLabel(course.schedule(),valueFont)),BorderLayout.CENTER);
+        schedulePanel.add(new KPanel(new KLabel("Schedule:",hintFont)),BorderLayout.WEST);
+        schedulePanel.add(new KPanel(new KLabel(course.schedule(),valueFont)),BorderLayout.CENTER);
 
         final KPanel venuePanel = new KPanel(new BorderLayout());
-        venuePanel.add(KPanel.wantDirectAddition(new KLabel("Venue:",hintFont)),BorderLayout.WEST);
-        venuePanel.add(KPanel.wantDirectAddition(new KLabel(course.getVenue(),valueFont)),BorderLayout.CENTER);
+        venuePanel.add(new KPanel(new KLabel("Venue:",hintFont)),BorderLayout.WEST);
+        venuePanel.add(new KPanel(new KLabel(course.getVenue(),valueFont)),BorderLayout.CENTER);
 
         final KPanel creditPanel = new KPanel(new BorderLayout());
-        creditPanel.add(KPanel.wantDirectAddition(new KLabel("Credit Hours:",hintFont)),BorderLayout.WEST);
-        creditPanel.add(KPanel.wantDirectAddition(new KLabel(course.getCreditHours()+"",valueFont)),BorderLayout.CENTER);
+        creditPanel.add(new KPanel(new KLabel("Credit Hours:",hintFont)),BorderLayout.WEST);
+        creditPanel.add(new KPanel(new KLabel(course.getCreditHours()+"",valueFont)),BorderLayout.CENTER);
 
         final KPanel scorePanel = new KPanel(new BorderLayout());
-        scorePanel.add(KPanel.wantDirectAddition(new KLabel("Final Score:",hintFont)),BorderLayout.WEST);
-        scorePanel.add(KPanel.wantDirectAddition(new KLabel(course.getScore()+"",valueFont)),BorderLayout.CENTER);
+        scorePanel.add(new KPanel(new KLabel("Final Score:",hintFont)),BorderLayout.WEST);
+        scorePanel.add(new KPanel(new KLabel(course.getScore()+"",valueFont)),BorderLayout.CENTER);
 
         final KPanel gradePanel = new KPanel(new BorderLayout());
-        gradePanel.add(KPanel.wantDirectAddition(new KLabel("Grade:",hintFont)),BorderLayout.WEST);
-        gradePanel.add(KPanel.wantDirectAddition(new KLabel(course.getGrade()+"  ["+course.getGradeComment()+"]",valueFont)),BorderLayout.CENTER);
+        gradePanel.add(new KPanel(new KLabel("Grade:",hintFont)),BorderLayout.WEST);
+        gradePanel.add(new KPanel(new KLabel(course.getGrade()+"  ["+course.getGradeComment()+"]",valueFont)),BorderLayout.CENTER);
 
         final KPanel gradeValuePanel = new KPanel(new BorderLayout());
-        gradeValuePanel.add(KPanel.wantDirectAddition(new KLabel("Grade Value:",hintFont)),BorderLayout.WEST);
-        gradeValuePanel.add(KPanel.wantDirectAddition(new KLabel(course.getQualityPoint()+"",valueFont)),BorderLayout.CENTER);
+        gradeValuePanel.add(new KPanel(new KLabel("Grade Value:",hintFont)),BorderLayout.WEST);
+        gradeValuePanel.add(new KPanel(new KLabel(course.getQualityPoint()+"",valueFont)),BorderLayout.CENTER);
 
         final KPanel statusPanel = new KPanel(new BorderLayout());
-        statusPanel.add(KPanel.wantDirectAddition(new KLabel("Status:",hintFont)),BorderLayout.WEST);
-        statusPanel.add(KPanel.wantDirectAddition(new KLabel(course.isVerified() ? "Confirmed" : "Unverified",valueFont,course.isVerified() ? Color.BLUE : Color.RED)),BorderLayout.CENTER);
+        statusPanel.add(new KPanel(new KLabel("Status:",hintFont)),BorderLayout.WEST);
+        statusPanel.add(new KPanel(new KLabel(course.isVerified() ? "Confirmed" : "Unverified",valueFont,course.isVerified() ? Color.BLUE : Color.RED)),BorderLayout.CENTER);
 
         final KButton closeButton = new KButton("Close");
         closeButton.addActionListener(e -> exhibitDialog.dispose());

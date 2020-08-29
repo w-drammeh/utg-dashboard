@@ -172,7 +172,7 @@ public class SummerModulesHandler {
                     Student.thirdAcademicYear(), Student.finalAcademicYear()});
             availableYearsBox.setFont(KFontFactory.createPlainFont(15));
             yearPanel.removeLastChild();
-            yearPanel.add(KPanel.wantDirectAddition(availableYearsBox), BorderLayout.CENTER);
+            yearPanel.add(new KPanel(availableYearsBox), BorderLayout.CENTER);
 
             actionButton.removeActionListener(actionButton.getActionListeners()[0]);
             actionButton.addActionListener(additionListener());

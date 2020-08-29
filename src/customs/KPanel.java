@@ -21,49 +21,30 @@ public class KPanel extends JPanel implements Preference {
         this.setPreferences();
     }
 
-    public KPanel(Dimension d) {
-        super();
-        this.setPreferredSize(d);
-        this.setPreferences();
-    }
-
-    public KPanel(int pWidth, int pHeight){
-        this(new Dimension(pWidth, pHeight));
+    public KPanel(int width, int height){
+        this();
+        this.setPreferredSize(new Dimension(width, height));
     }
 
     public KPanel(LayoutManager layout, Dimension dimension) {
-        super(layout);
+        this(layout);
         this.setPreferredSize(dimension);
-        this.setPreferences();
+    }
+
+    public KPanel(Component... directComponents){
+        this();
+        this.addAll(directComponents);
     }
 
     /**
-     * A convenient way of calling wantDirectAddition(null, null, directComponent).
-     * Still respecting the default-layout, this will add all the directComponents
-     * to the returned-instance.
-     * Notice that the ability of this call to accept multiple param-components
-     * will minimize declaration of panels for the sake of holding multiple components
-     * instead of direct-addition.
-     */
-    public static KPanel wantDirectAddition(Component... directComponents){
-        final KPanel panel = new KPanel();
-        for (Component comp : directComponents) {
-            panel.add(comp);
-        }
-        return panel;
-    }
-
-    /**
-     * The layout and the dimension can be specified. If the layout is null, it uses the default Flow;
+     * The layout and the dimension can be specified.
+     * If the layout is null, uses the default Flow;
      * If the dimension is null, UI is asked, off course.
-     * If you have the intention of using both params null, then use the alternative over-loaded call.
      */
     public static KPanel wantDirectAddition(LayoutManager layout, Dimension dimension, JComponent... directComponents){
-        final KPanel kPanel = new KPanel(layout == null ? new FlowLayout(FlowLayout.CENTER) : layout);
+        final KPanel kPanel = new KPanel(layout == null ? new FlowLayout() : layout);
         kPanel.setPreferredSize(dimension);
-        for (JComponent directComponent : directComponents) {
-            kPanel.add(directComponent);
-        }
+        kPanel.addAll(directComponents);
         return kPanel;
     }
 
@@ -80,14 +61,14 @@ public class KPanel extends JPanel implements Preference {
      * layouts; especially, the beloved 'Border'. However, very useful under certain other
      * beloved layouts like 'Flow', and 'Box'.
      */
-    public void addAll(Component ... list) {
+    public void addAll(Component... list) {
         for (Component c : list) {
             this.add(c);
         }
     }
 
     public void setPreferences() {
-        this.setBackground(SettingsCore.currentBackground());//Since some are created at runtime
+        this.setBackground(SettingsCore.currentBackground());//since some are created at runtime
         ALL_PANELS.add(this);
     }
 

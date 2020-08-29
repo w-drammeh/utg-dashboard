@@ -14,18 +14,19 @@ import java.awt.event.KeyEvent;
 public class KTextField extends JTextField implements Preference {
 
 
+    public KTextField(){
+        super();
+        this.setPreferences();
+    }
+
     public KTextField(String initial){
 	    super(initial);
 	    this.setPreferences();
     }
 
-    public KTextField(){
-        this("");
-    }
-
-    public KTextField(Dimension d){
+    public KTextField(Dimension preferredSize){
         this();
-        this.setPreferredSize(d);
+        this.setPreferredSize(preferredSize);
     }
 
     /**
@@ -97,9 +98,9 @@ public class KTextField extends JTextField implements Preference {
     }
 
     public void setPreferences() {
-        this.setFont(KFontFactory.createPlainFont(15));
         this.setAutoscrolls(true);
         this.setHorizontalAlignment(SwingConstants.CENTER);
+        this.setFont(KFontFactory.createPlainFont(15));
     }
 
 }

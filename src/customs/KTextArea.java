@@ -18,7 +18,7 @@ public class KTextArea extends JTextArea implements Preference {
     /**
      * Use a TextArea with limited character entry as specified by the limit-param.
      */
-    public static KTextArea limitedEntry(int limit){
+    public static KTextArea getLimitedEntryArea(int limit){
         final KTextArea controlArea = new KTextArea();
         controlArea.addKeyListener(new KeyAdapter() {
             @Override

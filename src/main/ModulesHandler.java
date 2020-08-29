@@ -573,25 +573,6 @@ public class ModulesHandler {
         t.getColumnModel().getColumn(3).setPreferredWidth(50);
     }
 
-    public static void serializeData(){
-        System.out.print("Serializing all modules... ");
-        final String[] allCourses = new String[modulesMonitor.size()];
-        for (int i = 0; i < allCourses.length; i++) {
-            allCourses[i] = modulesMonitor.get(i).exportContent();
-        }
-        MyClass.serialize(allCourses, "allCourses.ser");
-        System.out.println("Completed.");
-    }
-
-    public static void deserializeData(){
-        System.out.print("Deserializing all modules... ");
-        final String[] allCourses = (String[]) MyClass.deserialize("allCourses.ser");
-        for (String line : allCourses) {
-            modulesMonitor.add(Course.importFromSerial(line));
-        }
-        System.out.println("Completed.");
-    }
-
     public JComponent presentForYearOne(){
         return new YearOneHandler().getPresent();
     }
@@ -803,13 +784,13 @@ public class ModulesHandler {
                 }
             });
 
-            final KPanel present = new KPanel(new Dimension(825,540));
+            final KPanel present = new KPanel(825,540);
             present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
+            present.add(new KPanel(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane1);
             present.add(Box.createVerticalStrut(30));
-            present.add(KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
+            present.add(new KPanel(new KSeparator(new Dimension(800,1), Color.BLACK)));
+            present.add(new KPanel(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane2);
             present.add(Box.createVerticalStrut(15));
             return present;
@@ -1020,13 +1001,13 @@ public class ModulesHandler {
                 }
             });
 
-            final KPanel present = new KPanel(new Dimension(825,540));
+            final KPanel present = new KPanel(825,540);
             present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
+            present.add(new KPanel(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane3);
             present.add(Box.createVerticalStrut(30));
-            present.add(KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
+            present.add(new KPanel(new KSeparator(new Dimension(800,1),Color.BLACK)));
+            present.add(new KPanel(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane4);
             present.add(Box.createVerticalStrut(15));
             return present;
@@ -1237,13 +1218,13 @@ public class ModulesHandler {
                 }
             });
 
-            final KPanel present = new KPanel(new Dimension(825,540));
+            final KPanel present = new KPanel(825,540);
             present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
+            present.add(new KPanel(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane5);
             present.add(Box.createVerticalStrut(30));
-            present.add(KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
+            present.add(new KPanel(new KSeparator(new Dimension(800,1),Color.BLACK)));
+            present.add(new KPanel(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane6);
             present.add(Box.createVerticalStrut(15));
             return present;
@@ -1458,13 +1439,13 @@ public class ModulesHandler {
                 }
             });
 
-            final KPanel present = new KPanel(new Dimension(825,540));
+            final KPanel present = new KPanel(825,540);
             present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
+            present.add(new KPanel(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane7);
             present.add(Box.createVerticalStrut(30));
-            present.add(KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
+            present.add(new KPanel(new KSeparator(new Dimension(800,1),Color.BLACK)));
+            present.add(new KPanel(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
             present.add(scrollPane8);
             present.add(Box.createVerticalStrut(15));
             return present;
@@ -1516,31 +1497,31 @@ public class ModulesHandler {
             yearField.setText(yearName);
             yearField.setEditable(yearName == null);
             yearPanel = new KPanel(new BorderLayout());
-            yearPanel.add(KPanel.wantDirectAddition(new KLabel("Year:",hintFont)),BorderLayout.WEST);
-            yearPanel.add(KPanel.wantDirectAddition(yearField),BorderLayout.CENTER);
+            yearPanel.add(new KPanel(new KLabel("Year:",hintFont)),BorderLayout.WEST);
+            yearPanel.add(new KPanel(yearField),BorderLayout.CENTER);
 
             semesterField = new KTextField(new Dimension(200,30));
             semesterField.setText(semesterName);
             semesterField.setEditable(semesterName == null);
             semesterPanel = new KPanel(new BorderLayout());
-            semesterPanel.add(KPanel.wantDirectAddition(new KLabel("Semester:",hintFont)),BorderLayout.WEST);
-            semesterPanel.add(KPanel.wantDirectAddition(semesterField),BorderLayout.CENTER);
+            semesterPanel.add(new KPanel(new KLabel("Semester:",hintFont)),BorderLayout.WEST);
+            semesterPanel.add(new KPanel(semesterField),BorderLayout.CENTER);
 
             codeField = KTextField.rangeControlField(10);
             codeField.setPreferredSize(new Dimension(125,30));
             final KPanel codePanel = new KPanel(new BorderLayout());
-            codePanel.add(KPanel.wantDirectAddition(new KLabel("Code:",hintFont)),BorderLayout.WEST);
-            codePanel.add(KPanel.wantDirectAddition(codeField),BorderLayout.CENTER);
+            codePanel.add(new KPanel(new KLabel("Code:",hintFont)),BorderLayout.WEST);
+            codePanel.add(new KPanel(codeField),BorderLayout.CENTER);
 
             nameField = new KTextField(new Dimension(300,30));
             final KPanel namePanel = new KPanel(new BorderLayout());
-            namePanel.add(KPanel.wantDirectAddition(new KLabel("Name:",hintFont)),BorderLayout.WEST);
-            namePanel.add(KPanel.wantDirectAddition(nameField),BorderLayout.CENTER);
+            namePanel.add(new KPanel(new KLabel("Name:",hintFont)),BorderLayout.WEST);
+            namePanel.add(new KPanel(nameField),BorderLayout.CENTER);
 
             lecturerField = new KTextField(new Dimension(300,30));
             final KPanel lecturerPanel = new KPanel(new BorderLayout());
-            lecturerPanel.add(KPanel.wantDirectAddition(new KLabel("Lecturer:",hintFont)),BorderLayout.WEST);
-            lecturerPanel.add(KPanel.wantDirectAddition(lecturerField),BorderLayout.CENTER);
+            lecturerPanel.add(new KPanel(new KLabel("Lecturer:",hintFont)),BorderLayout.WEST);
+            lecturerPanel.add(new KPanel(lecturerField),BorderLayout.CENTER);
 
             dayBox = new JComboBox<>(Course.getWeekDays());
             dayBox.setFont(KFontFactory.createPlainFont(15));
@@ -1552,27 +1533,27 @@ public class ModulesHandler {
 
             venueField = new KTextField(new Dimension(300,30));
             final KPanel venuePanel = new KPanel(new BorderLayout());
-            venuePanel.add(KPanel.wantDirectAddition(new KLabel("Venue:",hintFont)),BorderLayout.WEST);
-            venuePanel.add(KPanel.wantDirectAddition(venueField),BorderLayout.CENTER);
+            venuePanel.add(new KPanel(new KLabel("Venue:",hintFont)),BorderLayout.WEST);
+            venuePanel.add(new KPanel(venueField),BorderLayout.CENTER);
 
             requirementBox = new JComboBox<>(Course.availableCourseRequirements());
             requirementBox.setFont(KFontFactory.createPlainFont(15));
             requirementBox.setSelectedItem(Course.NONE);
             final KPanel requirementPanel = new KPanel(new BorderLayout());
-            requirementPanel.add(KPanel.wantDirectAddition(new KLabel("Requirement:",hintFont)),BorderLayout.WEST);
-            requirementPanel.add(KPanel.wantDirectAddition(requirementBox),BorderLayout.CENTER);
+            requirementPanel.add(new KPanel(new KLabel("Requirement:",hintFont)),BorderLayout.WEST);
+            requirementPanel.add(new KPanel(requirementBox),BorderLayout.CENTER);
 
             creditBox = new JComboBox<>(Course.availableCreditHours());
             creditBox.setFont(KFontFactory.createPlainFont(15));
             final KPanel creditPanel = new KPanel(new BorderLayout());
-            creditPanel.add(KPanel.wantDirectAddition(new KLabel("Credit Hours:",hintFont)),BorderLayout.WEST);
-            creditPanel.add(KPanel.wantDirectAddition(creditBox),BorderLayout.CENTER);
+            creditPanel.add(new KPanel(new KLabel("Credit Hours:",hintFont)),BorderLayout.WEST);
+            creditPanel.add(new KPanel(creditBox),BorderLayout.CENTER);
 
             scoreField = KTextField.rangeControlField(7);
             scoreField.setPreferredSize(new Dimension(125,30));
             final KPanel scorePanel = new KPanel(new BorderLayout());
-            scorePanel.add(KPanel.wantDirectAddition(new KLabel("Score:",hintFont)),BorderLayout.WEST);
-            scorePanel.add(KPanel.wantDirectAddition(scoreField),BorderLayout.CENTER);
+            scorePanel.add(new KPanel(new KLabel("Score:",hintFont)),BorderLayout.WEST);
+            scorePanel.add(new KPanel(scoreField),BorderLayout.CENTER);
 
             final KButton cancelButton = new KButton("Cancel");
             cancelButton.addActionListener(e -> ModuleAdder.this.dispose());
@@ -1738,6 +1719,30 @@ public class ModulesHandler {
                 }
             };
         }
+    }
+
+
+    public static void serializeData(){
+        System.out.print("Serializing Modules... ");
+        final String[] allCourses = new String[modulesMonitor.size()];
+        for (int i = 0; i < allCourses.length; i++) {
+            allCourses[i] = modulesMonitor.get(i).exportContent();
+        }
+        Serializer.toDisk(allCourses, "allCourses.ser");
+        System.out.println("Completed.");
+    }
+
+    public static void deserializeData(){
+        System.out.print("Deserializing Modules... ");
+        final String[] allCourses = (String[]) Serializer.fromDisk("allCourses.ser");
+        if (allCourses == null) {
+            System.err.println("Unsuccessful.");
+            return;
+        }
+        for (String line : allCourses) {
+            modulesMonitor.add(Course.importFromSerial(line));
+        }
+        System.out.println("Completed successfully.");
     }
 
 }

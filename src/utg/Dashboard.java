@@ -7,28 +7,26 @@ import java.io.File;
 
 /**
  * @author Muhammed W. Drammeh
- *
  * This is the actual runner type.
- * In a nutshell, it may read from a serializable state if existed, or triggers a new instance if not -
+ * In a nutshell, it reads from a serializable state if existed, or triggers a new instance if not -
  * or otherwise found inconsistent.
- *
  * This class defines the normal process-flow of the Dashboard. Please read the logic.txt file.
  */
 public class Dashboard {
-    private static Preview preview = new Preview(null);
-    public static final String VERSION = "1.1.5";
+    private static final Preview PREVIEW = new Preview(null);
+    public static final String VERSION = "1.2.2";
     private static boolean isFirst;
 
 
     public static void main(String[] args) {
-        preview.setVisible(true);
-        final Object recentUser = MyClass.deserialize("userName.ser");
+        PREVIEW.setVisible(true);
+        final Object recentUser = Serializer.fromDisk("userName.ser");
         if (recentUser == null) {
-            final File coreFile = new File(MyClass.serialsDir + MyClass.fileSeparator + "core.ser");
+            final File coreFile = new File(Serializer.SERIALS_DIR + Serializer.FILE_SEPARATOR + "core.ser");
             if (coreFile.exists()) {
                 verifyUser(true);
             } else {
-                forgeNew();
+                freshStart();
             }
         } else {
             final String immediateUser = System.getProperty("user.name");
@@ -40,107 +38,72 @@ public class Dashboard {
         }
     }
 
-    private static void forgeNew(){
+    private static void freshStart(){
         isFirst = true;
-        new Thread(()-> {
-            Student.reset();
-            PrePortal.startFixingDriver();
-        }).start();
+        new Thread(PrePortal::startFixingDriver).start();
         final Welcome welcome = new Welcome();
-        SwingUtilities.invokeLater(() -> {
-            preview.dispose();
+        SwingUtilities.invokeLater(()-> {
+            PREVIEW.dispose();
             welcome.setVisible(true);
+            welcome.getScrollPane().toTop();
         });
     }
 
     private static void verifyUser(boolean deserialize){
         if (deserialize) {
-            Student.reset();
             try {
                 Student.deserializeData();
-            } catch (Exception e) {
-                App.silenceException(e);
-                forgeNew();
+            } catch (NullPointerException nullException) {
+                App.silenceException(nullException);
+                freshStart();
                 return;
             }
         }
 
-        preview.setVisible(false);
-        final String matNumber = constantlyRequestInput();
+        PREVIEW.setVisible(false);
+        final String matNumber = requestInput();
         if (matNumber.equals(String.valueOf(Student.getMatNumber()))) {
+            PREVIEW.setVisible(true);
             rebuildNow(false);
         } else {
-            App.signalError(preview, "Error", "That Matriculation Number is incorrect. Try again.");
+            App.signalError(PREVIEW, "Error", "Wrong Matriculation Number. Please try again.");
             verifyUser(false);
         }
     }
 
-    private static String constantlyRequestInput(){
-        final String input = App.requestInput(preview, "UTG Dashboard", "This Dashboard belongs to "+Student.getFullNamePostOrder()+".\n" +
-                "Please enter your Matriculation Number:");
+//    constantly requests the input, actually
+    private static String requestInput(){
+        final String userName = Student.getFullNamePostOrder();
+        final String input = App.requestInput(PREVIEW, "UTG Dashboard", "This Dashboard belongs to "+userName+".\n" +
+                "Please enter your Matriculation Number to confirm:");
         if (input == null) {
             System.exit(0);
         }
-        return Globals.hasText(input) ? input : constantlyRequestInput();
+        return Globals.hasText(input) ? input : requestInput();
     }
 
     private static void rebuildNow(boolean deserialize){
         if (deserialize) {
-            Student.reset();
             try {
                 Student.deserializeData();
-            } catch (Exception e) {
-                App.silenceException(e);
-                forgeNew();
+            } catch (NullPointerException nullException) {
+                App.silenceException(nullException);
+                freshStart();
                 return;
             }
-        } else {
-            preview.setVisible(true);
         }
 
-        try {
-            SettingsCore.deSerialize();
-        } catch (Exception e) {
-            App.silenceException(e);
-        }
-        try {
-            Portal.deSerialize();
-        } catch (Exception e) {
-            App.silenceException(e);
-        }
-        try {
-            NewsGenerator.deSerializeData();
-        } catch (Exception e) {
-            App.silenceException(e);
-        }
+        SettingsCore.deSerialize();
+        Portal.deSerialize();
+        NewsGenerator.deSerializeData();
         SwingUtilities.invokeLater(()-> {
             final Board lastBoard = new Board();
-            try {
-                SettingsUI.deSerialize();
-            } catch (Exception e) {
-                App.silenceException(e);
-            }
-            try {
-                RunningCoursesGenerator.deserializeModules();
-            } catch (Exception e) {
-                App.silenceException(e);
-            }
-            try {
-                ModulesHandler.deserializeData();
-            } catch (Exception e) {
-                App.silenceException(e);
-            }
-            try {
-                TaskSelf.deSerializeAll();
-            } catch (Exception e) {
-                App.silenceException(e);
-            }
-            try {
-                Notification.deSerializeAll();
-            } catch (Exception e) {
-                App.silenceException(e);
-            }
-            preview.dispose();
+            SettingsUI.deSerialize();
+            RunningCoursesGenerator.deserializeModules();
+            ModulesHandler.deserializeData();
+            TaskSelf.deSerializeAll();
+            Notification.deSerializeAll();
+            PREVIEW.dispose();
             lastBoard.setVisible(true);
         });
     }

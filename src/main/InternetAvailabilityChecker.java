@@ -6,8 +6,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 /**
- * A class which is lucky that its functionality is not integrated in other types.
- * It is purposely meant for checking the availability of the internet. The algorithm is "rough".
+ * A class which is lucky its functionality is not integrated in other types.
+ * It is purposely meant for checking the availability of the internet.
+ * This algorithm is "rough"!
  */
 public class InternetAvailabilityChecker {
 
@@ -17,7 +18,7 @@ public class InternetAvailabilityChecker {
      */
     public static boolean isInternetAvailable(){
         try {
-            return isHostAvailable("utg.gm") || isHostAvailable("google.com") ||
+            return isHostAvailable("google.com") || isHostAvailable("utg.gm") ||
                     isHostAvailable("facebook.com");
         } catch (IOException e) {
             return false;

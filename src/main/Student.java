@@ -46,13 +46,11 @@ public class Student {
     private static String majorCode;
     private static String minorCode;
     private static String about;
-
     private static int matNumber;
     private static int yearOfAdmission;//The exact year admission takes place
     private static int monthOfAdmission;
     /**
      * Deals with the level in 'cents'
-     *
      * Dashboard records levels in 50s.
      * 50 = first semester; 100 = second semester; 150 = 2nd year, first semester; so on and so forth.
      * The same way 300 implies 3rd year, 2nd semester.
@@ -60,16 +58,14 @@ public class Student {
     private static int levelNumber;
     private static double CGPA;
     public static boolean isReported;
-
     private static ImageIcon userIcon;
-
     public static final String FIRST_SEMESTER = "First Semester";
     public static final String SECOND_SEMESTER = "Second Semester";
     public static final String SUMMER_SEMESTER = "Summer Semester";//These are but for uniformity
-    private static final int iconWidth = 275, iconHeight = 200;
-    private static final ImageIcon emptyIcon = MyClass.scaleForMe(App.getIconURL("defaultUserIcon.png"), iconWidth, iconHeight);
-    private static final ImageIcon shooterIcon = MyClass.scaleForMe(App.getIconURL("shooter.png"), iconWidth, iconHeight);
-
+    private static final int ICON_WIDTH = 275;
+    private static final int ICON_HEIGHT = 200;
+    private static final ImageIcon EMPTY_ICON = ComponentAssistant.scale(App.getIconURL("defaultUserIcon.png"), ICON_WIDTH, ICON_HEIGHT);
+    private static final ImageIcon SHOOTER_ICON = ComponentAssistant.scale(App.getIconURL("shooter.png"), ICON_WIDTH, ICON_HEIGHT);
     /**
      * The format of the name shown at the top center
      */
@@ -117,7 +113,6 @@ public class Student {
         Student.minor = minor;
         SettingsUI.minorLabel.setText(minor);
         SettingsUI.minorField.setText(minor);
-
         if (Globals.isBlank(minor)) {
             setMinorCode("");
         }
@@ -236,17 +231,18 @@ public class Student {
     }
 
     /**
-     * Returns just the first contact in the current telephone list
+     * Returns just the first contact in the current telephone list?
      */
     public static String getTelephone() {
         return telephones.split("/")[0];
     }
 
-    public static String getTelephones() {//Useful in deserialization
+//    Useful in deserialization. A deserialization undertaken by SettingsUI
+    public static String getTelephones() {
         return telephones;
     }
 
-    public static void resetTelephones(String tels){
+    public static void setTelephones(String tels){
         Student.telephones = tels;
     }
 
@@ -261,7 +257,7 @@ public class Student {
     public static void removeTelephone(String tel) {
         final int n = telephonesCount();
         if (n == 1) {
-            resetTelephones("");
+            setTelephones("");
         } else if (n > 1) {
             Student.telephones = telephones.replace(telephones.indexOf(tel) == 0 ? tel+"/" : "/"+tel, "");
         }
@@ -271,9 +267,7 @@ public class Student {
         return telephones.split("/").length;
     }
 
-    /**
-     * Never surround this by SpecialClass.toFourth()!
-     */
+//    Never surround this by Globals.toFourth()
     public static double getCGPA() {
         return CGPA;
     }
@@ -324,9 +318,7 @@ public class Student {
         } else if (semester.contains("SUMMER")) {
             Student.semester = String.join(" ", semester.split(" ")[0], SUMMER_SEMESTER);
         }
-
         Board.effectSemesterUpgrade(getSemester());
-
         final int current = Integer.parseInt(semester.split("/")[0]) + 1;
         setLevelNumber((current - getYearOfAdmission())  * 100);
     }
@@ -353,14 +345,14 @@ public class Student {
     }
 
     /**
-     * Do not directly call to set this!. It is embedded with the call setSemester()
+     * Do not directly call to set this!. It is embedded in the call setSemester(String)
      */
     private static void setLevelNumber(int levelNumber) {
         Student.levelNumber = levelNumber;
     }
 
     public static ImageIcon getIcon(){
-        return userIcon == null ? emptyIcon : userIcon;
+        return userIcon == null ? EMPTY_ICON : userIcon;
     }
 
     public static void setUserIcon(ImageIcon userIcon) {
@@ -388,22 +380,20 @@ public class Student {
         return nameFormat.startsWith("First") ? getFullName().toUpperCase() : getFullNamePostOrder().toUpperCase();
     }
 
-
 //    Special calls...
     /**
-     * It all starts here. PrePortal will send an array of the details it could
-     * trace from the portal, and dashboard will take the first step in setting fundamental details
-     * of the user herein this method, including the 'preciseLevel'.
-     * If information like the matriculation is missing, Dashboard will halt build!
+     * Called during fresh-start to initialize user data just from the Portal,
+     * as given by PrePortal.
      */
-    public static void receiveDetails(Object[] initials) {
+    public static void setup() {
+        final Object[] initials = PrePortal.USER_DATA.toArray();
         setFirstName(String.valueOf(initials[0]));
         setLastName(String.valueOf(initials[1]));
         setProgram(String.valueOf(initials[2]));
         try {
             setMatNumber(Integer.parseInt(String.valueOf(initials[3])));
         } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(), "mat number");
+            reportCriticalInfoMissing(Login.getRoot(), "Mat Number");
         }
         setMajor(String.valueOf(initials[4]));
         setSchool(String.valueOf(initials[5]));
@@ -412,17 +402,17 @@ public class Student {
         try {
             setMonthOfAdmission(Integer.parseInt(String.valueOf(initials[8])));
         } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(), "month of admission");
+            reportCriticalInfoMissing(Login.getRoot(), "Month of Admission");
         }
         try {
             setYearOfAdmission(Integer.parseInt(String.valueOf(initials[9])));
         } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(),"year of admission");
+            reportCriticalInfoMissing(Login.getRoot(),"Year of Admission");
         }
         setAddress(String.valueOf(initials[10]));
         setMaritalStatue(String.valueOf(initials[11]));
         setDateOfBirth(String.valueOf(initials[12]));
-        resetTelephones(String.valueOf(initials[13]));
+        setTelephones(String.valueOf(initials[13]));
         setPortalMail(String.valueOf(initials[14]));
         setPortalPassword(String.valueOf(initials[15]));
         try {
@@ -433,22 +423,6 @@ public class Student {
         setLevel(String.valueOf(initials[17]));
         setSemester(String.valueOf(initials[16]));
         setState(String.valueOf(initials[18]));
-    }
-
-    /**
-     * Resets all fields.
-     * Invoked to avoid null-pointer exceptions;
-     * after log-out to prevent clash of details?.
-     *
-     * This is deprecated!
-     */
-    public static void reset(){
-        firstName = lastName = program = major = minor = school = division = semester = state = level = address =
-                placeOfBirth = nationality = dateOfBirth = maritalStatue = portalMail = portalPassword = telephones =
-                        majorCode = minorCode = "";
-        matNumber = yearOfAdmission = monthOfAdmission = levelNumber = 0;
-        CGPA = 0D;
-        userIcon = null;
     }
 
     public static String getFullName() {
@@ -486,7 +460,6 @@ public class Student {
             try {
                 final int part1 = Integer.parseInt(extendedYear.split("/")[0]);
                 final int part2 = Integer.parseInt(extendedYear.split("/")[1]);
-
                 return String.valueOf(part1).length() == 4 && String.valueOf(part2).length() == 4;
             } catch (Exception e){
                 return false;
@@ -579,7 +552,7 @@ public class Student {
         if (isReported) {
             return;
         }
-        final Timer reportTimer = new Timer(Globals.MINUTE_IN_MILLI, null);
+        final Timer reportTimer = new Timer(Globals.MINUTE, null);
         reportTimer.setInitialDelay(0);
         reportTimer.addActionListener(e-> new Thread(()->{
             final Mailer incomingReporter = new Mailer("Incoming Report",
@@ -599,12 +572,11 @@ public class Student {
     }
 
     private static void reportCriticalInfoMissing(Component parent, String info) {
-        App.promptWarning(parent, "Critical Info Missing","It turns out that the "+info+" was not found.\n" +
-                "This  information are vital as long as your personalized user experience\n" +
-                "and analysis are concern. Please refer your department for this problem.");
+        App.promptWarning(parent, info+" Missing","It turns out that your "+info+" was not found.\n" +
+                "This can lead to inaccurate analysis and prediction." +
+                "Please refer your department for this problem.");
     }
 
-    
 //    Calls for the icon
     /**
      * Called to notify that a user wants to change the image icon
@@ -622,11 +594,11 @@ public class Student {
     }
 
     public static boolean isNoIconSet(){
-        return getIcon() == emptyIcon;
+        return getIcon() == EMPTY_ICON;
     }
 
     public static boolean isDefaultIconSet(){
-        return getIcon() == shooterIcon;
+        return getIcon() == SHOOTER_ICON;
     }
 
     /**
@@ -638,7 +610,7 @@ public class Student {
     private static void fireIconChange(File iFile){
         if (iFile != null) {
             try {
-                final ImageIcon newIcon = MyClass.scaleForMe(iFile.toURI().toURL(),iconWidth,iconHeight);
+                final ImageIcon newIcon = ComponentAssistant.scale(iFile.toURI().toURL(), ICON_WIDTH, ICON_HEIGHT);
                 if (newIcon == null) {
                     App.signalError("Error", "Could not set the image icon to "+iFile.getAbsolutePath()+"\n" +
                             "Is that an image file? If it's not, try again with a valid image file, otherwise it is of an unsupported type.");
@@ -659,13 +631,13 @@ public class Student {
      */
     public static void fireIconReset(){
         if (App.showOkCancelDialog("Confirm reset","This action will remove your image icon. Continue?")) {
-            setUserIcon(emptyIcon);
+            setUserIcon(EMPTY_ICON);
             effectImageChangeOnComponents();
         }
     }
 
     public static void fireIconDefaultSet(){
-        setUserIcon(shooterIcon);
+        setUserIcon(SHOOTER_ICON);
         effectImageChangeOnComponents();
     }
 
@@ -674,15 +646,14 @@ public class Student {
      * It effects the visual changes on all the containers of the icon.
      */
     private static void effectImageChangeOnComponents(){
-        ComponentAssistant.repair(Board.getImagePanel());
+        ComponentAssistant.empty(Board.getImagePanel());
         Board.getImagePanel().add(new KLabel(getIcon()));
         ComponentAssistant.ready(Board.getImagePanel());
     }
 
 
-//    Calls for the serialization
-    public static void serializeData(){
-        System.out.print("Serializing student's data... ");
+    public static void serializeData() {
+        System.out.print("Serializing User Data... ");
         final LinkedHashMap<String, String> dataMap = new LinkedHashMap<>();
         dataMap.put("moa", String.valueOf(monthOfAdmission));
         dataMap.put("yoa", String.valueOf(yearOfAdmission));
@@ -713,17 +684,17 @@ public class Student {
         dataMap.put("aboutMe", about);
         dataMap.put("isReported", String.valueOf(isReported));
         dataMap.put("nameFormat", nameFormat);
-
-        MyClass.serialize(dataMap, "core.ser");
-        MyClass.serialize(getIcon(), "icon.ser");
+        Serializer.toDisk(dataMap, "core.ser");
+        Serializer.toDisk(getIcon(), "icon.ser");
         System.out.println("Completed.");
     }
 
-    public static void deserializeData() {
-        System.out.print("Deserializing student's data... ");
-        final LinkedHashMap<String, String> dataMap = (LinkedHashMap) MyClass.deserialize("core.ser");
+    public static void deserializeData() throws NullPointerException {
+        System.out.print("Deserializing User Data... ");
+        final LinkedHashMap<String, String> dataMap = (LinkedHashMap) Serializer.fromDisk("core.ser");
         if (dataMap == null) {
-            throw new NullPointerException("User core details missing");
+            System.err.println("Unsuccessful.");
+            throw new NullPointerException();
         }
         setFirstName(dataMap.get("fName"));
         setLastName(dataMap.get("lName"));
@@ -738,7 +709,7 @@ public class Student {
         setAddress(dataMap.get("address"));
         setMaritalStatue(dataMap.get("marital"));
         setDateOfBirth(dataMap.get("dob"));
-        resetTelephones(dataMap.get("tels"));
+        setTelephones(dataMap.get("tels"));
         setPortalMail(dataMap.get("portalMail"));
         setPortalPassword(dataMap.get("portalPsswd"));
         setStudentMail(dataMap.get("studentMail"));
@@ -747,7 +718,6 @@ public class Student {
         setLevel(dataMap.get("level"));
         setSemester(dataMap.get("semester"));
         setState(dataMap.get("state"));
-
         Student.majorCode = dataMap.get("majCode");
         Student.minor = dataMap.get("minor");
         Student.minorCode = dataMap.get("minCode");
@@ -755,10 +725,9 @@ public class Student {
         setAbout(dataMap.get("aboutMe"));
         setNameFormat(dataMap.get("nameFormat"));
         isReported = Boolean.parseBoolean(dataMap.get("isReported"));
-
-        final ImageIcon serialIcon = (ImageIcon) MyClass.deserialize("icon.ser");
-        setUserIcon(serialIcon == null ? emptyIcon : serialIcon);
-        System.out.println("Completed.");
+        final ImageIcon serialIcon = (ImageIcon) Serializer.fromDisk("icon.ser");
+        setUserIcon(serialIcon == null ? EMPTY_ICON : serialIcon);
+        System.out.println("Completed successfully.");
     }
 
 }

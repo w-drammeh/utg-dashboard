@@ -29,14 +29,14 @@ public class Portal {
     public static final String HOME_PAGE = "https://www.utg.gm/home";
     private static String registrationNotice = "Waiting for a successful sync...";
     private static String admissionNotice = registrationNotice;
-    private static Date lastNoticeUpdate;
+    private static Date lastAdmissionNoticeUpdate, lastRegistrationNoticeUpdate;
     private static boolean autoSync = false;
     private static Date lastLogin;//currently not readable, as its get function is not used
     private static FirefoxDriver portalDriver;
 
 
     static {
-        new Timer(Globals.DAY_IN_MILLI, e -> {
+        new Timer(Globals.DAY, e -> {
             /*
             keeps checking every day whether to automate or not. Error generated herein must not come
             to notice. And it should be internet-availability sensitive.
@@ -126,7 +126,7 @@ public class Portal {
             noticeDriver.navigate().to(HOME_PAGE);
             new WebDriverWait(noticeDriver,50).until(ExpectedConditions.presenceOfElementLocated(By.className("media-heading")));
             final WebElement admissionElement = new WebDriverWait(noticeDriver,59).until(ExpectedConditions.presenceOfElementLocated(By.className("gritter-title")));
-            setNotices(null, admissionElement.getText());
+            setAdmissionNotice(admissionElement.getText());
         } catch (Exception e) {
             if (userRequested) {
                 App.reportConnectionLost();
@@ -137,7 +137,7 @@ public class Portal {
         try {
             noticeDriver.navigate().to(CONTENTS_PAGE);
             WebElement registrationElement = new WebDriverWait(noticeDriver,59).until(ExpectedConditions.presenceOfElementLocated(By.className("gritter-title")));
-            Portal.setNotices(registrationElement.getText(),null);
+            Portal.setRegistrationNotice(registrationElement.getText());
         } catch (Exception e) {
             if (userRequested) {
                 App.reportConnectionLost();
@@ -145,42 +145,31 @@ public class Portal {
         }
     }
 
-    /**
-     * Method call does not attempt to renew notice - hence returns the recently found notice.
-     */
-    public static String getBufferedNotice_Admission(){
+    public static String getAdmissionNotice(){
         return admissionNotice;
     }
 
-    /**
-     * Method call does not attempt to renew notice - hence returns the recently found notice.
-     */
-    public static String getBufferedNotice_Registration(){
+    public static void setAdmissionNotice(String admissionNotice){
+        Portal.admissionNotice = admissionNotice;
+        lastAdmissionNoticeUpdate = new Date();
+    }
+
+    public static String getLastAdmissionNoticeUpdate(){
+        return lastAdmissionNoticeUpdate == null ? "Never" : MDate.formatFully(lastAdmissionNoticeUpdate);
+    }
+
+    public static String getRegistrationNotice(){
         return registrationNotice;
     }
 
-    /**
-     * Returns the last time a notice was updated.
-     */
-    public static String getLastNoticeUpdate(){
-        return lastNoticeUpdate == null ? "Never" : MDate.formatFully(lastNoticeUpdate);
+    public static void setRegistrationNotice(String registrationNotice){
+        Portal.registrationNotice = registrationNotice;
+        lastRegistrationNoticeUpdate = new Date();
+        RunningCoursesGenerator.noticeLabel.setText(registrationNotice+("    [Last updated: "+getLastRegistrationNoticeUpdate()+"]"));
     }
 
-    /**
-     * Remains public for the sake of only PrePortal to set them during build.
-     * The non-null param(s) will be renewed to their respective types, and notify the components holding those.
-     */
-    public static void setNotices(String registration, String admission){
-        if (registration != null) {
-            registrationNotice = registration;
-            RunningCoursesGenerator.noticeLabel.setText(registration+("    [Last updated: "+getLastNoticeUpdate()+"]"));
-        }
-
-        if (admission != null) {
-            admissionNotice = admission;
-        }
-
-        lastNoticeUpdate = new Date();
+    public static String getLastRegistrationNoticeUpdate(){
+        return lastRegistrationNoticeUpdate == null ? "Never" : MDate.formatFully(lastRegistrationNoticeUpdate);
     }
 
     /**
@@ -223,31 +212,34 @@ public class Portal {
         setLastLogin(new Date());
     }
 
-    public static void receiveDriver(FirefoxDriver prePortalDriver) {
-        Portal.portalDriver = prePortalDriver;
-    }
 
     public static void serialize(){
-        System.out.print("Serializing portal data... ");
+        System.out.print("Serializing Portal Data... ");
         final HashMap<String, Object> portalHash = new HashMap<>();
         portalHash.put("rNotice", registrationNotice);
         portalHash.put("aNotice", admissionNotice);
         portalHash.put("autoSync", autoSync);
-        portalHash.put("lastNoticeUpdate", lastNoticeUpdate);
+        portalHash.put("lastAdmissionNoticeUpdate", lastAdmissionNoticeUpdate);
+        portalHash.put("lastRegistrationNoticeUpdate", lastRegistrationNoticeUpdate);
         portalHash.put("lastLogin", lastLogin);
-        MyClass.serialize(portalHash, "portal.ser");
+        Serializer.toDisk(portalHash, "portal.ser");
         System.out.println("Completed.");
     }
 
     public static void deSerialize(){
-        System.out.print("Deserializing portal data... ");
-        final HashMap<String, Object> savedState = (HashMap<String, Object>) MyClass.deserialize("portal.ser");
+        System.out.print("Deserializing Portal Data... ");
+        final HashMap<String, Object> savedState = (HashMap<String, Object>) Serializer.fromDisk("portal.ser");
+        if (savedState == null) {
+            System.err.println("Unsuccessful.");
+            return;
+        }
         registrationNotice = savedState.get("rNotice").toString();
         admissionNotice = savedState.get("aNotice").toString();
         autoSync = Boolean.parseBoolean(savedState.get("autoSync").toString());
-        lastNoticeUpdate = (Date) savedState.get("lastNoticeUpdate");
+        lastAdmissionNoticeUpdate = (Date) savedState.get("lastAdmissionNoticeUpdate");
+        lastRegistrationNoticeUpdate = (Date) savedState.get("lastRegistrationNoticeUpdate");
         lastLogin = (Date) savedState.get("lastLogin");
-        System.out.println("Completed.");
+        System.out.println("Completed successfully.");
     }
 
 }

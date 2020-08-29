@@ -134,7 +134,7 @@ public class TranscriptHandler {
     private static KPanel newDetailPanel(int x, int y, int leftMostWidth, int totalWidth, int totalHeight, String... strings){
         final Font hereFont = KFontFactory.createPlainFont(10);
 
-        final KPanel l = new KPanel(new Dimension(leftMostWidth, totalHeight)){
+        final KPanel l = new KPanel(leftMostWidth, totalHeight){
             @Override
             public Component add(Component comp) {
                 comp.setBackground(Color.WHITE);
@@ -157,7 +157,7 @@ public class TranscriptHandler {
                     new KLabel(strings[1].toUpperCase(), hereFont));
         } else if (strings.length == 3) {
             l.setLayout(new BoxLayout(l, BoxLayout.Y_AXIS));
-            l.addAll(KPanel.wantDirectAddition(new KLabel(strings[0], hereFont)), KPanel.wantDirectAddition(new KLabel(strings[1].toUpperCase(), hereFont)));
+            l.addAll(new KPanel(new KLabel(strings[0], hereFont)), new KPanel(new KLabel(strings[1].toUpperCase(), hereFont)));
 
             r.setLayout(new BoxLayout(r, BoxLayout.X_AXIS));
             r.addAll(new KPanel(), new KLabel(strings[2].toUpperCase(), hereFont), new KPanel());

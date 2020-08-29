@@ -80,7 +80,7 @@ public class TranscriptGenerator implements ActivityAnswerer {
         downloadButton.setPreferredSize(new Dimension(175, 30));
         downloadButton.setStyle(KFontFactory.createPlainFont(15), Color.BLUE);
         downloadButton.undress();
-        downloadButton.underline(null, false);
+        downloadButton.underline(false);
         downloadButton.setToolTipText("Export Transcript to PDF");
         downloadButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         downloadButton.addActionListener(actionEvent -> {
@@ -118,7 +118,7 @@ public class TranscriptGenerator implements ActivityAnswerer {
         final KLabel l1 = new KLabel("THE UNIVERSITY OF THE GAMBIA",KFontFactory.createBoldFont(25));
         final KLabel l2 = new KLabel("STUDENT ACADEMIC RECORDS",l1.getFont());
 
-        final KPanel l1l2_Panel = new KPanel(new Dimension(500,100));
+        final KPanel l1l2_Panel = new KPanel(500,100);
         l1l2_Panel.addAll(l1,l2);
 
         final KPanel lParted = new KPanel();
@@ -159,7 +159,7 @@ public class TranscriptGenerator implements ActivityAnswerer {
     private static KPanel provideRectangularPanel(int leftMostWidth, int leftMostHeight, String... strings){
         final Font hereFont = KFontFactory.createPlainFont(15);
 
-        final KPanel l = new KPanel(new Dimension(leftMostWidth, leftMostHeight));
+        final KPanel l = new KPanel(leftMostWidth, leftMostHeight);
         final KPanel r = new KPanel();
 
         if (strings.length == 2) {
@@ -167,8 +167,8 @@ public class TranscriptGenerator implements ActivityAnswerer {
             r.add(Objects.equals(strings[0], "MINOR") ? minorLabel : new KLabel(strings[1].toUpperCase(), hereFont));
         } else if (strings.length == 3) {
             l.setLayout(new BoxLayout(l, BoxLayout.Y_AXIS));
-            l.add(KPanel.wantDirectAddition(new KLabel(strings[0], hereFont)));
-            l.add(KPanel.wantDirectAddition(new KLabel(strings[1].toUpperCase(), hereFont)));
+            l.add(new KPanel(new KLabel(strings[0], hereFont)));
+            l.add(new KPanel(new KLabel(strings[1].toUpperCase(), hereFont)));
 
             r.setLayout(new BoxLayout(r, BoxLayout.X_AXIS));
             r.addAll(new KPanel(), new KLabel(strings[2].toUpperCase(), hereFont), new KPanel());
@@ -185,10 +185,10 @@ public class TranscriptGenerator implements ActivityAnswerer {
     private static KPanel getPointPanel(){
         final KPanel leftHand = new KPanel();
         leftHand.setLayout(new BoxLayout(leftHand, BoxLayout.Y_AXIS));
-        leftHand.addAll(KPanel.wantDirectAddition(new KLabel("AVERAGE", KFontFactory.createPlainFont(15))),
-                KPanel.wantDirectAddition(new KLabel("QUALITY POINT",KFontFactory.createPlainFont(15))));
+        leftHand.addAll(new KPanel(new KLabel("AVERAGE", KFontFactory.createPlainFont(15))),
+                new KPanel(new KLabel("QUALITY POINT",KFontFactory.createPlainFont(15))));
 
-        final KPanel avgPanel = new KPanel(new Dimension(255,55));
+        final KPanel avgPanel = new KPanel(255,55);
         avgPanel.setLayout(new BoxLayout(avgPanel, BoxLayout.X_AXIS));
         avgPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK,1,false));
         avgPanel.add(leftHand);
@@ -204,7 +204,7 @@ public class TranscriptGenerator implements ActivityAnswerer {
     }
 
     private static KPanel bottomLiner(){
-        return KPanel.wantDirectAddition(classificationLabel);
+        return new KPanel(classificationLabel);
     }
 
     private static void reIndexTableResources(){

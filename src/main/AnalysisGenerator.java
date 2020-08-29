@@ -26,13 +26,14 @@ public class AnalysisGenerator implements ActivityAnswerer {
             highestDERScoreCourse, lowestDERScoreCourse, highestGERScoreCourse, lowestGERScoreCourse;
     private CardLayout cardLayout;
     private KPanel coursesBased, semestersBased, yearsBased;
-
-    private static final Font valueFont = KFontFactory.createPlainFont(15),
-            hintFont = KFontFactory.createBoldFont(15),
-            onFocusFont = KFontFactory.createBoldFont(16);
-    private static final Cursor onFocusCursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+//
+    private static final Font VALUE_FONT = KFontFactory.createPlainFont(15);
+    private static final Font HINT_FONT = KFontFactory.createBoldFont(15);
+    private static final Font ON_FOCUS_FONT = KFontFactory.createBoldFont(16);
+    private static final Cursor ON_FOCUS_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+//
     private static ArrayList<String> semestersList, yearsList;
-    private static ArrayList<Double> semesterScores;//As for the names, the 'semestersList' is enough - it's being static for this reason?
+    private static ArrayList<Double> semesterScores;//as for the names, the 'semestersList' is enough - it's being static for such reason?
 
 
     public AnalysisGenerator(){
@@ -51,7 +52,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
         optionsCombo.setFont(KFontFactory.createPlainFont(15));
         optionsCombo.setFocusable(false);
         optionsCombo.setToolTipText("Shift analysis type");
-        optionsCombo.setCursor(onFocusCursor);
+        optionsCombo.setCursor(ON_FOCUS_CURSOR);
         optionsCombo.addActionListener(e -> {
             if (optionsCombo.getSelectedIndex() == 0) {
                 cardLayout.show(analysisContents, "course-basement");
@@ -337,8 +338,8 @@ public class AnalysisGenerator implements ActivityAnswerer {
             }
         });
 
-        allTellerLabel = new KLabel("",valueFont, BLUE);
-        allTellerLabel.underline(null,true);
+        allTellerLabel = new KLabel("", VALUE_FONT, BLUE);
+        allTellerLabel.underline(true);
         allTellerLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         allTellerLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -353,7 +354,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
     }
 
     private void finishModulesAnalysisBasement(){
-        ComponentAssistant.repair(coursesBased);
+        ComponentAssistant.empty(coursesBased);
         if (Memory.listRequested().isEmpty()) {
             coursesBased.addAll(new KPanel(), createNoAnalysisPanel(), new KPanel());
         } else {
@@ -403,13 +404,13 @@ public class AnalysisGenerator implements ActivityAnswerer {
 
     private void finishSemestersAnalysisBasement(){
         semesterScores = new ArrayList<>();
-        ComponentAssistant.repair(semestersBased);
+        ComponentAssistant.empty(semestersBased);
         if (semestersList.isEmpty()) {
             semestersBased.addAll(new KPanel(), createNoAnalysisPanel(), new KPanel());
         } else {
             for (String semTex : semestersList) {
                 final ArrayList<Course> fractionalSem = Memory.getFractionBySemester(semTex);
-                final KLabel promptLabel = new KLabel("", valueFont, BLUE);
+                final KLabel promptLabel = new KLabel("", VALUE_FONT, BLUE);
                 promptLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 promptLabel.addMouseListener(new MouseAdapter() {
                     @Override
@@ -430,18 +431,18 @@ public class AnalysisGenerator implements ActivityAnswerer {
                 }
                 attachActiveOnFocus(promptLabel, null);
 
-                final KLabel cgTeller = new KLabel(Globals.toFourth(Memory.getCGPABySemester(semTex)),valueFont,Color.BLUE);
+                final KLabel cgTeller = new KLabel(Globals.toFourth(Memory.getCGPABySemester(semTex)), VALUE_FONT,Color.BLUE);
                 semesterScores.add(Double.valueOf(cgTeller.getText()));
 
                 semestersBased.addAll(newAnalysisHeader(semTex),newAnalysisPlate("Courses Registered",promptLabel),
                         newAnalysisPlate("CGPA Earned",cgTeller));
             }
-            final KLabel totalLabel = new KLabel(Globals.checkPlurality(semestersList.size(),"Semesters"),valueFont, BLUE);
-            totalLabel.underline(null,true);
+            final KLabel totalLabel = new KLabel(Globals.checkPlurality(semestersList.size(),"Semesters"), VALUE_FONT, BLUE);
+            totalLabel.underline(true);
             semestersBased.addAll(newAnalysisHeader("Overall"),
                     newAnalysisPlate("All together",totalLabel),
-                    newAnalysisPlate("Best Semester",new KLabel(Memory.traceBestSemester(true),valueFont, BLUE)),
-                    newAnalysisPlate("Worst Semester",new KLabel(Memory.traceWorstSemester(true),valueFont, BLUE)),
+                    newAnalysisPlate("Best Semester",new KLabel(Memory.traceBestSemester(true), VALUE_FONT, BLUE)),
+                    newAnalysisPlate("Worst Semester",new KLabel(Memory.traceWorstSemester(true), VALUE_FONT, BLUE)),
                     newAnalysisHeader("Performance Sketch"),new RoughSketch());
         }
         ComponentAssistant.ready(semestersBased);
@@ -454,13 +455,13 @@ public class AnalysisGenerator implements ActivityAnswerer {
     }
 
     private void finishYearsAnalysisBasement(){
-        ComponentAssistant.repair(yearsBased);
+        ComponentAssistant.empty(yearsBased);
         if (yearsList.isEmpty()) {
             yearsBased.addAll(new KPanel(), createNoAnalysisPanel(), new KPanel());
         } else {
             for (String yearTex : yearsList) {
                 final ArrayList<Course> fractionalYear = Memory.getFractionByYear(yearTex);
-                final KLabel allPromptLabel = new KLabel("", valueFont, BLUE);
+                final KLabel allPromptLabel = new KLabel("", VALUE_FONT, BLUE);
                 allPromptLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 allPromptLabel.addMouseListener(new MouseAdapter() {
                     @Override
@@ -485,7 +486,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
                 attachActiveOnFocus(allPromptLabel, null);
 
                 final ArrayList<String> yLectsList = Memory.getLecturersByYear(yearTex);
-                final KLabel tutorsLabel = new KLabel(Globals.checkPlurality(yLectsList.size(),"Lecturers"),valueFont, BLUE);
+                final KLabel tutorsLabel = new KLabel(Globals.checkPlurality(yLectsList.size(),"Lecturers"), VALUE_FONT, BLUE);
                 tutorsLabel.setCursor(tutorsLabel.getText().equals("No Lecturers") ? null : Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 attachActiveOnFocus(tutorsLabel, "No Lecturers");
                 tutorsLabel.addMouseListener(new MouseAdapter() {
@@ -502,11 +503,11 @@ public class AnalysisGenerator implements ActivityAnswerer {
                         newAnalysisPlate("DERs",specificYearLabel("DERs",yDERs,yearTex)),
                         newAnalysisPlate("GERs",specificYearLabel("GERs",yGERs,yearTex)),
                         newAnalysisPlate("Lecturers",tutorsLabel),
-                        newAnalysisPlate("CGPA Earned",new KLabel(Globals.toFourth(Memory.getCGPAByYear(yearTex)), valueFont, BLUE)));
+                        newAnalysisPlate("CGPA Earned",new KLabel(Globals.toFourth(Memory.getCGPAByYear(yearTex)), VALUE_FONT, BLUE)));
             }
 
             final ArrayList<String> lectsList = Memory.filterLecturers();
-            final KLabel totalTutorsLabel = new KLabel(Globals.checkPlurality(lectsList.size(),"distinguished lecturers"), valueFont, BLUE);
+            final KLabel totalTutorsLabel = new KLabel(Globals.checkPlurality(lectsList.size(),"distinguished lecturers"), VALUE_FONT, BLUE);
             totalTutorsLabel.setCursor(totalTutorsLabel.getText().equals("No distinguished lecturers") ? null :
                     Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             attachActiveOnFocus(totalTutorsLabel, "No distinguished lecturers");
@@ -519,14 +520,14 @@ public class AnalysisGenerator implements ActivityAnswerer {
                 }
             });
 
-            final KLabel totalLabel = new KLabel(Globals.checkPlurality(yearsList.size(),"Academic years"), valueFont, BLUE);
-            totalLabel.underline(null,true);
+            final KLabel totalLabel = new KLabel(Globals.checkPlurality(yearsList.size(),"Academic years"), VALUE_FONT, BLUE);
+            totalLabel.underline(true);
             yearsBased.addAll(newAnalysisHeader("Overall"),
                     newAnalysisPlate("All together",totalLabel),
                     newAnalysisPlate("My Tutors",totalTutorsLabel),
-                    newAnalysisPlate("Best Year",new KLabel(Memory.traceBestYear(true),valueFont, BLUE)),
-                    newAnalysisPlate("Worst Year",new KLabel(Memory.traceWorstYear(true),valueFont, BLUE)),
-                    newAnalysisPlate("Current CGPA",new KLabel(Student.getCGPA()+" ["+Student.upperDivision()+"]", valueFont, BLUE)));
+                    newAnalysisPlate("Best Year",new KLabel(Memory.traceBestYear(true), VALUE_FONT, BLUE)),
+                    newAnalysisPlate("Worst Year",new KLabel(Memory.traceWorstYear(true), VALUE_FONT, BLUE)),
+                    newAnalysisPlate("Current CGPA",new KLabel(Student.getCGPA()+" ["+Student.upperDivision()+"]", VALUE_FONT, BLUE)));
         }
         ComponentAssistant.ready(yearsBased);
     }
@@ -539,14 +540,14 @@ public class AnalysisGenerator implements ActivityAnswerer {
     private KPanel createNoAnalysisPanel(){
         final KPanel noAnalysisPanel = new KPanel();
         noAnalysisPanel.setLayout(new BoxLayout(noAnalysisPanel, BoxLayout.Y_AXIS));
-        noAnalysisPanel.addAll(KPanel.wantDirectAddition(new KLabel("Analysis is not available", KFontFactory.createPlainFont(20))),
-                KPanel.wantDirectAddition(new KLabel("No Verified Course detected", KFontFactory.createPlainFont(15), Color.GRAY)));
+        noAnalysisPanel.addAll(new KPanel(new KLabel("Analysis is not available", KFontFactory.createPlainFont(20))),
+                new KPanel(new KLabel("No Verified Course detected", KFontFactory.createPlainFont(15), Color.GRAY)));
         noAnalysisPanel.setMaximumSize(noAnalysisPanel.getPreferredSize());
         return noAnalysisPanel;
     }
 
     private KLabel specificYearLabel(String plText, ArrayList<Course> list, String specificName){
-        final KLabel kLabel = new KLabel(getProperValueText(list), valueFont, BLUE);
+        final KLabel kLabel = new KLabel(getProperValueText(list), VALUE_FONT, BLUE);
         kLabel.setCursor(kLabel.getText().equals("None") ? null : Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         kLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -566,7 +567,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
 
     private KPanel newAnalysisPlate(String hint, KLabel aLabel){
         final KPanel aPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        aPanel.add(KPanel.wantDirectAddition(new KLabel(hint, hintFont)));
+        aPanel.add(new KPanel(new KLabel(hint, HINT_FONT)));
         aPanel.addAll(Box.createHorizontalStrut(25), aLabel);
         return aPanel;
     }
@@ -575,22 +576,22 @@ public class AnalysisGenerator implements ActivityAnswerer {
         vLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                vLabel.setFont(vLabel.getText().equals(except) ? valueFont : onFocusFont);
+                vLabel.setFont(vLabel.getText().equals(except) ? VALUE_FONT : ON_FOCUS_FONT);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                vLabel.setFont(valueFont);
+                vLabel.setFont(VALUE_FONT);
             }
         });
     }
 
     private KLabel newValueLabel(){
-        final KLabel vLabel = new KLabel("", valueFont, BLUE){
+        final KLabel vLabel = new KLabel("", VALUE_FONT, BLUE){
             @Override
             public void setText(String newText) {
                 super.setText(newText);
-                super.setCursor(newText.equals("None") ? null : onFocusCursor);
+                super.setCursor(newText.equals("None") ? null : ON_FOCUS_CURSOR);
             }
 
         };
@@ -599,7 +600,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
     }
 
     private KLabel newSingletonLabel(){
-        final KLabel singletonLabel = new KLabel("", valueFont, BLUE){
+        final KLabel singletonLabel = new KLabel("", VALUE_FONT, BLUE){
             @Override
             public void setText(String newText) {
                 super.setText(newText);
@@ -792,7 +793,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
                     Memory.getFractionByLecturer(lName), this.getRootPane()).setVisible(true)));
 
             final KPanel joinPanel = new KPanel(new BorderLayout());
-            joinPanel.add(KPanel.wantDirectAddition(new KLabel(lName,KFontFactory.createPlainFont(15))),BorderLayout.WEST);
+            joinPanel.add(new KPanel(new KLabel(lName,KFontFactory.createPlainFont(15))),BorderLayout.WEST);
             joinPanel.add(Box.createRigidArea(new Dimension(30, 30)), BorderLayout.CENTER);
             joinPanel.add(dtlButton,BorderLayout.EAST);
 
@@ -810,7 +811,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             }));
 
             final KPanel joinPanel = new KPanel(new BorderLayout());
-            joinPanel.add(KPanel.wantDirectAddition(new KLabel(tName,KFontFactory.createPlainFont(15))), BorderLayout.WEST);
+            joinPanel.add(new KPanel(new KLabel(tName,KFontFactory.createPlainFont(15))), BorderLayout.WEST);
             joinPanel.add(Box.createRigidArea(new Dimension(30, 30)),BorderLayout.CENTER);
             joinPanel.add(dtlButton,BorderLayout.EAST);
 
@@ -823,7 +824,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             dtlButton.addActionListener(e -> Course.exhibit(this.getRootPane(), c));
 
             final KPanel joinPanel = new KPanel(new BorderLayout());
-            joinPanel.add(KPanel.wantDirectAddition(new KLabel(c.getName(),KFontFactory.createPlainFont(15))), BorderLayout.WEST);
+            joinPanel.add(new KPanel(new KLabel(c.getName(),KFontFactory.createPlainFont(15))), BorderLayout.WEST);
             joinPanel.add(dtlButton, BorderLayout.EAST);
             substancePanel.add(joinPanel);
         }
@@ -834,13 +835,13 @@ public class AnalysisGenerator implements ActivityAnswerer {
         private static final int PADDING = 50;
         private static final int POINTS_WIDTH = 10;
         private static final int Y_COUNT = 20;
-        private double Y_MAX = 4.3;
+        private static final double Y_MAX = 4.3;
 
         private RoughSketch(){
             if (semestersList.size() <= 1) {
                 this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-                this.addAll(new KPanel(), KPanel.wantDirectAddition(new KLabel("No Sketch Available", KFontFactory.createPlainFont(20))),
-                        KPanel.wantDirectAddition(new KLabel("Student must complete at least two semesters", KFontFactory.createPlainFont(15), Color.GRAY)),
+                this.addAll(new KPanel(), new KPanel(new KLabel("No Sketch Available", KFontFactory.createPlainFont(20))),
+                        new KPanel(new KLabel("Student must complete at least two semesters", KFontFactory.createPlainFont(15), Color.GRAY)),
                         new KPanel());
                 this.setMaximumSize(this.getPreferredSize());
             } else {

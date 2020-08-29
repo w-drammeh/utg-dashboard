@@ -3,7 +3,6 @@ package customs;
 import javax.swing.table.DefaultTableModel;
 
 /**
- * The add and removeRow() are yet tobe effectively overridden as per Dashboard's specification.
  * These are course oriented, since all the tables deals with courses?
  */
 public class KDefaultTableModel extends DefaultTableModel implements Preference {
@@ -22,28 +21,15 @@ public class KDefaultTableModel extends DefaultTableModel implements Preference 
         return table.getSelectedRow();
     }
 
-    @Override
-    public void addRow(Object[] rowData) {
-        super.addRow(rowData);
-    }
-
-    @Override
-    public void removeRow(int row) {
-        super.removeRow(row);
-    }
-
-    @Override
-    public boolean isCellEditable(int row, int column) {
-        return false;
-    }
-
     /**
-     * Gets the row-index of the row (more formally, the first row found) holding this string in the first column.
-     * A return of -1 signals absence of such a row in this table's model.
+     * Gets the row-index of the row (more formally, the first row found) holding this string
+     * in its first column. A return of -1 signals absence of such a row in this model.
+     *
+     * This call is case-insensitive.
      */
     public int getRowOf(String key){
         for (int i = 0; i < this.getRowCount(); i++) {
-            if (this.getValueAt(i,0).toString().equalsIgnoreCase(key)) {
+            if (key.equalsIgnoreCase(String.valueOf(this.getValueAt(i,0)))) {
                 return i;
             }
         }
@@ -51,8 +37,12 @@ public class KDefaultTableModel extends DefaultTableModel implements Preference 
     }
 
     @Override
-    public void setPreferences() {
+    public boolean isCellEditable(int row, int column) {
+        return false;
+    }
 
+    @Override
+    public void setPreferences() {
     }
 
 }

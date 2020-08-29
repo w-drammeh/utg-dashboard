@@ -63,8 +63,12 @@ public class SettingsCore {
         return lookName;
     }
 
+    public static Date getSerializationTime(){
+        return serializationTime;
+    }
+
     public static void serialize(){
-        System.out.print("Serializing settings... ");
+        System.out.print("Serializing Settings... ");
         final HashMap<String, Object> coreMap = new HashMap<>();
         coreMap.put("verificationUnneeded",noVerifyNeeded);
         coreMap.put("directLeave", confirmExit);
@@ -74,13 +78,17 @@ public class SettingsCore {
         coreMap.put("lafName",lookName);
         coreMap.put("bgName",backgroundName);
         coreMap.put("dateSerialized", new Date());
-        MyClass.serialize(coreMap, "settings.ser");
+        Serializer.toDisk(coreMap, "settings.ser");
         System.out.println("Completed.");
     }
 
-    public static void deSerialize(){
-        System.out.print("Deserializing settings... ");
-        final HashMap<String, Object> coreMap = (HashMap<String, Object>) MyClass.deserialize("settings.ser");
+    public static void deSerialize() {
+        System.out.print("Deserializing Settings... ");
+        final HashMap<String, Object> coreMap = (HashMap<String, Object>) Serializer.fromDisk("settings.ser");
+        if (coreMap == null) {
+            System.err.println("Unsuccessful.");
+            return;
+        }
         serializationTime = (Date) coreMap.get("dateSerialized");
         noVerifyNeeded = Boolean.parseBoolean(String.valueOf(coreMap.get("verificationUnneeded")));
         confirmExit = Boolean.parseBoolean(String.valueOf(coreMap.get("directLeave")));
@@ -89,11 +97,7 @@ public class SettingsCore {
         lookName = String.valueOf(coreMap.get("lafName"));
         ToolTipManager.sharedInstance().setInitialDelay(Integer.parseInt(coreMap.get("tipInitialDelay").toString()));
         ToolTipManager.sharedInstance().setDismissDelay(Integer.parseInt(coreMap.get("tipDismissDelay").toString()));
-        System.out.println("Completed.");
-    }
-
-    public static Date getSerializationTime(){
-        return serializationTime;
+        System.out.println("Completed successfully.");
     }
 
 }

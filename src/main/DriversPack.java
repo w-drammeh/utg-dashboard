@@ -16,11 +16,10 @@ public class DriversPack {
     public static final int ATTEMPT_FAILED = 1;
     public static final int ATTEMPT_SUCCEEDED = 2;
 
+
     /**
      * Returns a fresh driver as appropriate for the currently running OS.
      * Nullability must be checked prior to any attempt of usage.
-     * This can be done like:
-     *  if(DriversPack.forgeNew(boolean) == null)
      */
     public static synchronized FirefoxDriver forgeNew(boolean headless){
         FirefoxDriver fDriver = null;
@@ -28,7 +27,7 @@ public class DriversPack {
             WebDriverManager.firefoxdriver().setup();
             fDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(headless));
         } catch (Exception e) {
-            App.silenceException("Building driver failed: "+e.getMessage());
+            App.silenceException("Error building driver");
         }
         return fDriver;
     }
@@ -70,7 +69,6 @@ public class DriversPack {
     }
 
     public static void attemptLogout(FirefoxDriver foxDriver){
-
     }
 
     /**

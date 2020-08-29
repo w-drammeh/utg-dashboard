@@ -60,11 +60,11 @@ public class MyDashboard extends KDialog {
     private KPanel getAboutCard(){
         final KPanel dashboardLayer = new KPanel(new BorderLayout());
         dashboardLayer.add(KLabel.wantIconLabel("dashboard.png",150,135),BorderLayout.CENTER);
-        dashboardLayer.add(KPanel.wantDirectAddition(new KLabel("A flexible and elegant student management system of the UTG",KFontFactory.createPlainFont(16))),BorderLayout.SOUTH);
+        dashboardLayer.add(new KPanel(new KLabel("A flexible and elegant student management system of the UTG",KFontFactory.createPlainFont(16))),BorderLayout.SOUTH);
 
         final KPanel javaLayer = new KPanel(new BorderLayout());
         javaLayer.add(new KLabel(new ImageIcon(App.getIconURL("splash.gif"))),BorderLayout.CENTER);
-        javaLayer.add(KPanel.wantDirectAddition(new KLabel("Dashboard is 100% Java and only Java!",KFontFactory.createPlainFont(16))),BorderLayout.SOUTH);
+        javaLayer.add(new KPanel(new KLabel("Dashboard is 100% Java and only Java!",KFontFactory.createPlainFont(16))),BorderLayout.SOUTH);
 
         final KPanel iconsLayer = new KPanel();
         iconsLayer.setLayout(new BoxLayout(iconsLayer, BoxLayout.Y_AXIS));
@@ -77,7 +77,7 @@ public class MyDashboard extends KDialog {
                 new KLabel("Contact: +220 3413910", KFontFactory.createPlainFont(15)));
 
         final KPanel aboutCard = new KPanel(new BorderLayout());
-        aboutCard.add(KPanel.wantDirectAddition(new KLabel("University Student Dashboard",KFontFactory.createBoldFont(18))),BorderLayout.NORTH);
+        aboutCard.add(new KPanel(new KLabel("University Student Dashboard",KFontFactory.createBoldFont(18))),BorderLayout.NORTH);
         aboutCard.add(iconsLayer,BorderLayout.CENTER);
         aboutCard.add(contactLayer,BorderLayout.SOUTH);
         return aboutCard;
@@ -99,15 +99,15 @@ public class MyDashboard extends KDialog {
 
         final KPanel respectLayer = new KPanel(new BorderLayout());
         respectLayer.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.LEFT), null, new KLabel("Special thanks to:",KFontFactory.createBoldFont(16))),BorderLayout.NORTH);
-        respectLayer.add(KPanel.wantDirectAddition(specialNamesLayer),BorderLayout.CENTER);
-        respectLayer.add(KPanel.wantDirectAddition(new KLabel("*Plus all the students whose details were used during the 'Testing'",KFontFactory.createPlainFont(13),Color.GRAY)),BorderLayout.SOUTH);
+        respectLayer.add(new KPanel(specialNamesLayer),BorderLayout.CENTER);
+        respectLayer.add(new KPanel(new KLabel("*Plus all the students whose details were used during the 'Testing'",KFontFactory.createPlainFont(13),Color.GRAY)),BorderLayout.SOUTH);
 
         final KPanel creditsPanel = new KPanel();
         creditsPanel.setLayout(new BoxLayout(creditsPanel, BoxLayout.Y_AXIS));
         creditsPanel.addAll(forgeCredits(waksLabel, moreOfWask), respectLayer);
 
         final KPanel creditsCard = new KPanel(new BorderLayout());
-        creditsCard.add(KPanel.wantDirectAddition(new KLabel("In the name of Allah - The Entirely Merciful, Especially  Merciful",KFontFactory.createBoldFont(17))),BorderLayout.NORTH);
+        creditsCard.add(new KPanel(new KLabel("In the name of Allah - The Entirely Merciful, Especially  Merciful",KFontFactory.createBoldFont(17))),BorderLayout.NORTH);
         creditsCard.add(new KScrollPane(creditsPanel, new Dimension(this.getPreferredSize().width,530),false),BorderLayout.CENTER);
         return creditsCard;
     }
@@ -125,7 +125,7 @@ public class MyDashboard extends KDialog {
         moreButton.setPreferredSize(new Dimension(130, 30));
         moreButton.setStyle(KFontFactory.createPlainFont(14),Color.BLUE);
         moreButton.undress();
-        moreButton.underline(null, false);
+        moreButton.underline(false);
         moreButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         moreButton.addActionListener(moreListener);
 
@@ -161,7 +161,7 @@ public class MyDashboard extends KDialog {
         final Border spaceBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
         final Font hFedFont = KFontFactory.createBoldFont(16);
 
-        final KTextArea reviewTextArea = KTextArea.limitedEntry(500);
+        final KTextArea reviewTextArea = KTextArea.getLimitedEntryArea(500);
         final JScrollPane reviewTextAreaScroll = KScrollPane.getTextAreaScroller(reviewTextArea,new Dimension(500,100));
         reviewTextAreaScroll.setBorder(spaceBorder);
         final String reviewString = "If you have any review, you can send write it to the developers in the text-area below. " +
@@ -199,7 +199,7 @@ public class MyDashboard extends KDialog {
         reviewLayer.addAll(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.LEFT),null,new KLabel("Give a Review",hFedFont)),
                 getANotePane(reviewString,50),reviewTextAreaScroll,KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,reviewSender));
 
-        final KTextArea suggestionTextArea = KTextArea.limitedEntry(500);
+        final KTextArea suggestionTextArea = KTextArea.getLimitedEntryArea(500);
         final JScrollPane suggestionTextAreaScroll = KScrollPane.getTextAreaScroller(suggestionTextArea,new Dimension(500,100));
         suggestionTextAreaScroll.setBorder(spaceBorder);
         final String suggestionString = "In no more than 500 characters, briefly state, in the text-area below, a feature " +
@@ -239,7 +239,7 @@ public class MyDashboard extends KDialog {
 
         final KTextField answerTitleField = KTextField.rangeControlField(100);
         answerTitleField.setPreferredSize(new Dimension(550, 30));
-        final KTextArea answerTextArea = KTextArea.limitedEntry(500);
+        final KTextArea answerTextArea = KTextArea.getLimitedEntryArea(500);
         final JScrollPane answerTextAreaScroll = KScrollPane.getTextAreaScroller(answerTextArea,new Dimension(500,100));
         answerTextAreaScroll.setBorder(spaceBorder);
         final String answerString = "Answer a problem faced by students at UTG and benefit your brothers and sisters! Please refer to 'Home | FAQs & Help | UTG FAQs' to " +
@@ -279,7 +279,7 @@ public class MyDashboard extends KDialog {
         });
         final KPanel titleSubstance = new KPanel(new BorderLayout());
         titleSubstance.add(new KLabel(" Question:",KFontFactory.createPlainFont(15)),BorderLayout.WEST);
-        titleSubstance.add(KPanel.wantDirectAddition(answerTitleField),BorderLayout.CENTER);
+        titleSubstance.add(new KPanel(answerTitleField),BorderLayout.CENTER);
         final KPanel bodySubstance = new KPanel(new BorderLayout());
         bodySubstance.add(new KLabel(" Answer: ",KFontFactory.createPlainFont(15)),BorderLayout.WEST);
         bodySubstance.add(answerTextAreaScroll,BorderLayout.CENTER);
@@ -292,7 +292,7 @@ public class MyDashboard extends KDialog {
         answerLayer.addAll(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.LEFT),null,new KLabel("Answer a FAQ",hFedFont)),
                 getANotePane(answerString,75),answerSubstance,KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,answerSender));
 
-        final KTextArea bugTextArea = KTextArea.limitedEntry(500);
+        final KTextArea bugTextArea = KTextArea.getLimitedEntryArea(500);
         final JScrollPane bugTextAreaScroll = KScrollPane.getTextAreaScroller(bugTextArea,new Dimension(500,100));
         bugTextAreaScroll.setBorder(spaceBorder);
         final String bugString = "In no more than 500 characters, kindly describe a problem (if there is any) you encountered while using Dashboard.";
@@ -390,36 +390,36 @@ public class MyDashboard extends KDialog {
             final Font hintFont = KFontFactory.createBoldFont(15);
 
             final KPanel firstNamePanel = new KPanel(new BorderLayout());
-            firstNamePanel.add(KPanel.wantDirectAddition(new KLabel("First Name:",hintFont)),BorderLayout.WEST);
-            firstNamePanel.add(KPanel.wantDirectAddition(new KLabel("Drammeh",font)),BorderLayout.CENTER);
+            firstNamePanel.add(new KPanel(new KLabel("First Name:",hintFont)),BorderLayout.WEST);
+            firstNamePanel.add(new KPanel(new KLabel("Drammeh",font)),BorderLayout.CENTER);
 
             final KPanel lastNamePanel = new KPanel(new BorderLayout());
-            lastNamePanel.add(KPanel.wantDirectAddition(new KLabel("Last Name:",hintFont)),BorderLayout.WEST);
-            lastNamePanel.add(KPanel.wantDirectAddition(new KLabel("Muhammed W",font)),BorderLayout.CENTER);
+            lastNamePanel.add(new KPanel(new KLabel("Last Name:",hintFont)),BorderLayout.WEST);
+            lastNamePanel.add(new KPanel(new KLabel("Muhammed W",font)),BorderLayout.CENTER);
 
             final KPanel dobPanel = new KPanel(new BorderLayout());
-            dobPanel.add(KPanel.wantDirectAddition(new KLabel("Date of Birth:",hintFont)),BorderLayout.WEST);
-            dobPanel.add(KPanel.wantDirectAddition(new KLabel("Jan 01, 1999",font)),BorderLayout.CENTER);
+            dobPanel.add(new KPanel(new KLabel("Date of Birth:",hintFont)),BorderLayout.WEST);
+            dobPanel.add(new KPanel(new KLabel("Jan 01, 1999",font)),BorderLayout.CENTER);
 
             final KPanel pobPanel = new KPanel(new BorderLayout());
-            pobPanel.add(KPanel.wantDirectAddition(new KLabel("Place of Birth:",hintFont)),BorderLayout.WEST);
-            pobPanel.add(KPanel.wantDirectAddition(new KLabel("Diabugu Batapa, Sandu District, URR",font)),BorderLayout.CENTER);
+            pobPanel.add(new KPanel(new KLabel("Place of Birth:",hintFont)),BorderLayout.WEST);
+            pobPanel.add(new KPanel(new KLabel("Diabugu Batapa, Sandu District, URR",font)),BorderLayout.CENTER);
 
             final KPanel addressPanel = new KPanel(new BorderLayout());
-            addressPanel.add(KPanel.wantDirectAddition(new KLabel("Address:",hintFont)),BorderLayout.WEST);
-            addressPanel.add(KPanel.wantDirectAddition(new KLabel("Sukuta, Kombo North",font)),BorderLayout.CENTER);
+            addressPanel.add(new KPanel(new KLabel("Address:",hintFont)),BorderLayout.WEST);
+            addressPanel.add(new KPanel(new KLabel("Sukuta, Kombo North",font)),BorderLayout.CENTER);
 
             final KPanel telephonePanel = new KPanel(new BorderLayout());
-            telephonePanel.add(KPanel.wantDirectAddition(new KLabel("Telephone:",hintFont)),BorderLayout.WEST);
-            telephonePanel.add(KPanel.wantDirectAddition(new KLabel("+220 3413910",font)),BorderLayout.CENTER);
+            telephonePanel.add(new KPanel(new KLabel("Telephone:",hintFont)),BorderLayout.WEST);
+            telephonePanel.add(new KPanel(new KLabel("+220 3413910",font)),BorderLayout.CENTER);
 
             final KPanel emailPanel = new KPanel(new BorderLayout());
-            emailPanel.add(KPanel.wantDirectAddition(new KLabel("Email Address:",hintFont)),BorderLayout.WEST);
-            emailPanel.add(KPanel.wantDirectAddition(new KLabel("wakadrammeh@gmail.com",font)),BorderLayout.CENTER);
+            emailPanel.add(new KPanel(new KLabel("Email Address:",hintFont)),BorderLayout.WEST);
+            emailPanel.add(new KPanel(new KLabel("wakadrammeh@gmail.com",font)),BorderLayout.CENTER);
 
             final KPanel nationalityPanel = new KPanel(new BorderLayout());
-            nationalityPanel.add(KPanel.wantDirectAddition(new KLabel("Nationality:",hintFont)),BorderLayout.WEST);
-            nationalityPanel.add(KPanel.wantDirectAddition(new KLabel("The Gambia",font)),BorderLayout.CENTER);
+            nationalityPanel.add(new KPanel(new KLabel("Nationality:",hintFont)),BorderLayout.WEST);
+            nationalityPanel.add(new KPanel(new KLabel("The Gambia",font)),BorderLayout.CENTER);
 
             final KButton closeButton = new KButton("Ok");
             closeButton.addActionListener(e -> dispose());

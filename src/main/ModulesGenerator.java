@@ -8,9 +8,9 @@ import java.awt.*;
 public class ModulesGenerator implements ActivityAnswerer {
     private KButton onButton;
     private KLabel indicator;
-    private CardLayout residentLayout;//There's a 'residentPanel'
+    private CardLayout residentLayout;//there's a 'residentPanel'
     private ModulesHandler handlerInstance;
-    private static KButton refreshButton;//To be used by sync
+    private static KButton refreshButton;//to be used by sync
 
 
     public ModulesGenerator(){
@@ -42,8 +42,8 @@ public class ModulesGenerator implements ActivityAnswerer {
         refreshButton.addActionListener(e -> triggerRefresh(true));
 
         final KPanel headerPanel = new KPanel(new BorderLayout());
-        headerPanel.add(KPanel.wantDirectAddition(refreshButton), BorderLayout.EAST);
-        headerPanel.add(KPanel.wantDirectAddition(tipShower), BorderLayout.CENTER);
+        headerPanel.add(new KPanel(refreshButton), BorderLayout.EAST);
+        headerPanel.add(new KPanel(tipShower), BorderLayout.CENTER);
         headerPanel.add(indicator, BorderLayout.WEST);
 
         final KButton y1Button = getControlButton("Year One");
@@ -91,7 +91,7 @@ public class ModulesGenerator implements ActivityAnswerer {
             residentLayout.show(residentPanel,"misc");
         });
 
-        final KPanel controlPanel = new KPanel(new Dimension(150,400));
+        final KPanel controlPanel = new KPanel(150,400);
         controlPanel.add(Box.createRigidArea(new Dimension(150, 50)));
         controlPanel.addAll(y1Button,y2Button,y3Button,y4Button,new KSeparator(new Dimension(125,1)),
                 summerButton, new KSeparator(new Dimension(125,1)),miscButton);
@@ -175,7 +175,7 @@ public class ModulesGenerator implements ActivityAnswerer {
         if (getOnButton() == button) {
             return;
         }
-        button.dress();
+        button.redress();
         getOnButton().undress();
         onButton = button;
     }

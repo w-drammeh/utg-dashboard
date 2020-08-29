@@ -58,7 +58,7 @@ public final class Board extends KFrame {
             return super.add(runnable);
         }
     };
-    public static final Thread shutDownThread = new Thread(MyClass::mountUserData);
+    public static final Thread shutDownThread = new Thread(Serializer::mountUserData);
 
 
 //    Collaborators declaration.
@@ -73,8 +73,8 @@ public final class Board extends KFrame {
 
 
     public Board(){
+        super("UTG-Student Dashboard");
         appInstance = Board.this;
-        this.setTitle("UTG-Student Dashboard");
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             @Override
@@ -106,8 +106,8 @@ public final class Board extends KFrame {
         faqsGenerator = new HelpGenerator();
         myDashboard = new MyDashboard();
 
-        final Timer dayTimer = new Timer(Globals.DAY_IN_MILLI, e-> anotherDay());
-        dayTimer.setInitialDelay(Globals.DAY_IN_MILLI - MDate.getTimeValue(new Date()));
+        final Timer dayTimer = new Timer(Globals.DAY, e-> anotherDay());
+        dayTimer.setInitialDelay(Globals.DAY - MDate.getTimeValue(new Date()));
 
         this.pack();
         this.setMinimumSize(this.getPreferredSize());
@@ -209,7 +209,6 @@ public final class Board extends KFrame {
         imageOptionsPop.add(defaultOption);
 
         imagePanel = new KPanel(new BorderLayout(), new Dimension(275,200));
-        imagePanel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 1, true));
         imagePanel.add(new KLabel(Student.getIcon()));
         imagePanel.addMouseListener(new MouseAdapter(){
             @Override
@@ -246,7 +245,7 @@ public final class Board extends KFrame {
         final KPanel midPart = new KPanel(300, 200);
         midPart.setLayout(new GridLayout(7, 1, 5, 0));
         midPart.addAll(levelPanel, Box.createRigidArea(new Dimension(100, 10)),
-                KPanel.wantDirectAddition(nameLabel), KPanel.wantDirectAddition(programLabel),
+                new KPanel(nameLabel), new KPanel(programLabel),
                 Box.createRigidArea(new Dimension(100, 10)));
         final KPanel horizontalWrapper = new KPanel();
         horizontalWrapper.setLayout(new BoxLayout(horizontalWrapper, BoxLayout.X_AXIS));
@@ -370,14 +369,12 @@ public final class Board extends KFrame {
         if (b) {
             super.setVisible(true);
             if (Dashboard.isFirst()) {
-                new FirstLaunch().setVisible(true);
+                SwingUtilities.invokeLater(()-> new FirstLaunch().setVisible(true));
             }
-            new Thread(() -> {
-                for (Runnable runnable : postProcesses) {
-                    runnable.run();
-                }
-                Student.mayReportIncoming();
-            }).start();
+            for (Runnable runnable : postProcesses) {
+                runnable.run();
+            }
+            Student.mayReportIncoming();
         } else {
             collapse();
         }
@@ -388,7 +385,7 @@ public final class Board extends KFrame {
      */
     private void collapse(){
         dispose();
-        Runtime.getRuntime().exit(0);
+        System.exit(0);
     }
 
     private void completeBuild(){

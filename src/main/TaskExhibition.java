@@ -38,42 +38,42 @@ public class TaskExhibition {
             contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
             final KPanel nameLayer = new KPanel(new BorderLayout());
-            nameLayer.add(KPanel.wantDirectAddition(giveLabel("Task name:")),BorderLayout.WEST);
-            nameLayer.add(KPanel.wantDirectAddition(giveValueLabel(theTask.getDescription())),BorderLayout.CENTER);
+            nameLayer.add(new KPanel(giveLabel("Task name:")),BorderLayout.WEST);
+            nameLayer.add(new KPanel(giveValueLabel(theTask.getDescription())),BorderLayout.CENTER);
 
             final KPanel stateLayer = new KPanel(new BorderLayout());
-            stateLayer.add(KPanel.wantDirectAddition(giveLabel("Current state:")),BorderLayout.WEST);
-            stateLayer.add(KPanel.wantDirectAddition(giveValueLabel(theTask.isActive() ? "In progress" : "Completed")),BorderLayout.CENTER);
+            stateLayer.add(new KPanel(giveLabel("Current state:")),BorderLayout.WEST);
+            stateLayer.add(new KPanel(giveValueLabel(theTask.isActive() ? "In progress" : "Completed")),BorderLayout.CENTER);
 
             final KPanel durationLayer = new KPanel(new BorderLayout());
-            durationLayer.add(KPanel.wantDirectAddition(giveLabel("Specified duration:")),BorderLayout.WEST);
-            durationLayer.add(KPanel.wantDirectAddition(giveValueLabel(theTask.getSpecifiedDuration()+" days")),BorderLayout.CENTER);
+            durationLayer.add(new KPanel(giveLabel("Specified duration:")),BorderLayout.WEST);
+            durationLayer.add(new KPanel(giveValueLabel(theTask.getSpecifiedDuration()+" days")),BorderLayout.CENTER);
 
             final KPanel addDateLayer = new KPanel(new BorderLayout());
-            addDateLayer.add(KPanel.wantDirectAddition(giveLabel("Date Initiated:")),BorderLayout.WEST);
-            addDateLayer.add(KPanel.wantDirectAddition(giveValueLabel(theTask.getStartDate())),BorderLayout.CENTER);
+            addDateLayer.add(new KPanel(giveLabel("Date Initiated:")),BorderLayout.WEST);
+            addDateLayer.add(new KPanel(giveValueLabel(theTask.getStartDate())),BorderLayout.CENTER);
 
             final KPanel completeDateLayer = new KPanel(new BorderLayout());
-            completeDateLayer.add(KPanel.wantDirectAddition(giveLabel("Date expected to complete:")),BorderLayout.WEST);
-            completeDateLayer.add(KPanel.wantDirectAddition(giveValueLabel(theTask.getDateExpectedToComplete())),BorderLayout.CENTER);
+            completeDateLayer.add(new KPanel(giveLabel("Date expected to complete:")),BorderLayout.WEST);
+            completeDateLayer.add(new KPanel(giveValueLabel(theTask.getDateExpectedToComplete())),BorderLayout.CENTER);
 
             final KPanel soFarLayer = new KPanel(new BorderLayout());
-            soFarLayer.add(KPanel.wantDirectAddition(giveLabel("Time taken so far:")),BorderLayout.WEST);
-            soFarLayer.add(KPanel.wantDirectAddition(giveValueLabel(theTask.getDaysTaken() == 0 ? "Less than a day" :
+            soFarLayer.add(new KPanel(giveLabel("Time taken so far:")),BorderLayout.WEST);
+            soFarLayer.add(new KPanel(giveValueLabel(theTask.getDaysTaken() == 0 ? "Less than a day" :
                     Globals.checkPlurality(theTask.getDaysTaken(), "days"))), BorderLayout.CENTER);
 
             final KPanel remainingLayer = new KPanel(new BorderLayout());
-            remainingLayer.add(KPanel.wantDirectAddition(giveLabel("Time remaining:")),BorderLayout.WEST);
-            remainingLayer.add(KPanel.wantDirectAddition(giveValueLabel(theTask.getDaysLeft() == 1 ? "Less than a day" :
+            remainingLayer.add(new KPanel(giveLabel("Time remaining:")),BorderLayout.WEST);
+            remainingLayer.add(new KPanel(giveValueLabel(theTask.getDaysLeft() == 1 ? "Less than a day" :
                     theTask.getDaysLeft()+" days")),BorderLayout.CENTER);
 
             final KPanel completedLayer = new KPanel(new BorderLayout());
-            completedLayer.add(KPanel.wantDirectAddition(giveLabel("Date completed:")),BorderLayout.WEST);
-            completedLayer.add(KPanel.wantDirectAddition(giveValueLabel(theTask.getDateCompleted())),BorderLayout.CENTER);
+            completedLayer.add(new KPanel(giveLabel("Date completed:")),BorderLayout.WEST);
+            completedLayer.add(new KPanel(giveValueLabel(theTask.getDateCompleted())),BorderLayout.CENTER);
 
             final KPanel consumedLayer = new KPanel(new BorderLayout());
-            consumedLayer.add(KPanel.wantDirectAddition(giveLabel("Time consumed:")),BorderLayout.WEST);
-            consumedLayer.add(KPanel.wantDirectAddition(giveValueLabel(theTask.getTotalTimeConsumed() == 0 ? "Less than a day" :
+            consumedLayer.add(new KPanel(giveLabel("Time consumed:")),BorderLayout.WEST);
+            consumedLayer.add(new KPanel(giveValueLabel(theTask.getTotalTimeConsumed() == 0 ? "Less than a day" :
                     theTask.getTotalTimeConsumed() == theTask.getSpecifiedDuration() ? " Period specified ("+theTask.getSpecifiedDuration()+" days)" :
                             Globals.checkPlurality(theTask.getTotalTimeConsumed(), "days"))),BorderLayout.CENTER);
 
@@ -123,42 +123,42 @@ public class TaskExhibition {
             exhibitionPane.setLayout(new BoxLayout(exhibitionPane, BoxLayout.Y_AXIS));
 
             final KPanel namePanel = new KPanel(new BorderLayout());
-            namePanel.add(KPanel.wantDirectAddition(giveLabel("Project name:")),BorderLayout.WEST);
-            namePanel.add(KPanel.wantDirectAddition(giveValueLabel(theProject.getProjectName())),BorderLayout.CENTER);
+            namePanel.add(new KPanel(giveLabel("Project name:")),BorderLayout.WEST);
+            namePanel.add(new KPanel(giveValueLabel(theProject.getProjectName())),BorderLayout.CENTER);
 
             final KPanel typePanel = new KPanel(new BorderLayout());
-            typePanel.add(KPanel.wantDirectAddition(giveLabel("Type:")),BorderLayout.WEST);
-            typePanel.add(KPanel.wantDirectAddition(giveValueLabel(theProject.getType())),BorderLayout.CENTER);
+            typePanel.add(new KPanel(giveLabel("Type:")),BorderLayout.WEST);
+            typePanel.add(new KPanel(giveValueLabel(theProject.getType())),BorderLayout.CENTER);
 
             final KPanel statusPanel = new KPanel(new BorderLayout());
-            statusPanel.add(KPanel.wantDirectAddition(giveLabel("Status:")),BorderLayout.WEST);
-            statusPanel.add(KPanel.wantDirectAddition(giveValueLabel(theProject.isLive() ? "Running" : "Completed")),BorderLayout.CENTER);
+            statusPanel.add(new KPanel(giveLabel("Status:")),BorderLayout.WEST);
+            statusPanel.add(new KPanel(giveValueLabel(theProject.isLive() ? "Running" : "Completed")),BorderLayout.CENTER);
 
             final KPanel startedPanel = new KPanel(new BorderLayout());
-            startedPanel.add(KPanel.wantDirectAddition(giveLabel("Started:")),BorderLayout.WEST);
-            startedPanel.add(KPanel.wantDirectAddition(giveValueLabel(theProject.getStartDate())),BorderLayout.CENTER);
+            startedPanel.add(new KPanel(giveLabel("Started:")),BorderLayout.WEST);
+            startedPanel.add(new KPanel(giveValueLabel(theProject.getStartDate())),BorderLayout.CENTER);
 
             final KPanel expectedPanel = new KPanel(new BorderLayout());
-            expectedPanel.add(KPanel.wantDirectAddition(giveLabel("Expected to complete:")),BorderLayout.WEST);
-            expectedPanel.add(KPanel.wantDirectAddition(giveValueLabel(theProject.getDateExpectedToComplete())), BorderLayout.CENTER);
+            expectedPanel.add(new KPanel(giveLabel("Expected to complete:")),BorderLayout.WEST);
+            expectedPanel.add(new KPanel(giveValueLabel(theProject.getDateExpectedToComplete())), BorderLayout.CENTER);
 
             final KPanel soFarPanel = new KPanel(new BorderLayout());
-            soFarPanel.add(KPanel.wantDirectAddition(giveLabel("Time taken so far:")),BorderLayout.WEST);
-            soFarPanel.add(KPanel.wantDirectAddition(giveValueLabel(theProject.getDaysTaken() == 0 ? "Less than a day" :
+            soFarPanel.add(new KPanel(giveLabel("Time taken so far:")),BorderLayout.WEST);
+            soFarPanel.add(new KPanel(giveValueLabel(theProject.getDaysTaken() == 0 ? "Less than a day" :
                     Globals.checkPlurality(theProject.getDaysTaken(), "days"))),BorderLayout.CENTER);
 
             final KPanel remPanel = new KPanel(new BorderLayout());
-            remPanel.add(KPanel.wantDirectAddition(giveLabel("Time remaining:")),BorderLayout.WEST);
-            remPanel.add(KPanel.wantDirectAddition(giveValueLabel(theProject.getDaysLeft() == 1 ? "Less than a day" :
+            remPanel.add(new KPanel(giveLabel("Time remaining:")),BorderLayout.WEST);
+            remPanel.add(new KPanel(giveValueLabel(theProject.getDaysLeft() == 1 ? "Less than a day" :
                     theProject.getDaysLeft()+" days")), BorderLayout.CENTER);
 
             final KPanel completedPanel = new KPanel(new BorderLayout());
-            completedPanel.add(KPanel.wantDirectAddition(giveLabel("Completed:")),BorderLayout.WEST);
-            completedPanel.add(KPanel.wantDirectAddition(giveValueLabel(theProject.getDateCompleted())), BorderLayout.CENTER);
+            completedPanel.add(new KPanel(giveLabel("Completed:")),BorderLayout.WEST);
+            completedPanel.add(new KPanel(giveValueLabel(theProject.getDateCompleted())), BorderLayout.CENTER);
 
             final KPanel consumedPanel = new KPanel(new BorderLayout());
-            consumedPanel.add(KPanel.wantDirectAddition(giveLabel("Time Consumed:")),BorderLayout.WEST);
-            consumedPanel.add(KPanel.wantDirectAddition(giveValueLabel(theProject.getTotalTimeConsumed() == 0 ? "Less than a day" :
+            consumedPanel.add(new KPanel(giveLabel("Time Consumed:")),BorderLayout.WEST);
+            consumedPanel.add(new KPanel(giveValueLabel(theProject.getTotalTimeConsumed() == 0 ? "Less than a day" :
                     theProject.getDaysTaken() == theProject.getSpecifiedDuration() ? "Specified period ("+theProject.getSpecifiedDuration()+" days)" :
                             theProject.getDaysTaken() +" days")), BorderLayout.CENTER);
 
@@ -172,7 +172,7 @@ public class TaskExhibition {
             closeButton.addActionListener(e -> this.dispose());
 
             exhibitionPane.add(Box.createVerticalStrut(25));
-            exhibitionPane.add(KPanel.wantDirectAddition(closeButton));
+            exhibitionPane.add(new KPanel(closeButton));
 
             this.getRootPane().setDefaultButton(closeButton);
             this.setContentPane(exhibitionPane);
@@ -194,36 +194,36 @@ public class TaskExhibition {
             this.setResizable(true);
 
             final KPanel subjectPanel = new KPanel(new BorderLayout());
-            subjectPanel.add(KPanel.wantDirectAddition(giveLabel("Subject:")),BorderLayout.WEST);
-            subjectPanel.add(KPanel.wantDirectAddition(giveValueLabel(assignment.getCourseName())),BorderLayout.CENTER);
+            subjectPanel.add(new KPanel(giveLabel("Subject:")),BorderLayout.WEST);
+            subjectPanel.add(new KPanel(giveValueLabel(assignment.getCourseName())),BorderLayout.CENTER);
 
             final KPanel statusPanel = new KPanel(new BorderLayout());
-            statusPanel.add(KPanel.wantDirectAddition(giveLabel("Status:")),BorderLayout.WEST);
-            statusPanel.add(KPanel.wantDirectAddition(giveValueLabel(assignment.isOn() ? "In-progress / Un-submitted" : "Submitted")), BorderLayout.CENTER);
+            statusPanel.add(new KPanel(giveLabel("Status:")),BorderLayout.WEST);
+            statusPanel.add(new KPanel(giveValueLabel(assignment.isOn() ? "In-progress / Un-submitted" : "Submitted")), BorderLayout.CENTER);
 
             final KPanel startPanel = new KPanel(new BorderLayout());
-            startPanel.add(KPanel.wantDirectAddition(giveLabel("Date Initiated:")),BorderLayout.WEST);
-            startPanel.add(KPanel.wantDirectAddition(giveValueLabel(assignment.getStartDate())),BorderLayout.CENTER);
+            startPanel.add(new KPanel(giveLabel("Date Initiated:")),BorderLayout.WEST);
+            startPanel.add(new KPanel(giveValueLabel(assignment.getStartDate())),BorderLayout.CENTER);
 
             final KPanel submittedPanel = new KPanel(new BorderLayout());
-            submittedPanel.add(KPanel.wantDirectAddition(giveLabel("Date Submitted:")),BorderLayout.WEST);
-            submittedPanel.add(KPanel.wantDirectAddition(giveValueLabel(assignment.getSubmissionDate())),BorderLayout.CENTER);
+            submittedPanel.add(new KPanel(giveLabel("Date Submitted:")),BorderLayout.WEST);
+            submittedPanel.add(new KPanel(giveValueLabel(assignment.getSubmissionDate())),BorderLayout.CENTER);
 
             final KPanel deadlinePanel = new KPanel(new BorderLayout());
-            deadlinePanel.add(KPanel.wantDirectAddition(giveLabel("Deadline Given:")),BorderLayout.WEST);
-            deadlinePanel.add(KPanel.wantDirectAddition(giveValueLabel(assignment.getDeadLine())),BorderLayout.CENTER);
+            deadlinePanel.add(new KPanel(giveLabel("Deadline Given:")),BorderLayout.WEST);
+            deadlinePanel.add(new KPanel(giveValueLabel(assignment.getDeadLine())),BorderLayout.CENTER);
 
             final KPanel remainPanel = new KPanel(new BorderLayout());
-            remainPanel.add(KPanel.wantDirectAddition(giveLabel("Time Remaining:")),BorderLayout.WEST);
-            remainPanel.add(KPanel.wantDirectAddition(giveValueLabel((Globals.checkPlurality(assignment.getTimeRemaining(),"days")) +
+            remainPanel.add(new KPanel(giveLabel("Time Remaining:")),BorderLayout.WEST);
+            remainPanel.add(new KPanel(giveValueLabel((Globals.checkPlurality(assignment.getTimeRemaining(),"days")) +
                     " to submit")),BorderLayout.CENTER);
 
             final KPanel modePanel = new KPanel(new BorderLayout());
-            modePanel.add(KPanel.wantDirectAddition(giveLabel("Mode of submission:")), BorderLayout.WEST);
-            modePanel.add(KPanel.wantDirectAddition(giveValueLabel(assignment.getModeOfSubmission())), BorderLayout.CENTER);
+            modePanel.add(new KPanel(giveLabel("Mode of submission:")), BorderLayout.WEST);
+            modePanel.add(new KPanel(giveValueLabel(assignment.getModeOfSubmission())), BorderLayout.CENTER);
 
             final KPanel questionPanel = new KPanel(new BorderLayout());
-            questionPanel.add(KPanel.wantDirectAddition(giveLabel("Question(s):")), BorderLayout.WEST);
+            questionPanel.add(new KPanel(giveLabel("Question(s):")), BorderLayout.WEST);
             final KTextArea questionArea = new KTextArea();
             questionArea.setText(assignment.getQuestion());
             final KScrollPane scrollPane = KScrollPane.getTextAreaScroller(questionArea, new Dimension(475,150));
