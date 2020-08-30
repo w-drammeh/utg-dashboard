@@ -9,7 +9,13 @@ import java.util.List;
  * By default, all dialogs are disposable, and not resizable.
  */
 public class KDialog extends JDialog implements Preference {
-    public static final List<KDialog> ALL_DIALOGS = new ArrayList<>();
+    public static final List<KDialog> ALL_DIALOGS = new ArrayList<>(){
+        @Override
+        public boolean add(KDialog dialog) {
+            SwingUtilities.updateComponentTreeUI(dialog);
+            return super.add(dialog);
+        }
+    };
 
 
     public KDialog(){

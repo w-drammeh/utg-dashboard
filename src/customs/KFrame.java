@@ -9,7 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KFrame extends JFrame implements Preference {
-    public static final List<KFrame> ALL_FRAMES = new ArrayList<>();
+    public static final List<KFrame> ALL_FRAMES = new ArrayList<>(){
+        @Override
+        public boolean add(KFrame frame) {
+            SwingUtilities.updateComponentTreeUI(frame);
+            return super.add(frame);
+        }
+    };
 
 
     public KFrame(String title){

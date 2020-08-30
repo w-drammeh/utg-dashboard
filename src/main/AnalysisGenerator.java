@@ -8,8 +8,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-import static java.awt.Color.BLUE;
-
 public class AnalysisGenerator implements ActivityAnswerer {
     private KLabel aPlusTellerLabel, aNeutralTellerLabel, aMinusTellerLabel, bPlusTellerLabel, bNeutralTellerLabel, bMinusTellerLabel,
             cPlusTellerLabel, cNeutralTellerLabel, cMinusTellerLabel, dTellerLabel, fTellerLabel;
@@ -26,19 +24,16 @@ public class AnalysisGenerator implements ActivityAnswerer {
             highestDERScoreCourse, lowestDERScoreCourse, highestGERScoreCourse, lowestGERScoreCourse;
     private CardLayout cardLayout;
     private KPanel coursesBased, semestersBased, yearsBased;
-//
     private static final Font VALUE_FONT = KFontFactory.createPlainFont(15);
     private static final Font HINT_FONT = KFontFactory.createBoldFont(15);
     private static final Font ON_FOCUS_FONT = KFontFactory.createBoldFont(16);
     private static final Cursor ON_FOCUS_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
-//
     private static ArrayList<String> semestersList, yearsList;
     private static ArrayList<Double> semesterScores;//as for the names, the 'semestersList' is enough - it's being static for such reason?
 
 
     public AnalysisGenerator(){
-        cardLayout = new CardLayout();
-        final KPanel analysisContents = new KPanel(cardLayout);
+        final KPanel analysisContents = new KPanel(cardLayout = new CardLayout());
         cardLayout.addLayoutComponent(analysisContents.add(new KScrollPane(coursesAnalysisBasement(),false)), "course-basement");
         cardLayout.addLayoutComponent(analysisContents.add(new KScrollPane(initiateSemestersAnalysisBasement(),false)), "semester-basement");
         cardLayout.addLayoutComponent(analysisContents.add(new KScrollPane(initiateYearlyAnalysisBasement(),false)),"year-basement");
@@ -338,7 +333,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
             }
         });
 
-        allTellerLabel = new KLabel("", VALUE_FONT, BLUE);
+        allTellerLabel = new KLabel("", VALUE_FONT, Color.BLUE);
         allTellerLabel.underline(true);
         allTellerLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         allTellerLabel.addMouseListener(new MouseAdapter() {
@@ -410,7 +405,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
         } else {
             for (String semTex : semestersList) {
                 final ArrayList<Course> fractionalSem = Memory.getFractionBySemester(semTex);
-                final KLabel promptLabel = new KLabel("", VALUE_FONT, BLUE);
+                final KLabel promptLabel = new KLabel("", VALUE_FONT, Color.BLUE);
                 promptLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 promptLabel.addMouseListener(new MouseAdapter() {
                     @Override
@@ -437,12 +432,12 @@ public class AnalysisGenerator implements ActivityAnswerer {
                 semestersBased.addAll(newAnalysisHeader(semTex),newAnalysisPlate("Courses Registered",promptLabel),
                         newAnalysisPlate("CGPA Earned",cgTeller));
             }
-            final KLabel totalLabel = new KLabel(Globals.checkPlurality(semestersList.size(),"Semesters"), VALUE_FONT, BLUE);
+            final KLabel totalLabel = new KLabel(Globals.checkPlurality(semestersList.size(),"Semesters"), VALUE_FONT, Color.BLUE);
             totalLabel.underline(true);
             semestersBased.addAll(newAnalysisHeader("Overall"),
                     newAnalysisPlate("All together",totalLabel),
-                    newAnalysisPlate("Best Semester",new KLabel(Memory.traceBestSemester(true), VALUE_FONT, BLUE)),
-                    newAnalysisPlate("Worst Semester",new KLabel(Memory.traceWorstSemester(true), VALUE_FONT, BLUE)),
+                    newAnalysisPlate("Best Semester",new KLabel(Memory.traceBestSemester(true), VALUE_FONT, Color.BLUE)),
+                    newAnalysisPlate("Worst Semester",new KLabel(Memory.traceWorstSemester(true), VALUE_FONT, Color.BLUE)),
                     newAnalysisHeader("Performance Sketch"),new RoughSketch());
         }
         ComponentAssistant.ready(semestersBased);
@@ -461,7 +456,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
         } else {
             for (String yearTex : yearsList) {
                 final ArrayList<Course> fractionalYear = Memory.getFractionByYear(yearTex);
-                final KLabel allPromptLabel = new KLabel("", VALUE_FONT, BLUE);
+                final KLabel allPromptLabel = new KLabel("", VALUE_FONT, Color.BLUE);
                 allPromptLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 allPromptLabel.addMouseListener(new MouseAdapter() {
                     @Override
@@ -486,7 +481,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
                 attachActiveOnFocus(allPromptLabel, null);
 
                 final ArrayList<String> yLectsList = Memory.getLecturersByYear(yearTex);
-                final KLabel tutorsLabel = new KLabel(Globals.checkPlurality(yLectsList.size(),"Lecturers"), VALUE_FONT, BLUE);
+                final KLabel tutorsLabel = new KLabel(Globals.checkPlurality(yLectsList.size(),"Lecturers"), VALUE_FONT, Color.BLUE);
                 tutorsLabel.setCursor(tutorsLabel.getText().equals("No Lecturers") ? null : Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 attachActiveOnFocus(tutorsLabel, "No Lecturers");
                 tutorsLabel.addMouseListener(new MouseAdapter() {
@@ -503,11 +498,11 @@ public class AnalysisGenerator implements ActivityAnswerer {
                         newAnalysisPlate("DERs",specificYearLabel("DERs",yDERs,yearTex)),
                         newAnalysisPlate("GERs",specificYearLabel("GERs",yGERs,yearTex)),
                         newAnalysisPlate("Lecturers",tutorsLabel),
-                        newAnalysisPlate("CGPA Earned",new KLabel(Globals.toFourth(Memory.getCGPAByYear(yearTex)), VALUE_FONT, BLUE)));
+                        newAnalysisPlate("CGPA Earned",new KLabel(Globals.toFourth(Memory.getCGPAByYear(yearTex)), VALUE_FONT, Color.BLUE)));
             }
 
             final ArrayList<String> lectsList = Memory.filterLecturers();
-            final KLabel totalTutorsLabel = new KLabel(Globals.checkPlurality(lectsList.size(),"distinguished lecturers"), VALUE_FONT, BLUE);
+            final KLabel totalTutorsLabel = new KLabel(Globals.checkPlurality(lectsList.size(),"distinguished lecturers"), VALUE_FONT, Color.BLUE);
             totalTutorsLabel.setCursor(totalTutorsLabel.getText().equals("No distinguished lecturers") ? null :
                     Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             attachActiveOnFocus(totalTutorsLabel, "No distinguished lecturers");
@@ -520,14 +515,14 @@ public class AnalysisGenerator implements ActivityAnswerer {
                 }
             });
 
-            final KLabel totalLabel = new KLabel(Globals.checkPlurality(yearsList.size(),"Academic years"), VALUE_FONT, BLUE);
+            final KLabel totalLabel = new KLabel(Globals.checkPlurality(yearsList.size(),"Academic years"), VALUE_FONT, Color.BLUE);
             totalLabel.underline(true);
             yearsBased.addAll(newAnalysisHeader("Overall"),
                     newAnalysisPlate("All together",totalLabel),
                     newAnalysisPlate("My Tutors",totalTutorsLabel),
-                    newAnalysisPlate("Best Year",new KLabel(Memory.traceBestYear(true), VALUE_FONT, BLUE)),
-                    newAnalysisPlate("Worst Year",new KLabel(Memory.traceWorstYear(true), VALUE_FONT, BLUE)),
-                    newAnalysisPlate("Current CGPA",new KLabel(Student.getCGPA()+" ["+Student.upperDivision()+"]", VALUE_FONT, BLUE)));
+                    newAnalysisPlate("Best Year",new KLabel(Memory.traceBestYear(true), VALUE_FONT, Color.BLUE)),
+                    newAnalysisPlate("Worst Year",new KLabel(Memory.traceWorstYear(true), VALUE_FONT, Color.BLUE)),
+                    newAnalysisPlate("Current CGPA",new KLabel(Student.getCGPA()+" ["+Student.upperDivision()+"]", VALUE_FONT, Color.BLUE)));
         }
         ComponentAssistant.ready(yearsBased);
     }
@@ -547,7 +542,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
     }
 
     private KLabel specificYearLabel(String plText, ArrayList<Course> list, String specificName){
-        final KLabel kLabel = new KLabel(getProperValueText(list), VALUE_FONT, BLUE);
+        final KLabel kLabel = new KLabel(getProperValueText(list), VALUE_FONT, Color.BLUE);
         kLabel.setCursor(kLabel.getText().equals("None") ? null : Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         kLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -587,7 +582,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
     }
 
     private KLabel newValueLabel(){
-        final KLabel vLabel = new KLabel("", VALUE_FONT, BLUE){
+        final KLabel vLabel = new KLabel("", VALUE_FONT, Color.BLUE){
             @Override
             public void setText(String newText) {
                 super.setText(newText);
@@ -600,7 +595,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
     }
 
     private KLabel newSingletonLabel(){
-        final KLabel singletonLabel = new KLabel("", VALUE_FONT, BLUE){
+        final KLabel singletonLabel = new KLabel("", VALUE_FONT, Color.BLUE){
             @Override
             public void setText(String newText) {
                 super.setText(newText);
@@ -906,7 +901,7 @@ public class AnalysisGenerator implements ActivityAnswerer {
 
                 final Stroke oldStroke = g2.getStroke();
                 g2.setStroke(oldStroke);
-                g2.setColor(BLUE);
+                g2.setColor(Color.BLUE);
 
                 for (int i = 0; i < points.size(); i++) {
                     int x = points.get(i).x - POINTS_WIDTH / 2;

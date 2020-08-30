@@ -8,7 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KPanel extends JPanel implements Preference {
-    public static final List<KPanel> ALL_PANELS = new ArrayList<>();
+    public static final List<KPanel> ALL_PANELS = new ArrayList<>(){
+        @Override
+        public boolean add(KPanel panel) {
+            panel.setBackground(SettingsCore.currentBackground());
+            return super.add(panel);
+        }
+    };
 
 
     public KPanel(){
@@ -68,7 +74,6 @@ public class KPanel extends JPanel implements Preference {
     }
 
     public void setPreferences() {
-        this.setBackground(SettingsCore.currentBackground());//since some are created at runtime
         ALL_PANELS.add(this);
     }
 

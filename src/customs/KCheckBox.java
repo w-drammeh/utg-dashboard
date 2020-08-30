@@ -7,10 +7,12 @@ public class KCheckBox extends JCheckBox implements Preference {
 
     public KCheckBox(String text){
         super(text);
+        this.setPreferences();
     }
 
     public KCheckBox(String text, boolean selected){
         super(text, selected);
+        this.setPreferences();
     }
 
     @Override

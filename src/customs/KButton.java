@@ -114,6 +114,7 @@ public class KButton extends JButton implements Preference {
 
     @Override
     public void setPreferences(){
+        this.setFont(KFontFactory.createPlainFont(15));
         this.setFocusable(false);
     }
 

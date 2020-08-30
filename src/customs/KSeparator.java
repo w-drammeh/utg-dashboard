@@ -41,6 +41,7 @@ public class KSeparator extends JSeparator implements Preference {
 
     @Override
     public void setPreferences() {
+        this.setOpaque(false);
     }
 
 }

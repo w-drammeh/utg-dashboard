@@ -25,7 +25,7 @@ public class KTextPane extends JTextPane implements Preference {
     public void setPreferences(){
         this.setEditable(false);
         this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        this.setFont(KFontFactory.createPlainFont(15));//in case of non-html
+        this.setFont(KFontFactory.createPlainFont(15));//as in case of non-html
     }
 
 }
