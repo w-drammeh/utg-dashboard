@@ -36,7 +36,7 @@ public class Login extends KDialog {
         this.setSize(720, 425);
         this.setDefaultCloseOperation(Login.DO_NOTHING_ON_CLOSE);
 
-        final KLabel bigText = new KLabel("LOGIN TO GET THE MOST OUT OF YOUR STUDENT-HOOD!",
+        final KLabel bigText = new KLabel("LOGIN TO GET THE MOST OUT OF YOUR STUDENTHOOD",
                 KFontFactory.createPlainFont(18), Color.WHITE);
         bigText.setBounds(15, 10, 625, 30);
         bigText.setOpaque(false);
@@ -56,32 +56,30 @@ public class Login extends KDialog {
 
         emailField = new KTextField();
         emailField.setBounds(105, 45, 315, 30);
-        emailField.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2, true));
-        emailField.setToolTipText("Insert email here");
+        emailField.setToolTipText("Enter email here");
         emailField.addActionListener(e-> passwordField.requestFocusInWindow());
 
         passwordField = new JPasswordField(){
             @Override
             public JToolTip createToolTip() {
-                return KLabel.preferredTip();
+                return MComponent.preferredTip();
             }
         };
-        passwordField.setBorder(emailField.getBorder());
         passwordField.setHorizontalAlignment(emailField.getHorizontalAlignment());
         passwordField.setFont(emailField.getFont());
         passwordField.setBounds(105, 100, 315, 30);
-        passwordField.setToolTipText("Insert password here");
+        passwordField.setToolTipText("Enter password here");
         passwordField.addActionListener(e-> loginTriggered());
 
         loginButton = new KButton("LOGIN");
         loginButton.setStyle(KFontFactory.createPlainFont(15), Color.BLUE);
-        loginButton.setBounds(265, 160, 110, 30);
+        loginButton.setBounds(270, 150, 100, 30);
         loginButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         loginButton.addActionListener(e-> loginTriggered());
 
         closeButton = new KButton("CLOSE");
         closeButton.setFont(loginButton.getFont());
-        closeButton.setBounds(140, 160, 110, 30);
+        closeButton.setBounds(155, 150, 100, 30);
         closeButton.addActionListener(CLOSE_LISTENER);
 
         final KPanel smallPanel = new KPanel();
@@ -96,7 +94,7 @@ public class Login extends KDialog {
         statusPanel.setBackground(new Color(40, 40, 40));
 
         statusHolder = KScrollPane.getAutoScroller(statusPanel);
-        statusHolder.setBounds(1, 270, 718, 154);
+        statusHolder.setBounds(1, 265, 718, 160);
 
         final KPanel contentsPanel = new KPanel();
         contentsPanel.setBackground(new Color(40, 40, 40));
@@ -116,7 +114,7 @@ public class Login extends KDialog {
             App.signalError(rootPane,"No Password", "Password Field cannot be blank. Please insert a password.");
             passwordField.requestFocusInWindow();
         } else {
-            if (!InternetAvailabilityChecker.isInternetAvailable()) {
+            if (!Internet.isInternetAvailable()) {
                 App.signalError(rootPane,"Internet Error","Internet connection is required to set up Dashboard.\n" +
                         "Please connect to the internet and try again.");
                 return;
@@ -137,28 +135,22 @@ public class Login extends KDialog {
         final KLabel newLabel = new KLabel(update, KFontFactory.createPlainFont(15), Color.WHITE);
         newLabel.setOpaque(false);
         statusPanel.add(newLabel);
-        ComponentAssistant.ready(statusPanel);
+        MComponent.ready(statusPanel);
         try {
             Thread.sleep(250);
-            if (update.equals("-")) {
-                statusHolder.stopAutoScrolling();
-                RunningCoursesGenerator.uploadInitials();
-                ModulesHandler.uploadModules();
-                Student.setup();
-            }
         } catch (InterruptedException ignored) {
         }
     }
 
     public static void replaceLastUpdate(String newUpdate){
-        statusPanel.removeLastChild();
+        statusPanel.removeLast();
         appendToStatus(newUpdate);
     }
 
     public static void setInputsState(boolean state){
-        ComponentAssistant.empty(statusPanel);
-        emailField.setEditable(state);
-        passwordField.setEditable(state);
+        MComponent.empty(statusPanel);
+        emailField.setEnabled(state);
+        passwordField.setEnabled(state);
         loginButton.setEnabled(state);
         if (state) {
             closeButton.removeActionListener(PrePortal.CANCEL_LISTENER);
@@ -187,25 +179,27 @@ public class Login extends KDialog {
      * PrePortal should call this after it's done all its tasks.
      */
     public static void notifyCompletion(){
+        closeButton.setEnabled(false);
         appendToStatus("#####");
-        loginButton.setEnabled(false);
         Login.appendToStatus("Now running Pre-Dashboard builds....... Please wait");
-        final KButton enter = new KButton("Launch Dashboard");
+        Student.initialize();
+        final KButton enter = new KButton();
         enter.setFocusable(true);
-        SwingUtilities.invokeLater(()-> {
-            final Board firstBoard = new Board();
-            enter.addActionListener(e-> {
-                instance.dispose();
-                firstBoard.setVisible(true);
-            });
-            rootPane.add(enter);
-            rootPane.setDefaultButton(enter);
-            replaceLastUpdate("Now running Pre-Dashboard builds....... Completed");
-            appendToStatus("Your Dashboard is ready : Press 'Enter' to launch");
-            appendToStatus("----------------------------------------------------------------------------------------------------------------------------------------");
-            appendToStatus("                                                <<<<------- Enter ------>>>>");
-            appendToStatus("-");
+        final Board firstBoard = new Board();
+        RunningCoursesGenerator.uploadInitials();
+        ModulesHandler.uploadModules();
+        enter.addActionListener(e-> {
+            instance.dispose();
+            firstBoard.setVisible(true);
         });
+        rootPane.add(enter);
+        rootPane.setDefaultButton(enter);
+        replaceLastUpdate("Now running Pre-Dashboard builds....... Completed");
+        appendToStatus("Your Dashboard is ready : Press 'Enter' to launch");
+        appendToStatus("------------------------------------------------------------------------------------------------------------------------------------------");
+        appendToStatus("                                                <<<<------- Enter ------>>>>");
+        appendToStatus("-");
+        statusHolder.stopAutoScrolling();
     }
 
 }

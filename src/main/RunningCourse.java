@@ -21,7 +21,8 @@ public class RunningCourse implements Serializable {
     private boolean isConfirmed;
 
 
-    public RunningCourse(String code, String name, String lName, String vName, String rName, String day, String time, boolean onPortal){
+    public RunningCourse(String code, String name, String lName, String vName, String rName, String day, String time,
+                         boolean onPortal){
         this.code = code.toUpperCase();
         this.name = name;
         this.lecturer = lName;
@@ -32,34 +33,6 @@ public class RunningCourse implements Serializable {
         this.isConfirmed = onPortal;
     }
 
-    /**
-     * See Course.importFromSerial(String)
-     */
-    public static RunningCourse importFromSerial(String dataLines){
-        final String[] data = dataLines.split("\n");
-        boolean onPortalState = false;
-        try {
-            onPortalState = Boolean.parseBoolean(data[7]);
-        } catch (Exception e) {
-            App.silenceException("Warning: error reading validity of the registered course "+data[3]);
-        }
-
-        return new RunningCourse(data[0], data[1], data[2], data[3], data[4], data[5], data[6], onPortalState);
-    }
-
-    /**
-     * See Course.exportContent()
-     */
-    public String exportContent(){
-        return code+"\n" +
-                name+"\n" +
-                lecturer+"\n" +
-                venue+"\n" +
-                room+"\n" +
-                day+"\n" +
-                time+"\n" +
-                isConfirmed+"\n";
-    }
 
     public String getCode(){
         return code;
@@ -117,18 +90,6 @@ public class RunningCourse implements Serializable {
         this.time = newTime;
     }
 
-    public String schedule(){
-        if (Globals.hasText(day) && Globals.hasText(time)) {
-            return String.join(" ", day, time);
-        } else if (Globals.hasText(day) && !Globals.hasText(time)) {
-            return String.join(" - ", day, "Unknown time");
-        } else if (!Globals.hasText(day) && Globals.hasText(time)) {
-            return String.join(" - ", time, "Unknown day");
-        } else {
-            return "";
-        }
-    }
-
     public boolean isConfirmed(){
         return isConfirmed;
     }
@@ -137,61 +98,105 @@ public class RunningCourse implements Serializable {
         this.isConfirmed = onPortal;
     }
 
-    public static void exhibit(Component base, RunningCourse activeCourse){
-        final KDialog exhibitDialog = new KDialog(activeCourse.getName());
-        exhibitDialog.setResizable(true);
-        exhibitDialog.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
+//
+    public String getAbsoluteName(){
+        return String.join(" ", code, name);
+    }
+
+    public String getSchedule(){
+        if (Globals.hasText(day) && Globals.hasText(time)) {
+            return String.join(" ", day, time);
+        } else if (Globals.hasText(day) && Globals.isBlank(time)) {
+            return String.join(" - ", day, "Unknown time");
+        } else if (Globals.isBlank(day) && Globals.hasText(time)) {
+            return String.join(" - ", time, "Unknown day");
+        } else {
+            return "";
+        }
+    }
+
+    public String exportContent(){
+        return code + "\n" +
+                name + "\n" +
+                lecturer + "\n" +
+                venue + "\n" +
+                room + "\n" +
+                day + "\n" +
+                time + "\n" +
+                isConfirmed;
+    }
+
+    public static RunningCourse importFromSerial(String dataLines){
+        final String[] data = dataLines.split("\n");
+        boolean onPortalState = false;
+        try {
+            onPortalState = Boolean.parseBoolean(data[7]);
+        } catch (Exception e) {
+            App.silenceException("Warning: error reading validity of the registered course "+data[3]);
+        }
+        return new RunningCourse(data[0], data[1], data[2], data[3], data[4], data[5], data[6], onPortalState);
+    }
+
+    public static void exhibit(RunningCourse course, Component base){
+        if (course == null) {
+            return;
+        }
+
+        final KDialog dialog = new KDialog(course.name);
+        dialog.setResizable(true);
+        dialog.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
 
         final Font hintFont = KFontFactory.createBoldFont(15);
         final Font valueFont = KFontFactory.createPlainFont(15);
 
         final KPanel codePanel = new KPanel(new BorderLayout());
-        codePanel.add(new KPanel(new KLabel("Code:",hintFont)),BorderLayout.WEST);
-        codePanel.add(new KPanel(new KLabel(activeCourse.code,valueFont)),BorderLayout.CENTER);
+        codePanel.add(new KPanel(new KLabel("Code:", hintFont)), BorderLayout.WEST);
+        codePanel.add(new KPanel(new KLabel(course.code, valueFont)), BorderLayout.CENTER);
 
         final KPanel namePanel = new KPanel(new BorderLayout());
-        namePanel.add(new KPanel(new KLabel("Name:",hintFont)),BorderLayout.WEST);
-        namePanel.add(new KPanel(new KLabel(activeCourse.name,valueFont)),BorderLayout.CENTER);
+        namePanel.add(new KPanel(new KLabel("Name:", hintFont)), BorderLayout.WEST);
+        namePanel.add(new KPanel(new KLabel(course.name, valueFont)), BorderLayout.CENTER);
 
         final KPanel lectPanel = new KPanel(new BorderLayout());
-        lectPanel.add(new KPanel(new KLabel("Lecturer:",hintFont)),BorderLayout.WEST);
-        lectPanel.add(new KPanel(new KLabel(activeCourse.lecturer,valueFont)),BorderLayout.CENTER);
+        lectPanel.add(new KPanel(new KLabel("Lecturer:", hintFont)), BorderLayout.WEST);
+        lectPanel.add(new KPanel(new KLabel(course.lecturer, valueFont)), BorderLayout.CENTER);
 
         final KPanel schedulePanel = new KPanel(new BorderLayout());
-        schedulePanel.add(new KPanel(new KLabel("Schedule:",hintFont)),BorderLayout.WEST);
-        schedulePanel.add(new KPanel(new KLabel(activeCourse.schedule(),valueFont)),BorderLayout.CENTER);
+        schedulePanel.add(new KPanel(new KLabel("Schedule:", hintFont)), BorderLayout.WEST);
+        schedulePanel.add(new KPanel(new KLabel(course.getSchedule(), valueFont)), BorderLayout.CENTER);
 
         final KPanel venuePanel = new KPanel(new BorderLayout());
-        venuePanel.add(new KPanel(new KLabel("Venue:",hintFont)),BorderLayout.WEST);
-        venuePanel.add(new KPanel(new KLabel(activeCourse.venue,valueFont)),BorderLayout.CENTER);
+        venuePanel.add(new KPanel(new KLabel("Venue:", hintFont)), BorderLayout.WEST);
+        venuePanel.add(new KPanel(new KLabel(course.venue, valueFont)), BorderLayout.CENTER);
 
         final KPanel roomPanel = new KPanel(new BorderLayout());
-        roomPanel.add(new KPanel(new KLabel("Room:",hintFont)),BorderLayout.WEST);
-        roomPanel.add(new KPanel(new KLabel(activeCourse.room,valueFont)),BorderLayout.CENTER);
+        roomPanel.add(new KPanel(new KLabel("Room:", hintFont)), BorderLayout.WEST);
+        roomPanel.add(new KPanel(new KLabel(course.room, valueFont)), BorderLayout.CENTER);
 
         final KPanel statusPanel = new KPanel(new BorderLayout());
-        statusPanel.add(new KPanel(new KLabel("Status:",hintFont)),BorderLayout.WEST);
-        statusPanel.add(new KPanel(new KLabel((activeCourse.isConfirmed ? "Confirmed" : "Unknown"), valueFont,
-                (activeCourse.isConfirmed ? Color.BLUE : Color.RED))),BorderLayout.CENTER);
+        statusPanel.add(new KPanel(new KLabel("Status:", hintFont)), BorderLayout.WEST);
+        final KLabel vLabel = course.isConfirmed ? new KLabel("Confirmed", valueFont, Color.BLUE) :
+                new KLabel("Unknown", valueFont, Color.RED);
+        statusPanel.add(new KPanel(vLabel), BorderLayout.CENTER);
 
         final KButton closeButton = new KButton("Close");
-        closeButton.addActionListener(e -> exhibitDialog.dispose());
+        closeButton.addActionListener(e-> dialog.dispose());
 
         final KPanel contentPanel = new KPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.addAll(codePanel, namePanel, lectPanel, schedulePanel, venuePanel, roomPanel, statusPanel,
-                ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,closeButton));
+                MComponent.contentBottomGap(), new KPanel(closeButton));
 
-        exhibitDialog.getRootPane().setDefaultButton(closeButton);
-        exhibitDialog.setContentPane(contentPanel);
-        exhibitDialog.pack();
-        exhibitDialog.setMinimumSize(exhibitDialog.getPreferredSize());
-        exhibitDialog.setLocationRelativeTo(base == null ? Board.getRoot() : base);
-        exhibitDialog.setVisible(true);
+        dialog.getRootPane().setDefaultButton(closeButton);
+        dialog.setContentPane(contentPanel);
+        dialog.pack();
+        dialog.setMinimumSize(dialog.getPreferredSize());
+        dialog.setLocationRelativeTo(base == null ? Board.getRoot() : base);
+        SwingUtilities.invokeLater(()-> dialog.setVisible(true));
     }
 
     public static void exhibit(RunningCourse runningCourse){
-        exhibit(null, runningCourse);
+        exhibit(runningCourse, null);
     }
 
 }

@@ -15,6 +15,7 @@ package utg;
 public class SpecificTester {
 
     public static void main(String[] args) {
+        System.out.println(" maha ".strip().length());
     }
 
 }

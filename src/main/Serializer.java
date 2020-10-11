@@ -20,7 +20,7 @@ public class Serializer {
         try {
             final File serialsPath = new File(SERIALS_DIR);
             if (serialsPath.exists() || serialsPath.mkdirs()) {
-                final FileOutputStream fileOutputStream = new FileOutputStream(serialsPath + "/" + name);
+                final FileOutputStream fileOutputStream = new FileOutputStream(serialsPath + FILE_SEPARATOR + name);
                 final ObjectOutputStream out = new ObjectOutputStream(fileOutputStream);
                 out.writeObject(obj);
                 out.close();
@@ -40,7 +40,7 @@ public class Serializer {
     public static Object fromDisk(String serName){
         Object serObject = null;
         try {
-            final FileInputStream fileInputStream = new FileInputStream(SERIALS_DIR +"/"+serName);
+            final FileInputStream fileInputStream = new FileInputStream(SERIALS_DIR + FILE_SEPARATOR + serName);
             final ObjectInputStream in = new ObjectInputStream(fileInputStream);
             serObject = in.readObject();
             in.close();
@@ -72,7 +72,7 @@ public class Serializer {
     public static void placeUserDetails(){
         final String data = "\t\t----This file shall contain the fundamental details of the student / user----\n" +
                 "Do not bother modify this file - all modifications are discarded at every \"collapse\".\n\n" +
-                "Month of Admission: "+ Student.getMonthOfAdmission_Extended()+"\n" +
+                "Month of Admission: "+ Student.getMonthOfAdmissionName()+"\n" +
                 "Year of Admission: "+Student.getYearOfAdmission()+"\n" +
                 "Current Semester: "+Student.getSemester().toUpperCase()+"\n" +
                 "First Name: "+Student.getFirstName()+"\n" +
@@ -94,31 +94,35 @@ public class Serializer {
                 "Marital Status: "+Student.getMaritalStatue()+"\n" +
                 "Place of Birth: "+Student.getPlaceOfBirth()+"\n" +
                 "Level: "+Student.getLevel()+"\n" +
-                "State: "+Student.getState()+"\n" +
+                "Status: "+Student.getStatus()+"\n" +
                 "Last Dashboard Launch: "+ MDate.now()+"\n" +
                 "Dashboard Version: "+ Dashboard.VERSION;
         try {
-            final Formatter formatter = new Formatter(OUTPUT_DIR + "/user.txt");
-            formatter.format(data);
-            formatter.close();
+            final File outputsPath = new File(OUTPUT_DIR);
+            if (outputsPath.exists() || outputsPath.mkdirs()) {
+                final Formatter formatter = new Formatter(OUTPUT_DIR + FILE_SEPARATOR + "user.txt");
+                formatter.format(data);
+                formatter.close();
+            } else {
+                App.silenceException("Error placing user text file; cannot create directory");
+            }
         } catch (FileNotFoundException e) {
             App.silenceException(e);
         }
     }
 
     public static void mountUserData(){
-        toDisk(System.getProperty("user.name"), "userName.ser");
+        toDisk(System.getProperty("user.name"), "user-name.ser");
         placeReadMeFile();
         placeUserDetails();
         Student.serializeData();
         Portal.serialize();
-        SettingsCore.serialize();
-        SettingsUI.serialize();
+        Settings.serialize();
         RunningCoursesGenerator.serializeModules();
         ModulesHandler.serializeData();
         TaskSelf.serializeAll();
         Notification.serializeAll();
-        NewsGenerator.serializeData();
+        News.serializeData();
     }
 
     public static boolean unMountUserData(){

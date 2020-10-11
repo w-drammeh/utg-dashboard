@@ -6,7 +6,6 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,9 +18,12 @@ import java.util.List;
  */
 public class Portal {
     public static final String LOGIN_PAGE = "https://www.utg.gm/login";
+    public static final String LOGOUT_PAGE = "https://www.utg.gm/logout";
     //do not call the contentsPage or profilePage on a driver that has not yet entered....!
     public static final String CONTENTS_PAGE = "https://www.utg.gm/course-registrations";
     public static final String PROFILE_PAGE = "https://www.utg.gm/profile";
+    public static final int MAXIMUM_WAIT_TIME = 30;//intended in seconds
+    public static final int MINIMUM_WAIT_TIME = 5;
     /**
      * It's where the admission notice is.
      * Notice: The same class reference of the admission-notice will change to registrationNotice on the contentsPage.
@@ -35,39 +37,22 @@ public class Portal {
     private static FirefoxDriver portalDriver;
 
 
-    static {
-        new Timer(Globals.DAY, e -> {
-            /*
-            keeps checking every day whether to automate or not. Error generated herein must not come
-            to notice. And it should be internet-availability sensitive.
-             */
-            if (autoSync) {
-                RunningCoursesGenerator.startMatching(false);
-                ModulesGenerator.triggerRefresh(false);
-                NotificationGenerator.updateNotices(false);
-            }
-        }).start();
-    }
-
-    public static void userRequestsOpenPortal(Component button){
+    public static void openPortal(Component clickable){
         new Thread(() -> {
-            button.setEnabled(false);
-            if (InternetAvailabilityChecker.isInternetAvailable()) {
-                final int vInt = App.verifyUser("To access your portal, enter your matriculation number below, so Dashboard confirms its you.\n" +
-                        "-\n" +
-                        "By using this process, do not bother write your Email & Password when the browser is opened - \n" +
-                        "leave everything to Dashboard! In a short-while, the contents of your portal will be shown to you.\n");
+            clickable.setEnabled(false);
+            if (Internet.isInternetAvailable()) {
+                final int vInt = App.verifyUser("To access your portal, kindly enter your Matriculation Number below:");
                 if (vInt == App.VERIFICATION_TRUE) {
-                    showOpenPortal(button);
+                    launchPortal(clickable);
                 } else if (vInt == App.VERIFICATION_FALSE) {
                     App.reportMatError();
-                    button.setEnabled(true);
-                } else {//whatever
-                    button.setEnabled(true);
+                    clickable.setEnabled(true);
+                } else {
+                    clickable.setEnabled(true);
                 }
             } else {
                 App.reportNoInternet();
-                button.setEnabled(true);
+                clickable.setEnabled(true);
             }
         }).start();
     }
@@ -78,14 +63,14 @@ public class Portal {
      * will enable it after completing the pending charges.
      *
      */
-    public static void showOpenPortal(Component kButton){
+    private static void launchPortal(Component clickable){
         try {
             if (portalDriver == null) {
                 portalDriver = DriversPack.forgeNew(false);
-            }
-            if (portalDriver == null) {
-                App.reportMissingDriver();
-                return;
+                if (portalDriver == null) {
+                    App.reportMissingDriver();
+                    return;
+                }
             }
 
             final int loginAttempt = DriversPack.attemptLogin(portalDriver);
@@ -93,8 +78,8 @@ public class Portal {
                 portalDriver.navigate().to(Portal.CONTENTS_PAGE);
             }
         } finally {
-            if (!(kButton == null)) {
-                kButton.setEnabled(true);
+            if (!(clickable == null)) {
+                clickable.setEnabled(true);
             }
         }
     }
@@ -124,8 +109,8 @@ public class Portal {
 
         try {
             noticeDriver.navigate().to(HOME_PAGE);
-            new WebDriverWait(noticeDriver,50).until(ExpectedConditions.presenceOfElementLocated(By.className("media-heading")));
-            final WebElement admissionElement = new WebDriverWait(noticeDriver,59).until(ExpectedConditions.presenceOfElementLocated(By.className("gritter-title")));
+            new WebDriverWait(noticeDriver, 50).until(ExpectedConditions.presenceOfElementLocated(By.className("media-heading")));
+            final WebElement admissionElement = new WebDriverWait(noticeDriver, 59).until(ExpectedConditions.presenceOfElementLocated(By.className("gritter-title")));
             setAdmissionNotice(admissionElement.getText());
         } catch (Exception e) {
             if (userRequested) {
@@ -165,7 +150,7 @@ public class Portal {
     public static void setRegistrationNotice(String registrationNotice){
         Portal.registrationNotice = registrationNotice;
         lastRegistrationNoticeUpdate = new Date();
-        RunningCoursesGenerator.noticeLabel.setText(registrationNotice+("    [Last updated: "+getLastRegistrationNoticeUpdate()+"]"));
+        RunningCoursesGenerator.noticeLabel.setText(registrationNotice+("  (Last updated: "+getLastRegistrationNoticeUpdate()+")"));
     }
 
     public static String getLastRegistrationNoticeUpdate(){
@@ -202,7 +187,7 @@ public class Portal {
         if (nowDriver.getCurrentUrl().equals(CONTENTS_PAGE)) {
             final List<WebElement> iGroup = nowDriver.findElementsByClassName("info-group");
             Student.setLevel(iGroup.get(2).getText().split("\n")[1]);
-            Student.setState(iGroup.get(3).getText().split("\n")[1]);
+            Student.setStatus(iGroup.get(3).getText().split("\n")[1]);
 
             final String[] findingSemester = iGroup.get(6).getText().split("\n")[0].split(" ");
             final String ongoingSemester = findingSemester[0]+" "+findingSemester[1]+" "+findingSemester[2];

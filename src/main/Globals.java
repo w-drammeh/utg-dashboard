@@ -6,7 +6,6 @@ public class Globals {
     public static final int MINUTE = 60 * SECOND;
     public static final int HOUR = 60 * MINUTE;
     public static final int DAY = 24 * HOUR;
-    public static final int PORTAL_WAIT_TIME = 25;//intended in seconds
     public static final String NONE = "None";
     public static final String UNKNOWN = "Unknown";
 

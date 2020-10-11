@@ -66,7 +66,7 @@ public class Welcome extends KDialog {
 
         final String nextText = "<p>To continue, acknowledge adherence to these terms by selecting the <b>CheckBox</b> below.</p>";
 
-        final KPanel separatorPanel = new KPanel(new KSeparator(new Dimension(PREFERRED_WIDTH, 1)));
+        final KPanel separatorPanel = new KPanel(new KSeparator(new Dimension(PREFERRED_WIDTH, 1), Color.RED));
         separatorPanel.setBackground(Color.WHITE);
 
         final KPanel welcomePanel = new KPanel();
@@ -97,7 +97,7 @@ public class Welcome extends KDialog {
 
         final KPanel lowerPanel = new KPanel(PREFERRED_WIDTH, 50);
         lowerPanel.setLayout(new BoxLayout(lowerPanel, BoxLayout.X_AXIS));
-        lowerPanel.addAll(checkBox, KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, exitButton, nextButton));
+        lowerPanel.addAll(checkBox, new KPanel(new FlowLayout(FlowLayout.RIGHT), exitButton, nextButton));
 
         this.addWindowListener(new WindowAdapter() {
             @Override
@@ -107,7 +107,7 @@ public class Welcome extends KDialog {
         });
         this.getRootPane().setDefaultButton(nextButton);
         this.getContentPane().setLayout(new BorderLayout());
-        this.getContentPane().add(scrollPane = new KScrollPane(welcomePanel, false), BorderLayout.CENTER);
+        this.getContentPane().add(scrollPane = new KScrollPane(welcomePanel), BorderLayout.CENTER);
         this.getContentPane().add(lowerPanel, BorderLayout.SOUTH);
         this.setLocationRelativeTo(null);
     }

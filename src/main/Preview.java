@@ -12,18 +12,18 @@ public class Preview extends KDialog {
 
 
     public Preview(Component root){
-        this.setDefaultCloseOperation(KDialog.DO_NOTHING_ON_CLOSE);
-        this.setUndecorated(true);
+        setDefaultCloseOperation(KDialog.DO_NOTHING_ON_CLOSE);
+        setUndecorated(true);
 
         final KPanel kPanel = new KPanel(475, 200);
         kPanel.setBackground(Color.WHITE);
         kPanel.setLayout(new BoxLayout(kPanel, BoxLayout.Y_AXIS));
         kPanel.addAll(new KPanel(new KLabel(new ImageIcon(App.getIconURL("splash.gif")))),
-                KPanel.wantDirectAddition(new FlowLayout(FlowLayout.LEFT), null, new KLabel("Dashboard is starting... Please wait",
+                new KPanel(new FlowLayout(FlowLayout.LEFT), new KLabel("Dashboard is starting... Please wait",
                         KFontFactory.createPlainFont(15))));
-        this.setContentPane(kPanel);
-        this.pack();
-        this.setLocationRelativeTo(root);
+        setContentPane(kPanel);
+        pack();
+        setLocationRelativeTo(root);
     }
 
 }

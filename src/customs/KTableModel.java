@@ -3,9 +3,10 @@ package customs;
 import javax.swing.table.DefaultTableModel;
 
 /**
- * These are course oriented, since all the tables deals with courses?
+ * This is an implementation of javax.swing.table.DefaultTableModel.
+ * These are course oriented, since all the tables deal with courses?
  */
-public class KDefaultTableModel extends DefaultTableModel implements Preference {
+public class KTableModel extends DefaultTableModel implements Preference {
     private KTable table;
 
 
@@ -23,10 +24,11 @@ public class KDefaultTableModel extends DefaultTableModel implements Preference 
 
     /**
      * Gets the row-index of the row (more formally, the first row found) holding this string
-     * in its first column. A return of -1 signals absence of such a row in this model.
+     * in its first column.
+     * A return of -1 signals absence of such a row in this model.
      * This call is case-insensitive.
      */
-    public int getRowOf(String key){
+    public int getRowOf(String key) {
         for (int i = 0; i < this.getRowCount(); i++) {
             if (key.equalsIgnoreCase(String.valueOf(this.getValueAt(i,0)))) {
                 return i;

@@ -6,79 +6,174 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class NotificationGenerator {
-    private static int unreadCount;//with a technical mechanism of incrementing and decrementing it
-    private static KPanel dashboardPanel, portalPanel;
-    private static KButton clearingButton;
-    private static FirefoxDriver portalNoticeDriver;
-    private static KButton portalRefresher;
-    //and its related-rubbish components
-    private static KLabel admissionLabel, registrationLabel;
-    private KLabel hint;
-    private CardLayout card;
-    private KPanel notificationPanel;
+    private CardLayout cardLayout;
+    private static KPanel dashboardPanel;
+    private static KPanel portalPanel;
+    private static KButton refreshButton;
+    private static FirefoxDriver noticeDriver;
+    private static KLabel registrationLabel;
+    private static KLabel admissionLabel;
+    /**
+     * How may it be needed outside? As for the big-button, it's
+     * only the toolTip needed which is taken cared by renewCount(), herein this class.
+     */
+    private static int unreadCount;
 
 
-    public NotificationGenerator(){
-        card = new CardLayout();
-        notificationPanel = new KPanel(card);
+    public NotificationGenerator() {
+        cardLayout = new CardLayout();
+        final KPanel centerPanel = new KPanel(cardLayout);
+        cardLayout.addLayoutComponent(centerPanel.add(dashboardComponent()), "dashboard");
+        cardLayout.addLayoutComponent(centerPanel.add(portalComponent()), "portal");
 
-        hint = KLabel.getPredefinedLabel("Notifications ", SwingConstants.LEFT);
+        final KLabel hint = KLabel.getPredefinedLabel("Notifications ", SwingConstants.LEFT);
         hint.setFont(KFontFactory.bodyHeaderFont());
+        hint.setText("[Showing Local Dashboard Alerts]");
 
-        configureDashAlerts();
-        configurePortalAlerts();
+        final KComboBox<String> alertOptions = new KComboBox<>(new String[] {"Dashboard", "Portal"});
+        alertOptions.addActionListener(e-> {
+            if (alertOptions.getSelectedIndex() == 0) {
+                cardLayout.show(centerPanel,"dashboard");
+                hint.setText("[Showing Local Dashboard Alerts]");
+            } else if (alertOptions.getSelectedIndex() == 1) {
+                cardLayout.show(centerPanel, "portal");
+                hint.setText("[Showing Portal Alerts]");
+            }
+        });
+
+        final KPanel northPanel = new KPanel(new BorderLayout());
+        northPanel.add(new KPanel(hint), BorderLayout.WEST);
+        northPanel.add(new KPanel(alertOptions), BorderLayout.EAST);
+
+        final KPanel activityPanel = new KPanel(new BorderLayout());
+        activityPanel.add(northPanel, BorderLayout.NORTH);
+        activityPanel.add(centerPanel, BorderLayout.CENTER);
+
+        Board.addCard(activityPanel, "Notifications");
     }
 
-    public static synchronized void trySettingNoticeDriver(){
-        if (portalNoticeDriver == null) {
-            portalNoticeDriver = DriversPack.forgeNew(true);
+    private Component dashboardComponent() {
+        final KButton clearButton = new KButton("Remove all");
+        clearButton.setFont(KFontFactory.createPlainFont(15));
+        clearButton.setCursor(MComponent.HAND_CURSOR);
+        clearButton.addActionListener(clearAction());
+        clearButton.setToolTipText("Clear Notifications");
+
+        dashboardPanel = new KPanel();
+        dashboardPanel.setLayout(new BoxLayout(dashboardPanel, BoxLayout.Y_AXIS));
+        dashboardPanel.addAll(new KPanel(new FlowLayout(FlowLayout.LEFT), clearButton),
+                new KPanel(new KSeparator(new Dimension(975, 1))));
+        return new KScrollPane(new KPanel(new FlowLayout(FlowLayout.CENTER, 0, 5), dashboardPanel));
+    }
+
+    private Component portalComponent() {
+        registrationLabel = new KLabel(Portal.getRegistrationNotice(), KFontFactory.createPlainFont(16));
+
+        final KPanel registrationPanel = new KPanel(new BorderLayout());
+        registrationPanel.setPreferredSize(new Dimension(1_000, 35));
+        registrationPanel.setCursor(MComponent.HAND_CURSOR);
+        registrationPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                registrationLabel.setFont(KFontFactory.createBoldFont(16));
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                SwingUtilities.invokeLater(()-> new NoticeExhibition(NoticeExhibition.REGISTRATION_NOTICE).setVisible(true));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                registrationLabel.setFont(KFontFactory.createPlainFont(16));
+            }
+        });
+        registrationPanel.add(new KPanel(new KLabel("REGISTRATION ALERT:", KFontFactory.createBoldFont(16),
+                Color.BLUE)), BorderLayout.WEST);
+        registrationPanel.add(new KPanel(registrationLabel), BorderLayout.CENTER);
+
+        admissionLabel = new KLabel(Portal.getAdmissionNotice(), KFontFactory.createPlainFont(16));
+
+        final KPanel admissionPanel = new KPanel(new BorderLayout());
+        admissionPanel.setPreferredSize(new Dimension(1_000, 35));
+        admissionPanel.setCursor(MComponent.HAND_CURSOR);
+        admissionPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                admissionLabel.setFont(KFontFactory.createBoldFont(16));
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                SwingUtilities.invokeLater(()-> new NoticeExhibition(NoticeExhibition.ADMISSION_NOTICE).setVisible(true));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                admissionLabel.setFont(KFontFactory.createPlainFont(16));
+            }
+        });
+        admissionPanel.add(new KPanel(new KLabel("ADMISSION ALERT:", KFontFactory.createBoldFont(16),
+                Color.BLUE)), BorderLayout.WEST);
+        admissionPanel.add(new KPanel(admissionLabel), BorderLayout.CENTER);
+
+        refreshButton = new KButton("Update Alerts");
+        refreshButton.setFont(KFontFactory.createPlainFont(15));
+        refreshButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        refreshButton.addActionListener(e-> updateNotices(true));
+
+        portalPanel = new KPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));
+        portalPanel.addAll(refreshButton, new KPanel(new KSeparator(new Dimension(975, 1))),
+                admissionPanel, registrationPanel);
+        return portalPanel;
+    }
+
+    private static synchronized void setupDriver() {
+        if (noticeDriver == null) {
+            noticeDriver = DriversPack.forgeNew(true);
         }
-    }
-
-    public static void awareLookShift(){
-        SwingUtilities.updateComponentTreeUI(dashboardPanel);
-        SwingUtilities.updateComponentTreeUI(portalPanel);
-        SwingUtilities.updateComponentTreeUI(clearingButton);
-        SwingUtilities.updateComponentTreeUI(portalRefresher);
     }
 
     /**
-     * As alerts are passed here, they are forwarded to their respective panel.
-     * Do not call this method directly! Call Notification.create(#) instead.
+     * Do not call this method directly!
+     * Call Notification.create(#) instead.
      */
-    public static void join(Notification newNotification){
-        dashboardPanel.add(newNotification.getLayer());
-        if (!newNotification.isRead()) {
+    public static void join(Notification notification) {
+        dashboardPanel.addAll(notification.getLayer(), Box.createVerticalStrut(5));
+        MComponent.ready(dashboardPanel);
+        if (!notification.isRead()) {
             effectCount(1);
         }
-        ComponentAssistant.ready(dashboardPanel);
     }
 
-    public static ActionListener deletionListener(Notification notification){
-        return e -> {
+    public static ActionListener deleteAction(Notification notification) {
+        return e-> {
             notification.getShower().dispose();
             dashboardPanel.remove(notification.getLayer());
-            ComponentAssistant.ready(dashboardPanel);
+            MComponent.ready(dashboardPanel);
             Notification.NOTIFICATIONS.remove(notification);
         };
     }
 
-    public static ActionListener clearListener(){
-        return e -> {
+    /**
+     * For clearing dashboard notifications
+     */
+    private ActionListener clearAction() {
+        return e-> {
             if (dashboardPanel.getComponentCount() > 0) {
-                if (App.showOkCancelDialog("Warning",
-                        "This action will remove all notifications, including unread.\n" +
-                                (getUnreadCount() == 0 ? "" : "You have "+ Globals.checkPlurality(getUnreadCount(),
+                if (App.showOkCancelDialog("Clear", "This action will remove all notifications, including unread.\n" +
+                                (unreadCount == 0 ? "" : "You currently have "+ Globals.checkPlurality(unreadCount,
                                         "notifications")+" unread."))) {
-                    dashboardPanel.removeAll();
-                    effectCount(-getUnreadCount());
-                    ComponentAssistant.ready(dashboardPanel);
+                    for (Notification notification : Notification.NOTIFICATIONS) {
+                        dashboardPanel.remove(notification.getLayer());
+                    }
+                    MComponent.ready(dashboardPanel);
                     Notification.NOTIFICATIONS.clear();
+                    effectCount(-unreadCount);
                 }
             }
         };
@@ -88,237 +183,102 @@ public class NotificationGenerator {
      * For all incoming or read alerts, this should be called eventually.
      * If notification is coming(new) parse 1, else if it's being read, parse -1
      *
-     * This function will also renew the ToolTipText of the Board's big-button
+     * This function will also renew the toolTipText of the Board's big-button
      */
     public static void effectCount(int value){
         unreadCount += value;
-        final String sendingTip = getUnreadCount() == 0 ? null : Globals.checkPlurality(getUnreadCount(),
+        final String tipText = unreadCount == 0 ? null : Globals.checkPlurality(unreadCount,
                 "unread notifications");
-        Board.getNotificationButton().setToolTipText(sendingTip);
+        Board.getNotificationButton().setToolTipText(tipText);
     }
 
-    /**
-     * This gets the 'unreadCount'. How may it be needed outside? As for the big-button, it's
-     * only the toolTip needed which is taken cared by renewCount(), herein this class.
-     */
-    private static int getUnreadCount(){
-        return unreadCount;
-    }
-
-    public static void updateNotices(boolean userRequested){
-        if (!userRequested && !portalRefresher.isEnabled()) {
+    public static void updateNotices(boolean userRequested) {
+        if (!(userRequested || refreshButton.isEnabled())) {
             return;
         }
-
         new Thread(()-> {
-            portalRefresher.setEnabled(false);
-            adjustNoticeComponents(false);
-            if (portalNoticeDriver == null){
-                trySettingNoticeDriver();
-            }
-            if (portalNoticeDriver == null){
+            setNoticeComponents(false);
+            setupDriver();
+            if (noticeDriver == null) {
                 if (userRequested) {
                     App.reportMissingDriver();
                 }
-                portalRefresher.setEnabled(true);
+                setNoticeComponents(true);
                 return;
             }
-            if (!InternetAvailabilityChecker.isInternetAvailable()){
+
+            if (!Internet.isInternetAvailable()){
                 if (userRequested) {
                     App.reportNoInternet();
                 }
-                portalRefresher.setEnabled(true);
+                setNoticeComponents(true);
                 return;
             }
-            if (DriversPack.isIn(portalNoticeDriver)) {
-                Portal.startRenewingNotices(portalNoticeDriver, userRequested);
-            } else {
-                final int loginTry = DriversPack.attemptLogin(portalNoticeDriver);
-                if (loginTry == DriversPack.ATTEMPT_SUCCEEDED) {
-                    Portal.startRenewingNotices(portalNoticeDriver,userRequested);
-                } else if (loginTry == DriversPack.ATTEMPT_FAILED) {
-                    if (userRequested) {
-                        App.reportLoginAttemptFailed();
-                    }
-                    portalRefresher.setEnabled(true);
-                    return;
-                } else if (loginTry == DriversPack.CONNECTION_LOST) {
-                    if (userRequested) {
-                        App.reportConnectionLost();
-                    }
-                    portalRefresher.setEnabled(true);
-                    return;
+
+            final int loginTry = DriversPack.attemptLogin(noticeDriver);
+            if (loginTry == DriversPack.ATTEMPT_SUCCEEDED) {
+                Portal.startRenewingNotices(noticeDriver, userRequested);
+            } else if (loginTry == DriversPack.ATTEMPT_FAILED) {
+                if (userRequested) {
+                    App.reportLoginAttemptFailed();
                 }
+                setNoticeComponents(true);
+                return;
+            } else if (loginTry == DriversPack.CONNECTION_LOST) {
+                if (userRequested) {
+                    App.reportConnectionLost();
+                }
+                setNoticeComponents(true);
+                return;
             }
-            portalRefresher.setEnabled(true);
+            setNoticeComponents(true);
         }).start();
     }
 
-    private static void adjustNoticeComponents(boolean responsive){
+    private static void setNoticeComponents(boolean responsive){
         if (responsive) {
             registrationLabel.setText(Portal.getRegistrationNotice());
             admissionLabel.setText(Portal.getAdmissionNotice());
         } else {
-            final String waitingText = "Contacting portal... Please wait";
+            final String waitingText = "Contacting Portal... Please wait";
             registrationLabel.setText(waitingText);
             admissionLabel.setText(waitingText);
         }
+        refreshButton.setEnabled(responsive);
     }
 
-    public KPanel presentedContainer(){
-        final KPanel bridgePanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        final JComboBox<String> alertOptions = new JComboBox<String>(new String[] {"Dashboard", "Portal"}){
-            @Override
-            public JToolTip createToolTip() {
-                return KLabel.preferredTip();
-            }
-        };
-        alertOptions.setFont(KFontFactory.createPlainFont(15));
-        alertOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        alertOptions.addActionListener(e -> {
-            if (alertOptions.getSelectedIndex() == 0) {
-                bridgePanel.remove(portalRefresher);
-                bridgePanel.add(clearingButton);
-                ComponentAssistant.ready(bridgePanel);
-                card.show(notificationPanel,"Dashboard Alerts");
-                hint.setText("[Showing Local Dashboard Alerts]");
-            } else if (alertOptions.getSelectedIndex() == 1) {
-                bridgePanel.remove(clearingButton);
-                bridgePanel.add(portalRefresher);
-                ComponentAssistant.ready(bridgePanel);
-                card.show(notificationPanel, "Portal Alerts");
-                hint.setText("[Showing Portal Alerts]");
-            }
-        });
-        hint.setText("[Showing Local Dashboard Alerts]");
-
-        clearingButton = new KButton("Clear Notifications");
-        clearingButton.setFont(KFontFactory.createPlainFont(15));
-        clearingButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        clearingButton.setMnemonic(KeyEvent.VK_C);
-        clearingButton.addActionListener(clearListener());
-
-        bridgePanel.add(clearingButton);
-
-        final KPanel upPanel = new KPanel(new BorderLayout());
-        upPanel.add(hint, BorderLayout.WEST);
-        upPanel.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null, alertOptions), BorderLayout.EAST);
-        upPanel.add(bridgePanel, BorderLayout.SOUTH);
-
-        final KPanel present = new KPanel(new BorderLayout());
-        present.add(upPanel, BorderLayout.NORTH);
-        present.add(new KScrollPane(notificationPanel,false), BorderLayout.CENTER);
-        return present;
-    }
-
-    //Local notification functions
-    private void configureDashAlerts(){
-        dashboardPanel = new KPanel(){
-            @Override
-            public Component add(Component comp) {
-                dashboardPanel.setPreferredSize(new Dimension(975,dashboardPanel.getPreferredSize().height+35));
-                return super.add(comp);
-            }
-
-            @Override
-            public void remove(Component comp) {
-                super.remove(comp);
-                dashboardPanel.setPreferredSize(new Dimension(975,dashboardPanel.getPreferredSize().height-35));
-            }
-        };
-        dashboardPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        card.addLayoutComponent(notificationPanel.add(dashboardPanel),"Dashboard Alerts");
-    }
-
-    //For those as associated with the portal
-    private void configurePortalAlerts(){
-        final Dimension iDimension = new Dimension(1_000,30);
-
-        registrationLabel = new KLabel(Portal.getRegistrationNotice(),KFontFactory.createPlainFont(16));
-        final KPanel alertPanel_registration = new KPanel(new BorderLayout(), iDimension);
-        alertPanel_registration.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        alertPanel_registration.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                SwingUtilities.invokeLater(()-> new NoticeExhibition(NoticeExhibition.REGISTRATION_NOTICE).setVisible(true));
-            }
-        });
-        alertPanel_registration.add(new KLabel("REGISTRATION ALERT:",KFontFactory.createBoldFont(16),Color.BLUE),BorderLayout.WEST);
-        alertPanel_registration.add(new KPanel(registrationLabel),BorderLayout.CENTER);
-
-        admissionLabel = new KLabel(Portal.getAdmissionNotice(),KFontFactory.createPlainFont(16));
-        final KPanel alertPanel_admission = new KPanel(new BorderLayout(), iDimension);
-        alertPanel_admission.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        alertPanel_admission.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                SwingUtilities.invokeLater(()-> new NoticeExhibition(NoticeExhibition.ADMISSION_NOTICE).setVisible(true));
-            }
-        });
-        alertPanel_admission.add(new KLabel("ADMISSION ALERT:",KFontFactory.createBoldFont(16),Color.BLUE),BorderLayout.WEST);
-        alertPanel_admission.add(new KPanel(admissionLabel),BorderLayout.CENTER);
-
-        portalRefresher = new KButton("Update Alerts"){
-            @Override
-            public void setEnabled(boolean b) {
-                super.setEnabled(b);
-                adjustNoticeComponents(b);
-            }
-        };
-        portalRefresher.setFont(KFontFactory.createPlainFont(15));
-        portalRefresher.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        portalRefresher.addActionListener(e -> updateNotices(true));
-
-        portalPanel = new KPanel(){
-            @Override
-            public Component add(Component comp) {
-                portalPanel.setPreferredSize(new Dimension(975,portalPanel.getPreferredSize().height+35));
-                return super.add(comp);
-            }
-
-            @Override
-            public void remove(Component comp) {
-                super.remove(comp);
-                portalPanel.setPreferredSize(new Dimension(975,portalPanel.getPreferredSize().height-35));
-            }
-        };
-        portalPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        portalPanel.addAll(alertPanel_registration, alertPanel_admission);
-        card.addLayoutComponent(notificationPanel.add(portalPanel),"Portal Alerts");
-    }
 
     private static class NoticeExhibition extends KDialog {
-        private static final String REGISTRATION_NOTICE = "Registration Notice",
-                ADMISSION_NOTICE = "Admission Notice";
+        private static final String REGISTRATION_NOTICE = "Registration Notice";
+        private static final String ADMISSION_NOTICE = "Admission Notice";
 
         private NoticeExhibition(String noticeTitle){
             super(noticeTitle);
-            this.setModalityType(Dialog.DEFAULT_MODALITY_TYPE);
-            this.setResizable(true);
+            setModalityType(Dialog.DEFAULT_MODALITY_TYPE);
+            setResizable(true);
 
             final String noticeText = noticeTitle.equals(REGISTRATION_NOTICE) ? Portal.getRegistrationNotice() :
                     Portal.getAdmissionNotice();
             final KTextPane noticePane = KTextPane.wantHtmlFormattedPane(noticeText);
-            noticePane.setBackground(Color.WHITE);
             noticePane.setPreferredSize(new Dimension(500, 125));
 
             final KButton disposeButton = new KButton("Ok");
-            disposeButton.addActionListener(e1 -> this.dispose());
+            disposeButton.addActionListener(e-> dispose());
 
             final KPanel lowerPart = new KPanel();
-            lowerPart.setLayout(new BoxLayout(lowerPart,BoxLayout.Y_AXIS));
+            lowerPart.setLayout(new BoxLayout(lowerPart, BoxLayout.Y_AXIS));
             lowerPart.add(new KPanel(new KLabel("Last updated: ", KFontFactory.createBoldFont(16)),
                     new KLabel(noticeTitle.equals(REGISTRATION_NOTICE) ? Portal.getLastRegistrationNoticeUpdate() :
                             Portal.getLastAdmissionNoticeUpdate(), KFontFactory.createPlainFont(16))));
-            lowerPart.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,disposeButton));
+            lowerPart.add(new KPanel(disposeButton));
 
-            this.getRootPane().setDefaultButton(disposeButton);
             final KPanel contentPanel = new KPanel();
             contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-            contentPanel.addAll(new KScrollPane(noticePane), lowerPart);
-            this.setContentPane(contentPanel);
-            this.pack();
-            this.setLocationRelativeTo(Board.getRoot());
+            contentPanel.addAll(noticePane, lowerPart);
+            setContentPane(contentPanel);
+            getRootPane().setDefaultButton(disposeButton);
+            pack();
+            setLocationRelativeTo(Board.getRoot());
         }
     }
 

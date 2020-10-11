@@ -1,6 +1,7 @@
 package customs;
 
 import main.Globals;
+import main.MComponent;
 import main.MDate;
 
 import javax.swing.*;
@@ -10,57 +11,72 @@ import java.awt.event.KeyEvent;
 
 /**
  * The standard dashboard text-field. One of the custom classes.
+ * Note that control-fields suspend any form of pasting.
  */
 public class KTextField extends JTextField implements Preference {
 
 
     public KTextField(){
         super();
-        this.setPreferences();
+        setPreferences();
     }
 
-    public KTextField(String initial){
-	    super(initial);
-	    this.setPreferences();
+    public KTextField(String initialText){
+	    super(initialText);
+	    setPreferences();
     }
 
     public KTextField(Dimension preferredSize){
         this();
-        this.setPreferredSize(preferredSize);
+        setPreferredSize(preferredSize);
     }
 
     /**
-     * Provides a field that accepts all input (just like any other normal instance) until the
+     * Provides a field that accepts all input (like any other normal instance) until the
      * range of values are met.
      */
     public static KTextField rangeControlField(int range) {
-        final KTextField smallField = new KTextField();
-        smallField.addKeyListener(new KeyAdapter() {
+        final KTextField rangeField = new KTextField() {
+            @Override
+            public void paste() {
+                UIManager.getLookAndFeel().provideErrorFeedback(this);
+            }
+        };
+
+        rangeField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if (smallField.getText().length() >= range) {
+                if (rangeField.getText().length() >= range) {
                     e.consume();
                 }
             }
         });
-        return smallField;
+
+        return rangeField;
     }
 
     /**
-     * Provides a field that restricts its input to only numbers until the specified number of values are in.
+     * Provides a rangeControlField(int) that restricts its input to only numbers.
      */
     public static KTextField digitPlusRangeControlField(int range) {
-        final KTextField smallField = new KTextField();
-        smallField.addKeyListener(new KeyAdapter() {
+        final KTextField digitField = new KTextField(){
+            @Override
+            public void paste() {
+                UIManager.getLookAndFeel().provideErrorFeedback(this);
+            }
+        };
+
+        digitField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if (smallField.getText().length() >= range || !Character.isDigit(e.getKeyChar()) &&
+                if (digitField.getText().length() >= range || !Character.isDigit(e.getKeyChar()) &&
                         !(e.getKeyChar() == KeyEvent.VK_DELETE || e.getKeyChar() == KeyEvent.VK_BACK_SPACE)) {
                     e.consume();
                 }
             }
         });
-        return smallField;
+
+        return digitField;
     }
 
     public static KTextField newDayField(){
@@ -80,27 +96,27 @@ public class KTextField extends JTextField implements Preference {
         return yearField;
     }
 
-    public boolean hasText(){
+    public boolean hasText() {
         return Globals.hasText(getText());
     }
 
-    public boolean hasNoText(){
-        return !this.hasText();
+    public boolean isBlank() {
+        return Globals.isBlank(getText());
     }
 
     public void setText(int n) {
-        super.setText(String.valueOf(n));
+        setText(Integer.toString(n));
     }
 
     @Override
     public JToolTip createToolTip() {
-        return KLabel.preferredTip();
+        return MComponent.preferredTip();
     }
 
     public void setPreferences() {
-        this.setAutoscrolls(true);
-        this.setHorizontalAlignment(SwingConstants.CENTER);
-        this.setFont(KFontFactory.createPlainFont(15));
+        setFont(KFontFactory.createPlainFont(15));
+        setHorizontalAlignment(SwingConstants.CENTER);
+        setAutoscrolls(true);
     }
 
 }

@@ -16,26 +16,26 @@ import java.util.Date;
  * Or NotificationSelf
  */
 public class Notification implements Serializable {
-    public static final ArrayList<Notification> NOTIFICATIONS = new ArrayList<>();
     private String heading;
     private String text;
-    private String description;//dialog parses this same text, if the description is null.
+    private String information;//dialog parses this same text, if the description is null.
     private boolean isRead;
     private Date time;
     private transient Exhibitor shower;
     private transient NotificationLayer layer;
+    public static final ArrayList<Notification> NOTIFICATIONS = new ArrayList<>();
 
 
-    private Notification(String heading, String vText, String information, Date time){
+    private Notification(String heading, String vText, String information, Date time) {
         this.heading = heading;
         this.text = vText;
-        this.description = information;
+        this.information = information;
         this.time = time;
         this.shower = new Exhibitor(this);
         this.layer = new NotificationLayer(this);
     }
 
-    public static void create(String heading, String vText, String information){
+    public static void create(String heading, String vText, String information) {
         final Notification incoming = new Notification(heading, vText, information, new Date());
         NotificationGenerator.join(incoming);
         NOTIFICATIONS.add(incoming);
@@ -49,8 +49,8 @@ public class Notification implements Serializable {
         return text;
     }
 
-    public String getDescription(){
-        return description;
+    public String getInformation(){
+        return information;
     }
 
     public KDialog getShower(){
@@ -65,6 +65,7 @@ public class Notification implements Serializable {
     //This is an update
     private void justRead(){
         isRead = true;
+        layer.innerLabel.setForeground(null);
     }
 
     public KPanel getLayer(){
@@ -76,18 +77,17 @@ public class Notification implements Serializable {
 
         private  Exhibitor(Notification notification){
             super(notification.getHeading()+" - Dashboard Notification");
-            this.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
-            this.setResizable(true);
+            setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
+            setResizable(true);
 
-            final String decidedText = notification.getDescription() == null ? notification.getText() : notification.getDescription();
+            final String decidedText = notification.getInformation() == null ? notification.getText() : notification.getInformation();
             final KTextPane noticePane = KTextPane.wantHtmlFormattedPane(decidedText);
-            noticePane.setBackground(Color.WHITE);
 
-            final KScrollPane textScroll = new KScrollPane(noticePane,false);
+            final KScrollPane textScroll = new KScrollPane(noticePane);
             textScroll.setPreferredSize(new Dimension(550,235));
 
             final KButton deleteButton = new KButton("Remove");
-            deleteButton.addActionListener(NotificationGenerator.deletionListener(notification));
+            deleteButton.addActionListener(NotificationGenerator.deleteAction(notification));
 
             final KButton disposeButton = new KButton("Close");
             disposeButton.setFocusable(true);
@@ -96,58 +96,66 @@ public class Notification implements Serializable {
             final KPanel lowerPart = new KPanel(new FlowLayout(FlowLayout.RIGHT));
             lowerPart.addAll(deleteButton, disposeButton);
 
-            this.getRootPane().setDefaultButton(disposeButton);
             final KPanel contentPanel = new KPanel();
             contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-            contentPanel.addAll(textScroll, ComponentAssistant.contentBottomGap(), lowerPart);
-            this.setContentPane(contentPanel);
-            this.pack();
-            this.setMinimumSize(this.getPreferredSize());
-            this.setLocationRelativeTo(Board.getRoot());
+            contentPanel.addAll(textScroll, MComponent.contentBottomGap(), lowerPart);
+            setContentPane(contentPanel);
+            getRootPane().setDefaultButton(disposeButton);
+            pack();
+            setLocationRelativeTo(Board.getRoot());
         }
 
         private ActionListener closeListener(){
-            return e-> Exhibitor.this.dispose();
+            return e-> dispose();
         }
+
     }
 
 
-    public static class NotificationLayer extends KPanel {
+    private static class NotificationLayer extends KPanel {
         private Notification notification;
         private KLabel innerLabel;
 
-        private NotificationLayer(Notification notification){
-            this.notification = notification;
-            this.setPreferredSize(new Dimension(1_000, 30));
-            this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            this.addMouseListener(forgeListener(this));
-            this.setLayout(new BorderLayout());
-            this.add(new KPanel(new KLabel(this.notification.heading.toUpperCase(),
-                    KFontFactory.createBoldFont(16), Color.BLUE)), BorderLayout.WEST);
-            this.innerLabel = new KLabel(this.notification.text, KFontFactory.createPlainFont(16),
-                    this.notification.isRead ? null : Color.RED);
-            this.add(new KPanel(this.innerLabel), BorderLayout.CENTER);
-            this.add(new KPanel(new KLabel(MDate.formatFully(this.notification.time),
+        private NotificationLayer(Notification alert) {
+            this.notification = alert;
+            setPreferredSize(new Dimension(1_000, 35));
+            setCursor(MComponent.HAND_CURSOR);
+            addMouseListener(forgeListener(this));
+            setLayout(new BorderLayout());
+            add(new KPanel(new KLabel(alert.heading.toUpperCase(), KFontFactory.createBoldFont(16),
+                    Color.BLUE)), BorderLayout.WEST);
+            innerLabel = new KLabel(alert.text, KFontFactory.createPlainFont(16), alert.isRead ? null : Color.RED);
+            add(new KPanel(innerLabel), BorderLayout.CENTER);
+            add(new KPanel(new KLabel(MDate.formatFully(alert.time),
                     KFontFactory.createPlainFont(16), Color.GRAY)), BorderLayout.EAST);
         }
 
         private static MouseListener forgeListener(NotificationLayer layer){
             return new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    layer.innerLabel.setFont(KFontFactory.createBoldFont(16));
+                }
+
                 public void mouseClicked(MouseEvent e) {
                     super.mouseClicked(e);
                     SwingUtilities.invokeLater(()-> layer.notification.shower.setVisible(true));
                     if (!layer.notification.isRead()) {
                         layer.notification.justRead();
-                        layer.innerLabel.setForeground(null);
                         NotificationGenerator.effectCount(-1);
                     }
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    layer.innerLabel.setFont(KFontFactory.createPlainFont(16));
                 }
             };
         }
     }
 
 
-    public static void serializeAll(){
+    public static void serializeAll() {
         System.out.print("Serializing Notifications... ");
         Serializer.toDisk(NOTIFICATIONS, "alerts.ser");
         System.out.println("Completed.");
@@ -165,8 +173,8 @@ public class Notification implements Serializable {
                 NotificationGenerator.join(alert);
                 NOTIFICATIONS.add(alert);
             }
+            System.out.println("Completed successfully.");
         }
-        System.out.println("Completed");
     }
 
 }

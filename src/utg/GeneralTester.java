@@ -31,10 +31,11 @@ public class GeneralTester {
         Student.setSemester("2019/2020 second semester".toUpperCase());
         Student.setFirstName("Jallow");
         Student.setLastName("Ismaila");
-        Student.setMatNumber(22113377);
+        Student.setMatNumber("22113377");
         Student.setMajor("Major");
         Student.setCGPA(3.954);
         Student.setProgram("Bachelor of Science in Mathematics");
+        Student.setMinor("Minor");
         Student.setSchool("Arts and Sciences");
         Student.setDivision("Physical and Natural Sciences");
         Student.setAddress("Sukuta");
@@ -43,14 +44,13 @@ public class GeneralTester {
         Student.setDateOfBirth("01 Jan 1999");
         Student.setPortalMail("email@utg.edu.gm");
         Student.setPortalPassword("student@utg");
-//        Student.setMaritalStatue("");
-//        Student.setPlaceOfBirth("");
+        Student.setMaritalStatue("");
+        Student.setPlaceOfBirth("");
         Student.setLevel("Undergraduate".toUpperCase());
-        Student.setState("Running".toUpperCase());
+        Student.setStatus("Running".toUpperCase());
         //
         Board.postProcesses.add(()-> {
             Student.setMajorCode("MTH");
-            Student.setMinor("Minor");
             Student.setMinorCode("");
         });
     }

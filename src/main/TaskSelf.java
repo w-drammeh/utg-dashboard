@@ -70,12 +70,12 @@ public class TaskSelf {
 
         private void setUpUI(){
             final KPanel namePanel = new KPanel(new BorderLayout());
-            namePanel.add(new KLabel(this.description, KFontFactory.createBoldFont(16), Color.BLUE), BorderLayout.SOUTH);
+            namePanel.add(new KLabel(this.description, KFontFactory.createPlainFont(17), Color.BLUE), BorderLayout.SOUTH);
 
             final KButton moreOptions = KButton.getIconifiedButton("options.png", 20, 20);
             moreOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             moreOptions.setToolTipText("About this Task");
-            moreOptions.addActionListener(e -> this.exhibition = new TaskExhibition.TodoExhibition(this));
+            moreOptions.addActionListener(e-> this.exhibition = new TaskExhibition.TodoExhibition(this));
 
             this.togoLabel = new KLabel(Globals.checkPlurality(this.getDaysLeft(), "days") + " to complete",
                     KFontFactory.createPlainFont(16));
@@ -95,11 +95,11 @@ public class TaskSelf {
             if (layerPanel == null) {
                 this.layerPanel = new KPanel(1_000, 35);
             } else {
-                ComponentAssistant.empty(layerPanel);
+                MComponent.empty(layerPanel);
             }
             this.layerPanel.setLayout(new BoxLayout(this.layerPanel, BoxLayout.X_AXIS));
             this.layerPanel.addAll(namePanel, quantaPanel);
-            ComponentAssistant.ready(this.layerPanel);
+            MComponent.ready(this.layerPanel);
         }
 
         private void signalEveNotice(){
@@ -252,7 +252,7 @@ public class TaskSelf {
 
         private void initializeUI(){
             final KPanel namePanel = new KPanel(new BorderLayout());
-            namePanel.add(new KLabel(this.projectName, KFontFactory.createBoldFont(16), Color.BLUE), BorderLayout.CENTER);
+            namePanel.add(new KLabel(this.projectName, KFontFactory.createPlainFont(17), Color.BLUE), BorderLayout.CENTER);
 
             final Dimension optionsDim = new Dimension(30, 30);//the small-buttons actually
 
@@ -270,7 +270,7 @@ public class TaskSelf {
             projectProgression.setPreferredSize(new Dimension(150, 20));
             projectProgression.setForeground(Color.BLUE);
 
-            terminationButton = KButton.getIconifiedButton("terminate.png", 15, 15);
+            terminationButton = KButton.getIconifiedButton("terminate.png", 20, 20);
             terminationButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             terminationButton.setPreferredSize(optionsDim);
             terminationButton.setToolTipText("Remove this Project");
@@ -288,8 +288,9 @@ public class TaskSelf {
             moreOptions.addActionListener(e -> exhibition = new TaskExhibition.ProjectExhibition(this));
 
             final KPanel quanterLayer = new KPanel(new FlowLayout(FlowLayout.RIGHT));
-            quanterLayer.addAll(new KLabel(this.getType()+" Project", KFontFactory.createPlainFont(16)), projectProgression,
-                    progressLabelPercentage, terminationButton, completionButton, Box.createRigidArea(new Dimension(15, 10)), moreOptions);
+            quanterLayer.addAll(new KLabel(this.getType()+" Project", KFontFactory.createPlainFont(16)),
+                    Box.createHorizontalStrut(15), projectProgression, progressLabelPercentage, terminationButton,
+                    completionButton, Box.createHorizontalStrut(15), moreOptions);
 
             this.projectLayer = new KPanel(1_000, 35);
             this.projectLayer.setLayout(new BoxLayout(this.projectLayer, BoxLayout.X_AXIS));
@@ -321,16 +322,17 @@ public class TaskSelf {
 
             final KPanel quantaLayer = new KPanel(new FlowLayout(FlowLayout.RIGHT));
             quantaLayer.addAll(new KLabel(this.getType()+" Project", KFontFactory.createPlainFont(16)),
-                    projectProgression, progressLabelPercentage, terminationButton, Box.createRigidArea(new Dimension(10, 10)), moreOptions);
+                    Box.createHorizontalStrut(15), projectProgression, progressLabelPercentage, terminationButton,
+                    Box.createRigidArea(new Dimension(10, 10)), moreOptions);
 
             if (projectLayer == null) {
                 projectLayer = new KPanel(1_000, 35);
                 this.projectLayer.setLayout(new BoxLayout(this.projectLayer, BoxLayout.X_AXIS));
             } else {
-                ComponentAssistant.empty(projectLayer);
+                MComponent.empty(projectLayer);
             }
             this.projectLayer.addAll(namePanel, quantaLayer);
-            ComponentAssistant.ready(projectLayer);
+            MComponent.ready(projectLayer);
         }
 
         private void signalEveNotice(){
@@ -494,13 +496,13 @@ public class TaskSelf {
 
         private void setUpUI(){
         	final KPanel namePanel = new KPanel(new BorderLayout());
-        	namePanel.add(new KLabel(this.getCourseName(), KFontFactory.createBoldFont(16),
+        	namePanel.add(new KLabel(this.getCourseName(), KFontFactory.createPlainFont(17),
                     Color.BLUE), BorderLayout.SOUTH);
 
         	deadlineIndicator = new KLabel();
             if (this.isOn) {
                 deadlineIndicator.setText("Deadline: "+deadLine);
-                deadlineIndicator.setStyle(KFontFactory.createItalicFont(16), Color.RED);
+                deadlineIndicator.setStyle(KFontFactory.createItalicFont(17), Color.RED);
                 deadlineIndicator.underline(false);
                 deadlineIndicator.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 deadlineIndicator.addMouseListener(new MouseAdapter() {
@@ -521,18 +523,19 @@ public class TaskSelf {
 
             if (this.isGroup()) {
                 groupLabel = KLabel.wantIconLabel("group.png",20,20);
+                groupLabel.setText(memberCount <= 1 ? "1 Member" : memberCount+" Members");
+                groupLabel.setFont(KFontFactory.createPlainFont(17));
                 groupLabel.setToolTipText("View Participants");
                 groupLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                groupLabel.setText(Globals.checkPlurality(this.memberCount, "Members"));
                 groupLabel.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        new MemberExhibitor(AssignmentSelf.this).setVisible(true);
-                    }
-
                     @Override
                     public void mouseEntered(MouseEvent e) {
                         groupLabel.setForeground(Color.BLUE);
+                    }
+
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        new MemberExhibitor(AssignmentSelf.this).setVisible(true);
                     }
 
                     @Override
@@ -667,7 +670,138 @@ public class TaskSelf {
             this.signalSubmissionNotice();
         }
 
-        //Inner-class of an inner-class...
+        private class MemberExhibitor extends KDialog {
+            int pX, pY;
+            private KPanel membersPanel;
+            private KButton memberAdder;
+
+            private MemberExhibitor(AssignmentSelf assignmentSelf){
+                this.setUndecorated(true);
+                this.setSize(500, 500);
+                this.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
+                final KPanel upperBar = new KPanel(new FlowLayout(FlowLayout.CENTER));
+                upperBar.add(new KLabel(assignmentSelf.getCourseName()+" Assignment", KFontFactory.createPlainFont(15), Color.BLUE));
+                upperBar.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        super.mousePressed(e);
+                        pX = e.getX();
+                        pY = e.getY();
+                        upperBar.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+                    }
+
+                    @Override
+                    public void mouseDragged(MouseEvent e) {
+                        super.mouseDragged(e);
+                        MemberExhibitor.this.setLocation(MemberExhibitor.this.getLocation().x + e.getX() - pX,
+                                MemberExhibitor.this.getLocation().y + e.getY() - pY);
+                    }
+
+                    @Override
+                    public void mouseReleased(MouseEvent e) {
+                        super.mouseReleased(e);
+                        upperBar.setCursor(null);
+                    }
+                });
+                upperBar.addMouseMotionListener(new MouseMotionAdapter() {
+                    @Override
+                    public void mouseDragged(MouseEvent e) {
+                        super.mouseDragged(e);
+                        MemberExhibitor.this.setLocation(MemberExhibitor.this.getLocation().x + e.getX() - pX,
+                                MemberExhibitor.this.getLocation().y + e.getY() - pY);
+                    }
+                });
+
+                membersPanel = new KPanel(){
+                    @Override
+                    public Component add(Component comp) {
+                        assignmentSelf.effectMembersCount(1);
+                        membersPanel.setPreferredSize(new Dimension(membersPanel.getPreferredSize().width,membersPanel.getPreferredSize().height+35));
+                        return super.add(comp);
+                    }
+
+                    @Override
+                    public void remove(Component comp) {
+                        super.remove(comp);
+                        membersPanel.setPreferredSize(new Dimension(membersPanel.getPreferredSize().width,membersPanel.getPreferredSize().height-35));
+                        assignmentSelf.effectMembersCount(-1);
+                    }
+                };
+                membersPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+                membersPanel.setBackground(Color.WHITE);
+                final KScrollPane midScroll = new KScrollPane(membersPanel);
+
+                final KButton closeButton = new KButton("Close");
+                closeButton.addActionListener(e -> this.dispose());
+
+                memberAdder = new KButton("Add Member");
+                memberAdder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                memberAdder.addActionListener(e -> {
+                    final String newMemberName = App.requestInput(this.getRootPane(),"New Member","Enter member's name below:\n \n");
+                    if (newMemberName != null && !Globals.isBlank(newMemberName)) {
+                        if (newMemberName.length() > 30) {
+                            App.signalError("Error", "Sorry, a member's name cannot exceed 30 characters.");
+                        } else {
+                            appendNewMember(newMemberName, false);
+                            assignmentSelf.members.add(newMemberName);
+                        }
+                    }
+                });
+                memberAdder.setEnabled(assignmentSelf.isOn);
+
+                final KPanel buttonsPanel = new KPanel(new BorderLayout());
+                buttonsPanel.add(new KPanel(memberAdder), BorderLayout.WEST);
+                buttonsPanel.add(new KPanel(closeButton), BorderLayout.EAST);
+
+                this.getRootPane().setDefaultButton(closeButton);
+                final KPanel contentPanel = new KPanel(new BorderLayout());
+                contentPanel.setBorder(BorderFactory.createLineBorder(null, 1, false));
+                contentPanel.add(upperBar, BorderLayout.NORTH);
+                contentPanel.add(midScroll, BorderLayout.CENTER);
+                contentPanel.add(buttonsPanel, BorderLayout.SOUTH);
+                this.setContentPane(contentPanel);
+                this.setLocationRelativeTo(Board.getRoot());
+
+                effectMembersCount(-assignmentSelf.memberCount);//This is useful for those triggered from serialization
+                if (assignmentSelf.members.isEmpty()) {
+                    appendNewMember(Student.getFullNamePostOrder()+" (me)", true);
+                    assignmentSelf.members.add(Student.getFullNamePostOrder());
+                } else {
+                    appendNewMember(Student.getFullNamePostOrder()+" (me)", true);
+                    for (int i = 1; i < assignmentSelf.members.size(); i++) {
+                        appendNewMember(assignmentSelf.members.get(i), false);
+                    }
+                }
+            }
+
+            private void appendNewMember(String name, boolean myself){
+                final KLabel nameLabel = new KLabel(name,KFontFactory.createPlainFont(18));
+
+                final KButton removeButton = KButton.getIconifiedButton("terminate.png", 17, 17);
+
+                final KPanel namePanel = new KPanel(new BorderLayout(),new Dimension(480,30));
+                namePanel.add(new KPanel(nameLabel),BorderLayout.WEST);
+                namePanel.add(removeButton, BorderLayout.EAST);
+                namePanel.setBackground(Color.WHITE);//except head and toe, the dialog is to be white
+                namePanel.getComponent(0).setBackground(Color.WHITE);
+
+                membersPanel.add(namePanel);
+                MComponent.ready(membersPanel);
+
+                removeButton.setToolTipText("Remove "+name.split(" ")[0]);
+                removeButton.addActionListener(e-> {
+                    if (App.showYesNoCancelDialog(this.getRootPane(), "Confirm",
+                            "Are you sure you want to remove "+name+" as a participant for this assignment?")) {
+                        membersPanel.remove(namePanel);
+                        MComponent.ready(membersPanel);
+                        AssignmentSelf.this.members.remove(name);
+                    }
+                });
+                removeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                removeButton.setEnabled(!myself && AssignmentSelf.this.isOn);
+            }
+        }
+
         private static class DeadLineEditor extends KDialog {
 
             private DeadLineEditor(AssignmentSelf assignmentSelf){
@@ -732,143 +866,6 @@ public class TaskSelf {
                 SwingUtilities.invokeLater(()-> this.setVisible(true));
             }
         }
-
-        //Hmm, here comes another one
-        private class MemberExhibitor extends KDialog {
-            int pX, pY;
-            private KLabel titleLabel;
-            private KPanel membersPanel;
-            private KButton memberAdder;
-
-            private MemberExhibitor(AssignmentSelf assignmentSelf){
-                this.setUndecorated(true);
-                this.setSize(500, 500);
-                this.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
-                titleLabel = new KLabel("", KFontFactory.createPlainFont(15), Color.BLUE);
-                final KPanel upperBar = new KPanel(new FlowLayout(FlowLayout.CENTER));
-                upperBar.add(titleLabel);
-                upperBar.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mousePressed(MouseEvent e) {
-                        super.mousePressed(e);
-                        pX = e.getX();
-                        pY = e.getY();
-                        upperBar.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-                    }
-
-                    @Override
-                    public void mouseDragged(MouseEvent e) {
-                        super.mouseDragged(e);
-                        MemberExhibitor.this.setLocation(MemberExhibitor.this.getLocation().x + e.getX() - pX,
-                                MemberExhibitor.this.getLocation().y + e.getY() - pY);
-                    }
-
-                    @Override
-                    public void mouseReleased(MouseEvent e) {
-                        super.mouseReleased(e);
-                        upperBar.setCursor(null);
-                    }
-                });
-                upperBar.addMouseMotionListener(new MouseMotionAdapter() {
-                    @Override
-                    public void mouseDragged(MouseEvent e) {
-                        super.mouseDragged(e);
-                        MemberExhibitor.this.setLocation(MemberExhibitor.this.getLocation().x + e.getX() - pX,
-                                MemberExhibitor.this.getLocation().y + e.getY() - pY);
-                    }
-                });
-
-                membersPanel = new KPanel(){
-                    @Override
-                    public Component add(Component comp) {
-                        assignmentSelf.effectMembersCount(1);
-                        titleLabel.setText(assignmentSelf.getCourseName()+" Assignment : "+assignmentSelf.groupLabel.getText());
-                        membersPanel.setPreferredSize(new Dimension(membersPanel.getPreferredSize().width,membersPanel.getPreferredSize().height+35));
-                        return super.add(comp);
-                    }
-
-                    @Override
-                    public void remove(Component comp) {
-                        super.remove(comp);
-                        membersPanel.setPreferredSize(new Dimension(membersPanel.getPreferredSize().width,membersPanel.getPreferredSize().height-35));
-                        assignmentSelf.effectMembersCount(-1);
-                        titleLabel.setText(assignmentSelf.getCourseName()+" Assignment : "+assignmentSelf.groupLabel.getText());
-                    }
-                };
-                membersPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-                membersPanel.setBackground(Color.WHITE);
-                final KScrollPane midScroll = new KScrollPane(membersPanel, false);
-
-                final KButton closeButton = new KButton("Close");
-                closeButton.addActionListener(e -> this.dispose());
-
-                memberAdder = new KButton("Add Member");
-                memberAdder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                memberAdder.addActionListener(e -> {
-                    final String newMemberName = App.requestInput(this.getRootPane(),"New Member","Enter member's name below:\n \n");
-                    if (newMemberName != null && !Globals.isBlank(newMemberName)) {
-                        if (newMemberName.length() > 30) {
-                            App.signalError("Error", "Sorry, a member's name cannot exceed 30 characters.");
-                        } else {
-                            appendNewMember(newMemberName, false);
-                            assignmentSelf.members.add(newMemberName);
-                        }
-                    }
-                });
-                memberAdder.setEnabled(assignmentSelf.isOn);
-
-                this.getRootPane().setDefaultButton(closeButton);
-                final KPanel contentPanel = new KPanel(new BorderLayout());
-                contentPanel.setBorder(BorderFactory.createLineBorder(null, 1, false));
-                contentPanel.add(upperBar, BorderLayout.NORTH);
-                contentPanel.add(midScroll, BorderLayout.CENTER);
-                contentPanel.add(KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, memberAdder, closeButton),
-                        BorderLayout.SOUTH);
-                this.setContentPane(contentPanel);
-                this.setLocationRelativeTo(Board.getRoot());
-
-                effectMembersCount(-assignmentSelf.memberCount);//This is useful for those triggered from serialization
-                if (assignmentSelf.members.isEmpty()) {
-                    appendNewMember(Student.getFullNamePostOrder()+" (me)", true);
-                    assignmentSelf.members.add(Student.getFullNamePostOrder());
-                } else {
-                    appendNewMember(Student.getFullNamePostOrder()+" (me)", true);
-                    for (int i = 1; i < assignmentSelf.members.size(); i++) {
-                        appendNewMember(assignmentSelf.members.get(i), false);
-                    }
-                }
-                titleLabel.setText(assignmentSelf.getCourseName()+" Assignment : "+assignmentSelf.groupLabel.getText());
-            }
-
-            private void appendNewMember(String name, boolean myself){
-                final KLabel nameLabel = new KLabel(name,KFontFactory.createPlainFont(18));
-
-                final KButton removeButton = new KButton("X");
-                removeButton.setStyle(KFontFactory.createPlainFont(15), Color.RED);
-                removeButton.undress();
-
-                final KPanel namePanel = new KPanel(new BorderLayout(),new Dimension(480,30));
-                namePanel.add(new KPanel(nameLabel),BorderLayout.WEST);
-                namePanel.add(removeButton, BorderLayout.EAST);
-                namePanel.setBackground(Color.WHITE);//except head and toe, the dialog is to be white
-                namePanel.getComponent(0).setBackground(Color.WHITE);
-
-                membersPanel.add(namePanel);
-                ComponentAssistant.ready(membersPanel);
-
-                removeButton.setToolTipText("Remove "+name.split(" ")[0]);
-                removeButton.addActionListener(e -> {
-                    if (App.showYesNoCancelDialog(this.getRootPane(), "Confirm Removal",
-                            "This action will remove "+name+" as a group participant for this assignment.\nContinue?")) {
-                        membersPanel.remove(namePanel);
-                        ComponentAssistant.ready(membersPanel);
-                        AssignmentSelf.this.members.remove(name);
-                    }
-                });
-                removeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                removeButton.setEnabled(!myself);
-            }
-        }
     }
 
 
@@ -897,7 +894,7 @@ public class TaskSelf {
         private void initializeTimer(int iDelay){
             timer = new Timer(Globals.DAY,null);
             timer.setInitialDelay(iDelay);
-            timer.addActionListener(e -> {
+            timer.addActionListener(e-> {
                 final Calendar eveCalendar = Calendar.getInstance();
                 eveCalendar.setTime(MDate.parse(this.dateDue+" 0:0:0"));
                 eveCalendar.add(Calendar.DATE, -1);
@@ -906,7 +903,7 @@ public class TaskSelf {
                 } else if(MDate.sameDay(MDate.parse(this.dateDue+" 0:0:0"), new Date())) {
                     endState();
                     setUpUI();
-                    ComponentAssistant.ready(this.eventLayer);
+                    MComponent.ready(this.eventLayer);
                     TasksGenerator.EventsHandler.renewCount(-1);
                 }
             });
@@ -915,7 +912,7 @@ public class TaskSelf {
 
         private void setUpUI(){
             if (isPending) {
-                canceller = KButton.getIconifiedButton("terminate.png", 15, 15);
+                canceller = KButton.getIconifiedButton("terminate.png", 20, 20);
                 canceller.setToolTipText("Terminate this Event");
                 canceller.addActionListener(e -> {
                     if (App.showYesNoCancelDialog("Confirm Termination",
@@ -940,7 +937,7 @@ public class TaskSelf {
 
             this.eventLayer = new KPanel(1_000,30);//this is 30
             this.eventLayer.setLayout(new BorderLayout());
-            this.eventLayer.add(new KPanel(new KLabel(this.getTitle(), KFontFactory.createBoldFont(16), Color.BLUE)),
+            this.eventLayer.add(new KPanel(new KLabel(this.getTitle(), KFontFactory.createPlainFont(17), Color.BLUE)),
                     BorderLayout.WEST);
             this.eventLayer.add(new KPanel(stateIndicator), BorderLayout.CENTER);
             this.eventLayer.add(canceller, BorderLayout.EAST);

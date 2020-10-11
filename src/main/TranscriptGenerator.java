@@ -10,125 +10,113 @@ import java.awt.event.MouseEvent;
 import java.util.Objects;
 
 /**
- * Dashboard does not make any effort(s) to calculate the CGPA. So, the cgpa, the upperDivision,
- * as well as other generated resources of this type should be renewed anytime it answerActivity.
+ * Dashboard does not make any effort(s) to calculate the CGPA.
+ * So, the cgpa, the upperDivision, as well as other generated resources of this type
+ * should be renewed anytime it answer activity.
  * And the cgpa is always set before the upperDivision is re-checked!
  * Feel free of what this class presents, because what's printed is independent of it.
  */
-public class TranscriptGenerator implements ActivityAnswerer {
-    public static final String[] HEADS = {"COURSE CODE", "COURSE DESCRIPTION", "CREDIT VALUE", "GRADE", "QUALITY POINT"};
-    private static final KLabel classificationLabel = KLabel.getPredefinedLabel("Current Upper Class Division: ",
-            SwingConstants.LEFT);
-    private static KPanel transcriptFace;
+public class TranscriptGenerator implements Activity {
     /**
-     * Hold the logo, labels, as well as the details.
+     * Holds the logo, labels, as well as the details.
      */
-    private static KPanel detailsPanelPlus;
-    private static KDefaultTableModel tModel;
-    private static KTable tTable;
-    private static KScrollPane tWrapper;
-    private static KLabel cgpaLabel;
+    private static KPanel detailPanel;
+    private static KTable table;
+    private static KLabel CGPALabel;
     private static KLabel minorLabel;
+    private static KScrollPane scrollPane;
+    private static KLabel classificationLabel;
+    public static final KTableModel TRANSCRIPT_MODEL = new KTableModel();
+    public static final String[] HEADS = { "COURSE CODE", "COURSE DESCRIPTION", "CREDIT VALUE", "GRADE", "QUALITY POINT" };
 
 
     public TranscriptGenerator(){
-        cgpaLabel = new KLabel(Student.getCGPA()+"",KFontFactory.createPlainFont(16));
-        minorLabel = new KLabel(Student.getMinor().toUpperCase(),KFontFactory.createPlainFont(15));
-        classificationLabel.setFont(KFontFactory.createPlainFont(15));
+        CGPALabel = new KLabel(Double.toString(Student.getCGPA()), KFontFactory.createPlainFont(16));
+        minorLabel = new KLabel(Student.getMinor().toUpperCase(), KFontFactory.createPlainFont(15));
+        classificationLabel = new KLabel(Student.upperClassDivision(), KFontFactory.createPlainFont(15));
 
         buildDetailsPanelPlus();
 
-        tModel = new KDefaultTableModel();
-        tModel.setColumnIdentifiers(HEADS);
+        TRANSCRIPT_MODEL.setColumnIdentifiers(HEADS);
 
-        tTable = new KTable(tModel);
-        tTable.setRowHeight(30);
-        tTable.setFont(KFontFactory.createPlainFont(15));
-        tTable.getColumnModel().getColumn(1).setPreferredWidth(350);
-        tTable.getColumnModel().getColumn(3).setPreferredWidth(40);
-        tTable.getTableHeader().setFont(KFontFactory.createBoldFont(16));
-        tTable.getTableHeader().setPreferredSize(new Dimension(tTable.getPreferredSize().width,35));
-        tTable.centerAlignColumns(2, 3, 4);
-        tTable.addMouseListener(new MouseAdapter() {
+        table = new KTable(TRANSCRIPT_MODEL);
+        table.setRowHeight(30);
+        table.setFont(KFontFactory.createBoldFont(15));
+        table.getColumnModel().getColumn(1).setPreferredWidth(350);
+        table.getColumnModel().getColumn(3).setPreferredWidth(40);
+        table.getTableHeader().setFont(KFontFactory.createBoldFont(16));
+        table.getTableHeader().setPreferredSize(new Dimension(table.getPreferredSize().width,35));
+        table.centerAlignColumns(2, 3, 4);
+        table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() >= 2) {
-                    final int selectedRow = tTable.getSelectedRow();
+                    final int selectedRow = table.getSelectedRow();
                     if (selectedRow >= 0) {
-                        SwingUtilities.invokeLater(()-> Course.exhibit(ModulesHandler.getModuleByCode(
-                                String.valueOf(tModel.getValueAt(selectedRow, 0)))));
+                        Course.exhibit(ModulesHandler.getModuleByCode(String.valueOf(TRANSCRIPT_MODEL.getValueAt(selectedRow, 0))));
+                        e.consume();
                     }
-                    e.consume();
                 }
             }
         });
 
-        tWrapper = KScrollPane.getSizeMatchingScrollPane(tTable, 3);
+        scrollPane = table.sizeMatchingScrollPane();
 
-        generateTranscriptFace();
+        final KPanel midLiner = new KPanel();
+        midLiner.setLayout(new BoxLayout(midLiner, BoxLayout.Y_AXIS));
+        midLiner.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        midLiner.addAll(Box.createVerticalStrut(10), detailPanel, Box.createVerticalStrut(20),
+                scrollPane, Box.createVerticalStrut(10), getPointPanel());
 
         final KPanel transcriptUI = new KPanel(new BorderLayout());
-        transcriptUI.add(headLiner(),BorderLayout.NORTH);
-        transcriptUI.add(new KScrollPane(transcriptFace), BorderLayout.CENTER);
-        transcriptUI.add(bottomLiner(),BorderLayout.SOUTH);
+        transcriptUI.add(headLiner(), BorderLayout.NORTH);
+        transcriptUI.add(new KScrollPane(midLiner), BorderLayout.CENTER);
+        transcriptUI.add(bottomLiner(), BorderLayout.SOUTH);
 
         Board.addCard(transcriptUI, "Transcript");
     }
 
-    private static KPanel headLiner(){
-        final KButton downloadButton = new KButton("Export Transcript");
-        downloadButton.setPreferredSize(new Dimension(175, 30));
-        downloadButton.setStyle(KFontFactory.createPlainFont(15), Color.BLUE);
-        downloadButton.undress();
-        downloadButton.underline(false);
-        downloadButton.setToolTipText("Export Transcript to PDF");
-        downloadButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        downloadButton.addActionListener(actionEvent -> {
-            downloadButton.setEnabled(false);
-            TranscriptHandler.exportNow();
-            downloadButton.setEnabled(true);
-        });
-
-        final KCheckBox detailsCheck = new KCheckBox("Show Details",false);
-        detailsCheck.setFont(KFontFactory.createPlainFont(15));
-        detailsCheck.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        detailsCheck.setOpaque(true);
-        detailsCheck.addItemListener(itemEvent -> {
-            if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
-                detailsPanelPlus.setVisible(true);
-            } else {
-                detailsPanelPlus.setVisible(false);
-            }
-        });
-
-        final KPanel helloPanel = new KPanel(new FlowLayout(FlowLayout.RIGHT));
-        helloPanel.addAll(detailsCheck, downloadButton);
-        return helloPanel;
-    }
-
-    private static void generateTranscriptFace(){
-        transcriptFace = new KPanel();
-        transcriptFace.setLayout(new BoxLayout(transcriptFace, BoxLayout.Y_AXIS));
-        transcriptFace.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-        transcriptFace.addAll(Box.createVerticalStrut(10), detailsPanelPlus, Box.createVerticalStrut(20),
-                tWrapper, Box.createVerticalStrut(10), getPointPanel());
+    @Override
+    public void answerActivity() {
+        minorLabel.setText(Student.isDoingMinor() ? Student.getMinor().toUpperCase() : "NONE");
+        classificationLabel.setText(Student.upperClassDivision());
+        classificationLabel.setForeground(classificationLabel.getText().contains("None") ? Color.RED : Color.BLUE);
+        CGPALabel.setText(Double.toString(Student.getCGPA()));
+        Board.showCard("Transcript");
     }
 
     private static void buildDetailsPanelPlus(){
-        final KLabel l1 = new KLabel("THE UNIVERSITY OF THE GAMBIA",KFontFactory.createBoldFont(25));
-        final KLabel l2 = new KLabel("STUDENT ACADEMIC RECORDS",l1.getFont());
+        final KLabel l1 = new KLabel("THE UNIVERSITY OF THE GAMBIA", KFontFactory.createBoldFont(25));
+        final KLabel l2 = new KLabel("STUDENT ACADEMIC RECORDS", l1.getFont());
 
-        final KPanel l1l2_Panel = new KPanel(500,100);
-        l1l2_Panel.addAll(l1,l2);
+        final KPanel l1l2_Panel = new KPanel(new Dimension(500, 100), l1, l2);
 
-        final KPanel lParted = new KPanel();
-        lParted.addAll(KLabel.wantIconLabel("UTGLogo.gif",125,125),
-                Box.createRigidArea(new Dimension(50, 100)),l1l2_Panel);
+        final KPanel lParted = new KPanel(KLabel.wantIconLabel("UTGLogo.gif", 125,  125),
+                Box.createRigidArea(new Dimension(50, 100)), l1l2_Panel);
 
-        detailsPanelPlus = new KPanel();
-        detailsPanelPlus.setLayout(new BoxLayout(detailsPanelPlus, BoxLayout.Y_AXIS));
-        detailsPanelPlus.addAll(lParted,Box.createVerticalStrut(30),packAllSeparatedPanels());
-        detailsPanelPlus.setVisible(false);
+        detailPanel = new KPanel();
+        detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
+        detailPanel.addAll(lParted, Box.createVerticalStrut(30), packAllSeparatedPanels());
+        detailPanel.setVisible(false);
+    }
+
+//    all the components needed at the top. may be a label to the left, buttons to the right
+    private static KPanel headLiner() {
+        final KButton downloadButton = new KButton("Export Transcript");
+        downloadButton.undress();
+        downloadButton.underline(Color.BLUE, false);
+        downloadButton.setPreferredSize(new Dimension(175, 30));
+        downloadButton.setStyle(KFontFactory.createPlainFont(15), Color.BLUE);
+        downloadButton.setToolTipText("Save Transcript as PDF");
+        downloadButton.setCursor(MComponent.HAND_CURSOR);
+        downloadButton.addActionListener(actionEvent-> TranscriptHandler.exportNow());
+
+        final KCheckBox detailsCheck = new KCheckBox("Show Details", false);
+        detailsCheck.setFont(KFontFactory.createPlainFont(15));
+        detailsCheck.setCursor(MComponent.HAND_CURSOR);
+        detailsCheck.addItemListener(itemEvent -> detailPanel.setVisible(itemEvent.getStateChange() == ItemEvent.SELECTED));
+
+        return new KPanel(new FlowLayout(FlowLayout.RIGHT), detailsCheck, downloadButton);
     }
 
     private static KPanel packAllSeparatedPanels(){
@@ -143,7 +131,7 @@ public class TranscriptGenerator implements ActivityAnswerer {
 
         final KPanel rightSide = new KPanel();
         rightSide.setLayout(new BoxLayout(rightSide,BoxLayout.Y_AXIS));
-        rightSide.add(provideRectangularPanel(165,30,"STUDENT NUMBER", Student.getMatNumber()+""));
+        rightSide.add(provideRectangularPanel(165,30,"STUDENT NUMBER", Student.getMatNumber()));
         rightSide.add(Box.createVerticalStrut(10));
         rightSide.add(provideRectangularPanel(165,60,"YEAR EXPECTED", "TO GRADUATE",
                 Student.getExpectedYearOfGraduation()+""));
@@ -156,30 +144,30 @@ public class TranscriptGenerator implements ActivityAnswerer {
         return returningPanel;
     }
 
-    private static KPanel provideRectangularPanel(int leftMostWidth, int leftMostHeight, String... strings){
+    private static KPanel provideRectangularPanel(int leftMostWidth, int leftMostHeight, String... parts){
         final Font hereFont = KFontFactory.createPlainFont(15);
 
-        final KPanel l = new KPanel(leftMostWidth, leftMostHeight);
-        final KPanel r = new KPanel();
+        final KPanel leftMost = new KPanel(leftMostWidth, leftMostHeight);
+        final KPanel rightMost = new KPanel();
 
-        if (strings.length == 2) {
-            l.add(new KLabel(strings[0], hereFont));
-            r.add(Objects.equals(strings[0], "MINOR") ? minorLabel : new KLabel(strings[1].toUpperCase(), hereFont));
-        } else if (strings.length == 3) {
-            l.setLayout(new BoxLayout(l, BoxLayout.Y_AXIS));
-            l.add(new KPanel(new KLabel(strings[0], hereFont)));
-            l.add(new KPanel(new KLabel(strings[1].toUpperCase(), hereFont)));
+        if (parts.length == 2) {
+            leftMost.add(new KLabel(parts[0], hereFont));
+            rightMost.add(Objects.equals(parts[0], "MINOR") ? minorLabel : new KLabel(parts[1].toUpperCase(), hereFont));
+        } else if (parts.length == 3) {
+            leftMost.setLayout(new BoxLayout(leftMost, BoxLayout.Y_AXIS));
+            leftMost.add(new KPanel(new KLabel(parts[0], hereFont)));
+            leftMost.add(new KPanel(new KLabel(parts[1].toUpperCase(), hereFont)));
 
-            r.setLayout(new BoxLayout(r, BoxLayout.X_AXIS));
-            r.addAll(new KPanel(), new KLabel(strings[2].toUpperCase(), hereFont), new KPanel());
+            rightMost.setLayout(new BoxLayout(rightMost, BoxLayout.X_AXIS));
+            rightMost.addAll(new KPanel(), new KLabel(parts[2].toUpperCase(), hereFont), new KPanel());
         }
 
-        final KPanel lr = new KPanel(new BorderLayout());
-        lr.setBorder(BorderFactory.createLineBorder(Color.BLACK,1, false));
-        lr.add(l, BorderLayout.WEST);
-        lr.add(new KSeparator(KSeparator.VERTICAL), BorderLayout.CENTER);
-        lr.add(r, BorderLayout.EAST);
-        return lr;
+        final KPanel whole = new KPanel(new BorderLayout());
+        whole.setBorder(BorderFactory.createLineBorder(Color.BLACK,1));
+        whole.add(leftMost, BorderLayout.WEST);
+        whole.add(new KSeparator(KSeparator.VERTICAL), BorderLayout.CENTER);
+        whole.add(rightMost, BorderLayout.EAST);
+        return whole;
     }
 
     private static KPanel getPointPanel(){
@@ -195,7 +183,7 @@ public class TranscriptGenerator implements ActivityAnswerer {
         avgPanel.add(new KSeparator(KSeparator.VERTICAL));
         final KPanel numberHolder = new KPanel();
         numberHolder.setLayout(new BoxLayout(numberHolder, BoxLayout.X_AXIS));
-        numberHolder.addAll(new KPanel(), cgpaLabel, new KPanel());
+        numberHolder.addAll(new KPanel(), CGPALabel, new KPanel());
         avgPanel.add(numberHolder);
 
         final KPanel kPanel = new KPanel(new BorderLayout());
@@ -203,36 +191,12 @@ public class TranscriptGenerator implements ActivityAnswerer {
         return kPanel;
     }
 
-    private static KPanel bottomLiner(){
+    private static KPanel bottomLiner() {
         return new KPanel(classificationLabel);
     }
 
-    private static void reIndexTableResources(){
-        for (int i = 0; i < tTable.getRowCount(); i++){
-            tModel.removeRow(i);
-            tWrapper.setPreferredSize(new Dimension(tWrapper.getPreferredSize().width, tWrapper.getPreferredSize().height - 30));
-        }
-
-        for (Course tCourse : Memory.listRequested()) {
-            tModel.addRow(new String[] {tCourse.getCode(),tCourse.getName(),tCourse.getCreditHours()+"", tCourse.getGrade(),
-                    tCourse.getQualityPoint()+""});
-            tWrapper.setPreferredSize(new Dimension(tWrapper.getPreferredSize().width, tWrapper.getPreferredSize().height + 30));
-        }
-    }
-
-    public static String getMinorState(){
+    public static String getMinorState() {
         return minorLabel.getText();
-    }
-
-    @Override
-    public void answerActivity() {
-        minorLabel.setText(Student.isDoingMinor()? Student.getMinor().toUpperCase() : "NONE");
-        classificationLabel.setText(Student.upperDivision());
-        classificationLabel.setForeground(classificationLabel.getText().contains("None") ? Color.RED : Color.BLUE);
-        cgpaLabel.setText(Double.toString(Student.getCGPA()));
-
-        SwingUtilities.invokeLater(TranscriptGenerator::reIndexTableResources);
-        Board.showCard("Transcript");
     }
 
 }

@@ -8,17 +8,17 @@ public class KMenuItem extends JMenuItem implements Preference {
 
     public KMenuItem(String text){
         super(text);
-        this.setPreferences();
+        setPreferences();
     }
 
-    public KMenuItem(String text, ActionListener actionListener){
+    public KMenuItem(String text, ActionListener action){
         this(text);
-        this.addActionListener(actionListener);
+        addActionListener(action);
     }
 
     @Override
     public void setPreferences() {
-        this.setFont(KFontFactory.createPlainFont(15));
+        setFont(KFontFactory.createPlainFont(15));
     }
 
 }

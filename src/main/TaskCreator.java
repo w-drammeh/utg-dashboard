@@ -55,8 +55,8 @@ public class TaskCreator {
             this.getRootPane().setDefaultButton(createButton);
             final KPanel contentPlate = new KPanel();
             contentPlate.setLayout(new BoxLayout(contentPlate,BoxLayout.Y_AXIS));
-            contentPlate.addAll(namePlate,durationPlate,ComponentAssistant.contentBottomGap(),
-                    KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, quitButton, createButton));
+            contentPlate.addAll(namePlate,durationPlate, MComponent.contentBottomGap(),
+                    new KPanel(new FlowLayout(FlowLayout.RIGHT), quitButton, createButton));
             this.setContentPane(contentPlate);
             this.pack();
             this.setMinimumSize(this.getPreferredSize());
@@ -117,7 +117,7 @@ public class TaskCreator {
             final KPanel contentPlate = new KPanel();
             contentPlate.setLayout(new BoxLayout(contentPlate,BoxLayout.Y_AXIS));
             contentPlate.addAll(namePanelPlus,typePanelPlus,durationPanelPlus, giveSpace(400, 25),
-                    KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, cancelButton, createButton));
+                    new KPanel(new FlowLayout(FlowLayout.RIGHT), cancelButton, createButton));
             this.setContentPane(contentPlate);
             this.pack();
             this.setMinimumSize(this.getPreferredSize());
@@ -162,7 +162,7 @@ public class TaskCreator {
                 final JComboBox<String> importBox = new JComboBox<String>(activeNames){
                     @Override
                     public JToolTip createToolTip() {
-                        return KLabel.preferredTip();
+                        return MComponent.preferredTip();
                     }
                 };
                 importBox.setFont(KFontFactory.createPlainFont(15));
@@ -235,7 +235,7 @@ public class TaskCreator {
             final KPanel questionPanel = new KPanel(new BorderLayout());
             questionPanel.add(new KPanel(new KLabel("Write the question(s) below",KFontFactory.createPlainFont(14))),BorderLayout.NORTH);
             questionArea = new KTextArea();
-            final KScrollPane scrollPane = KScrollPane.getTextAreaScroller(questionArea, new Dimension(475,150));
+            final KScrollPane scrollPane = questionArea.outerScrollPane(new Dimension(475,150));
             scrollPane.setBorder(BorderFactory.createLineBorder(Color.BLUE,2,true));
             questionPanel.add(scrollPane,BorderLayout.CENTER);
 
@@ -247,7 +247,7 @@ public class TaskCreator {
             final KPanel contentPlate = new KPanel();
             contentPlate.setLayout(new BoxLayout(contentPlate,BoxLayout.Y_AXIS));
             contentPlate.addAll(importPanel, namePanel,deadLinePanel,groupPanel,modePanel,groupPanel,giveSpace(500,25),questionPanel,
-                    ComponentAssistant.contentBottomGap(),KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, cancelButton, addButton));
+                    MComponent.contentBottomGap(), new KPanel(new FlowLayout(FlowLayout.RIGHT), cancelButton, addButton));
             this.setContentPane(contentPlate);
             this.getRootPane().setDefaultButton(addButton);
             this.pack();
@@ -342,7 +342,7 @@ public class TaskCreator {
                 final JComboBox<String> importBox = new JComboBox<String>(activeNames){
                     @Override
                     public JToolTip createToolTip() {
-                        return KLabel.preferredTip();
+                        return MComponent.preferredTip();
                     }
                 };
                 importBox.setFont(KFontFactory.createPlainFont(15));
@@ -402,8 +402,8 @@ public class TaskCreator {
             addButton.addActionListener(TasksGenerator.EventsHandler.newListener());//No fear - if value was not one of the specified 3, compiler won't reach this line
 
             this.getRootPane().setDefaultButton(addButton);
-            contentPanel.addAll(titleLayer, datesLayer, ComponentAssistant.contentBottomGap(),
-                    KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, cancelButton,addButton));
+            contentPanel.addAll(titleLayer, datesLayer, MComponent.contentBottomGap(),
+                    new KPanel(new FlowLayout(FlowLayout.RIGHT), cancelButton,addButton));
             this.setContentPane(contentPanel);
             this.pack();
             this.setMinimumSize(this.getPreferredSize());

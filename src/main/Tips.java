@@ -8,28 +8,25 @@ import java.awt.*;
 /**
  * Encompasses both the 'FAQs' and 'Dashboard Tips'.
  */
-public class HelpGenerator implements ActivityAnswerer {
+public class Tips implements Activity {
     private CardLayout helpCard;
-    private KScrollPane tipScrollPane, faqsScrollPane;
+    private KScrollPane tipsPane, faqsPane;
     private boolean isFirst;
 
 
-    public HelpGenerator(){
+    public Tips(){
         isFirst = true;
-
         helpCard = new CardLayout();
         final KPanel centerPanel = new KPanel(helpCard);//There's north, and this is the center
-        final KLabel showingLabel = new KLabel("Showing Dashboard Tips", KFontFactory.createBoldFont(16));
-        final JComboBox<String> helpBox = new JComboBox<String>(new String[] {"Dashboard Tips", "UTG FAQs"}){
+        final KLabel showingLabel = new KLabel("Showing Dashboard Tips", KFontFactory.createBoldFont(17));
+        final KComboBox<String> helpBox = new KComboBox<>(new String[] {"Dashboard Tips", "UTG FAQs"}) {
             @Override
             public JToolTip createToolTip() {
-                return KLabel.preferredTip();
+                return MComponent.preferredTip();
             }
         };
-        helpBox.setFont(KFontFactory.createPlainFont(15));
-        helpBox.setToolTipText("Change help activity");
-        helpBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        helpBox.addActionListener(e -> {
+        helpBox.setToolTipText("Change Activity");
+        helpBox.addActionListener(e-> {
             if (helpBox.getSelectedIndex() == 0) {
                 helpCard.show(centerPanel,"tips");
                 showingLabel.setText("Showing Dashboard Tips");
@@ -40,19 +37,32 @@ public class HelpGenerator implements ActivityAnswerer {
         });
 
         final KPanel northPanel = new KPanel(new BorderLayout());
-        northPanel.add(showingLabel, BorderLayout.WEST);
-        northPanel.add(new KPanel(helpBox),BorderLayout.EAST);
+        northPanel.add(new KPanel(showingLabel), BorderLayout.WEST);
+        northPanel.add(new KPanel(helpBox), BorderLayout.EAST);
 
         final KPanel allHelpPlace = new KPanel(new BorderLayout());
         allHelpPlace.add(northPanel, BorderLayout.NORTH);
         allHelpPlace.add(centerPanel, BorderLayout.CENTER);
 
-        setUpTips();
-        setUpFAQs();
-        helpCard.addLayoutComponent(centerPanel.add(tipScrollPane),"tips");
-        helpCard.addLayoutComponent(centerPanel.add(faqsScrollPane),"faqs");
+        generateTips();
+        generateFAQs();
+
+        helpCard.addLayoutComponent(centerPanel.add(tipsPane),"tips");
+        helpCard.addLayoutComponent(centerPanel.add(faqsPane),"faqs");
 
         Board.addCard(allHelpPlace, "Faqs & Help");
+    }
+
+    @Override
+    public void answerActivity() {
+        Board.showCard("Faqs & Help");
+        if (isFirst) {
+            SwingUtilities.invokeLater(()-> {
+                tipsPane.toTop();
+                faqsPane.toTop();
+            });
+            isFirst = false;
+        }
     }
 
     /**
@@ -63,20 +73,8 @@ public class HelpGenerator implements ActivityAnswerer {
         return "'Home | FAQs & Help | Dashboard Tips | "+ref+"'";
     }
 
-    @Override
-    public void answerActivity() {
-        Board.showCard("Faqs & Help");
-        if (isFirst) {
-            SwingUtilities.invokeLater(()->{
-                tipScrollPane.toTop();
-                faqsScrollPane.toTop();
-            });
-            isFirst = false;
-        }
-    }
-
 //    Dashboard tips
-    private void setUpTips(){
+    private void generateTips(){
         final String runningTip = "Dashboard provides a mechanism for you to effectively keep track of the courses you " +
                 "register for every ongoing semester. Go to 'Home | This Semester'. Temporarily, you can add courses to " +
                 "the table which you should <i>Verify</i> later. However, it is recommended that you register all your courses on " +
@@ -171,38 +169,37 @@ public class HelpGenerator implements ActivityAnswerer {
 
         final KPanel tipsPlace = new KPanel(975, 2_210);
         tipsPlace.setLayout(new BoxLayout(tipsPlace, BoxLayout.Y_AXIS));
-        tipsPlace.addAll(tipHeading("Running Courses"),tipWriting(runningTip),tipSubHeading("Verification"),
-                tipWriting(verificationTip),tipSubHeading("Matching"), tipWriting(matchingTip),
-                tipHeading("Module Collection"),tipWriting(modulesTip),tipSubHeading("Modules Synchronization"),
-                tipWriting(syncingTip),tipSubHeading("Course Verification"),tipWriting(confirmationTip),
-                tipSubHeading("Summer"),tipWriting(summerTip),tipSubHeading("Miscellaneous Table"),tipWriting(miscTableTip),
-                tipHeading("Privacy & Settings"),tipWriting(settingsTip),tipSubHeading("User Icon"),
-                tipWriting(iconTip),tipSubHeading("Major Code"),tipWriting(majCodeTip),tipSubHeading("Minor Code"),
-                tipWriting(minCodeTip),tipSubHeading("Custom Detail"),tipWriting(customDTip),
-                tipHeading("My Transcript"),tipWriting(transTip),tipSubHeading("Printing"),tipWriting(printTip),
-                tipHeading("Analysis"),tipWriting(analysisTip),
-                tipHeading("Other Tips and Universal Access"),tipSubHeading("Go Portal"),tipWriting(goPortalTip),
-                tipSubHeading("Come Home"),tipWriting(comeHomeTip),tipSubHeading("About UTG"),tipWriting(utgTip));
-        tipScrollPane = new KScrollPane(tipsPlace);
+        tipsPlace.addAll(head("Running Courses"), write(runningTip), subHead("Verification"),
+                write(verificationTip), subHead("Matching"), write(matchingTip),
+                head("Module Collection"), write(modulesTip), subHead("Modules Synchronization"),
+                write(syncingTip), subHead("Course Verification"), write(confirmationTip),
+                subHead("Summer"), write(summerTip), subHead("Miscellaneous Table"), write(miscTableTip),
+                head("Privacy & Settings"), write(settingsTip), subHead("User Icon"),
+                write(iconTip), subHead("Major Code"), write(majCodeTip), subHead("Minor Code"),
+                write(minCodeTip), subHead("Custom Detail"), write(customDTip),
+                head("My Transcript"), write(transTip), subHead("Printing"), write(printTip),
+                head("Analysis"), write(analysisTip),
+                head("Other Tips and Universal Access"), subHead("Go Portal"), write(goPortalTip),
+                subHead("Come Home"), write(comeHomeTip), subHead("About UTG"), write(utgTip));
+        tipsPane = new KScrollPane(tipsPlace);
     }
 
-    private KPanel tipHeading(String topic){
-        return KPanel.wantDirectAddition(new FlowLayout(FlowLayout.LEFT), null, new KLabel(topic,
-                KFontFactory.createBoldFont(17),Color.BLUE));
+    private KPanel head(String topic) {
+        return new KPanel(new KLabel(topic, KFontFactory.createBoldFont(18), Color.BLUE));
     }
 
-    private KPanel tipSubHeading(String subTopic){
-        return new KPanel(new KLabel(subTopic, KFontFactory.createPlainFont(16), Color.BLUE));
+    private KPanel subHead(String subTopic) {
+        return new KPanel(new FlowLayout(FlowLayout.LEFT), new KLabel(subTopic, KFontFactory.createPlainFont(16), Color.BLUE));
     }
 
-    private KTextPane tipWriting(String tNote){
-        final KTextPane tipTextPane = KTextPane.wantHtmlFormattedPane(tNote);
+    private KTextPane write(String note) {
+        final KTextPane tipTextPane = KTextPane.wantHtmlFormattedPane(note);
         tipTextPane.setOpaque(false);
         return tipTextPane;
     }
 
 //    UTG Faqs
-    private void setUpFAQs(){
+    private void generateFAQs(){
         //declaring the q, a strings
         final String mailQ = "How do I get to discover my Student Mail address?";
         final String mailA = "Every enrolled-student is assigned a unique email address known as the <b>student mail</b>. " +
@@ -217,59 +214,39 @@ public class HelpGenerator implements ActivityAnswerer {
                 "so it is strongly recommended that you change it. Visit the faulty of your department for this changes.";
 
         //Let user answer a faq
-        final String contributeString = "Do you know an answer to a problem faced by you or any other student " +
+        final String contributeString = "<i>Do you know an answer to a problem faced by you or any other student " +
                 "which is not stated above? Then do not hesitate to let your brothers and sisters benefit from it " +
-                "by giving it to us. Simply go to 'Home | Personal Dashboard | Feedback | Answer a FAQ'.";
-        final KPanel downPanel = new KPanel(900,115);
+                "by giving it to us. Simply go to 'Home | Personal Dashboard | Feedback | Answer a FAQ'</i>";
+
+        final KPanel downPanel = new KPanel(975, 115);
         downPanel.setLayout(new BoxLayout(downPanel, BoxLayout.Y_AXIS));
-        downPanel.addAll(Box.createVerticalStrut(30),new KPanel(new KSeparator(new Dimension(800,1), Color.BLACK)),
-                newBlank(), insertedText(contributeString));
+        downPanel.addAll(new KPanel(new KSeparator(new Dimension(775,1), Color.BLACK)), write(contributeString));
 
         final KPanel faqsPlace = new KPanel();
         faqsPlace.setLayout(new BoxLayout(faqsPlace, BoxLayout.Y_AXIS));
         faqsPlace.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-        faqsPlace.addAll(provideAnswerToFaq(mailQ, mailA, newDimension(150)), newBlank(),
-                provideAnswerToFaq(changePortalMailQ, changePortalMailA, newDimension(125)), newBlank(),
+        faqsPlace.addAll(provideAnswerToFaq(mailQ, mailA, 150), Box.createVerticalStrut(10),
+                provideAnswerToFaq(changePortalMailQ, changePortalMailA, 125), Box.createVerticalStrut(25),
                 downPanel);//to be continued...
-        faqsScrollPane = new KScrollPane(faqsPlace);
+        faqsPane = new KScrollPane(faqsPlace);
     }
 
-    private KPanel provideAnswerToFaq(String problem, String answer, Dimension dms){
-        final Font hFont = KFontFactory.createBoldFont(15);
+    private KPanel provideAnswerToFaq(String problem, String answer, int height){
+        final Font hintFont = KFontFactory.createBoldFont(15);
 
         final KPanel quesPanel = new KPanel(new BorderLayout());
-        quesPanel.setBackground(Color.WHITE);
-        final KPanel wrapper = new KPanel(new KLabel("Question:", hFont));
-        wrapper.setBackground(Color.WHITE);
-        quesPanel.add(wrapper, BorderLayout.WEST);
-        quesPanel.add(insertedText(problem), BorderLayout.CENTER);
+        quesPanel.add(new KPanel(new KLabel("Question:", hintFont)), BorderLayout.WEST);
+        quesPanel.add(write(problem), BorderLayout.CENTER);
 
         final KPanel ansPanel = new KPanel(new BorderLayout());
-        ansPanel.setBackground(Color.WHITE);
-        final KPanel wrapper1 = new KPanel(new KLabel("Answer:", hFont));
-        wrapper1.setBackground(Color.WHITE);
-        ansPanel.add(wrapper1, BorderLayout.WEST);
-        ansPanel.add(insertedText(answer), BorderLayout.CENTER);
+        ansPanel.add(new KPanel(new KLabel("Answer:", hintFont)), BorderLayout.WEST);
+        ansPanel.add(write(answer), BorderLayout.CENTER);
 
-        final KPanel onePanel = new KPanel(dms.width, dms.height);
-        onePanel.setBackground(Color.WHITE);
-        onePanel.setBorder(BorderFactory.createLineBorder(Color.BLUE,2,true));
+        final KPanel onePanel = new KPanel(975, height);
+        onePanel.setBorder(BorderFactory.createLineBorder(Color.BLUE,2));
         onePanel.setLayout(new BoxLayout(onePanel, BoxLayout.Y_AXIS));
         onePanel.addAll(quesPanel, ansPanel);
-
         return onePanel;
-    }
-
-    private KTextPane insertedText(String tNote){
-        return KTextPane.wantHtmlFormattedPane(tNote);
-    }
-
-    private Component newBlank(){
-        return Box.createRigidArea(new Dimension(500, 10));
-    }
-
-    private Dimension newDimension(int height){
-        return new Dimension(500, height);
     }
 
 }

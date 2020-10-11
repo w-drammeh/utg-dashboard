@@ -1,12 +1,15 @@
 package main;
 
+import customs.KFontFactory;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
-public class ComponentAssistant {
+public class MComponent {
+    public static final Cursor HAND_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 
 
     /**
@@ -36,6 +39,15 @@ public class ComponentAssistant {
             c.repaint();
             c.revalidate();
         }
+    }
+
+    /**
+     * Dashboard's standard toolTip for components.
+     */
+    public static JToolTip preferredTip(){
+        final JToolTip toolTip = new JToolTip();
+        toolTip.setFont(KFontFactory.createPlainFont(14));
+        return toolTip;
     }
 
     /**

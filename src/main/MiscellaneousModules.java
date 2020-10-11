@@ -7,41 +7,42 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Objects;
 
-public class MiscellaneousModulesHandler {
-    private JPopupMenu jPopupMenu;
+public class MiscellaneousModules {
     private KMenuItem detailsItem, editItem, removeItem, confirmItem, newItem;
+    private JPopupMenu jPopupMenu;
     private static KTable miscTable;
-    private static KDefaultTableModel miscModel;
+    public static KTableModel miscModel;
 
 
-    public MiscellaneousModulesHandler(){
-        generateMiscTable();
+    public MiscellaneousModules(){
+        setupTable();
         configurePopUp();
     }
 
     /**
-     * Triggered by the monitor to signal addition is directed to miscellaneousTable.
+     * Triggered by the monitor to signal addition is directed to the miscellaneous-table.
      */
-    public static void welcome(Course summerCourse){
+    public static void welcome(Course summerCourse) {
         miscModel.addRow(new String[] {summerCourse.getCode(), summerCourse.getName(), summerCourse.getLecturer(),
                 summerCourse.getGrade(), summerCourse.getYear()});
     }
 
     /**
-     * Triggered by the monitor to signal removal is directed to miscellaneousTable.
+     * Triggered by the monitor to signal removal is directed to miscellaneous-table.
      */
     public static void ridOf(Course summerCourse){
         miscModel.removeRow(miscModel.getRowOf(summerCourse.getCode()));
     }
 
-    private void generateMiscTable(){
-        miscModel = new KDefaultTableModel();
+    private void setupTable(){
+        miscModel = new KTableModel();
         miscModel.setColumnIdentifiers(new String[] {"CODE", "NAME", "LECTURER", "GRADE", "YEAR"});
-        ModulesHandler.models[9] = miscModel;
+        ModulesHandler.ALL_MODELS.add(miscModel);
+
         miscTable = new KTable(miscModel);
         miscTable.setRowHeight(30);
+        miscTable.setHeaderHeight(30);
         miscTable.getTableHeader().setFont(KFontFactory.createBoldFont(16));
         miscTable.setFont(KFontFactory.createPlainFont(15));
         miscTable.centerAlignAllColumns();
@@ -49,75 +50,71 @@ public class MiscellaneousModulesHandler {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.isPopupTrigger()) {
-                    final boolean necessary = miscTable.getSelectedRow() >= 0;
-
-                    detailsItem.setEnabled(necessary);
-                    editItem.setEnabled(necessary);
-                    removeItem.setEnabled(necessary);
-                    confirmItem.setEnabled(necessary);
-                    newItem.setEnabled(miscTable.getRowCount() <= 15);
-
-                    jPopupMenu.show(miscTable, e.getX(), e.getY());
+                    detailsItem.setEnabled(true);
+                    editItem.setEnabled(true);
+                    removeItem.setEnabled(true);
+                    confirmItem.setEnabled(true);
+                    miscTable.getSelectionModel().setSelectionInterval(0, miscTable.rowAtPoint(e.getPoint()));
+                    SwingUtilities.invokeLater(()-> jPopupMenu.show(miscTable, e.getX(), e.getY()));
                 }
             }
+
             @Override
             public void mouseReleased(MouseEvent e) {
                 mousePressed(e);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() >= 2) {
+                    final int selectedRow = miscTable.getSelectedRow();
+                    if (selectedRow >= 0) {
+                        Course.exhibit(ModulesHandler.getModuleByCode(String.valueOf(miscTable.getValueAt(selectedRow, 0))));
+                    }
+                    e.consume();
+                }
             }
         });
     }
 
     private void configurePopUp(){
-        detailsItem = new KMenuItem(ModulesHandler.DETAILS_STRING);
-        detailsItem.addActionListener(e -> SwingUtilities.invokeLater(()->{
-            final Course c = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(
+        detailsItem = new KMenuItem(ModulesHandler.DETAILS);
+        detailsItem.addActionListener(e-> SwingUtilities.invokeLater(()-> {
+            final Course course = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(
                     miscTable.getSelectedRow(), 0)));
-            try {
-                Course.exhibit(Board.getRoot(), Objects.requireNonNull(c));
-            } catch (NullPointerException npe){
-                App.silenceException("No such course in list");
-            }
+            Course.exhibit(course);
         }));
 
-        editItem = new KMenuItem(ModulesHandler.EDIT_STRING);
-        editItem.addActionListener(e -> {
-            final Course c = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
-            try {
-                SwingUtilities.invokeLater(() -> new MiscModuleEditor(Objects.requireNonNull(c)).setVisible(true));
-            } catch (NullPointerException npe) {
-                App.silenceException("No such course in list");
+        editItem = new KMenuItem(ModulesHandler.EDIT);
+        editItem.addActionListener(e-> {
+            final Course course = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
+            if (course != null) {
+                final  MiscModuleEditor editor = new MiscModuleEditor(course);
+                SwingUtilities.invokeLater(()-> editor.setVisible(true));
             }
         });
 
-        removeItem = new KMenuItem(ModulesHandler.DELETE_STRING);
-        removeItem.addActionListener(e -> {
-            final Course c = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
-            try {
-                Objects.requireNonNull(c);
-                if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+c.getName()+"\n" +
-                        "and that you wish to remove it from your summer collection?")) {
-                    ModulesHandler.getModulesMonitor().remove(c);
-                }
-            } catch (NullPointerException npe) {
-                App.silenceException("No such course in list");
+        removeItem = new KMenuItem(ModulesHandler.DELETE);
+        removeItem.addActionListener(e-> {
+            final Course course = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
+            if (course != null) {
+                ModulesHandler.getModulesMonitor().remove(course);
             }
         });
 
-        confirmItem = new KMenuItem(ModulesHandler.CONFIRM_STRING);
-        confirmItem.addActionListener(e -> {
-            final Course c = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
-            new Thread(()-> {
-                try {
-                    Objects.requireNonNull(c);
-                    ModulesHandler.launchVerification(c);
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            }).start();
+        confirmItem = new KMenuItem(ModulesHandler.CONFIRM);
+        confirmItem.addActionListener(e-> {
+            final Course course = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
+            if (course != null) {
+                new Thread(()-> ModulesHandler.launchVerification(course)).start();
+            }
         });
 
-        newItem = new KMenuItem(ModulesHandler.ADD_STRING);
-        newItem.addActionListener(e -> SwingUtilities.invokeLater(()-> new MiscModuleAdder().setVisible(true)));
+        newItem = new KMenuItem(ModulesHandler.ADD);
+        newItem.addActionListener(e-> {
+            final MiscModuleAdder adder = new MiscModuleAdder();
+            SwingUtilities.invokeLater(()-> adder.setVisible(true));
+        });
 
         jPopupMenu = new JPopupMenu();
         jPopupMenu.add(detailsItem);
@@ -127,22 +124,21 @@ public class MiscellaneousModulesHandler {
         jPopupMenu.add(newItem);
     }
 
-    public JComponent getMiscPresent(){
-        final KScrollPane miscScrollPane = new KScrollPane(miscTable,false);
+    public JComponent getPresent(){
+        final KScrollPane miscScrollPane = miscTable.sizeMatchingScrollPane();
         miscScrollPane.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.isPopupTrigger()) {
-                    final boolean necessary = miscTable.getSelectedRow() >= 0;
-
-                    detailsItem.setEnabled(necessary);
-                    editItem.setEnabled(necessary);
-                    removeItem.setEnabled(necessary);
-                    confirmItem.setEnabled(necessary);
-
+                    miscTable.clearSelection();
+                    detailsItem.setEnabled(false);
+                    editItem.setEnabled(false);
+                    removeItem.setEnabled(false);
+                    confirmItem.setEnabled(false);
                     jPopupMenu.show(miscScrollPane, e.getX(), e.getY());
                 }
             }
+
             @Override
             public void mouseReleased(MouseEvent e) {
                 mousePressed(e);
@@ -151,7 +147,7 @@ public class MiscellaneousModulesHandler {
 
         final KPanel present = new KPanel();
         present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-        present.addAll(Box.createVerticalStrut(15), miscScrollPane, Box.createVerticalStrut(10));
+        present.addAll(miscScrollPane, Box.createVerticalStrut(15));
         return present;
     }
 
@@ -160,30 +156,30 @@ public class MiscellaneousModulesHandler {
         JComboBox<String> semestersBox;
 
         private MiscModuleAdder(){
-            super(null,null);
-            this.setTitle("New Miscellaneous Course");
+            super(null, null);
+            setTitle("New Miscellaneous Course");
 
-            this.semestersBox = new JComboBox<>(new String[] {Student.FIRST_SEMESTER, Student.SECOND_SEMESTER, Student.SUMMER_SEMESTER});
+            semestersBox = new JComboBox<>(new String[] {Student.FIRST_SEMESTER, Student.SECOND_SEMESTER, Student.SUMMER_SEMESTER});
             semestersBox.setFont(KFontFactory.createPlainFont(15));
-            semesterPanel.removeLastChild();
-            semesterPanel.add(new KPanel(this.semestersBox), BorderLayout.CENTER);
+            semesterPanel.removeLast();
+            semesterPanel.add(new KPanel(semestersBox), BorderLayout.CENTER);
 
             actionButton.removeActionListener(actionButton.getActionListeners()[0]);
             actionButton.addActionListener(additionListener());
         }
 
         private ActionListener additionListener() {
-            return e -> {
+            return e-> {
                 final String givenYear;
                 if (Student.isValidAcademicYear(yearField.getText())) {
                     givenYear = yearField.getText();
                 } else {
-                    App.signalError("Invalid year format",
-                            "Sorry, "+yearField.getText()+" is not a valid academic year. Dashboard reads years in the format: yyyy/yyyy.\n" +
-                                    "E.g 2016/2017");
+                    App.signalError("Error", "Sorry, "+yearField.getText()+" is not a valid academic year.\n" +
+                                    "Dashboard reads years in the format: yyyy/yyyy. E.g 2016/2017");
                     yearField.requestFocusInWindow();
                     return;
                 }
+
                 if (givenYear.equals(Student.firstAcademicYear())) {
                     App.signalError("Error",
                             "Sorry, the year you provided ["+givenYear+"] corresponds your first academic year.\n" +
@@ -213,45 +209,44 @@ public class MiscellaneousModulesHandler {
                     yearField.requestFocusInWindow();
                     return;
                 }
-                if (codeField.hasNoText()) {
-                    App.signalError(MiscModuleAdder.this.getRootPane(), "No Code","Please provide the code of the course.");
+
+                if (codeField.isBlank()) {
+                    App.signalError(getRootPane(),"No Code", "Please provide the code of the course.");
                     codeField.requestFocusInWindow();
-                } else if (nameField.hasNoText()) {
-                    App.signalError(MiscModuleAdder.this.getRootPane(),"No Name","Please provide the name of the course.");
+                } else if (nameField.isBlank()) {
+                    App.signalError(getRootPane(),"No Name","Please provide the name of the course.");
                     nameField.requestFocusInWindow();
-                } else if (scoreField.hasNoText()) {
-                    App.signalError(MiscModuleAdder.this.getRootPane(),"Error","Please enter the score you get from this course.");
+                } else if (scoreField.isBlank()) {
+                    App.signalError(getRootPane(),"Error","Please enter the score you get from this course.");
                     scoreField.requestFocusInWindow();
                 } else {
                     double score;
                     try {
                         score = Double.parseDouble(scoreField.getText());
                     } catch (NumberFormatException formatError){
-                        ModulesHandler.reportScoreInvalid(scoreField.getText(), this.getRootPane());
+                        ModulesHandler.reportScoreInvalid(scoreField.getText(), getRootPane());
                         scoreField.requestFocusInWindow();
                         return;
                     }
+
                     if (score < 0 || score > 100) {
-                        ModulesHandler.reportScoreOutOfRange(this.getRootPane());
+                        ModulesHandler.reportScoreOutOfRange(getRootPane());
                         scoreField.requestFocusInWindow();
                         return;
                     }
+
                     if (ModulesHandler.existsInList(codeField.getText())) {
                         ModulesHandler.reportCodeDuplication(codeField.getText());
                         codeField.requestFocusInWindow();
                         return;
                     }
 
-                    final String day = String.valueOf(dayBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
-                            String.valueOf(dayBox.getSelectedItem());
-                    final String time = String.valueOf(timeBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
-                            String.valueOf(timeBox.getSelectedItem());
                     final Course course = new Course(givenYear, String.valueOf(semestersBox.getSelectedItem()),
                             codeField.getText(), nameField.getText(), lecturerField.getText(), venueField.getText(),
-                            day, time, score, Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
-                            String.valueOf(requirementBox.getSelectedItem()), false);
+                            String.valueOf(dayBox.getSelectedItem()), String.valueOf(timeBox.getSelectedItem()), score,
+                            Integer.parseInt(String.valueOf(creditBox.getSelectedItem())), String.valueOf(requirementBox.getSelectedItem()), false);
                     ModulesHandler.getModulesMonitor().add(course);
-                    this.dispose();
+                    dispose();
                 }
             };
         }
@@ -263,33 +258,31 @@ public class MiscellaneousModulesHandler {
 
         private MiscModuleEditor(Course miscCourse){
             super();
-            this.setTitle(miscCourse.getName()+" - Miscellaneous");
-            this.target = miscCourse;
+            setTitle(miscCourse.getName()+" - Miscellaneous");
+            target = miscCourse;
 
             yearField.setText(target.getYear());
-            yearField.setEnabled(!target.isVerified());
-
             codeField.setText(target.getCode());
-            codeField.setEditable(!target.isVerified());
-
             nameField.setText(target.getName());
-            nameField.setEditable(!target.isVerified());
-
             lecturerField.setText(target.getLecturer());
-            lecturerField.setEditable(target.isTutorsNameCustomizable());
-
+            lecturerField.setEditable(target.canEditTutorName());
             dayBox.setSelectedItem(target.getDay());
             timeBox.setSelectedItem(target.getTime());
             venueField.setText(target.getVenue());
             requirementBox.setSelectedItem(target.getRequirement());
             creditBox.setSelectedItem(target.getCreditHours());
-
             scoreField.setText(Double.toString(target.getScore()));
-            scoreField.setEditable(!target.isVerified());
+
+            if (miscCourse.isVerified()) {
+                yearField.setEditable(false);
+                codeField.setEditable(false);
+                nameField.setEditable(false);
+                scoreField.setEditable(false);
+            }
 
             actionButton.removeActionListener(actionButton.getActionListeners()[0]);
             actionButton.addActionListener(editionListener());
-            actionButton.setText("Refract");
+            actionButton.setText("Done");
         }
 
         private ActionListener editionListener() {
@@ -299,8 +292,8 @@ public class MiscellaneousModulesHandler {
                     givenYear = yearField.getText();
                 } else {
                     App.signalError("Invalid Format",
-                            "Sorry, "+yearField.getText()+" is not a valid academic year. Dashboard reads years in the format: yyyy/yyyy.\n" +
-                                    "E.g 2016/2017");
+                            "Sorry, "+yearField.getText()+" is not a valid academic year.\n" +
+                                    "Dashboard reads years in the format: yyyy/yyyy. E.g 2016/2017");
                     yearField.requestFocusInWindow();
                     return;
                 }
@@ -333,14 +326,15 @@ public class MiscellaneousModulesHandler {
                     yearField.requestFocusInWindow();
                     return;
                 }
-                if (codeField.hasNoText()) {
-                    App.signalError(this.getRootPane(),"No Code","Please provide the code of the course.");
+
+                if (codeField.isBlank()) {
+                    App.signalError(getRootPane(),"No Code", "Please provide the code of the course.");
                     codeField.requestFocusInWindow();
-                } else if (nameField.hasNoText()) {
-                    App.signalError(this.getRootPane(),"No Name","Please provide the name of the course.");
+                } else if (nameField.isBlank()) {
+                    App.signalError(getRootPane(),"No Name","Please provide the name of the course.");
                     nameField.requestFocusInWindow();
-                } else if (scoreField.hasNoText()) {
-                    App.signalError(this.getRootPane(),"Error","Please enter the score you get from this course.");
+                } else if (scoreField.isBlank()) {
+                    App.signalError(getRootPane(),"Error","Please enter the score you get from this course.");
                     scoreField.requestFocusInWindow();
                 } else {
                     double score;
@@ -356,7 +350,7 @@ public class MiscellaneousModulesHandler {
                         scoreField.requestFocusInWindow();
                         return;
                     }
-//                    Check for exclusive existence in this table first
+
                     for (int row = 0; row < miscModel.getRowCount(); row++) {
                         if (row == miscModel.getSelectedRow()) {
                             continue;
@@ -368,23 +362,19 @@ public class MiscellaneousModulesHandler {
                             return;
                         }
                     }
+
                     if (ModulesHandler.existsInListExcept(miscModel, codeField.getText())) {
                         ModulesHandler.reportCodeDuplication(codeField.getText());
                         codeField.requestFocusInWindow();
                         return;
                     }
 
-                    final String day = String.valueOf(dayBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
-                            String.valueOf(dayBox.getSelectedItem());
-                    final String time = String.valueOf(timeBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
-                            String.valueOf(timeBox.getSelectedItem());
                     final Course course = new Course(yearField.getText(), String.valueOf(semestersBox.getSelectedItem()),
-                            codeField.getText(), nameField.getText(), "",venueField.getText(), day, time, score,
-                            Integer.parseInt(String.valueOf(creditBox.getSelectedItem())), String.valueOf(requirementBox.getSelectedItem()),
-                            target.isVerified());
-                    course.setLecturer(lecturerField.getText(), lecturerField.isEditable());
+                            codeField.getText(), nameField.getText(), lecturerField.getText(),venueField.getText(), String.valueOf(dayBox.getSelectedItem()),
+                            String.valueOf(timeBox.getSelectedItem()), score, Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
+                            String.valueOf(requirementBox.getSelectedItem()), target.isVerified());
                     ModulesHandler.substitute(target, course);
-                    this.dispose();
+                    dispose();
                 }
             };
         }

@@ -101,7 +101,7 @@ public class TaskExhibition {
                 buttonsContainer.addAll(removeButton,closeButton);
             }
 
-            contentPanel.addAll(ComponentAssistant.contentBottomGap(), buttonsContainer);
+            contentPanel.addAll(MComponent.contentBottomGap(), buttonsContainer);
             this.getRootPane().setDefaultButton(closeButton);
             this.setContentPane(contentPanel);
             this.pack();
@@ -226,7 +226,7 @@ public class TaskExhibition {
             questionPanel.add(new KPanel(giveLabel("Question(s):")), BorderLayout.WEST);
             final KTextArea questionArea = new KTextArea();
             questionArea.setText(assignment.getQuestion());
-            final KScrollPane scrollPane = KScrollPane.getTextAreaScroller(questionArea, new Dimension(475,150));
+            final KScrollPane scrollPane = questionArea.outerScrollPane(new Dimension(475,150));
             scrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY,1,false));
             questionPanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -270,7 +270,7 @@ public class TaskExhibition {
                 buttonsContainer.addAll(removeButton, closeButton);
             }
 
-            contentPanel.addAll(ComponentAssistant.contentBottomGap(), buttonsContainer);
+            contentPanel.addAll(MComponent.contentBottomGap(), buttonsContainer);
 
             this.getRootPane().setDefaultButton(closeButton);
             this.setContentPane(contentPanel);

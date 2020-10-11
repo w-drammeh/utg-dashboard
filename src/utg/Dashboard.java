@@ -20,7 +20,7 @@ public class Dashboard {
 
     public static void main(String[] args) {
         PREVIEW.setVisible(true);
-        final Object recentUser = Serializer.fromDisk("userName.ser");
+        final Object recentUser = Serializer.fromDisk("user-name.ser");
         if (recentUser == null) {
             final File coreFile = new File(Serializer.SERIALS_DIR + Serializer.FILE_SEPARATOR + "core.ser");
             if (coreFile.exists()) {
@@ -53,8 +53,8 @@ public class Dashboard {
         if (deserialize) {
             try {
                 Student.deserializeData();
-            } catch (NullPointerException nullException) {
-                App.silenceException(nullException);
+            } catch (NullPointerException e) {
+                App.silenceException(e);
                 freshStart();
                 return;
             }
@@ -62,7 +62,7 @@ public class Dashboard {
 
         PREVIEW.setVisible(false);
         final String matNumber = requestInput();
-        if (matNumber.equals(String.valueOf(Student.getMatNumber()))) {
+        if (matNumber.equals(Student.getMatNumber())) {
             PREVIEW.setVisible(true);
             rebuildNow(false);
         } else {
@@ -86,19 +86,18 @@ public class Dashboard {
         if (deserialize) {
             try {
                 Student.deserializeData();
-            } catch (NullPointerException nullException) {
-                App.silenceException(nullException);
+            } catch (NullPointerException e) {
+                App.silenceException(e);
                 freshStart();
                 return;
             }
         }
 
-        SettingsCore.deSerialize();
+        Settings.deSerialize();
         Portal.deSerialize();
-        NewsGenerator.deSerializeData();
+        News.deSerializeData();
         SwingUtilities.invokeLater(()-> {
             final Board lastBoard = new Board();
-            SettingsUI.deSerialize();
             RunningCoursesGenerator.deserializeModules();
             ModulesHandler.deserializeData();
             TaskSelf.deSerializeAll();
