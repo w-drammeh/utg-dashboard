@@ -46,12 +46,7 @@ public class Analysis implements Activity {
         cardLayout.addLayoutComponent(analysisContents.add(getSemestersBasement()), "semesters");
         cardLayout.addLayoutComponent(analysisContents.add(getYearsBasement()),"years");
 
-        final KComboBox<String> optionsCombo = new KComboBox<>(new String[]{"My Courses", "Semesters", "Academic Years"}) {
-            @Override
-            public JToolTip createToolTip() {
-                return MComponent.preferredTip();
-            }
-        };
+        final KComboBox<String> optionsCombo = new KComboBox<>(new String[]{"My Courses", "Semesters", "Academic Years"});
         optionsCombo.setToolTipText("Shift Analysis");
         optionsCombo.addActionListener(e-> {
             if (optionsCombo.getSelectedIndex() == 0) {

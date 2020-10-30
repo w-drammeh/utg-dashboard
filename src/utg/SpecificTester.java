@@ -1,5 +1,7 @@
 package utg;
 
+import main.About;
+
 /**
  * This type is intended for testing a specific component / functionality of the project.
  * Notice: using utg.GeneralTester loads the entire project which can be time and memory consuming.
@@ -15,7 +17,7 @@ package utg;
 public class SpecificTester {
 
     public static void main(String[] args) {
-        System.out.println(" maha ".strip().length());
+        new About().setVisible(true);
     }
 
 }

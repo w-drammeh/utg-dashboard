@@ -13,7 +13,7 @@ interface Activity {
      * while the main.TranscriptGenerator, post-tasks.
      * The consequence of this must not only be the result of a home-panel click,
      * as it traditionally use to be.
-     * By convention, it should be placed directly beneath the constructor.
+     * By convention, this call should physically be placed directly beneath the constructor.
      */
     public void answerActivity();
 

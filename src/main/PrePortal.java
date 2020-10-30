@@ -1,7 +1,6 @@
 package main;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -18,7 +17,7 @@ import java.util.List;
  */
 public class PrePortal {
     private static String email, password, temporaryName;
-    private static FirefoxDriver driver;//should be delivered to Portal after task
+    private static FirefoxDriver driver;//may be delivered to Portal after task
     private static WebDriverWait loadWaiter;
     public static final ArrayList<String> USER_DATA = new ArrayList<>();
     public static final ActionListener CANCEL_LISTENER = e-> {
@@ -77,9 +76,7 @@ public class PrePortal {
     }
 
     public static synchronized void startFixingDriver(){
-        if (driver == null) {
-            driver = DriversPack.forgeNew(true);
-        }
+        driver = DriversPack.forgeNew(true);
     }
 
     private static void onPortal(){
@@ -87,10 +84,9 @@ public class PrePortal {
                 school = "", division = "", nationality = "", MOA = "", YOA = "",
                 address = "", mStatus = "", DOB = "", tel = "", ongoingSemester, level, status;
 
-//        checking for busyness of the portal if Course Evaluation is required
+//        checking for busyness of the portal, i.e is Course Evaluation required
         if (Portal.isPortalBusy(driver)) {
             Login.appendToStatus("Busy portal: Course Evaluation needed");
-//            driver.quit();
             App.reportBusyPortal(Login.getRoot());
             Login.setInputsState(true);
             return;
@@ -99,11 +95,8 @@ public class PrePortal {
         try {
             final WebElement admissionAlert = loadWaiter.until(ExpectedConditions.presenceOfElementLocated(By.className("gritter-title")));
             Portal.setAdmissionNotice(admissionAlert.getText());
-        } catch (TimeoutException out){
-//            driver.quit();
-            App.reportConnectionLost(Login.getRoot());
-            Login.setInputsState(true);
-            return;
+        } catch (Exception e) {
+            App.silenceException("Admission Notice not found");
         }
 
         Login.appendToStatus("Now processing details.......");
@@ -111,17 +104,16 @@ public class PrePortal {
 //        going to the contents page
         try {
             driver.navigate().to(Portal.CONTENTS_PAGE);
-            try {//extracting the Registration Notice
-                final WebElement registrationAlert = loadWaiter.until(ExpectedConditions.presenceOfElementLocated(By.className("gritter-title")));
-                Portal.setRegistrationNotice(registrationAlert.getText());
-            } catch (TimeoutException out){
-                App.silenceException("Registration Notice not found because of timeout.");
-            }
         } catch (Exception e1) {
-//            driver.quit();
             App.reportConnectionLost(Login.getRoot());
             Login.setInputsState(true);
             return;
+        }
+        try {//extracting the Registration Notice...
+            final WebElement registrationAlert = loadWaiter.until(ExpectedConditions.presenceOfElementLocated(By.className("gritter-title")));
+            Portal.setRegistrationNotice(registrationAlert.getText());
+        } catch (Exception e) {
+            App.silenceException("Registration Notice not found");
         }
         try {
             final String[] allNames = temporaryName.split(" ");
@@ -162,7 +154,6 @@ public class PrePortal {
         try {
             driver.navigate().to(Portal.PROFILE_PAGE);
         } catch (Exception e1) {
-//            driver.quit();
             App.reportConnectionLost(Login.getRoot());
             Login.setInputsState(true);
             return;
@@ -239,7 +230,6 @@ public class PrePortal {
             driver.navigate().to(Portal.CONTENTS_PAGE);
             loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("table")));
         } catch (Exception e) {
-//            driver.quit();
             App.reportConnectionLost(Login.getRoot());
             Login.setInputsState(true);
             return;

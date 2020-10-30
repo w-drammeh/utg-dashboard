@@ -9,11 +9,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
 /**
- * It is the center for generalized concepts. Any attempt to point to an icon, a sheet, etc, must directly
- * call this class.
- *
+ * It is the center for generalized concepts.
+ * Any attempt to point to an icon, a sheet, etc, must directly call this class.
  * As analogous to the Globals type which globalizes code operations, this class universalizes the
- * input output operations.
+ * input-output operations.
  */
 public class App {
     public static final int DIALOG_DISMISSED = 0;

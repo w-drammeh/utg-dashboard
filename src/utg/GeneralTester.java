@@ -15,6 +15,7 @@ import javax.swing.*;
  */
 public class GeneralTester {
 
+
     public static void main(String[] args) {
         forgeDetailsForTest();
         forgeActiveCoursesForTest();

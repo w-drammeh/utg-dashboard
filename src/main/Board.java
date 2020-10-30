@@ -93,7 +93,7 @@ public final class Board extends KFrame {
                     try {
                         UIManager.setLookAndFeel(lookAndFeelInfo.getClassName());
                     } catch (Exception e) {
-                        App.silenceException(e.getMessage());
+                        App.silenceException(e);
                     }
                     break;
                 }
