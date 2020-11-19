@@ -221,12 +221,10 @@ public class ModulesHandler {
                         "Refer to "+ Tips.reference("My Courses | Course Verification"))) {
             return;
         }
+        fixModulesDriver();
         if (modulesDriver == null) {
-            fixModulesDriver();
-            if (modulesDriver == null) {
-                App.reportMissingDriver();
-                return;
-            }
+            App.reportMissingDriver();
+            return;
         }
 
         if (!Internet.isInternetAvailable()) {
@@ -340,7 +338,9 @@ public class ModulesHandler {
             return;
         }
 
-        if (modulesDriver == null) {
+        new Thread(()-> {
+            triggerButton.setEnabled(false);
+
             fixModulesDriver();
             if (modulesDriver == null) {
                 if (userRequested) {
@@ -349,124 +349,124 @@ public class ModulesHandler {
                 }
                 return;
             }
-        }
 
-        if (!Internet.isInternetAvailable()) {
-            if (userRequested) {
-                App.reportNoInternet();
-                triggerButton.setEnabled(true);
+            if (!Internet.isInternetAvailable()) {
+                if (userRequested) {
+                    App.reportNoInternet();
+                    triggerButton.setEnabled(true);
+                }
+                return;
             }
-            return;
-        }
 
-        synchronized (modulesDriver){
-            final WebDriverWait loadWaiter = new WebDriverWait(modulesDriver, 30);
-            final int loginAttempt = DriversPack.attemptLogin(modulesDriver);
-            if (loginAttempt == DriversPack.ATTEMPT_SUCCEEDED) {
-                if (Portal.isPortalBusy(modulesDriver)) {
+            synchronized (modulesDriver){
+                final WebDriverWait loadWaiter = new WebDriverWait(modulesDriver, 30);
+                final int loginAttempt = DriversPack.attemptLogin(modulesDriver);
+                if (loginAttempt == DriversPack.ATTEMPT_SUCCEEDED) {
+                    if (Portal.isPortalBusy(modulesDriver)) {
+                        if (userRequested) {
+                            App.reportBusyPortal();
+                            triggerButton.setEnabled(true);
+                        }
+                        return;
+                    }
+                } else if (loginAttempt == DriversPack.ATTEMPT_FAILED) {
                     if (userRequested) {
-                        App.reportBusyPortal();
+                        App.reportLoginAttemptFailed();
+                        triggerButton.setEnabled(true);
+                    }
+                    return;
+                } else if (loginAttempt == DriversPack.CONNECTION_LOST) {
+                    if (userRequested) {
+                        App.reportConnectionLost();
                         triggerButton.setEnabled(true);
                     }
                     return;
                 }
-            } else if (loginAttempt == DriversPack.ATTEMPT_FAILED) {
-                if (userRequested) {
-                    App.reportLoginAttemptFailed();
-                    triggerButton.setEnabled(true);
-                }
-                return;
-            } else if (loginAttempt == DriversPack.CONNECTION_LOST) {
-                if (userRequested) {
-                    App.reportConnectionLost();
-                    triggerButton.setEnabled(true);
-                }
-                return;
-            }
 
-            final List<WebElement> tabs;
-            try {
-                modulesDriver.navigate().to(Portal.CONTENTS_PAGE);
-                Portal.nowOnPortal(modulesDriver);
-                tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(".nav-tabs > li")));
-            } catch (Exception e) {
-                if (userRequested) {
-                    App.reportConnectionLost();
-                    triggerButton.setEnabled(true);
+                final List<WebElement> tabs;
+                try {
+                    modulesDriver.navigate().to(Portal.CONTENTS_PAGE);
+                    Portal.nowOnPortal(modulesDriver);
+                    tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(".nav-tabs > li")));
+                } catch (Exception e) {
+                    if (userRequested) {
+                        App.reportConnectionLost();
+                        triggerButton.setEnabled(true);
+                    }
+                    return;
                 }
-                return;
-            }
 
-            //Firstly, code, name, year, semester, and credit hour at transcript tab
-            //Addition to startupCourses is only here; all the following loops only updates the details. this eradicates the possibility of adding running courses at tab-4
-            final ArrayList<Course> foundCourses = new ArrayList<>();
-            tabs.get(7).click();
-            final WebElement transcriptTable = modulesDriver.findElementByCssSelector(".table-bordered");
-            final WebElement transBody = transcriptTable.findElement(By.tagName("tbody"));
-            final List<WebElement> transRows = transBody.findElements(By.tagName("tr"));
-            final List<WebElement> semCaptions = transBody.findElements(By.className("warning"));
-            String vYear = null;
-            String vSemester = null;
-            for (WebElement transRow : transRows) {
-                if (transRow.getText().contains("Semester")) {
-                    vYear = transRow.getText().split(" ")[0];
-                    vSemester = transRow.getText().split(" ")[1]+" Semester";
-                } else {
-                    final List<WebElement> data = transRow.findElements(By.tagName("td"));
-                    foundCourses.add(new Course(vYear, vSemester, data.get(1).getText(), data.get(2).getText(),
-                            "", "", "", "", 0.0, Integer.parseInt(data.get(3).getText()), "", true));
-                }
-            }
-            final WebElement surrounds = modulesDriver.findElementsByCssSelector(".pull-right").get(3);
-            final String CGPA = surrounds.findElements(By.tagName("th")).get(1).getText();
-            Student.setCGPA(Double.parseDouble(CGPA));
-
-            //Secondly, add scores at grades tab
-            tabs.get(6).click();
-            final WebElement gradesTable = modulesDriver.findElementsByCssSelector(".table-warning").get(1);
-            final WebElement tBody = gradesTable.findElement(By.tagName("tbody"));
-            final List<WebElement> rows = tBody.findElements(By.tagName("tr"));
-            for(WebElement t : rows){
-                final List<WebElement> data = t.findElements(By.tagName("td"));
-                for (Course c : foundCourses) {
-                    if (c.getCode().equals(data.get(0).getText())) {
-                        c.setScore(Double.parseDouble(data.get(6).getText()));
+                //Firstly, code, name, year, semester, and credit hour at transcript tab
+                //Addition to startupCourses is only here; all the following loops only updates the details. this eradicates the possibility of adding running courses at tab-4
+                final ArrayList<Course> foundCourses = new ArrayList<>();
+                tabs.get(7).click();
+                final WebElement transcriptTable = modulesDriver.findElementByCssSelector(".table-bordered");
+                final WebElement transBody = transcriptTable.findElement(By.tagName("tbody"));
+                final List<WebElement> transRows = transBody.findElements(By.tagName("tr"));
+                final List<WebElement> semCaptions = transBody.findElements(By.className("warning"));
+                String vYear = null;
+                String vSemester = null;
+                for (WebElement transRow : transRows) {
+                    if (transRow.getText().contains("Semester")) {
+                        vYear = transRow.getText().split(" ")[0];
+                        vSemester = transRow.getText().split(" ")[1]+" Semester";
+                    } else {
+                        final List<WebElement> data = transRow.findElements(By.tagName("td"));
+                        foundCourses.add(new Course(vYear, vSemester, data.get(1).getText(), data.get(2).getText(),
+                                "", "", "", "", 0.0, Integer.parseInt(data.get(3).getText()), "", true));
                     }
                 }
-            }
+                final WebElement surrounds = modulesDriver.findElementsByCssSelector(".pull-right").get(3);
+                final String CGPA = surrounds.findElements(By.tagName("th")).get(1).getText();
+                Student.setCGPA(Double.parseDouble(CGPA));
 
-            //Finally, available lecturer names at all-registered tab
-            tabs.get(4).click();
-            final WebElement allRegisteredTable = modulesDriver.findElementByCssSelector(".table-warning");
-            final WebElement tableBody = allRegisteredTable.findElement(By.tagName("tbody"));
-            final List<WebElement> allRows = tableBody.findElements(By.tagName("tr"));
-            int l = 0;
-            while (l < allRows.size()) {
-                final List<WebElement> instantRow = allRows.get(l).findElements(By.tagName("td"));
-                for (Course c : foundCourses) {
-                    if (c.getCode().equals(instantRow.get(0).getText())) {
-                        c.setLecturer(instantRow.get(2).getText(), false);
+                //Secondly, add scores at grades tab
+                tabs.get(6).click();
+                final WebElement gradesTable = modulesDriver.findElementsByCssSelector(".table-warning").get(1);
+                final WebElement tBody = gradesTable.findElement(By.tagName("tbody"));
+                final List<WebElement> rows = tBody.findElements(By.tagName("tr"));
+                for(WebElement t : rows){
+                    final List<WebElement> data = t.findElements(By.tagName("td"));
+                    for (Course c : foundCourses) {
+                        if (c.getCode().equals(data.get(0).getText())) {
+                            c.setScore(Double.parseDouble(data.get(6).getText()));
+                        }
                     }
                 }
-                l++;
-            }
 
-            for (Course found : foundCourses) {
-                final Course existed = getModuleByCode(found.getCode());
-                if (existed == null) {//does not exist?
-                    modulesMonitor.add(found);
-                } else {//merge and replace
-                    Course.merge(found, existed);
-                    substitute(existed, found);
+                //Finally, available lecturer names at all-registered tab
+                tabs.get(4).click();
+                final WebElement allRegisteredTable = modulesDriver.findElementByCssSelector(".table-warning");
+                final WebElement tableBody = allRegisteredTable.findElement(By.tagName("tbody"));
+                final List<WebElement> allRows = tableBody.findElements(By.tagName("tr"));
+                int l = 0;
+                while (l < allRows.size()) {
+                    final List<WebElement> instantRow = allRows.get(l).findElements(By.tagName("td"));
+                    for (Course c : foundCourses) {
+                        if (c.getCode().equals(instantRow.get(0).getText())) {
+                            c.setLecturer(instantRow.get(2).getText(), false);
+                        }
+                    }
+                    l++;
                 }
-            }
 
-            final int foundCount = foundCourses.size();
-            final int semesterCount = semCaptions.size();
-            App.promptPlain("Sync Successful", "Synchronization of the modules completed successfully:\n" +
-                    Globals.checkPlurality(foundCount, "courses")+" were found in "+ Globals.checkPlurality(semesterCount, "semesters."));
-            triggerButton.setEnabled(true);
-        }
+                for (Course found : foundCourses) {
+                    final Course existed = getModuleByCode(found.getCode());
+                    if (existed == null) {//does not exist?
+                        modulesMonitor.add(found);
+                    } else {//merge and replace
+                        Course.merge(found, existed);
+                        substitute(existed, found);
+                    }
+                }
+
+                final int foundCount = foundCourses.size();
+                final int semesterCount = semCaptions.size();
+                App.promptPlain("Sync Successful", "Synchronization of the modules completed successfully:\n" +
+                        Globals.checkPlurality(foundCount, "courses")+" were found in "+ Globals.checkPlurality(semesterCount, "semesters."));
+                triggerButton.setEnabled(true);
+            }
+        }).start();
     }
 
     /**

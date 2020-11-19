@@ -196,6 +196,7 @@ public class NotificationGenerator {
         if (!(userRequested || refreshButton.isEnabled())) {
             return;
         }
+
         new Thread(()-> {
             setNoticeComponents(false);
             setupDriver();
@@ -217,7 +218,13 @@ public class NotificationGenerator {
 
             final int loginTry = DriversPack.attemptLogin(noticeDriver);
             if (loginTry == DriversPack.ATTEMPT_SUCCEEDED) {
-                Portal.startRenewingNotices(noticeDriver, userRequested);
+                final boolean renew = Portal.startRenewingNotices(noticeDriver, userRequested);
+                if (renew) {
+                    App.promptPlain("Successful", "The \"Admission\" and \"Registration\" Notices are updated successfully.");
+                } else {
+                    App.signalError("Error", "Something went wrong while updating the Notices.\n" +
+                            "Please try again.");
+                }
             } else if (loginTry == DriversPack.ATTEMPT_FAILED) {
                 if (userRequested) {
                     App.reportLoginAttemptFailed();

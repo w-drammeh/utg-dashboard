@@ -135,16 +135,14 @@ public class RunningCoursesGenerator implements Activity {
         final String initialValue = String.valueOf(activeModel.getValueAt(activeModel.getRowOf(targetCode),
                 activeModel.getColumnCount() - 1));
         activeModel.setValueAt("Verifying...", activeModel.getRowOf(targetCode), activeModel.getColumnCount() - 1);
+        fixRunningDriver();
         if (activeDriver == null) {
-            fixRunningDriver();
-            if (activeDriver == null) {
-                App.reportMissingDriver();
-                final int targetRow = activeModel.getRowOf(targetCode);
-                if (targetRow >= 0) {
-                    activeModel.setValueAt(initialValue, targetRow, activeModel.getColumnCount() - 1);
-                }
-                return;
+            App.reportMissingDriver();
+            final int targetRow = activeModel.getRowOf(targetCode);
+            if (targetRow >= 0) {
+                activeModel.setValueAt(initialValue, targetRow, activeModel.getColumnCount() - 1);
             }
+            return;
         }
         if (!Internet.isInternetAvailable()) {
             App.reportNoInternet();
@@ -265,15 +263,13 @@ public class RunningCoursesGenerator implements Activity {
                         "This action has consequences. Kindly refer to "+ Tips.reference("Running Courses | Matching"))) {
             new Thread(()-> {
                 matchItem.setEnabled(false);
+                fixRunningDriver();
                 if (activeDriver == null) {
-                    fixRunningDriver();
-                    if (activeDriver == null) {
-                        if (userRequested) {
-                            App.reportMissingDriver();
-                        }
-                        matchItem.setEnabled(true);
-                        return;
+                    if (userRequested) {
+                        App.reportMissingDriver();
                     }
+                    matchItem.setEnabled(true);
+                    return;
                 }
 
                 if (!Internet.isInternetAvailable()) {

@@ -99,12 +99,12 @@ public class Portal {
     /**
      * Successful operation herein shall induce all the notices to be re-assigned, also do the 'lastNoticeUpdate' todate.
      */
-    public static void startRenewingNotices(FirefoxDriver noticeDriver, boolean userRequested){
+    public static boolean startRenewingNotices(FirefoxDriver noticeDriver, boolean userRequested){
         if (isPortalBusy(noticeDriver)) {
             if (userRequested) {
                 App.reportBusyPortal();
             }
-            return;
+            return false;
         }
 
         try {
@@ -116,17 +116,19 @@ public class Portal {
             if (userRequested) {
                 App.reportConnectionLost();
             }
-            return;
+            return false;
         }
 
         try {
             noticeDriver.navigate().to(CONTENTS_PAGE);
             WebElement registrationElement = new WebDriverWait(noticeDriver,59).until(ExpectedConditions.presenceOfElementLocated(By.className("gritter-title")));
             Portal.setRegistrationNotice(registrationElement.getText());
+            return true;
         } catch (Exception e) {
             if (userRequested) {
                 App.reportConnectionLost();
             }
+            return false;
         }
     }
 

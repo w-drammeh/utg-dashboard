@@ -41,7 +41,7 @@ public class News {
         accessTime = "Unknown";
         accessLabel.setText(accessTime);
 
-        refreshButton = new KButton("Refresh Feeds");
+        refreshButton = new KButton("Refresh");
         refreshButton.setFont(KFontFactory.createPlainFont(15));
         refreshButton.setCursor(MComponent.HAND_CURSOR);
         refreshButton.setMnemonic(KeyEvent.VK_F);

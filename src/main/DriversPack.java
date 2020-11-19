@@ -21,13 +21,13 @@ public class DriversPack {
      * Returns a fresh driver as appropriate for the currently running OS.
      * Nullability must be checked prior to any attempt of usage.
      */
-    public static FirefoxDriver forgeNew(boolean headless) {
+    public static synchronized FirefoxDriver forgeNew(boolean headless) {
         FirefoxDriver firefoxDriver = null;
         try {
             WebDriverManager.firefoxdriver().setup();
             firefoxDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(headless));
         } catch (Exception e) {
-            App.silenceException("Error building firefoxDriver");
+            App.silenceException("Error building Driver");
         }
         return firefoxDriver;
     }
