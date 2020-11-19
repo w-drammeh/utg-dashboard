@@ -150,7 +150,11 @@ public class Portal {
     public static void setRegistrationNotice(String registrationNotice){
         Portal.registrationNotice = registrationNotice;
         lastRegistrationNoticeUpdate = new Date();
-        RunningCoursesGenerator.noticeLabel.setText(registrationNotice+("  (Last updated: "+getLastRegistrationNoticeUpdate()+")"));
+        if (Board.isAppReady()) {
+            RunningCoursesGenerator.updateNotice();
+        } else {
+            Board.postProcesses.add(RunningCoursesGenerator::updateNotice);
+        }
     }
 
     public static String getLastRegistrationNoticeUpdate(){
@@ -199,7 +203,6 @@ public class Portal {
 
 
     public static void serialize(){
-        System.out.print("Serializing Portal Data... ");
         final HashMap<String, Object> portalHash = new HashMap<>();
         portalHash.put("rNotice", registrationNotice);
         portalHash.put("aNotice", admissionNotice);
@@ -208,14 +211,12 @@ public class Portal {
         portalHash.put("lastRegistrationNoticeUpdate", lastRegistrationNoticeUpdate);
         portalHash.put("lastLogin", lastLogin);
         Serializer.toDisk(portalHash, "portal.ser");
-        System.out.println("Completed.");
     }
 
     public static void deSerialize(){
-        System.out.print("Deserializing Portal Data... ");
         final HashMap<String, Object> savedState = (HashMap<String, Object>) Serializer.fromDisk("portal.ser");
         if (savedState == null) {
-            System.err.println("Unsuccessful.");
+            App.silenceException("Error reading Portal Data.");
             return;
         }
         registrationNotice = savedState.get("rNotice").toString();
@@ -224,7 +225,6 @@ public class Portal {
         lastAdmissionNoticeUpdate = (Date) savedState.get("lastAdmissionNoticeUpdate");
         lastRegistrationNoticeUpdate = (Date) savedState.get("lastRegistrationNoticeUpdate");
         lastLogin = (Date) savedState.get("lastLogin");
-        System.out.println("Completed successfully.");
     }
 
 }

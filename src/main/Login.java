@@ -123,7 +123,7 @@ public class Login extends KDialog {
                     "By clicking Login, you hereby permit Dashboard to go through your portal\n" +
                             "and acknowledge the safety of your data with it.");
             if (permission) {
-                Login.setInputsState(false);
+                Login.setInputState(false);
             } else {
                 return;
             }
@@ -138,7 +138,8 @@ public class Login extends KDialog {
         MComponent.ready(statusPanel);
         try {
             Thread.sleep(250);
-        } catch (InterruptedException ignored) {
+        } catch (InterruptedException e) {
+            App.silenceException(e);
         }
     }
 
@@ -147,7 +148,7 @@ public class Login extends KDialog {
         appendToStatus(newUpdate);
     }
 
-    public static void setInputsState(boolean state){
+    public static void setInputState(boolean state){
         MComponent.empty(statusPanel);
         emailField.setEnabled(state);
         passwordField.setEnabled(state);
@@ -181,8 +182,7 @@ public class Login extends KDialog {
     public static void notifyCompletion(){
         closeButton.setEnabled(false);
         appendToStatus("#####");
-        Login.appendToStatus("Now running Pre-Dashboard builds....... Please wait");
-        Student.initialize();
+        appendToStatus("Now running Pre-Dashboard builds....... Please wait");
         final KButton enter = new KButton();
         enter.setFocusable(true);
         final Board firstBoard = new Board();

@@ -1005,19 +1005,16 @@ public class TaskSelf {
 
 
     public static void serializeAll(){
-        System.out.print("Serializing Tasks... ");
         Serializer.toDisk(TasksGenerator.TodoHandler.TODOS, "todos.ser");
         Serializer.toDisk(TasksGenerator.ProjectsHandler.PROJECTS, "projects.ser");
         Serializer.toDisk(TasksGenerator.AssignmentsHandler.ASSIGNMENTS, "assignments.ser");
         Serializer.toDisk(TasksGenerator.EventsHandler.EVENTS, "events.ser");
-        System.out.println("Completed.");
     }
 
     public static void deSerializeAll(){
-        System.out.print("Deserializing Tasks... ");
         final ArrayList<TodoSelf> savedTasks = (ArrayList) Serializer.fromDisk("todos.ser");
         if (savedTasks == null) {
-            System.err.println("Error reading TODO Tasks;");
+            App.silenceException("Error reading TODO Tasks.");
         } else {
             for (TodoSelf todoSelf : savedTasks) {
                 if (todoSelf.isActive) {//This only means it slept alive - we're to check if it's to wake alive or not
@@ -1034,7 +1031,7 @@ public class TaskSelf {
 
         final ArrayList<ProjectSelf> savedProjects = (ArrayList) Serializer.fromDisk("projects.ser");
         if (savedProjects == null) {
-            System.err.println("Error reading Projects;");
+            App.silenceException("Error reading Projects.");
         } else {
             for (ProjectSelf projectSelf : savedProjects) {
                 if (projectSelf.isLive) {
@@ -1054,7 +1051,7 @@ public class TaskSelf {
 
         final ArrayList<AssignmentSelf> savedAssignments = (ArrayList) Serializer.fromDisk("assignments.ser");
         if (savedAssignments == null) {
-            System.err.println("Error reading Assignments;");
+            App.silenceException("Error reading Assignments.");
         } else {
             for (AssignmentSelf assignmentSelf : savedAssignments) {
                 if (assignmentSelf.isOn) {
@@ -1071,7 +1068,7 @@ public class TaskSelf {
 
         final ArrayList<EventSelf> savedEvents = (ArrayList) Serializer.fromDisk("events.ser");
         if (savedEvents == null) {
-            System.err.println("Error reading Evevnts;");
+            App.silenceException("Error reading Events.");
         } else {
             for (EventSelf eventSelf : savedEvents) {
                 if (eventSelf.isPending) {
@@ -1085,7 +1082,6 @@ public class TaskSelf {
                 TasksGenerator.EventsHandler.receiveFromSerials(eventSelf);
             }
         }
-        System.out.println("Completed.");
     }
 
 }

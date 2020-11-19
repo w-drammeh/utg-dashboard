@@ -180,7 +180,7 @@ public class SettingsUI implements Activity {
 
         final KButton contactButton = KButton.getIconifiedButton("plus.png", 20, 20);
         contactButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        contactButton.setToolTipText("Add a Number");
+        contactButton.setToolTipText("Add Number");
         contactButton.addActionListener(e-> {
             if (Student.telephonesCount() >= 4) {
                 App.signalError("Error", "Sorry, there can only be a maximum of four (4) contacts.\n" +
@@ -683,15 +683,13 @@ public class SettingsUI implements Activity {
         outButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         outButton.addActionListener(e-> {
             if (App.showOkCancelDialog("Sign out?", "By signing out, all your data will be lost.")) {
-                final int vInt = App.verifyUser("Please enter your matriculation number below\n \n" +
-                        "A successful sign-out will take you back to the Welcome Activity\n" +
-                        "Every subsequent launch will take you there until there be a login again\n \n" +
-                        "We hope this tool has been of great help to you\n \n");
+                final int vInt = App.verifyUser("To sign out, enter your matriculation number below.\n" +
+                        "We hope this tool has been of great help to you.");
 
                 if (vInt == App.VERIFICATION_TRUE) {
                     if (Serializer.unMountUserData()) {
-                        Board.getInstance().dispose();
                         Runtime.getRuntime().removeShutdownHook(Board.shutDownThread);
+                        Board.getInstance().dispose();
                         System.exit(0);
                     } else {
                         App.signalError("Error", "Unusual error encountered un-mounting the serializable files.\n" +

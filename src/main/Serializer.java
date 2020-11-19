@@ -15,6 +15,7 @@ public class Serializer {
 
     /**
      * This does the ultimate serialization.
+     * Any failed attempt in writing is reported
      */
     public static void toDisk(Object obj, String name){
         try {
@@ -25,7 +26,7 @@ public class Serializer {
                 out.writeObject(obj);
                 out.close();
             } else {
-                App.silenceException("Error serialize file "+name+"; could not mount directory "+serialsPath);
+                App.silenceException("Error serialize file " + name + "; could not mount directory '" + serialsPath + "'");
             }
         } catch (Exception e) {
             App.silenceException("Error serializing file "+name);
@@ -36,16 +37,17 @@ public class Serializer {
      * This does the ultimate deserialization.
      * This call also handles potential exceptions.
      * So caller must after-check if the returned-object is null before an attempt to use.
+     * No failed attempt in reading is reported.
+     * Instead, callers must check nullity of the returned object
      */
-    public static Object fromDisk(String serName){
+    public static Object fromDisk(String serName) {
         Object serObject = null;
         try {
             final FileInputStream fileInputStream = new FileInputStream(SERIALS_DIR + FILE_SEPARATOR + serName);
             final ObjectInputStream in = new ObjectInputStream(fileInputStream);
             serObject = in.readObject();
             in.close();
-        } catch (Exception e) {
-            App.silenceException("Error deserializing file "+serName);
+        } catch (Exception ignored) {
         }
         return serObject;
     }
@@ -130,8 +132,8 @@ public class Serializer {
             FileUtils.deleteDirectory(new File(ROOT_DIR));
             return true;
         } catch (IOException ioe) {
-            final File userName = new File(SERIALS_DIR + FILE_SEPARATOR + "userName.ser");
-            return userName.delete();
+            final File userData = new File(SERIALS_DIR + FILE_SEPARATOR + "core.ser");
+            return userData.delete();
         }
     }
 

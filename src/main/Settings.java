@@ -62,7 +62,6 @@ public class Settings {
 
 
     public static void serialize(){
-        System.out.print("Serializing Settings... ");
         final HashMap<String, Object> coreMap = new HashMap<>();
         coreMap.put("verificationUnneeded", noVerifyNeeded);
         coreMap.put("directLeave", confirmExit);
@@ -71,14 +70,12 @@ public class Settings {
         coreMap.put("lafName", lookName);
         coreMap.put("bgName", backgroundName);
         Serializer.toDisk(coreMap, "settings.ser");
-        System.out.println("Completed.");
     }
 
     public static void deSerialize() {
-        System.out.print("Deserializing Settings... ");
         final HashMap<String, Object> coreMap = (HashMap) Serializer.fromDisk("settings.ser");
         if (coreMap == null) {
-            System.err.println("Unsuccessful.");
+            App.silenceException("Error reading Settings.");
             return;
         }
         noVerifyNeeded = (boolean) coreMap.get("verificationUnneeded");
@@ -87,7 +84,6 @@ public class Settings {
         lookName = (String) coreMap.get("lafName");
         ToolTipManager.sharedInstance().setInitialDelay((int) coreMap.get("tipInitialDelay"));
         ToolTipManager.sharedInstance().setDismissDelay((int) coreMap.get("tipDismissDelay"));
-        System.out.println("Completed successfully.");
     }
 
 }

@@ -22,17 +22,9 @@ public class News {
     private static String accessTime;
     private static final ArrayList<NewsSavior> NEWS_DATA = new ArrayList<>() {
         @Override
-        public boolean add(NewsSavior newsSavior) {
-            if (NEWS_DATA.contains(newsSavior)) {
-                super.remove(newsSavior);
-            }
-            return super.add(newsSavior);
-        }
-
-        @Override
         public boolean contains(Object o) {
             for (NewsSavior savior : NEWS_DATA) {
-                if (savior.heading.equals(((NewsSavior) o).heading)) {
+                if (savior.equals((NewsSavior) o)) {
                     return true;
                 }
             }
@@ -46,7 +38,8 @@ public class News {
     public News() {
         accessLabel = KLabel.getPredefinedLabel("Last accessed: ", SwingConstants.LEFT);
         accessLabel.setStyle(KFontFactory.createPlainFont(15), Color.RED);
-        accessLabel.setText(accessTime = "Never");
+        accessTime = "Unknown";
+        accessLabel.setText(accessTime);
 
         refreshButton = new KButton("Refresh Feeds");
         refreshButton.setFont(KFontFactory.createPlainFont(15));
@@ -111,7 +104,6 @@ public class News {
      */
     private KPanel packageNews(String header, String body, String allContent) {
         final KLabel hLabel = new KLabel(header, KFontFactory.createBoldFont(18), Color.BLUE);
-
         final KTextPane textPane = KTextPane.wantHtmlFormattedPane(body.substring(0, body.length() - (header.length() + 13)));
 
         final KButton extendedReader = new KButton();
@@ -119,11 +111,11 @@ public class News {
         extendedReader.setCursor(MComponent.HAND_CURSOR);
         if (allContent == null) {
             final AllReader dialogReader = new AllReader(header, body, null);
-            extendedReader.setText("Get Full News");
+            extendedReader.setText("Get full news...");
             extendedReader.addActionListener(e-> dialogReader.primaryClick(extendedReader));
         } else {
             final AllReader dialogReader = new AllReader(header, body, allContent);
-            extendedReader.setText("Continue Reading...");
+            extendedReader.setText("Continue reading...");
             extendedReader.setForeground(Color.BLUE);
             extendedReader.addActionListener(e-> dialogReader.setVisible(true));
         }
@@ -137,7 +129,7 @@ public class News {
         };
         niceBox.setBackground(Color.WHITE);
         niceBox.setPreferredSize(new Dimension(975, 150));
-        niceBox.setBorder(BorderFactory.createLineBorder(Color.BLUE,2,true));
+        niceBox.setBorder(BorderFactory.createLineBorder(Color.BLUE));
         niceBox.add(hLabel, BorderLayout.NORTH);
         niceBox.add(textPane, BorderLayout.CENTER);
 
@@ -150,11 +142,25 @@ public class News {
 
 //    push if any
     public void pushNews() {
+        final ArrayList<NewsSavior> savedNews = (ArrayList<NewsSavior>) Serializer.fromDisk("news.ser");
+        if (savedNews == null) {
+            return;
+        }
+
+        for (NewsSavior s : savedNews) {
+            NEWS_DATA.add(s);
+        }
+
+        final Object accessObj = Serializer.fromDisk("news-time.ser");
+        if (accessObj != null) {
+            accessTime = (String) accessObj;
+            accessLabel.setText(accessTime);
+        }
+
         if (!NEWS_DATA.isEmpty()) {
-            for (NewsSavior saved : NEWS_DATA) {
-                present.addPenultimate(packageNews(saved.heading, saved.body, saved.content));
+            for (NewsSavior news : NEWS_DATA) {
+                present.addPenultimate(packageNews(news.heading, news.body, news.content));
             }
-            accessLabel.setText(accessTime);//which should be determined by now
             MComponent.ready(present);
         }
     }
@@ -173,11 +179,14 @@ public class News {
         keyContent = heading;
         bodyContent = body;
         allContent = allNews;
-
         textPane = KTextPane.wantHtmlFormattedPane(allContent);
-        textPane.setPreferredSize(new Dimension(530, 375));
+        textPane.setPreferredSize(new Dimension(665, 465));
+
+        final KScrollPane newsKScrollPane = new KScrollPane(textPane);
+        newsKScrollPane.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 
         final KButton jumpButton = new KButton("Visit site");
+        jumpButton.setMnemonic(KeyEvent.VK_V);
         jumpButton.addActionListener(e-> new Thread(()-> {
             jumpButton.setEnabled(false);
             dispose();
@@ -194,8 +203,7 @@ public class News {
 
         final KPanel contentPanel = new KPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.addAll(new KScrollPane(textPane), MComponent.contentBottomGap(),
-                new KPanel(new FlowLayout(FlowLayout.RIGHT)), jumpButton, closeButton);
+        contentPanel.addAll(newsKScrollPane, new KPanel(new FlowLayout(FlowLayout.RIGHT), jumpButton, closeButton));
         setContentPane(contentPanel);
         getRootPane().setDefaultButton(closeButton);
         pack();
@@ -218,7 +226,14 @@ public class News {
                 primaryButton.setForeground(Color.BLUE);
                 primaryButton.removeActionListener(primaryButton.getActionListeners()[0]);
                 primaryButton.addActionListener(e-> setVisible(true));
-                NEWS_DATA.add(new NewsSavior(keyContent, bodyContent, allContent));
+                final NewsSavior updatedNews = new NewsSavior(keyContent, bodyContent, allContent);
+                int i = 0;
+                for (; i < NEWS_DATA.size(); i++) {
+                    if (updatedNews.equals(NEWS_DATA.get(i))) {
+                        break;
+                    }
+                }
+                NEWS_DATA.set(i, updatedNews);
                 setVisible(true);
             } catch (IOException ioe) {
                 App.signalError("Error", "We are facing troubles getting the contents of the news '" + keyContent + "'\n" +
@@ -241,36 +256,16 @@ public class News {
             this.body = body;
             this.content = content;
         }
+
+        public boolean equals(NewsSavior s) {
+            return this.heading.equals(s.heading);
+        }
     }
 
 
     public static void serializeData() {
-        System.out.print("Serializing News updates... ");
         Serializer.toDisk(NEWS_DATA, "news.ser");
         Serializer.toDisk(accessTime, "news-time.ser");
-        System.out.println("Completed.");
-    }
-
-    public static void deSerializeData(){
-        System.out.print("Deserializing News updates... ");
-        final ArrayList<NewsSavior> savedNews = (ArrayList<NewsSavior>) Serializer.fromDisk("news.ser");
-        if (savedNews == null) {
-            System.err.println("Unsuccessful.");
-            return;
-        }
-
-        NEWS_DATA.addAll(savedNews);
-
-        if (!savedNews.isEmpty()) {
-            accessTime = "Unknown";
-        }
-
-        final Object accessObj = Serializer.fromDisk("news-time.ser");
-        if (!(accessObj == null || "Never".equals(accessObj))) {
-            accessTime = (String) accessObj;
-        }
-
-        System.out.println("Completed successfully.");
     }
 
 }

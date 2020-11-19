@@ -33,13 +33,11 @@ public class PrePortal {
         PrePortal.email = email;
         PrePortal.password = password;
         Login.appendToStatus("Setting up the web driver....... Please wait");
+        startFixingDriver();
         if (driver == null) {
-            startFixingDriver();
-            if (driver == null) {
-                App.reportMissingDriver(Login.getRoot());
-                Login.setInputsState(true);
-                return;
-            }
+            App.reportMissingDriver(Login.getRoot());
+            Login.setInputState(true);
+            return;
         }
         Login.replaceLastUpdate("Setting up the driver....... Successful");
         Login.appendToStatus("Now contacting utg.......");
@@ -50,7 +48,7 @@ public class PrePortal {
             if (logoutAttempt != DriversPack.ATTEMPT_SUCCEEDED) {
                 Login.replaceLastUpdate("Now contacting utg....... Failed");
                 App.reportConnectionLost(Login.getRoot());
-                Login.setInputsState(true);
+                Login.setInputState(true);
                 return;
             }
         }
@@ -67,16 +65,18 @@ public class PrePortal {
             App.signalError(Login.getRoot(),"Invalid Credentials","The information you provided,\n" +
                     "Email: "+email+"\nPassword: "+password+"\n" +
                     "do not match any student. Please try again.");
-            Login.setInputsState(true);
+            Login.setInputState(true);
         } else {
             Login.appendToStatus("Connection lost");
             App.reportConnectionLost(Login.getRoot());
-            Login.setInputsState(true);
+            Login.setInputState(true);
         }
     }
 
     public static synchronized void startFixingDriver(){
-        driver = DriversPack.forgeNew(true);
+        if (driver == null) {
+            driver = DriversPack.forgeNew(true);
+        }
     }
 
     private static void onPortal(){
@@ -88,7 +88,7 @@ public class PrePortal {
         if (Portal.isPortalBusy(driver)) {
             Login.appendToStatus("Busy portal: Course Evaluation needed");
             App.reportBusyPortal(Login.getRoot());
-            Login.setInputsState(true);
+            Login.setInputState(true);
             return;
         }
 //        extract the admission notice herein the home-page
@@ -106,7 +106,7 @@ public class PrePortal {
             driver.navigate().to(Portal.CONTENTS_PAGE);
         } catch (Exception e1) {
             App.reportConnectionLost(Login.getRoot());
-            Login.setInputsState(true);
+            Login.setInputState(true);
             return;
         }
         try {//extracting the Registration Notice...
@@ -155,7 +155,7 @@ public class PrePortal {
             driver.navigate().to(Portal.PROFILE_PAGE);
         } catch (Exception e1) {
             App.reportConnectionLost(Login.getRoot());
-            Login.setInputsState(true);
+            Login.setInputState(true);
             return;
         }
         try {
@@ -231,7 +231,7 @@ public class PrePortal {
             loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("table")));
         } catch (Exception e) {
             App.reportConnectionLost(Login.getRoot());
-            Login.setInputsState(true);
+            Login.setInputState(true);
             return;
         }
         final List<WebElement> tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(".nav-tabs > li")));
@@ -315,6 +315,7 @@ public class PrePortal {
             Login.appendToStatus("Plus "+runningCount+" registered courses this semester");
         }
 
+        Student.initialize();
         Login.notifyCompletion();
     }
 

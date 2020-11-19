@@ -103,6 +103,10 @@ public class RunningCoursesGenerator implements Activity {
         }
     }
 
+    public static void updateNotice(){
+        noticeLabel.setText(Portal.getRegistrationNotice()+("  (Last updated: "+Portal.getLastRegistrationNoticeUpdate()+")"));
+    }
+
     public static synchronized void fixRunningDriver(){
         if (activeDriver == null) {
             activeDriver = DriversPack.forgeNew(true);
@@ -684,26 +688,22 @@ public class RunningCoursesGenerator implements Activity {
 
 
     public static void serializeModules(){
-        System.out.print("Serializing Registered Courses... ");
         final String[] runningCourses = new String[ACTIVE_COURSES.size()];
         for (int i = 0; i < runningCourses.length; i++) {
             runningCourses[i] = ACTIVE_COURSES.get(i).exportContent();
         }
         Serializer.toDisk(runningCourses, "active-modules.ser");
-        System.out.println("Completed.");
     }
 
     public static void deserializeModules(){
-        System.out.print("Deserializing Registered Courses... ");
         final String[] runningCourses = (String[]) Serializer.fromDisk("active-modules.ser");
         if (runningCourses == null) {
-            System.err.println("Unsuccessful.");
+            App.silenceException("Error reading Active Courses.");
             return;
         }
         for (String dataLines : runningCourses) {
             ACTIVE_COURSES.add(RunningCourse.importFromSerial(dataLines));
         }
-        System.out.println("Completed successfully.");
     }
 
 }

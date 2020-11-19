@@ -14,7 +14,7 @@ import java.io.File;
  */
 public class Dashboard {
     private static final Preview PREVIEW = new Preview(null);
-    public static final String VERSION = "1.5.5";
+    public static final String VERSION = "1.5.9";
     private static boolean isFirst;
 
 
@@ -95,7 +95,6 @@ public class Dashboard {
 
         Settings.deSerialize();
         Portal.deSerialize();
-        News.deSerializeData();
         SwingUtilities.invokeLater(()-> {
             final Board lastBoard = new Board();
             RunningCoursesGenerator.deserializeModules();

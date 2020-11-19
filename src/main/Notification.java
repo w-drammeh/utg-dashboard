@@ -156,16 +156,13 @@ public class Notification implements Serializable {
 
 
     public static void serializeAll() {
-        System.out.print("Serializing Notifications... ");
         Serializer.toDisk(NOTIFICATIONS, "alerts.ser");
-        System.out.println("Completed.");
     }
 
     public static void deSerializeAll(){
-        System.out.print("Deserializing Notifications... ");
         final ArrayList<Notification> savedAlerts = (ArrayList<Notification>) Serializer.fromDisk("alerts.ser");
         if (savedAlerts == null) {
-            System.err.println("Unsuccessful.");
+            App.silenceException("Error reading Notifications.");
         } else {
             for (Notification alert : savedAlerts) {
                 alert.shower = new Exhibitor(alert);
@@ -173,7 +170,6 @@ public class Notification implements Serializable {
                 NotificationGenerator.join(alert);
                 NOTIFICATIONS.add(alert);
             }
-            System.out.println("Completed successfully.");
         }
     }
 

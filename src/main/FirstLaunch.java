@@ -165,7 +165,7 @@ public class FirstLaunch extends KDialog {
         psswdField.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2, true));
 
         final KButton setButton = new KButton("Set");
-        setButton.setFont(KFontFactory.createPlainFont(15));
+        setButton.setStyle(KFontFactory.createPlainFont(15), Color.BLUE);
         setButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         setButton.addActionListener(e-> {
             if (!emailField.hasText()) {

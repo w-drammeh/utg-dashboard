@@ -409,12 +409,12 @@ public class Student {
         division = (String) initials[6];
         nationality = (String) initials[7];
         try {
-            monthOfAdmission = (int) initials[8];
+            monthOfAdmission = Integer.parseInt((String) initials[8]);
         } catch (Exception e){
             reportCriticalInfoMissing(Login.getRoot(), "Month of Admission");
         }
         try {
-            yearOfAdmission = (int) initials[9];
+            yearOfAdmission = Integer.parseInt((String) initials[9]);
         } catch (Exception e){
             reportCriticalInfoMissing(Login.getRoot(),"Year of Admission");
         }
@@ -425,7 +425,7 @@ public class Student {
         portalMail = (String) initials[14];
         portalPassword = (String) initials[15];
         try {
-            CGPA = (double) initials[19];
+            CGPA = Double.parseDouble((String) initials[19]);
         } catch (Exception e){
             reportCriticalInfoMissing(Login.getRoot(), "CGPA");
         }
@@ -662,7 +662,6 @@ public class Student {
 
 
     public static void serializeData() {
-        System.out.print("Serializing User Data... ");
         final HashMap<String, Object> dataMap = new HashMap<>();
         dataMap.put("moa", monthOfAdmission);
         dataMap.put("yoa", yearOfAdmission);
@@ -703,14 +702,11 @@ public class Student {
             }
         }
         Serializer.toDisk(dataMap, "core.ser");
-        System.out.println("Completed.");
     }
 
     public static void deserializeData() throws NullPointerException {
-        System.out.print("Deserializing User Data... ");
         final HashMap<String, Object> dataMap = (HashMap) Serializer.fromDisk("core.ser");
         if (dataMap == null) {
-            System.err.println("Unsuccessful.");
             throw new NullPointerException();
         }
         firstName = (String) (dataMap.get("fName"));
@@ -748,7 +744,6 @@ public class Student {
         } else if (dataMap.containsKey("userIcon")) {
             userIcon = (ImageIcon) dataMap.get("iconSelf");
         }
-        System.out.println("Completed successfully.");
     }
 
 }

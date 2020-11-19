@@ -1034,26 +1034,23 @@ public class ModulesHandler {
 
 
     public static void serializeData(){
-        System.out.print("Serializing Modules... ");
         final String[] modulesData = new String[modulesMonitor.size()];
         for (int i = 0; i < modulesData.length; i++) {
             modulesData[i] = modulesMonitor.get(i).exportContent();
         }
         Serializer.toDisk(modulesData, "modules.ser");
-        System.out.println("Completed.");
     }
 
     public static void deserializeData() {
-        System.out.print("Deserializing Modules... ");
         final String[] modulesData = (String[]) Serializer.fromDisk("modules.ser");
         if (modulesData == null) {
-            System.err.println("Unsuccessful.");
+            App.silenceException("Error reading Modules.");
             return;
         }
+
         for (String dataLines : modulesData) {
             modulesMonitor.add(Course.importFromSerial(dataLines));
         }
-        System.out.println("Completed successfully.");
     }
 
 }
