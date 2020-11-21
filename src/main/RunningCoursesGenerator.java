@@ -68,7 +68,7 @@ public class RunningCoursesGenerator implements Activity {
         final KMenuItem updateItem = new KMenuItem("Update Registration Notice",
                 e-> App.promptPlain("Tip", "To renew the registration notice, go to 'Notifications | Portal Alerts | Update Alerts'"));
 
-        final KMenuItem visitItem = new KMenuItem("Visit Portal Instead");
+        final KMenuItem visitItem = new KMenuItem("Visit Portal instead");
         visitItem.addActionListener(e-> Portal.openPortal(visitItem));
 
         final JPopupMenu popupMenu = new JPopupMenu();
@@ -77,12 +77,11 @@ public class RunningCoursesGenerator implements Activity {
         popupMenu.add(visitItem);
 
         optionsButton = KButton.getIconifiedButton("options.png",25,25);
-        optionsButton.setFont(KFontFactory.createBoldFont(15));
-        optionsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        optionsButton.setCursor(MComponent.HAND_CURSOR);
         optionsButton.setToolTipText("More options");
-        final int buttonWidth = optionsButton.getPreferredSize().width;
-        optionsButton.addActionListener(e-> popupMenu.show(optionsButton,
-                optionsButton.getX() + buttonWidth - buttonWidth/4, optionsButton.getY() - 15));
+        final int preferredHeight = optionsButton.getPreferredSize().height;
+        optionsButton.addActionListener(e-> popupMenu.show(optionsButton, optionsButton.getX(),
+                optionsButton.getY() + preferredHeight));
 
         final KPanel upperPanel = new KPanel(new BorderLayout());
         upperPanel.add(optionsButton, BorderLayout.WEST);
