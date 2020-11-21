@@ -1,6 +1,8 @@
 package customs;
 
 import javax.swing.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,8 +25,16 @@ public class KDialog extends JDialog implements Preference {
     }
 
     public void setPreferences(){
-        setResizable(false);
         setIconImage(KFrame.getIcon());
+        setResizable(false);
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    dispose();
+                }
+            }
+        });
         ALL_DIALOGS.add(this);
     }
 

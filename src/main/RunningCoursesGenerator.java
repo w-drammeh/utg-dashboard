@@ -23,19 +23,25 @@ public class RunningCoursesGenerator implements Activity {
     public static KLabel noticeLabel;
     private static KMenuItem matchItem;
     private static KButton optionsButton;
+    private static JPopupMenu modulePopupMenu;
+    private static KLabel hintLabel;
     public static final ArrayList<RunningCourse> STARTUP_REGISTRATIONS = new ArrayList<>();
     private static final ArrayList<RunningCourse> ACTIVE_COURSES = new ArrayList<>() {
         @Override
         public boolean add(RunningCourse course) {
             activeModel.addRow(new String[] {course.getCode(), course.getName(), course.getLecturer(), course.getSchedule(),
                     course.isConfirmed() ? "Confirmed" : "Unknown"});
+            hintLabel.setVisible(true);
             return super.add(course);
         }
+
         @Override
         public boolean remove(Object o) {
             activeModel.removeRow(activeModel.getRowOf(((RunningCourse) o).getCode()));
+            hintLabel.setVisible(activeModel.getRowCount() > 0);
             return super.remove(o);
         }
+
         @Override
         public RunningCourse set(int index, RunningCourse course) {
             final int targetRow = activeModel.getRowOf(course.getCode());
@@ -55,8 +61,7 @@ public class RunningCoursesGenerator implements Activity {
         semesterBigLabel.setHorizontalAlignment(SwingConstants.CENTER);
         semesterBigLabel.underline(Color.BLACK, true);
 
-        noticeLabel = new KLabel(Portal.getRegistrationNotice()+("  (Last updated: "+Portal.getLastRegistrationNoticeUpdate()+")"),
-                KFontFactory.createPlainFont(16), Color.RED);
+        noticeLabel = new KLabel(Portal.getRegistrationNotice(), KFontFactory.createBoldFont(15), Color.RED);
 
         matchItem = new KMenuItem("Match Portal", e-> startMatching(true));
 
@@ -76,7 +81,7 @@ public class RunningCoursesGenerator implements Activity {
         optionsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         optionsButton.setToolTipText("More options");
         final int buttonWidth = optionsButton.getPreferredSize().width;
-        optionsButton.addActionListener(e -> popupMenu.show(optionsButton,
+        optionsButton.addActionListener(e-> popupMenu.show(optionsButton,
                 optionsButton.getX() + buttonWidth - buttonWidth/4, optionsButton.getY() - 15));
 
         final KPanel upperPanel = new KPanel(new BorderLayout());
@@ -103,7 +108,7 @@ public class RunningCoursesGenerator implements Activity {
         }
     }
 
-    public static void updateNotice(){
+    public static void effectNoticeUpdate(){
         noticeLabel.setText(Portal.getRegistrationNotice()+("  (Last updated: "+Portal.getLastRegistrationNoticeUpdate()+")"));
     }
 
@@ -430,6 +435,49 @@ public class RunningCoursesGenerator implements Activity {
     }
 
     private Container runningSubstances() {
+        final KMenuItem editItem = new KMenuItem("Edit");
+        editItem.addActionListener(e-> {
+            final String code = String.valueOf(activeModel.getValueAt(activeTable.getSelectedRow(), 0));
+            final RunningCourse runningCourse = getByCode(code);
+            if (runningCourse != null) {
+                SwingUtilities.invokeLater(()-> new RunningCourseEditor(runningCourse).setVisible(true));
+            }
+        });
+
+        final KMenuItem detailsItem = new KMenuItem("Details");
+        detailsItem.addActionListener(e-> {
+            final String code = String.valueOf(activeModel.getValueAt(activeTable.getSelectedRow(), 0));
+            RunningCourse.exhibit(getByCode(code));
+        });
+
+        final KMenuItem checkItem = new KMenuItem("Checkout");
+        checkItem.addActionListener(e-> {
+            new Thread(RunningCoursesGenerator::launchConfirmationSequence).start();
+        });
+
+        final KMenuItem removeItem = new KMenuItem("Remove");
+        removeItem.addActionListener(e-> {
+            final RunningCourse course = getByCode(String.valueOf(activeModel.getValueAt(activeTable.getSelectedRow(), 0)));
+            if (course != null && App.showOkCancelDialog("Remove", "Do you really wish to remove \""+course.getName()+"\"?")){
+                if (course.isConfirmed()) {
+                    final int vInt = App.verifyUser("Enter your Mat. number to proceed with this changes:");
+                    if (vInt == App.VERIFICATION_TRUE) {
+                        ACTIVE_COURSES.remove(course);
+                    } else if (vInt == App.VERIFICATION_FALSE) {
+                        App.reportMatError();
+                    }
+                } else {
+                    ACTIVE_COURSES.remove(course);
+                }
+            }
+        });
+
+        modulePopupMenu = new JPopupMenu();
+        modulePopupMenu.add(editItem);
+        modulePopupMenu.add(detailsItem);
+        modulePopupMenu.add(checkItem);
+        modulePopupMenu.add(removeItem);
+
         activeModel = new KTableModel();
         activeModel.setColumnIdentifiers(new String[] {"CODE", "NAME", "LECTURER", "SCHEDULE","STATUS"});
         activeTable = new KTable(activeModel);
@@ -456,84 +504,45 @@ public class RunningCoursesGenerator implements Activity {
                     }
                 }
             }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    activeTable.getSelectionModel().setSelectionInterval(0, activeTable.rowAtPoint(e.getPoint()));
+                    SwingUtilities.invokeLater(()-> modulePopupMenu.show(activeTable, e.getX(), e.getY()));
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                mousePressed(e);
+            }
         });
 
-        final Font buttonsFont = KFontFactory.createPlainFont(15);
-
-        final KButton addButton = new KButton("Add");
-        addButton.setFont(buttonsFont);
+        final KButton addButton = KButton.getIconifiedButton("plus.png", 15, 15);
+        addButton.redress();
+        addButton.setText("Add");
+        addButton.setFont(KFontFactory.createPlainFont(16));
+        addButton.setCursor(MComponent.HAND_CURSOR);
         addButton.addActionListener(e-> {
             if (activeTable.getRowCount() >= 6) {
-                App.signalError("Limit Reached","The maximum number of registrations per semester is six (6) courses.");
+                App.signalError("Error","The maximum number of registrations per semester is six (6) courses.");
             } else {
                 SwingUtilities.invokeLater(()-> new RunningCourseAdder().setVisible(true));
             }
         });
 
-        final KButton editButton = new KButton("Edit");
-        editButton.setFont(buttonsFont);
-        editButton.addActionListener(e-> {
-            if (activeTable.getSelectedRow() >= 0) {
-                final String code = String.valueOf(activeModel.getValueAt(activeTable.getSelectedRow(), 0));
-                final RunningCourse runningCourse = getByCode(code);
-                if (runningCourse != null) {
-                    SwingUtilities.invokeLater(()-> new RunningCourseEditor(runningCourse).setVisible(true));
-                }
-            } else {
-                App.promptPlain("No selection", "Firstly, select a course from the table that you want to edit.");
-            }
-        });
+        hintLabel = new KLabel("For more actions, right-click on a course (at any row).", KFontFactory.createBoldFont(16),
+                Color.BLUE);
+        hintLabel.setVisible(activeModel.getRowCount() > 0);
 
-        final KButton verifyButton = new KButton("Checkout");
-        verifyButton.setFont(buttonsFont);
-        verifyButton.addActionListener(e-> {
-            if (activeTable.getSelectedRow() >= 0) {
-                new Thread(RunningCoursesGenerator::launchConfirmationSequence).start();
-            } else {
-                App.promptPlain("No selection", "Firstly, select a course from the table that you want to verify on the Portal.");
-            }
-        });
-
-        final KButton exhibitButton = new KButton("Details");
-        exhibitButton.setFont(buttonsFont);
-        exhibitButton.addActionListener(e-> {
-            if (activeTable.getSelectedRow() >= 0) {
-                final String code = String.valueOf(activeModel.getValueAt(activeTable.getSelectedRow(), 0));
-                RunningCourse.exhibit(getByCode(code));
-            } else {
-                App.promptPlain("No selection", "Firstly, select a course from the table that you want to show details of.\n" +
-                        "You can also double-click on a row to exhibit its contents.");
-            }
-        });
-
-        final KButton removeButton = new KButton("Remove");
-        removeButton.setFont(buttonsFont);
-        removeButton.addActionListener(e-> {
-            if (activeTable.getSelectedRow() >= 0) {
-                final RunningCourse course = getByCode(String.valueOf(activeModel.getValueAt(activeTable.getSelectedRow(), 0)));
-                if (course != null && App.showOkCancelDialog("Remove", "Do you really wish to remove \""+course.getName()+"\"?")){
-                    if (course.isConfirmed()) {
-                        final int vInt = App.verifyUser("Enter your Mat. number to proceed with this changes:");
-                        if (vInt == App.VERIFICATION_TRUE) {
-                            ACTIVE_COURSES.remove(course);
-                        } else if (vInt == App.VERIFICATION_FALSE) {
-                            App.reportMatError();
-                        }
-                    } else {
-                        ACTIVE_COURSES.remove(course);
-                    }
-                }
-            } else {
-                App.promptPlain("No selection", "Firstly, select a course from the table that you want to remove.");
-            }
-        });
-
-        final KPanel buttonsPanel = new KPanel(new FlowLayout(FlowLayout.RIGHT), addButton, editButton, verifyButton,
-                exhibitButton, removeButton);
+        final KPanel bottomPanel = new KPanel(new BorderLayout());
+        bottomPanel.add(new KPanel(hintLabel), BorderLayout.CENTER);
+        bottomPanel.add(new KPanel(addButton), BorderLayout.EAST);
 
         final KPanel substancePanel = new KPanel();
         substancePanel.setLayout(new BoxLayout(substancePanel, BoxLayout.Y_AXIS));
-        substancePanel.addAll(new KScrollPane(activeTable), buttonsPanel, Box.createVerticalStrut(50));
+        substancePanel.addAll(new KScrollPane(activeTable), bottomPanel, Box.createVerticalStrut(50));
         return substancePanel;
     }
 

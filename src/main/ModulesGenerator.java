@@ -18,14 +18,13 @@ public class ModulesGenerator implements Activity {
 
         final KButton tipShower = KButton.getIconifiedButton("warn.png", 25, 25);
         tipShower.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        tipShower.setToolTipText("Read Me");
         tipShower.addActionListener(e-> App.promptPlain("Module Collection", "For more options, simply right-click on the tables.\n" +
                 "To Edit, Remove, Verify, or Show the Details of a course, just right-click on it and choose the corresponding\n" +
                 "option from the Popup Menu.\n \n" +
                 "You can navigate through your collection by using the buttons outlined in the left-most panel.\n" +
                 "If Dashboard cannot determine the academic year & semester of a course relative to your level,\n" +
-                "it will be pushed to the Miscellaneous table.\n \n" +
-                "It should be noted that only the courses that are Confirmed will be included in your 'Analysis' and Transcript.\n \n" +
+                "it will be pushed to the Miscellaneous Table.\n \n" +
+                "It should be noted that only the courses that are Confirmed will be included in your Analysis and Transcript.\n \n" +
                 "For more information about this activity, refer to "+ Tips.reference("Module Collection")));
 
         refreshButton = new KButton("Sync");

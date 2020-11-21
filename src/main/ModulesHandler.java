@@ -30,9 +30,9 @@ public class ModulesHandler {
     public static final ArrayList<KTableModel> ALL_MODELS = new ArrayList<>();
     public static final ArrayList<Course> STARTUP_COURSES = new ArrayList<>();
     private static final String[] COLUMN_IDENTIFIERS = new String[] { "CODE", "NAME", "LECTURER", "GRADE" };
-    public static final String DETAILS = "Details";
     public static final String EDIT = "Edit";
     public static final String CONFIRM = "Verify";
+    public static final String DETAILS = "Details";
     public static final String DELETE = "Remove";
     public static final String ADD = "Add";
 
@@ -613,10 +613,10 @@ public class ModulesHandler {
             });
 
             popupMenu = new JPopupMenu();
-            popupMenu.add(detailsItem);
-            popupMenu.add(editItem);
-            popupMenu.add(removeItem);
             popupMenu.add(confirmItem);
+            popupMenu.add(editItem);
+            popupMenu.add(detailsItem);
+            popupMenu.add(removeItem);
             popupMenu.add(newItem);
         }
 

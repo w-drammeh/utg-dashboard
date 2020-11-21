@@ -153,9 +153,9 @@ public class Portal {
         Portal.registrationNotice = registrationNotice;
         lastRegistrationNoticeUpdate = new Date();
         if (Board.isAppReady()) {
-            RunningCoursesGenerator.updateNotice();
+            RunningCoursesGenerator.effectNoticeUpdate();
         } else {
-            Board.postProcesses.add(RunningCoursesGenerator::updateNotice);
+            Board.postProcesses.add(RunningCoursesGenerator::effectNoticeUpdate);
         }
     }
 
