@@ -81,7 +81,7 @@ public class News {
                 final String body = element.getElementsByTag("p").text();
                 if (!NEWS_DATA.contains(new NewsSavior(head, null, null))) {
                     NEWS_DATA.add(new NewsSavior(head, body, null));
-                    present.addPenultimate(packageNews(head, body, null));
+                    present.addPenultimate(packNews(head, body, null));
                     MComponent.ready(present);
                 }
             }
@@ -102,7 +102,7 @@ public class News {
     /**
      * Organizes a news in a panel.
      */
-    private KPanel packageNews(String header, String body, String allContent) {
+    private KPanel packNews(String header, String body, String allContent) {
         final KLabel hLabel = new KLabel(header, KFontFactory.createBoldFont(18), Color.BLUE);
         final KTextPane textPane = KTextPane.wantHtmlFormattedPane(body.substring(0, body.length() - (header.length() + 13)));
 
@@ -159,7 +159,7 @@ public class News {
 
         if (!NEWS_DATA.isEmpty()) {
             for (NewsSavior news : NEWS_DATA) {
-                present.addPenultimate(packageNews(news.heading, news.body, news.content));
+                present.addPenultimate(packNews(news.heading, news.body, news.content));
             }
             MComponent.ready(present);
         }
