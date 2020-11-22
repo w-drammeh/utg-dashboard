@@ -13,42 +13,48 @@ public class Memory {
      * Accessors of this list - noticeably, the Transcript and Analysis - should refresh calls
      * prior to any activity-answer.
      * This list must remain updated by the monitor in ModulesHandler.
+     * Never directly add or withdraw from this list - all such must be directed
+     * by the monitor at main.ModulesHandler
      */
-    private static final ArrayList<Course> VERIFIED_LIST = new ArrayList<Course>(){
+    private static final ArrayList<Course> VERIFIED_LIST = new ArrayList<>() {
         @Override
         public boolean add(Course course) {
             return course.isVerified() && super.add(course);
         }
     };
 
-//    Carefully access the list
     /**
      * May be called only by the modulesMonitor at ModulesHandler
      */
-    public static void mayRemember(Course incomingCourse){
-        VERIFIED_LIST.add(incomingCourse);
-    }
-
-    /**
-     * May be called only by the modulesMonitor at ModulesHandler
-     */
-    public static void mayForget(Course outgoingCourse){
-        VERIFIED_LIST.remove(outgoingCourse);
-    }
-
-    /**
-     * May be called only by the modulesMonitor at ModulesHandler
-     */
-    public static void mayReplace(Course oldOne, Course newOne){
-        final int t = indexOf(oldOne.getCode());
-        if (t >= 0) {
-            VERIFIED_LIST.set(t, newOne);
+    public static void mayRemember(Course course){
+        if (VERIFIED_LIST.add(course)) {
+            TranscriptGenerator.TRANSCRIPT_MODEL.addRow(new String[] {course.getCode(), course.getName(),
+                    Integer.toString(course.getCreditHours()), course.getGrade(), Double.toString(course.getQualityPoint())});
         }
     }
 
-    public static int indexOf(String courseCode){
+    /**
+     * May be called only by the modulesMonitor at ModulesHandler
+     */
+    public static void mayForget(Course course){
+        if (VERIFIED_LIST.remove(course)) {
+            TranscriptGenerator.TRANSCRIPT_MODEL.removeRow(TranscriptGenerator.TRANSCRIPT_MODEL.getRowOf(course.getCode()));
+        }
+    }
+
+    /**
+     * May be called only by the modulesMonitor at ModulesHandler
+     */
+    public static void mayReplace(Course outgoing, Course incoming){
+        final int t = indexOf(outgoing.getCode());
+        if (t >= 0) {
+            VERIFIED_LIST.set(t, incoming);
+        }
+    }
+
+    public static int indexOf(String code){
         for (int i = 0; i < VERIFIED_LIST.size(); i++) {
-            if (VERIFIED_LIST.get(i).getCode().equalsIgnoreCase(courseCode)) {
+            if (VERIFIED_LIST.get(i).getCode().equalsIgnoreCase(code)) {
                 return i;
             }
         }

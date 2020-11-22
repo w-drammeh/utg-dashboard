@@ -16,69 +16,89 @@ public class DriversPack {
     public static final int ATTEMPT_FAILED = 1;
     public static final int ATTEMPT_SUCCEEDED = 2;
 
+
     /**
      * Returns a fresh driver as appropriate for the currently running OS.
      * Nullability must be checked prior to any attempt of usage.
-     * This can be done like:
-     *  if(DriversPack.forgeNew(boolean) == null)
      */
-    public static synchronized FirefoxDriver forgeNew(boolean headless){
-        FirefoxDriver fDriver = null;
+    public static synchronized FirefoxDriver forgeNew(boolean headless) {
+        FirefoxDriver firefoxDriver = null;
         try {
             WebDriverManager.firefoxdriver().setup();
-            fDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(headless));
+            firefoxDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(headless));
         } catch (Exception e) {
-            App.silenceException("Building driver failed: "+e.getMessage());
+            App.silenceException("Error building Driver");
         }
-        return fDriver;
+        return firefoxDriver;
     }
 
     /**
-     * By convention, this and the co. are to be used only after a successful build,
-     * as they're intended to only login / out the current user.
-     * It's checked before even proceeding to the 'content-page'.
-     * PrePortal does not use this whence.
+     * Attempts to log this driver in to the Portal using the given email and password.
+     * A successful attempt leaves the driver at the home page
      */
-    public static int attemptLogin(FirefoxDriver foxDriver){
-        if (isIn(foxDriver)) {
-            return ATTEMPT_SUCCEEDED;
+    public static int attemptLogin(FirefoxDriver driver, String email, String password) {
+        if (isIn(driver)) {
+            final int logoutAttempt = attemptLogout(driver);
+            if (logoutAttempt == CONNECTION_LOST) {
+                return CONNECTION_LOST;
+            }
+        } else {
+            try {
+                driver.navigate().to(Portal.LOGIN_PAGE);
+                driver.findElement(By.name("email")).sendKeys(email);
+                driver.findElement(By.name("password")).sendKeys(password);
+                driver.findElement(By.className("form-group")).submit();
+            } catch (Exception lost) {
+                return CONNECTION_LOST;
+            }
         }
 
         try {
-            foxDriver.navigate().to(Portal.LOGIN_PAGE);
-            foxDriver.findElement(By.name("email")).sendKeys(Student.getPortalMail());
-            foxDriver.findElement(By.name("password")).sendKeys(Student.getPortalPassword());
-            foxDriver.findElement(By.className("form-group")).submit();
-        } catch (Exception lost) {
-            return CONNECTION_LOST;
-        }
-
-        try {
-            new WebDriverWait(foxDriver, 5).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".alert-danger")));
+            new WebDriverWait(driver, Portal.MINIMUM_WAIT_TIME).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".alert-danger")));
             return ATTEMPT_FAILED;
-        } catch (TimeoutException out){//it's what I wanted
-            //if the time is up yet there's no danger sign, 1 condition?
-            //1. Let the next attempt wait for the name element, throw timeout, otherwise proceed
+        } catch (TimeoutException ignored) {
         }
 
         try {
-            new WebDriverWait(foxDriver, 50).until(ExpectedConditions.presenceOfElementLocated(By.className("media-heading")));
+            new WebDriverWait(driver, Portal.MAXIMUM_WAIT_TIME).until(ExpectedConditions.presenceOfElementLocated(By.className("media-heading")));
             return ATTEMPT_SUCCEEDED;
-        } catch (Exception e) {
+        } catch (TimeoutException e) {
             return CONNECTION_LOST;
         }
     }
 
-    public static void attemptLogout(FirefoxDriver foxDriver){
-
+    public static int attemptLogin(FirefoxDriver driver) {
+        return attemptLogin(driver, Student.getPortalMail(), Student.getPortalPassword());
     }
 
     /**
-     * Will say yes (return true) as long as the driver is in - no matter whether is
-     * at the home or contents-page.
+     * Attempts to log this driver out of the Portal.
+     * By the time this call returns, the driver will be at the login page.
      */
-    public static boolean isIn(FirefoxDriver foxDriver){
-        return foxDriver.getCurrentUrl().equals(Portal.HOME_PAGE) || foxDriver.getCurrentUrl().equals(Portal.CONTENTS_PAGE);
+    public static int attemptLogout(FirefoxDriver driver) {
+        if (isIn(driver)) {
+            try {
+                driver.navigate().to(Portal.LOGOUT_PAGE);
+                return ATTEMPT_SUCCEEDED;
+            } catch (Exception failed) {
+                return ATTEMPT_FAILED;
+            }
+        } else {
+            try {
+                driver.navigate().to(Portal.LOGIN_PAGE);
+                return ATTEMPT_SUCCEEDED;
+            } catch (Exception lost) {
+                return CONNECTION_LOST;
+            }
+        }
+    }
+
+    /**
+     * A driver is considered in the Portal if its url matches the home, content, or profile page
+     */
+    public static boolean isIn(FirefoxDriver driver) {
+        final String url = driver.getCurrentUrl();
+        return url.equals(Portal.HOME_PAGE) || url.equals(Portal.CONTENTS_PAGE) || url.equals(Portal.PROFILE_PAGE);
     }
 
 }

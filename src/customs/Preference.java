@@ -5,12 +5,12 @@ package customs;
  * are not compulsory on them - as the case of the KFontFactory which is abstract, relieving itself of
  * this duty.
  */
-public interface Preference {
+interface Preference {
 
     /**
      * The constructors of all implementors must also delegate to this method - setPreferences() -
      * to initialize them as Dashboard specific components.
      */
-    void setPreferences();
+    public void setPreferences();
 
 }

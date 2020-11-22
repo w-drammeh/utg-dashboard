@@ -1,6 +1,6 @@
 package customs;
 
-import main.SettingsCore;
+import main.Settings;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,86 +8,99 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KPanel extends JPanel implements Preference {
-    public static final List<KPanel> ALL_PANELS = new ArrayList<>();
+    public static final List<KPanel> ALL_PANELS = new ArrayList<>(){
+        @Override
+        public boolean add(KPanel panel) {
+            panel.setBackground(Settings.currentBackground());
+            return super.add(panel);
+        }
+    };
 
 
     public KPanel(){
         super();
-        this.setPreferences();
+        setPreferences();
+    }
+
+    public KPanel(int width, int height){
+        this();
+        setPreferredSize(new Dimension(width, height));
     }
 
     public KPanel(LayoutManager layout) {
         super(layout);
-        this.setPreferences();
-    }
-
-    public KPanel(Dimension d) {
-        super();
-        this.setPreferredSize(d);
-        this.setPreferences();
-    }
-
-    public KPanel(int pWidth, int pHeight){
-        this(new Dimension(pWidth, pHeight));
+        setPreferences();
     }
 
     public KPanel(LayoutManager layout, Dimension dimension) {
-        super(layout);
-        this.setPreferredSize(dimension);
-        this.setPreferences();
+        this(layout);
+        setPreferredSize(dimension);
     }
 
-    /**
-     * A convenient way of calling wantDirectAddition(null, null, directComponent).
-     * Still respecting the default-layout, this will add all the directComponents
-     * to the returned-instance.
-     * Notice that the ability of this call to accept multiple param-components
-     * will minimize declaration of panels for the sake of holding multiple components
-     * instead of direct-addition.
-     */
-    public static KPanel wantDirectAddition(Component... directComponents){
-        final KPanel panel = new KPanel();
-        for (Component comp : directComponents) {
-            panel.add(comp);
-        }
-        return panel;
+    public KPanel(LayoutManager layout, Component... components) {
+        this(layout);
+        addAll(components);
     }
 
-    /**
-     * The layout and the dimension can be specified. If the layout is null, it uses the default Flow;
-     * If the dimension is null, UI is asked, off course.
-     * If you have the intention of using both params null, then use the alternative over-loaded call.
-     */
-    public static KPanel wantDirectAddition(LayoutManager layout, Dimension dimension, JComponent... directComponents){
-        final KPanel kPanel = new KPanel(layout == null ? new FlowLayout(FlowLayout.CENTER) : layout);
+    public KPanel(Component... components){
+        this();
+        addAll(components);
+    }
+
+    public KPanel(Dimension dimension, Component... components) {
+        this(components);
+        setPreferredSize(dimension);
+    }
+
+//    layout cannot be null; you either set it or leave it
+    public KPanel(LayoutManager layout, Dimension dimension, Component... components){
+        this(layout, dimension);
+        addAll(components);
+    }
+
+//    this is now obsolete?
+    public static KPanel wantDirectAddition(LayoutManager layout, Dimension dimension, Component... components){
+        final KPanel kPanel = new KPanel(layout == null ? new FlowLayout() : layout);
         kPanel.setPreferredSize(dimension);
-        for (JComponent directComponent : directComponents) {
-            kPanel.add(directComponent);
-        }
+        kPanel.addAll(components);
         return kPanel;
-    }
-
-    public void removeLastChild() {
-        final int childrenCount = this.getComponentCount();
-        if (childrenCount >= 1) {
-            this.remove(childrenCount - 1);
-        }
     }
 
     /**
      * Directly adds a list of components to this instance.
      * Since this function pays no heed to position, it cannot technically be used under certain
      * layouts; especially, the beloved 'Border'. However, very useful under certain other
-     * beloved layouts like 'Flow', and 'Box'.
+     * beloved layouts like 'Flow', 'Box', 'Grid'.
      */
-    public void addAll(Component ... list) {
+    public void addAll(Component... list) {
         for (Component c : list) {
-            this.add(c);
+            add(c);
+        }
+    }
+
+//    does nothing if there is no component in this instance
+    public void removeLast() {
+        final int count = getComponentCount();
+        if (count >= 1) {
+            remove(count - 1);
+        }
+    }
+
+    /**
+     * Adds the given component, second to last, on this panel.
+     * If this panel contains no children prior to this call,
+     * then this call is effectively equivalent to a add(Component)
+     */
+    public Component addPenultimate(Component component){
+        final int count = getComponentCount();
+        if (count >= 1) {
+            return add(component, count - 1);
+        } else {
+            return add(component);
         }
     }
 
     public void setPreferences() {
-        this.setBackground(SettingsCore.currentBackground());//Since some are created at runtime
         ALL_PANELS.add(this);
     }
 

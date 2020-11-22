@@ -6,34 +6,38 @@ import utg.Dashboard;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-/**
- * Like the Course type, the Student class models a student with as much properties as needed.
- * As long as dashboard is concern, it should be customizable, but some details of the user
- * can not be directly modified!
- */
+// Customizable, but some details of the user cannot be directly modified
 public class Student {
     private static String firstName;
     private static String lastName;
+    private static String matNumber;//has no arithmetic use since;
     private static String program;
     private static String major;
     private static String minor;
     private static String school;
     private static String division;
     /**
-     * Determines the currently running semester. Initially provided by PrePortal but always auto-renewed.
+     * Determines the currently running semester.
+     * Initially provided by PrePortal but always auto-renewed.
      */
     private static String semester;
     /**
-     * The state or status. Also auto-renewed.
+     * The state / status. Also auto-renewed.
+     * "RUNNING", "UNKNOWN",
      */
-    private static String state;
+    private static String status;
     /**
      * The level, i.e "Undergraduate", "Post-graduate", etc. Also auto-renewed.
      */
     private static String level;
     private static String address;
+    /**
+     * Telephones: at any point in time, the first partition is returned
+     * as the current telephone.
+     */
     private static String telephones;
     private static String placeOfBirth;
     private static String nationality;
@@ -46,13 +50,10 @@ public class Student {
     private static String majorCode;
     private static String minorCode;
     private static String about;
-
-    private static int matNumber;
-    private static int yearOfAdmission;//The exact year admission takes place
+    private static int yearOfAdmission;//the exact year admission takes place
     private static int monthOfAdmission;
     /**
      * Deals with the level in 'cents'
-     *
      * Dashboard records levels in 50s.
      * 50 = first semester; 100 = second semester; 150 = 2nd year, first semester; so on and so forth.
      * The same way 300 implies 3rd year, 2nd semester.
@@ -60,23 +61,24 @@ public class Student {
     private static int levelNumber;
     private static double CGPA;
     public static boolean isReported;
-
     private static ImageIcon userIcon;
-
     public static final String FIRST_SEMESTER = "First Semester";
     public static final String SECOND_SEMESTER = "Second Semester";
-    public static final String SUMMER_SEMESTER = "Summer Semester";//These are but for uniformity
-    private static final int iconWidth = 275, iconHeight = 200;
-    private static final ImageIcon emptyIcon = MyClass.scaleForMe(App.getIconURL("defaultUserIcon.png"), iconWidth, iconHeight);
-    private static final ImageIcon shooterIcon = MyClass.scaleForMe(App.getIconURL("shooter.png"), iconWidth, iconHeight);
-
-    /**
-     * The format of the name shown at the top center
-     */
+    public static final String SUMMER_SEMESTER = "Summer Semester";
+    private static final int ICON_WIDTH = 275;
+    private static final int ICON_HEIGHT = 200;
+    private static final ImageIcon DEFAULT_ICON = MComponent.scale(App.getIconURL("default-icon.png"),
+            ICON_WIDTH, ICON_HEIGHT);
+    private static final ImageIcon SHOOTER_ICON = MComponent.scale(App.getIconURL("shooter.png"),
+            ICON_WIDTH, ICON_HEIGHT);
+    public static final String UNCLASSIFIED = "None";
+    public static final String THIRD_CLASS = "\"Cum laude\" - With Praise!";
+    public static final String SECOND_CLASS = "\"Magna Cum laude\" - With Great Honor!";
+    public static final String FIRST_CLASS = "\"Summa Cum laude\" - With Greatest Honor!";
+    private static LinkedHashMap<String, String> ADDITIONAL_DATA = new LinkedHashMap<>();
     private static String nameFormat = "First Name first";
 
 
-//    Calls for the fields..
     public static String getFirstName(){
         return firstName;
     }
@@ -117,7 +119,6 @@ public class Student {
         Student.minor = minor;
         SettingsUI.minorLabel.setText(minor);
         SettingsUI.minorField.setText(minor);
-
         if (Globals.isBlank(minor)) {
             setMinorCode("");
         }
@@ -183,6 +184,11 @@ public class Student {
         return portalMail;
     }
 
+    public static String getVisiblePortalMail(){
+        final int l = portalMail.split("@")[0].length();
+        return portalMail.substring(0, 2)+"*".repeat(l - 3)+portalMail.charAt(l - 1)+"@utg.edu.gm";
+    }
+
     public static void setPortalMail(String portalMail) {
         Student.portalMail = portalMail;
     }
@@ -211,11 +217,11 @@ public class Student {
         Student.portalPassword = portalPassword;
     }
 
-    public static int getMatNumber() {
+    public static String getMatNumber() {
         return matNumber;
     }
 
-    public static void setMatNumber(int matNumber) {
+    public static void setMatNumber(String matNumber) {
         Student.matNumber = matNumber;
     }
 
@@ -236,17 +242,19 @@ public class Student {
     }
 
     /**
-     * Returns just the first contact in the current telephone list
+     * Returns just the first contact in the current telephones list
+     * This may give 'Unknown' (when given by PrePortal),
+     * or the empty-string (when all are removed)
      */
     public static String getTelephone() {
         return telephones.split("/")[0];
     }
 
-    public static String getTelephones() {//Useful in deserialization
+    public static String getTelephones() {
         return telephones;
     }
 
-    public static void resetTelephones(String tels){
+    public static void setTelephones(String tels){
         Student.telephones = tels;
     }
 
@@ -255,15 +263,16 @@ public class Student {
     }
 
     public static void addTelephone(String tel) {
-        Student.telephones = Globals.isBlank(telephones) ? tel : telephones.contains(tel) ? telephones : telephones+"/"+tel;
+        Student.telephones = Globals.isBlank(telephones) ? tel : telephones.contains(tel) ?
+                telephones : telephones + "/" + tel;
     }
 
     public static void removeTelephone(String tel) {
         final int n = telephonesCount();
         if (n == 1) {
-            resetTelephones("");
+            setTelephones("");
         } else if (n > 1) {
-            Student.telephones = telephones.replace(telephones.indexOf(tel) == 0 ? tel+"/" : "/"+tel, "");
+            Student.telephones = telephones.replace(telephones.indexOf(tel) == 0 ? tel + "/" : "/" + tel, "");
         }
     }
 
@@ -271,9 +280,7 @@ public class Student {
         return telephones.split("/").length;
     }
 
-    /**
-     * Never surround this by SpecialClass.toFourth()!
-     */
+//    Never surround this by Globals.toFourth()
     public static double getCGPA() {
         return CGPA;
     }
@@ -284,9 +291,8 @@ public class Student {
 
     /**
      * Blank param may be given to signify reset.
-     * Null is not to be given to this, or its co.
      */
-    public static void setMajorCode(String majorCode){
+    public static void setMajorCode(String majorCode) {
         majorCode = majorCode.toUpperCase();
         SettingsUI.majorCodeField.setText(majorCode);
         ModulesHandler.effectMajorCodeChanges(Student.majorCode, majorCode);
@@ -314,7 +320,7 @@ public class Student {
 
     /**
      * Must not be called before setting the yearOfAdmission!
-     * At every login, level is set first, state, followed by this...
+     * At every login, level is set first, then state, followed by this.
      */
     public static void setSemester(String semester) {
         if (semester.contains("FIRST")) {
@@ -324,19 +330,18 @@ public class Student {
         } else if (semester.contains("SUMMER")) {
             Student.semester = String.join(" ", semester.split(" ")[0], SUMMER_SEMESTER);
         }
-
-        Board.effectSemesterUpgrade(getSemester());
-
+        Board.effectSemesterUpgrade();
         final int current = Integer.parseInt(semester.split("/")[0]) + 1;
-        setLevelNumber((current - getYearOfAdmission())  * 100);
+        levelNumber = (current - yearOfAdmission)  * 100;
     }
 
-    public static String getState() {
-        return state;
+    public static String getStatus() {
+        return status;
     }
 
-    public static void setState(String state) {
-        Student.state = state.charAt(0)+state.substring(1).toLowerCase();
+    public static void setStatus(String status) {
+        Student.status = status;
+        Board.effectStatusUpgrade();
     }
 
     public static String getLevel() {
@@ -352,15 +357,8 @@ public class Student {
         return levelNumber;
     }
 
-    /**
-     * Do not directly call to set this!. It is embedded with the call setSemester()
-     */
-    private static void setLevelNumber(int levelNumber) {
-        Student.levelNumber = levelNumber;
-    }
-
     public static ImageIcon getIcon(){
-        return userIcon == null ? emptyIcon : userIcon;
+        return userIcon == null ? DEFAULT_ICON : userIcon;
     }
 
     public static void setUserIcon(ImageIcon userIcon) {
@@ -375,119 +373,105 @@ public class Student {
         Student.about = about;
     }
 
+    public static LinkedHashMap<String, String> getAdditional(){
+        return ADDITIONAL_DATA;
+    }
+
     public static String currentNameFormat(){
         return nameFormat;
     }
 
-    public static void setNameFormat(String newFormat){
-        Student.nameFormat = newFormat;
+    public static void setNameFormat(String format){
+        Student.nameFormat = format;
         Board.effectNameFormatChanges();
     }
 
     public static String requiredNameForFormat(){
-        return nameFormat.startsWith("First") ? getFullName().toUpperCase() : getFullNamePostOrder().toUpperCase();
+        return nameFormat.startsWith("First") ? getFullName() : getFullNamePostOrder();
     }
 
-
-//    Special calls...
     /**
-     * It all starts here. PrePortal will send an array of the details it could
-     * trace from the portal, and dashboard will take the first step in setting fundamental details
-     * of the user herein this method, including the 'preciseLevel'.
-     * If information like the matriculation is missing, Dashboard will halt build!
+     * Called during fresh-start to initialize user data just from the Portal,
+     * as given by PrePortal.
      */
-    public static void receiveDetails(Object[] initials) {
-        setFirstName(String.valueOf(initials[0]));
-        setLastName(String.valueOf(initials[1]));
-        setProgram(String.valueOf(initials[2]));
+    public static void initialize() {
+        final Object[] initials = PrePortal.USER_DATA.toArray();
+        firstName = (String) initials[0];
+        lastName = (String) initials[1];
+        program = (String) initials[2];
         try {
-            setMatNumber(Integer.parseInt(String.valueOf(initials[3])));
+            matNumber = (String) initials[3];
         } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(), "mat number");
+            reportCriticalInfoMissing(Login.getRoot(), "Mat Number");
         }
-        setMajor(String.valueOf(initials[4]));
-        setSchool(String.valueOf(initials[5]));
-        setDivision(String.valueOf(initials[6]));
-        setNationality(String.valueOf(initials[7]));
+        major = (String) initials[4];
+        school = (String) initials[5];
+        division = (String) initials[6];
+        nationality = (String) initials[7];
         try {
-            setMonthOfAdmission(Integer.parseInt(String.valueOf(initials[8])));
+            monthOfAdmission = Integer.parseInt((String) initials[8]);
         } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(), "month of admission");
+            reportCriticalInfoMissing(Login.getRoot(), "Month of Admission");
         }
         try {
-            setYearOfAdmission(Integer.parseInt(String.valueOf(initials[9])));
+            yearOfAdmission = Integer.parseInt((String) initials[9]);
         } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(),"year of admission");
+            reportCriticalInfoMissing(Login.getRoot(),"Year of Admission");
         }
-        setAddress(String.valueOf(initials[10]));
-        setMaritalStatue(String.valueOf(initials[11]));
-        setDateOfBirth(String.valueOf(initials[12]));
-        resetTelephones(String.valueOf(initials[13]));
-        setPortalMail(String.valueOf(initials[14]));
-        setPortalPassword(String.valueOf(initials[15]));
+        address = (String) initials[10];
+        maritalStatue = (String) initials[11];
+        dateOfBirth = (String) initials[12];
+        telephones = (String) initials[13];
+        portalMail = (String) initials[14];
+        portalPassword = (String) initials[15];
         try {
-            setCGPA(Double.parseDouble(String.valueOf(initials[19])));
+            CGPA = Double.parseDouble((String) initials[19]);
         } catch (Exception e){
             reportCriticalInfoMissing(Login.getRoot(), "CGPA");
         }
-        setLevel(String.valueOf(initials[17]));
-        setSemester(String.valueOf(initials[16]));
-        setState(String.valueOf(initials[18]));
-    }
-
-    /**
-     * Resets all fields.
-     * Invoked to avoid null-pointer exceptions;
-     * after log-out to prevent clash of details?.
-     *
-     * This is deprecated!
-     */
-    public static void reset(){
-        firstName = lastName = program = major = minor = school = division = semester = state = level = address =
-                placeOfBirth = nationality = dateOfBirth = maritalStatue = portalMail = portalPassword = telephones =
-                        majorCode = minorCode = "";
-        matNumber = yearOfAdmission = monthOfAdmission = levelNumber = 0;
-        CGPA = 0D;
-        userIcon = null;
+        setLevel((String)(initials[17]));
+        setSemester((String)(initials[16]));
+        setStatus((String)(initials[18]));
+//
+        minor = majorCode = minorCode = "";
     }
 
     public static String getFullName() {
-        return String.join(" ", getFirstName(), getLastName());
+        return String.join(" ", firstName, lastName);
     }
 
     /**
      * Returns the full name, starting with the name first.
      */
     public static String getFullNamePostOrder() {
-        return String.join(" ", getLastName(), getFirstName());
+        return String.join(" ", lastName, firstName);
     }
 
-    public static String upperDivision(){
-        if (getCGPA() >= 4) {
-            return TranscriptHandler.FIRST_CLASS;
+    public static String upperClassDivision() {
+        if (CGPA >= 4) {
+            return FIRST_CLASS;
         } else if (getCGPA() >= 3.8) {
-            return TranscriptHandler.SECOND_CLASS;
+            return SECOND_CLASS;
         } else if (getCGPA() >= 3.5) {
-            return TranscriptHandler.THIRD_CLASS;
+            return THIRD_CLASS;
         } else {
-            return TranscriptHandler.UNCLASSIFIED;
+            return UNCLASSIFIED;
         }
     }
 
     /**
      * Should return the currently running academic year in yyyy/yyyy format.
      */
-    public static String thisAcademicYear(){
-        return getSemester().split(" ")[0];
+    public static String thisAcademicYear() {
+        return semester.split(" ")[0];
     }
 
-    public static boolean isValidAcademicYear(String extendedYear){
+    public static boolean isValidAcademicYear(String extendedYear) {
         if (extendedYear.contains("/")) {
             try {
                 final int part1 = Integer.parseInt(extendedYear.split("/")[0]);
                 final int part2 = Integer.parseInt(extendedYear.split("/")[1]);
-
-                return String.valueOf(part1).length() == 4 && String.valueOf(part2).length() == 4;
+                return Integer.toString(part1).length() == 4 && Integer.toString(part2).length() == 4;
             } catch (Exception e){
                 return false;
             }
@@ -497,7 +481,7 @@ public class Student {
     }
 
     public static int firstYear(){
-        return getYearOfAdmission();
+        return yearOfAdmission;
     }
 
     public static int secondYear(){
@@ -513,58 +497,55 @@ public class Student {
     }
 
     public static String firstAcademicYear(){
-        return firstYear()+"/"+secondYear();
+        return firstYear() + "/" + secondYear();
     }
 
     public static String secondAcademicYear(){
-        return secondYear()+"/"+thirdYear();
+        return secondYear() + "/" + thirdYear();
     }
 
     public static String thirdAcademicYear(){
-        return thirdYear()+"/"+finalYear();
+        return thirdYear() + "/" + finalYear();
     }
 
     public static String finalAcademicYear(){
-        return finalYear()+"/"+(finalYear() + 1);
+        return finalYear() + "/" + (finalYear() + 1);
     }
 
     public static boolean isFirstYear(){
-        return getLevelNumber() == 100;
+        return levelNumber == 100;
     }
 
     public static boolean isSecondYear(){
-        return getLevelNumber() == 200;
+        return levelNumber == 200;
     }
 
     public static boolean isThirdYear(){
-        return getLevelNumber() == 300;
+        return levelNumber == 300;
     }
 
     public static boolean isFinalYear(){
-        return getLevelNumber() == 400;
+        return levelNumber == 400;
     }
 
-    /**
-     * Do not mistake this with the final year!
-     */
     public static int getExpectedYearOfGraduation(){
-        return getYearOfAdmission() + 4;
+        return yearOfAdmission + 4;
     }
 
-    public static String getMonthOfAdmission_Extended(){
-        return MDate.getMonthByName(getMonthOfAdmission());
+    public static String getMonthOfAdmissionName(){
+        return MDate.getMonthByName(monthOfAdmission);
     }
 
     public static boolean isUndergraduate(){
-        return getLevel().equalsIgnoreCase("Undergraduate");
+        return level.equals("Undergraduate");
     }
 
     public static boolean isPostgraduate(){
-        return getLevel().equalsIgnoreCase("Postgraduate");
+        return level.equals("Postgraduate");
     }
 
     public static boolean isDoingMinor(){
-        return !Globals.isBlank(Student.minor);
+        return Globals.hasText(Student.minor);
     }
 
     public static String predictedStudentMailAddress(){
@@ -572,23 +553,23 @@ public class Student {
     }
 
     public static String predictedStudentPassword(){
-        return "student@utg";
+        return matNumber;//"student@utg"?
     }
 
-    public static void mayReportIncoming(){
+    public static void mayReportIncoming() {
         if (isReported) {
             return;
         }
-        final Timer reportTimer = new Timer(Globals.MINUTE_IN_MILLI, null);
+        final Timer reportTimer = new Timer(Globals.MINUTE, null);
         reportTimer.setInitialDelay(0);
-        reportTimer.addActionListener(e-> new Thread(()->{
+        reportTimer.addActionListener(e-> new Thread(()-> {
             final Mailer incomingReporter = new Mailer("Incoming Report",
                     "A student has successfully launched Dashboard-"+ Dashboard.VERSION+" with the following requested credentials\n{\n" +
                     "Name: "+getFullNamePostOrder()+"\n" +
                     "Program: "+program+"\n" +
                     "Level: "+level+"\n" +
                     "OS: "+System.getProperty("os.name")+"\n" +
-                    "Telephone: "+Student.getTelephone()+"\n" +
+                    "Telephone: "+getTelephone()+"\n" +
                             "}");
             if (incomingReporter.sendAs(Mailer.DEVELOPERS_REQUEST)) {
                 isReported = true;
@@ -599,52 +580,43 @@ public class Student {
     }
 
     private static void reportCriticalInfoMissing(Component parent, String info) {
-        App.promptWarning(parent, "Critical Info Missing","It turns out that the "+info+" was not found.\n" +
-                "This  information are vital as long as your personalized user experience\n" +
-                "and analysis are concern. Please refer your department for this problem.");
+        App.promptWarning(parent, info+" Missing","It turns out that your "+info+" was not found.\n" +
+                "This can lead to inaccurate analysis and prediction.\nPlease refer your department for this problem.");
     }
 
-    
-//    Calls for the icon
-    /**
-     * Called to notify that a user wants to change the image icon
-     */
-    public static void startSettingImage(Component... parents){
-        final String homeDir = System.getProperty("user.home"),
-                picturesDir = homeDir+"/Pictures";
+    public static void startSettingImage(Component parent){
+        final String homeDir = System.getProperty("user.home");
+        final String picturesDir = homeDir + "/Pictures";
         final JFileChooser fileChooser = new JFileChooser(new File(picturesDir).exists() ? picturesDir : homeDir);
         fileChooser.setMultiSelectionEnabled(false);
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        final int selection = fileChooser.showOpenDialog(parents.length == 0 ? Board.getRoot() : parents[0]);
+        final int selection = fileChooser.showOpenDialog(parent == null ? Board.getRoot() : parent);
         if (selection == JFileChooser.APPROVE_OPTION) {
             fireIconChange(fileChooser.getSelectedFile());
         }
     }
 
-    public static boolean isNoIconSet(){
-        return getIcon() == emptyIcon;
-    }
-
-    public static boolean isDefaultIconSet(){
-        return getIcon() == shooterIcon;
+    public static void startSettingImage(){
+        startSettingImage(null);
     }
 
     /**
-     * Remember, this call must be accompanied by a file! So it will send it, to setUserIcon as an icon to be set.
+     * Remember, this call must be accompanied by a file!
+     * So it will send it to setUserIcon() as an icon to be set.
      * It will also notify the containers harboring the icon. One of such known component:
-     * imagePanel of Board
-     * If the parsing-file is null, the function does nothing.
+     * imagePanel at main.Board
+     * If the parsing-file is null, nothing is done.
      */
-    private static void fireIconChange(File iFile){
-        if (iFile != null) {
+    private static void fireIconChange(File imageFile){
+        if (imageFile != null) {
             try {
-                final ImageIcon newIcon = MyClass.scaleForMe(iFile.toURI().toURL(),iconWidth,iconHeight);
+                final ImageIcon newIcon = MComponent.scale(imageFile.toURI().toURL(), ICON_WIDTH, ICON_HEIGHT);
                 if (newIcon == null) {
-                    App.signalError("Error", "Could not set the image icon to "+iFile.getAbsolutePath()+"\n" +
+                    App.signalError("Error", "Could not set the image icon to "+imageFile.getAbsolutePath()+".\n" +
                             "Is that an image file? If it's not, try again with a valid image file, otherwise it is of an unsupported type.");
                     return;
                 }
-                setUserIcon(newIcon);
+                userIcon = newIcon;
                 effectImageChangeOnComponents();
                 App.promptPlain("Successful","Image icon has been changed successfully.");
             } catch (Exception e) {
@@ -655,41 +627,48 @@ public class Student {
     }
 
     /**
-     * Will set the icon to the null value, and makes the effects by making the appropriate call(s).
+     * Should always be called on icon amendments.
+     * It effects the visual changes on all the containers of the icon.
      */
+    private static void effectImageChangeOnComponents() {
+        MComponent.empty(Board.getImagePanel());
+        Board.getImagePanel().add(new KLabel(userIcon));
+        MComponent.ready(Board.getImagePanel());
+    }
+
     public static void fireIconReset(){
-        if (App.showOkCancelDialog("Confirm reset","This action will remove your image icon. Continue?")) {
-            setUserIcon(emptyIcon);
+        if (App.showYesNoCancelDialog("Confirm reset","This action will remove your image icon. Continue?")) {
+            userIcon = DEFAULT_ICON;
             effectImageChangeOnComponents();
         }
     }
 
     public static void fireIconDefaultSet(){
-        setUserIcon(shooterIcon);
+        userIcon = SHOOTER_ICON;
         effectImageChangeOnComponents();
     }
 
     /**
-     * Should always be called on icon amendments.
-     * It effects the visual changes on all the containers of the icon.
+     * Algorithm generates true even if no icon is manually set.
+     * See getIcon()
      */
-    private static void effectImageChangeOnComponents(){
-        ComponentAssistant.repair(Board.getImagePanel());
-        Board.getImagePanel().add(new KLabel(getIcon()));
-        ComponentAssistant.ready(Board.getImagePanel());
+    public static boolean isDefaultIconSet(){
+        return getIcon() == DEFAULT_ICON;
+    }
+
+    public static boolean isShooterIconSet(){
+        return getIcon() == SHOOTER_ICON;
     }
 
 
-//    Calls for the serialization
-    public static void serializeData(){
-        System.out.print("Serializing student's data... ");
-        final LinkedHashMap<String, String> dataMap = new LinkedHashMap<>();
-        dataMap.put("moa", String.valueOf(monthOfAdmission));
-        dataMap.put("yoa", String.valueOf(yearOfAdmission));
+    public static void serializeData() {
+        final HashMap<String, Object> dataMap = new HashMap<>();
+        dataMap.put("moa", monthOfAdmission);
+        dataMap.put("yoa", yearOfAdmission);
         dataMap.put("semester", semester.toUpperCase());
         dataMap.put("fName", firstName);
         dataMap.put("lName", lastName);
-        dataMap.put("mat", String.valueOf(matNumber));
+        dataMap.put("mat", matNumber);
         dataMap.put("major", major);
         dataMap.put("majCode", majorCode);
         dataMap.put("minor", minor);
@@ -708,57 +687,63 @@ public class Student {
         dataMap.put("marital", maritalStatue);
         dataMap.put("pob", placeOfBirth);
         dataMap.put("level", level.toUpperCase());
-        dataMap.put("state", state.toUpperCase());
-        dataMap.put("cg", CGPA+"");
+        dataMap.put("status", status.toUpperCase());
+        dataMap.put("cg", CGPA);
         dataMap.put("aboutMe", about);
-        dataMap.put("isReported", String.valueOf(isReported));
+        dataMap.put("isReported", isReported);
         dataMap.put("nameFormat", nameFormat);
-
-        MyClass.serialize(dataMap, "core.ser");
-        MyClass.serialize(getIcon(), "icon.ser");
-        System.out.println("Completed.");
+        dataMap.put("extra", ADDITIONAL_DATA);
+        if (!isDefaultIconSet()) {
+            if (isShooterIconSet()) {
+                dataMap.put("shooterIcon", "Shooter");
+            } else {
+                dataMap.put("userIcon", "User Specific");
+                dataMap.put("iconSelf", getIcon());
+            }
+        }
+        Serializer.toDisk(dataMap, "core.ser");
     }
 
-    public static void deserializeData() {
-        System.out.print("Deserializing student's data... ");
-        final LinkedHashMap<String, String> dataMap = (LinkedHashMap) MyClass.deserialize("core.ser");
+    public static void deserializeData() throws NullPointerException {
+        final HashMap<String, Object> dataMap = (HashMap) Serializer.fromDisk("core.ser");
         if (dataMap == null) {
-            throw new NullPointerException("User core details missing");
+            throw new NullPointerException();
         }
-        setFirstName(dataMap.get("fName"));
-        setLastName(dataMap.get("lName"));
-        setProgram(dataMap.get("program"));
-        setMatNumber(Integer.parseInt(dataMap.get("mat")));
-        setMajor(dataMap.get("major"));
-        setSchool(dataMap.get("school"));
-        setDivision(dataMap.get("div"));
-        setNationality(dataMap.get("nationality"));
-        setMonthOfAdmission(Integer.parseInt(dataMap.get("moa")));
-        setYearOfAdmission(Integer.parseInt(dataMap.get("yoa")));
-        setAddress(dataMap.get("address"));
-        setMaritalStatue(dataMap.get("marital"));
-        setDateOfBirth(dataMap.get("dob"));
-        resetTelephones(dataMap.get("tels"));
-        setPortalMail(dataMap.get("portalMail"));
-        setPortalPassword(dataMap.get("portalPsswd"));
-        setStudentMail(dataMap.get("studentMail"));
-        setStudentPassword(dataMap.get("studentPsswd"));
-        setCGPA(Double.parseDouble(dataMap.get("cg")));
-        setLevel(dataMap.get("level"));
-        setSemester(dataMap.get("semester"));
-        setState(dataMap.get("state"));
-
-        Student.majorCode = dataMap.get("majCode");
-        Student.minor = dataMap.get("minor");
-        Student.minorCode = dataMap.get("minCode");
-        setPlaceOfBirth(dataMap.get("pob"));
-        setAbout(dataMap.get("aboutMe"));
-        setNameFormat(dataMap.get("nameFormat"));
-        isReported = Boolean.parseBoolean(dataMap.get("isReported"));
-
-        final ImageIcon serialIcon = (ImageIcon) MyClass.deserialize("icon.ser");
-        setUserIcon(serialIcon == null ? emptyIcon : serialIcon);
-        System.out.println("Completed.");
+        firstName = (String) (dataMap.get("fName"));
+        lastName = (String) (dataMap.get("lName"));
+        program = (String) (dataMap.get("program"));
+        matNumber = (String) dataMap.get("mat");
+        major = (String) (dataMap.get("major"));
+        school = (String) (dataMap.get("school"));
+        division = (String) (dataMap.get("div"));
+        nationality = (String) (dataMap.get("nationality"));
+        monthOfAdmission = (int) (dataMap.get("moa"));
+        yearOfAdmission = (int) (dataMap.get("yoa"));
+        address = (String) (dataMap.get("address"));
+        maritalStatue = (String) (dataMap.get("marital"));
+        dateOfBirth = (String) (dataMap.get("dob"));
+        telephones = (String) (dataMap.get("tels"));
+        portalMail = (String) dataMap.get("portalMail");
+        portalPassword = (String) dataMap.get("portalPsswd");
+        studentMail = (String) dataMap.get("studentMail");
+        studentPassword = (String) dataMap.get("studentPsswd");
+        CGPA = (double) dataMap.get("cg");
+        setLevel((String) dataMap.get("level"));
+        setSemester((String) dataMap.get("semester"));
+        status = (String) dataMap.get("status");
+        majorCode = (String) dataMap.get("majCode");
+        minor = (String) dataMap.get("minor");
+        minorCode = (String) dataMap.get("minCode");
+        placeOfBirth = (String) dataMap.get("pob");
+        about = (String) dataMap.get("aboutMe");
+        setNameFormat((String) dataMap.get("nameFormat"));
+        ADDITIONAL_DATA = (LinkedHashMap<String, String>) dataMap.get("extra");
+        isReported = (boolean) dataMap.get("isReported");
+        if (dataMap.containsKey("shooterIcon")) {
+            Board.postProcesses.add(Student::fireIconDefaultSet);
+        } else if (dataMap.containsKey("userIcon")) {
+            userIcon = (ImageIcon) dataMap.get("iconSelf");
+        }
     }
 
 }

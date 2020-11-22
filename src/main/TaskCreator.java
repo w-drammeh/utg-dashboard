@@ -36,15 +36,15 @@ public class TaskCreator {
             descriptionField = KTextField.rangeControlField(TASKS_DESCRIPTION_LIMIT);
             descriptionField.setPreferredSize(fieldsDimension);
             final KPanel namePlate = new KPanel(new BorderLayout(), platesDimension);
-            namePlate.add(KPanel.wantDirectAddition(new KLabel("Task Description:", labelsFont)), BorderLayout.WEST);
-            namePlate.add(KPanel.wantDirectAddition(descriptionField), BorderLayout.CENTER);
+            namePlate.add(new KPanel(new KLabel("Task Description:", labelsFont)), BorderLayout.WEST);
+            namePlate.add(new KPanel(descriptionField), BorderLayout.CENTER);
 
             durationBox = new JComboBox<>(new Object[] {"Five Days", "One Week", "Two Weeks", "Three Weeks", "One Month"});
             durationBox.setFont(KFontFactory.createPlainFont(15));
             durationBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             final KPanel durationPlate = new KPanel(new BorderLayout(), platesDimension);
-            durationPlate.add(KPanel.wantDirectAddition(new KLabel("To be completed in:", labelsFont)), BorderLayout.WEST);
-            durationPlate.add(KPanel.wantDirectAddition(durationBox), BorderLayout.CENTER);
+            durationPlate.add(new KPanel(new KLabel("To be completed in:", labelsFont)), BorderLayout.WEST);
+            durationPlate.add(new KPanel(durationBox), BorderLayout.CENTER);
 
             final KButton quitButton = new KButton("Cancel");
             quitButton.addActionListener(e -> this.dispose());
@@ -55,8 +55,8 @@ public class TaskCreator {
             this.getRootPane().setDefaultButton(createButton);
             final KPanel contentPlate = new KPanel();
             contentPlate.setLayout(new BoxLayout(contentPlate,BoxLayout.Y_AXIS));
-            contentPlate.addAll(namePlate,durationPlate,ComponentAssistant.contentBottomGap(),
-                    KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, quitButton, createButton));
+            contentPlate.addAll(namePlate,durationPlate, MComponent.contentBottomGap(),
+                    new KPanel(new FlowLayout(FlowLayout.RIGHT), quitButton, createButton));
             this.setContentPane(contentPlate);
             this.pack();
             this.setMinimumSize(this.getPreferredSize());
@@ -91,22 +91,22 @@ public class TaskCreator {
             nameField = KTextField.rangeControlField(TASKS_DESCRIPTION_LIMIT);
             nameField.setPreferredSize(new Dimension(310, 30));
             final KPanel namePanelPlus = new KPanel(new BorderLayout(), panelsDimension);
-            namePanelPlus.add(KPanel.wantDirectAddition(new KLabel("Project Name:", labelsFont)), BorderLayout.WEST);
-            namePanelPlus.add(KPanel.wantDirectAddition(nameField), BorderLayout.CENTER);
+            namePanelPlus.add(new KPanel(new KLabel("Project Name:", labelsFont)), BorderLayout.WEST);
+            namePanelPlus.add(new KPanel(nameField), BorderLayout.CENTER);
 
             typeBox = new JComboBox<>(new String[]{"Java", "Python", "C/C++", "C#", "Database", "Web", "Other"});
             typeBox.setFont(boxFont);
             typeBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             final KPanel typePanelPlus = new KPanel(new BorderLayout(),panelsDimension);
-            typePanelPlus.add(KPanel.wantDirectAddition(new KLabel("Project Type:", labelsFont)), BorderLayout.WEST);
-            typePanelPlus.add(KPanel.wantDirectAddition(typeBox), BorderLayout.CENTER);
+            typePanelPlus.add(new KPanel(new KLabel("Project Type:", labelsFont)), BorderLayout.WEST);
+            typePanelPlus.add(new KPanel(typeBox), BorderLayout.CENTER);
 
             durationBox = new JComboBox<>(new Object[] {"Five Days", "One Week", "Two Weeks", "Three Weeks", "One Month", "Two Months", "Three Months", "Six Months"});
             durationBox.setFont(boxFont);
             durationBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             final KPanel durationPanelPlus = new KPanel(new BorderLayout(),panelsDimension);
-            durationPanelPlus.add(KPanel.wantDirectAddition(new KLabel("Specified Duration:",labelsFont)),BorderLayout.WEST);
-            durationPanelPlus.add(KPanel.wantDirectAddition(durationBox),BorderLayout.CENTER);
+            durationPanelPlus.add(new KPanel(new KLabel("Specified Duration:",labelsFont)),BorderLayout.WEST);
+            durationPanelPlus.add(new KPanel(durationBox),BorderLayout.CENTER);
 
             final KButton cancelButton = new KButton("Cancel");
             cancelButton.addActionListener(e -> this.dispose());
@@ -117,7 +117,7 @@ public class TaskCreator {
             final KPanel contentPlate = new KPanel();
             contentPlate.setLayout(new BoxLayout(contentPlate,BoxLayout.Y_AXIS));
             contentPlate.addAll(namePanelPlus,typePanelPlus,durationPanelPlus, giveSpace(400, 25),
-                    KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, cancelButton, createButton));
+                    new KPanel(new FlowLayout(FlowLayout.RIGHT), cancelButton, createButton));
             this.setContentPane(contentPlate);
             this.pack();
             this.setMinimumSize(this.getPreferredSize());
@@ -162,7 +162,7 @@ public class TaskCreator {
                 final JComboBox<String> importBox = new JComboBox<String>(activeNames){
                     @Override
                     public JToolTip createToolTip() {
-                        return KLabel.preferredTip();
+                        return MComponent.preferredTip();
                     }
                 };
                 importBox.setFont(KFontFactory.createPlainFont(15));
@@ -179,8 +179,8 @@ public class TaskCreator {
             nameField = KTextField.rangeControlField(TASKS_DESCRIPTION_LIMIT);
             nameField.setPreferredSize(new Dimension(300,30));
             final KPanel namePanel = new KPanel(new BorderLayout());
-            namePanel.add(KPanel.wantDirectAddition(new KLabel("Course Name:",labelsFont)),BorderLayout.WEST);
-            namePanel.add(KPanel.wantDirectAddition(nameField),BorderLayout.CENTER);
+            namePanel.add(new KPanel(new KLabel("Course Name:",labelsFont)),BorderLayout.WEST);
+            namePanel.add(new KPanel(nameField),BorderLayout.CENTER);
 
             dField = KTextField.newDayField();
             mField = KTextField.newMonthField();
@@ -205,8 +205,8 @@ public class TaskCreator {
             final KPanel choicesPlate = new KPanel(new FlowLayout(FlowLayout.CENTER));//because it's boring - the ButtonGroup itself cannot be joined as a component
             choicesPlate.addAll(groupChoice,personalChoice);
             final KPanel groupPanel = new KPanel(new BorderLayout());
-            groupPanel.add(KPanel.wantDirectAddition(new KLabel("Assignment Type:",labelsFont)),BorderLayout.WEST);
-            groupPanel.add(KPanel.wantDirectAddition(choicesPlate),BorderLayout.CENTER);
+            groupPanel.add(new KPanel(new KLabel("Assignment Type:",labelsFont)),BorderLayout.WEST);
+            groupPanel.add(new KPanel(choicesPlate),BorderLayout.CENTER);
 
             modes = new JComboBox<>(new String[]{"To submit a hard copy","To submit a soft copy", "Through an email address", "Through a web site", "Other"});
             modes.setFont(KFontFactory.createPlainFont(15));
@@ -229,13 +229,13 @@ public class TaskCreator {
                 }
             });
             final KPanel modePanel = new KPanel(new BorderLayout());
-            modePanel.add(KPanel.wantDirectAddition(new KLabel("Submission Mode:",labelsFont)),BorderLayout.WEST);
-            modePanel.add(KPanel.wantDirectAddition(modes),BorderLayout.CENTER);
+            modePanel.add(new KPanel(new KLabel("Submission Mode:",labelsFont)),BorderLayout.WEST);
+            modePanel.add(new KPanel(modes),BorderLayout.CENTER);
 
             final KPanel questionPanel = new KPanel(new BorderLayout());
-            questionPanel.add(KPanel.wantDirectAddition(new KLabel("Write the question(s) below",KFontFactory.createPlainFont(14))),BorderLayout.NORTH);
+            questionPanel.add(new KPanel(new KLabel("Write the question(s) below",KFontFactory.createPlainFont(14))),BorderLayout.NORTH);
             questionArea = new KTextArea();
-            final KScrollPane scrollPane = KScrollPane.getTextAreaScroller(questionArea, new Dimension(475,150));
+            final KScrollPane scrollPane = questionArea.outerScrollPane(new Dimension(475,150));
             scrollPane.setBorder(BorderFactory.createLineBorder(Color.BLUE,2,true));
             questionPanel.add(scrollPane,BorderLayout.CENTER);
 
@@ -247,7 +247,7 @@ public class TaskCreator {
             final KPanel contentPlate = new KPanel();
             contentPlate.setLayout(new BoxLayout(contentPlate,BoxLayout.Y_AXIS));
             contentPlate.addAll(importPanel, namePanel,deadLinePanel,groupPanel,modePanel,groupPanel,giveSpace(500,25),questionPanel,
-                    ComponentAssistant.contentBottomGap(),KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, cancelButton, addButton));
+                    MComponent.contentBottomGap(), new KPanel(new FlowLayout(FlowLayout.RIGHT), cancelButton, addButton));
             this.setContentPane(contentPlate);
             this.getRootPane().setDefaultButton(addButton);
             this.pack();
@@ -342,7 +342,7 @@ public class TaskCreator {
                 final JComboBox<String> importBox = new JComboBox<String>(activeNames){
                     @Override
                     public JToolTip createToolTip() {
-                        return KLabel.preferredTip();
+                        return MComponent.preferredTip();
                     }
                 };
                 importBox.setFont(KFontFactory.createPlainFont(15));
@@ -381,8 +381,8 @@ public class TaskCreator {
             descriptionField = KTextField.rangeControlField(TASKS_DESCRIPTION_LIMIT);
             descriptionField.setPreferredSize(new Dimension(310,30));
             final KPanel titleLayer = new KPanel(new BorderLayout(),typicalPanelsDimension);
-            titleLayer.add(KPanel.wantDirectAddition(typeLabel), BorderLayout.WEST);
-            titleLayer.add(KPanel.wantDirectAddition(descriptionField), BorderLayout.CENTER);
+            titleLayer.add(new KPanel(typeLabel), BorderLayout.WEST);
+            titleLayer.add(new KPanel(descriptionField), BorderLayout.CENTER);
 
             dayField = KTextField.newDayField();
             monthField = KTextField.newMonthField();
@@ -392,7 +392,7 @@ public class TaskCreator {
             dateFieldsPanel.addAll(new KLabel("Day",labelsFont),dayField,giveSpace(10, 20),
                     new KLabel("Month",labelsFont),monthField,giveSpace(10, 20),new KLabel("Year",labelsFont),yearField);
             final KPanel datesLayer = new KPanel(new BorderLayout(),typicalPanelsDimension);
-            datesLayer.add(KPanel.wantDirectAddition(dateLabel),BorderLayout.WEST);
+            datesLayer.add(new KPanel(dateLabel),BorderLayout.WEST);
             datesLayer.add(dateFieldsPanel,BorderLayout.CENTER);
 
             final KButton cancelButton = new KButton("Cancel");
@@ -402,8 +402,8 @@ public class TaskCreator {
             addButton.addActionListener(TasksGenerator.EventsHandler.newListener());//No fear - if value was not one of the specified 3, compiler won't reach this line
 
             this.getRootPane().setDefaultButton(addButton);
-            contentPanel.addAll(titleLayer, datesLayer, ComponentAssistant.contentBottomGap(),
-                    KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT), null, cancelButton,addButton));
+            contentPanel.addAll(titleLayer, datesLayer, MComponent.contentBottomGap(),
+                    new KPanel(new FlowLayout(FlowLayout.RIGHT), cancelButton,addButton));
             this.setContentPane(contentPanel);
             this.pack();
             this.setMinimumSize(this.getPreferredSize());

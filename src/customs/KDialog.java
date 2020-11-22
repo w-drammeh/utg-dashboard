@@ -1,12 +1,14 @@
 package customs;
 
 import javax.swing.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The standard dashboard dialog. All dialogs must inherit this class!
- * By default, all dialogs are disposable, but not resizable.
+ * The standard Dashboard Dialog all dialogs must inherit from.
+ * By default, all dialogs are disposable, not resizable,
  */
 public class KDialog extends JDialog implements Preference {
     public static final List<KDialog> ALL_DIALOGS = new ArrayList<>();
@@ -14,17 +16,25 @@ public class KDialog extends JDialog implements Preference {
 
     public KDialog(){
         super();
-        this.setPreferences();
+        setPreferences();
     }
 
     public KDialog(String title){
-        this.setTitle(title);
-        this.setPreferences();
+        this();
+        setTitle(title);
     }
 
     public void setPreferences(){
-        this.setResizable(false);
-        this.setIconImage(KFrame.getIcon());
+        setIconImage(KFrame.getIcon());
+        setResizable(false);
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    dispose();
+                }
+            }
+        });
         ALL_DIALOGS.add(this);
     }
 

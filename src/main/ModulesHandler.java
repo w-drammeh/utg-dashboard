@@ -14,111 +14,120 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class ModulesHandler {
-    public static final KDefaultTableModel[] models = new KDefaultTableModel[10];//8 and summer and misc
-    public static final ArrayList<Course> STARTUP_COURSES = new ArrayList<>();
-//    For the popups
-    public static final String ADD_STRING = "Add", CONFIRM_STRING = "Verify", DELETE_STRING = "Remove",
-        DETAILS_STRING = "Show Details", EDIT_STRING = "Edit";
-    private static final String[] COLUMN_IDENTIFIERS = new String[] {"CODE", "NAME", "LECTURER", "GRADE"};
-    private static String semesterName;//Value keeps changing to the table-semester currently receiving focus
-    //The tables are local to their inner classes, but not the models
-    private static KDefaultTableModel model1, model2, model3, model4, model5, model6, model7, model8;
-    private static FirefoxDriver allDriver;
+    /**
+     * Value keeps changing to the semester-table currently receiving focus.
+     */
+    private static String semesterName;
+    private static FirefoxDriver modulesDriver;
     /**
      * This list has complete dominance over all the addition, removal, and editing changes to every
      * single module. All the models delegate to it. They only add or delete or substitute after it does.
      */
-    private static final ArrayList<Course> modulesMonitor = new ArrayList<Course>(){
-        @Override
-        public boolean add(Course course) {
-            if (course.isMisc()) {
-                MiscellaneousModulesHandler.welcome(course);
-            } else if (course.isSummerSemester()) {
-                SummerModulesHandler.welcome(course);
-            } else if (course.getYear().equals(Student.firstAcademicYear())) {
-                if (course.getSemester().equals(Student.FIRST_SEMESTER)) {
-                    model1.addRow(new String[]{course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
-                } else {
-                    model2.addRow(new String[]{course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
+    private static ArrayList<Course> modulesMonitor;
+    private ModuleYear yearOne, yearTwo, yearThree, yearFour;
+    public static final ArrayList<KTableModel> ALL_MODELS = new ArrayList<>();
+    public static final ArrayList<Course> STARTUP_COURSES = new ArrayList<>();
+    private static final String[] COLUMN_IDENTIFIERS = new String[] { "CODE", "NAME", "LECTURER", "GRADE" };
+    public static final String EDIT = "Edit";
+    public static final String CONFIRM = "Verify";
+    public static final String DETAILS = "Details";
+    public static final String DELETE = "Remove";
+    public static final String ADD = "Add";
+
+
+    public ModulesHandler() {
+        modulesMonitor = new ArrayList<>() {
+            @Override
+            public boolean add(Course course) {
+                if (course.isMisc()) {
+                    MiscellaneousModules.welcome(course);
+                } else if (course.isSummerSemester()) {
+                    SummerModules.welcome(course);
+                } else if (course.getYear().equals(Student.firstAcademicYear())) {
+                    yearOne.add(course);
+                } else if (course.getYear().equals(Student.secondAcademicYear())) {
+                    yearTwo.add(course);
+                } else if (course.getYear().equals(Student.thirdAcademicYear())) {
+                    yearThree.add(course);
+                } else if (course.getYear().equals(Student.finalAcademicYear())) {
+                    yearFour.add(course);
                 }
-            } else if (course.getYear().equals(Student.secondAcademicYear())) {
-                if (course.getSemester().equals(Student.FIRST_SEMESTER)) {
-                    model3.addRow(new String[]{course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
-                } else {
-                    model4.addRow(new String[]{course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
-                }
-            } else if (course.getYear().equals(Student.thirdAcademicYear())) {
-                if (course.getSemester().equals(Student.FIRST_SEMESTER)) {
-                    model5.addRow(new String[]{course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
-                } else {
-                    model6.addRow(new String[]{course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
-                }
-            } else if (course.getYear().equals(Student.finalAcademicYear())) {
-                if (course.getSemester().equals(Student.FIRST_SEMESTER)) {
-                    model7.addRow(new String[]{course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
-                } else {
-                    model8.addRow(new String[]{course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
-                }
+                Memory.mayRemember(course);
+                return super.add(course);
             }
 
-            Memory.mayRemember(course);
-            return super.add(course);
-        }
-
-        @Override
-        public boolean remove(Object o) {
-            final Course c = (Course) o;
-            if (c.isVerified()) {
-                final int vInt = App.verifyUser("Enter your your Matriculation Number to proceed with this changes:");
-                if (vInt == App.VERIFICATION_FALSE) {
-                    App.reportMatError();
-                    return false;
-                } else if (vInt != App.VERIFICATION_TRUE) {
+            @Override
+            public boolean remove(Object o) {
+                final Course course = (Course) o;
+                if (!App.showYesNoCancelDialog("Remove", "Are you sure you did not do \""+course.getName()+"\",\n" +
+                        "and that you wish to remove it from your collection?")) {
                     return false;
                 }
+
+                if (course.isVerified()) {
+                    final int vInt = App.verifyUser("Enter your your Mat. Number to proceed with this changes:");
+                    if (vInt == App.VERIFICATION_FALSE) {
+                        App.reportMatError();
+                        return false;
+                    } else if (vInt != App.VERIFICATION_TRUE) {
+                        return false;
+                    }
+                }
+
+                if (course.isMisc()) {
+                    MiscellaneousModules.ridOf(course);
+                } else if (course.isSummerSemester()) {
+                    SummerModules.ridOf(course);
+                } else if (course.isFirstYear()) {
+                    yearOne.remove(course);
+                } else if (course.isSecondYear()) {
+                    yearTwo.remove(course);
+                } else if (course.isThirdYear()) {
+                    yearThree.remove(course);
+                } else if (course.isFourthYear()) {
+                    yearFour.remove(course);
+                }
+                Memory.mayForget(course);
+                return super.remove(course);
             }
+        };
 
-            if (c.isMisc()) {
-                MiscellaneousModulesHandler.ridOf(c);
-            } else if (c.isSummerSemester()) {
-                SummerModulesHandler.ridOf(c);
-            } else if (model1.getRowOf(c.getCode()) >= 0) {
-                model1.removeRow(model1.getRowOf(c.getCode()));
-            } else if (model2.getRowOf(c.getCode()) >= 0) {
-                model2.removeRow(model2.getRowOf(c.getCode()));
-            } else if (model3.getRowOf(c.getCode()) >= 0) {
-                model3.removeRow(model3.getRowOf(c.getCode()));
-            } else if (model4.getRowOf(c.getCode()) >= 0) {
-                model4.removeRow(model4.getRowOf(c.getCode()));
-            } else if (model5.getRowOf(c.getCode()) >= 0) {
-                model5.removeRow(model5.getRowOf(c.getCode()));
-            } else if (model6.getRowOf(c.getCode()) >= 0) {
-                model6.removeRow(model6.getRowOf(c.getCode()));
-            } else if (model7.getRowOf(c.getCode()) >= 0) {
-                model7.removeRow(model7.getRowOf(c.getCode()));
-            } else if (model8.getRowOf(c.getCode()) >= 0) {
-                model8.removeRow(model8.getRowOf(c.getCode()));
-            }
+        yearOne = new ModuleYear(Student.firstAcademicYear());
+        yearTwo = new ModuleYear(Student.secondAcademicYear());
+        yearThree = new ModuleYear(Student.thirdAcademicYear());
+        yearFour = new ModuleYear(Student.finalAcademicYear());
+    }
 
-            Memory.mayForget(c);
-            return super.remove(c);
-        }
-    };
+    public Component yearOnePresent(){
+        return yearOne.getPresent();
+    }
 
-    public static void uploadModules(){
+    public Component yearTwoPresent(){
+        return yearTwo.getPresent();
+    }
+
+    public Component yearThreePresent(){
+        return yearThree.getPresent();
+    }
+
+    public Component yearFourPresent(){
+        return yearFour.getPresent();
+    }
+
+    public static void uploadModules() {
         for (Course c : STARTUP_COURSES) {
             modulesMonitor.add(c);
         }
     }
 
     /**
-     * Note: the edition dialogs should not use this, since they present an exception
-     * by skipping the focused row.
+     * Checks if the given code exists in the entire list.
+     * The edition dialogs should not use this, since they present an exception
+     * by skipping the focused row of the respective model.
      */
-    public static boolean existsInList(String code){
+    public static boolean existsInList(String code) {
         for (Course course : modulesMonitor) {
             if (course.getCode().equalsIgnoreCase(code)) {
                 return true;
@@ -128,11 +137,10 @@ public class ModulesHandler {
     }
 
     /**
-     * Useful for the editing.
-     * The model is given so that it excludes the selected row of the particular model.
+     * Checks if the given code exists in any other model except the given.
      */
-    public static boolean existsInListExcept(KDefaultTableModel targetModel, String code){
-        for (KDefaultTableModel model : models) {
+    public static boolean existsInListExcept(KTableModel targetModel, String code){
+        for (KTableModel model : ALL_MODELS) {
             if (model != targetModel && model.getRowOf(code) >= 0) {
                 return true;
             }
@@ -150,32 +158,32 @@ public class ModulesHandler {
      * Do not call set(Course, Course) on the monitor! Call this.
      */
     public static void substitute(Course old, Course recent){
-        if (existsInList(old.getCode())) {//Typically for editing. Or if it's from a sync / verification, the details should be merged prior to this call
+        if (existsInList(old.getCode())) {//typically for editing. or if it's from a sync / verification, the details should be merged prior to this call
             modulesMonitor.set(old.getListIndex(), recent);
-        } else {//May be an issue, after verification - as the user might have removed it during the process
+        } else {//may be an issue, after verification - as the user might have removed it during the process
             modulesMonitor.add(recent);
             return;
         }
 
-        for (KDefaultTableModel defaultTableModel : models) {
+        for (KTableModel defaultTableModel : ALL_MODELS) {
             final int targetRow = defaultTableModel.getRowOf(old.getCode());
             if (targetRow >= 0) {
                 defaultTableModel.setValueAt(recent.getCode(), targetRow, 0);
                 defaultTableModel.setValueAt(recent.getName(), targetRow, 1);
                 defaultTableModel.setValueAt(recent.getLecturer(), targetRow, 2);
                 defaultTableModel.setValueAt(recent.getGrade(), targetRow, 3);
-                if (defaultTableModel == models[8] || defaultTableModel == models[9]) {
+                if (defaultTableModel == SummerModules.summerModel || defaultTableModel == MiscellaneousModules.miscModel) {
                     defaultTableModel.setValueAt(recent.getYear(), targetRow, 4);
                 }
                 break;
             }
         }
-        //Finally
+
         Memory.mayReplace(old, recent);
     }
 
     public static void reportCodeDuplication(String dCode){
-        App.signalError(dCode.toUpperCase()+" - Repeated",
+        App.signalError("Duplicate Error",
                 "Sorry, there's already a course with the code '"+dCode.toUpperCase()+"' in the list.");
     }
 
@@ -197,89 +205,82 @@ public class ModulesHandler {
     }
 
     public static synchronized void fixModulesDriver(){
-        if (allDriver != null) {
-            return;
+        if (modulesDriver == null) {
+            modulesDriver = DriversPack.forgeNew(true);
         }
-        allDriver = DriversPack.forgeNew(true);
     }
 
     /**
      * Attempts to verify this course using its code only.
+     * Call this on a different thread.
      */
-    public static void launchVerification(Course target){
-        if (!App.showOkCancelDialog("Confirm",
-                "Dashboard will now launch Verification sequences for "+target.getName()+" - "+target.getYear()+" "+target.getSemester()+".\n" +
+    public static void launchVerification(Course target) {
+        if (!App.showOkCancelDialog("Verify "+target.getName(),
+                "Dashboard will now launch 'Verification Sequences' for \""+target.getName()+"\".\n" +
                 "It might be taken to another table if this is not its year & semester.\n \n" +
-                        "For more info about this action, read "+HelpGenerator.reference("My Courses | Course Verification."))) {
+                        "Refer to "+ Tips.reference("My Courses | Course Verification"))) {
             return;
         }
-        if (allDriver == null) {
-            fixModulesDriver();
-        }
-        if (allDriver == null) {
+        fixModulesDriver();
+        if (modulesDriver == null) {
             App.reportMissingDriver();
             return;
         }
-        if (!InternetAvailabilityChecker.isInternetAvailable()) {
+
+        if (!Internet.isInternetAvailable()) {
             App.reportNoInternet();
             return;
         }
 
-        synchronized (allDriver){
-            final WebDriverWait loadWaiter = new WebDriverWait(allDriver, 30);
-            Course foundOne = null;
-            if (DriversPack.isIn(allDriver)) {
-                try {
-                    allDriver.navigate().refresh();
-                    if (Portal.isPortalBusy(allDriver)) {
-                        App.reportBusyPortal();
-                    }
-                } catch (Exception e){
-                    App.reportRefreshFailure();
-                }
-            } else {
-                final int loginAttempt = DriversPack.attemptLogin(allDriver);
-                if (loginAttempt == DriversPack.ATTEMPT_SUCCEEDED) {
-                    try {
-                        allDriver.navigate().to(Portal.CONTENTS_PAGE);
-                        Portal.nowOnPortal(allDriver);
-                    } catch (Exception e) {
-                        App.reportConnectionLost();
-                        return;
-                    }
-                } else if (loginAttempt == DriversPack.ATTEMPT_FAILED) {
-                    App.reportLoginAttemptFailed();
-                    return;
-                } else if (loginAttempt == DriversPack.CONNECTION_LOST) {
-                    App.reportConnectionLost();
+        synchronized (modulesDriver){
+            final WebDriverWait loadWaiter = new WebDriverWait(modulesDriver, Portal.MAXIMUM_WAIT_TIME);
+            final int loginAttempt = DriversPack.attemptLogin(modulesDriver);
+            if (loginAttempt == DriversPack.ATTEMPT_SUCCEEDED) {
+                if (Portal.isPortalBusy(modulesDriver)) {
+                    App.reportBusyPortal();
                     return;
                 }
+            } else if (loginAttempt == DriversPack.ATTEMPT_FAILED) {
+                App.reportLoginAttemptFailed();
+                return;
+            } else if (loginAttempt == DriversPack.CONNECTION_LOST) {
+                App.reportConnectionLost();
+                return;
             }
 
+            try {
+                modulesDriver.navigate().to(Portal.CONTENTS_PAGE);
+                Portal.nowOnPortal(modulesDriver);
+            } catch (Exception e) {
+                App.reportConnectionLost();
+                return;
+            }
+
+            Course foundOne = null;
             final List<WebElement> tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(".nav-tabs > li")));
             //Firstly, the code, name, and score at grades tab
             tabs.get(6).click();
-            final WebElement gradesTable = allDriver.findElementsByCssSelector(".table-warning").get(1);
+            final WebElement gradesTable = modulesDriver.findElementsByCssSelector(".table-warning").get(1);
             final WebElement tBody = gradesTable.findElement(By.tagName("tbody"));
             final List<WebElement> rows = tBody.findElements(By.tagName("tr"));
-            for(WebElement t : rows){
-                final List<WebElement> instantRow = t.findElements(By.tagName("td"));
+            for(WebElement row : rows){
+                final List<WebElement> instantRow = row.findElements(By.tagName("td"));
                 if (instantRow.get(0).getText().equalsIgnoreCase(target.getCode())) {
-                    foundOne = new Course("","",instantRow.get(0).getText(),instantRow.get(1).getText(),"","","","",
-                            Double.parseDouble(instantRow.get(6).getText()),0,"",true);
+                    foundOne = new Course("","", instantRow.get(0).getText(), instantRow.get(1).getText(),
+                            "","","","", Double.parseDouble(instantRow.get(6).getText()),0,"",true);
                     break;
                 }
             }
-            //Checking... if the course was found and assigned, then we shall continue to set its succeeding details
+
             if (foundOne == null) {
-                App.promptWarning("Verification Unsuccessful","Your search for "+target.getName()+" was unsuccessful.\n" +
-                        "Dashboard could not locate any trace of it on your portal.\nIf you've done this course, then contact the lecturer.\n" +
-                        "You may also want to refer to "+HelpGenerator.reference("My Courses | Course Verification."));
+                App.promptWarning("Checkout Unsuccessful","The process to checkout for "+target.getAbsoluteName()+" was unsuccessful.\n" +
+                        "Dashboard could not locate any trace of it on your portal.\nIf you've done this course, then contact the lecturer.");
                 return;
             }
+
             //Secondly, the code, year and semester at transcript tab
             tabs.get(7).click();
-            final WebElement transcriptTable = allDriver.findElementByCssSelector(".table-bordered");
+            final WebElement transcriptTable = modulesDriver.findElementByCssSelector(".table-bordered");
             final WebElement transBody = transcriptTable.findElement(By.tagName("tbody"));
             final List<WebElement> transRows = transBody.findElements(By.tagName("tr"));
             String vYear = null;
@@ -296,181 +297,176 @@ public class ModulesHandler {
                     }
                 }
             }
+
             //Finally, the lecturer name at registration tab - if there
             tabs.get(4).click();
-            final WebElement allCourseTable = allDriver.findElementByCssSelector(".table-warning");
+            final WebElement allCourseTable = modulesDriver.findElementByCssSelector(".table-warning");
             final WebElement tableBody = allCourseTable.findElement(By.tagName("tbody"));
             final List<WebElement> allRows = tableBody.findElements(By.tagName("tr"));
 
-            int l = 0;
-            while (l < allRows.size()) {
-                final List<WebElement> instantRow = allRows.get(l).findElements(By.tagName("td"));
+            int i = 0;
+            while (i < allRows.size()) {
+                final List<WebElement> instantRow = allRows.get(i).findElements(By.tagName("td"));
                 if (foundOne.getCode().equals(instantRow.get(0).getText())) {
                     foundOne.setLecturer(instantRow.get(2).getText(), false);
                     break;
                 }
-                l++;
+                i++;
             }
 
             final Course existed = getModuleByCode(target.getCode());
-            if (existed == null) {//Was removed?
+            if (existed == null) {//removed?
                 modulesMonitor.add(foundOne);
-            } else {//Merge and replace
+            } else {//merge and replace
                 Course.merge(foundOne, existed);
                 substitute(existed, foundOne);
             }
-            App.promptPlain("Verification Successful","Your search for "+target.getName()+" is completed successfully.\n" +
-                    "It will now be included in your Analysis and Transcript.");
+
+            App.promptPlain("Checkout Successful","The process to checkout for "+target.getAbsoluteName()+" is completed successfully.\n" +
+                    "It is now verified-set and can be included in your Analysis and Transcript.");
         }
     }
 
     /**
      * Called to perform a thorough sync. This action has a lot of consequences!
-     * Never call this directly! Use ModulesGenerator.triggerRefresh() instead, it forges
-     * a thread and checks internet-availability prior to this call which does none!
+     * This executes itself on a thread.
      */
-    public static void startThoroughSync(KButton syncButton, boolean userRequested){
-        syncButton.setEnabled(false);
-        if (allDriver == null) {
-            fixModulesDriver();
-        }
-        if (allDriver == null) {
-            if (userRequested) {
-                App.reportMissingDriver();
-            }
-            syncButton.setEnabled(true);
-            return;
-        }
-        if (!InternetAvailabilityChecker.isInternetAvailable()) {
-            if (userRequested) {
-                App.reportNoInternet();
-            }
-            syncButton.setEnabled(true);
+    public static void startThoroughSync(boolean userRequested, KButton triggerButton){
+        if (userRequested && !App.showOkCancelDialog("Synchronize",
+                "This action is experimental. Dashboard will perform a complete 're-indexing' of your modules.\n" +
+                        "Please refer to "+ Tips.reference("My Courses | Modules Synchronization"))) {
             return;
         }
 
-        final ArrayList<Course> foundCourses = new ArrayList<>();
-        synchronized (allDriver){
-            final WebDriverWait loadWaiter = new WebDriverWait(allDriver, 30);
-            if (DriversPack.isIn(allDriver)) {
-                try {
-                    allDriver.navigate().refresh();
-                    if (Portal.isPortalBusy(allDriver)) {
-                        if (userRequested) {
-                            App.reportConnectionLost();
-                        }
-                        syncButton.setEnabled(true);
-                        return;
-                    }
-                } catch (Exception e){
-                    if (userRequested) {
-                        App.reportRefreshFailure();
-                    }
+        new Thread(()-> {
+            triggerButton.setEnabled(false);
+
+            fixModulesDriver();
+            if (modulesDriver == null) {
+                if (userRequested) {
+                    App.reportMissingDriver();
+                    triggerButton.setEnabled(true);
                 }
-            } else {
-                final int loginAttempt = DriversPack.attemptLogin(allDriver);
+                return;
+            }
+
+            if (!Internet.isInternetAvailable()) {
+                if (userRequested) {
+                    App.reportNoInternet();
+                    triggerButton.setEnabled(true);
+                }
+                return;
+            }
+
+            synchronized (modulesDriver){
+                final WebDriverWait loadWaiter = new WebDriverWait(modulesDriver, 30);
+                final int loginAttempt = DriversPack.attemptLogin(modulesDriver);
                 if (loginAttempt == DriversPack.ATTEMPT_SUCCEEDED) {
-                    try {
-                        allDriver.navigate().to(Portal.CONTENTS_PAGE);
-                        Portal.nowOnPortal(allDriver);
-                    } catch (Exception e) {
-                        App.reportConnectionLost();
-                        syncButton.setEnabled(true);
+                    if (Portal.isPortalBusy(modulesDriver)) {
+                        if (userRequested) {
+                            App.reportBusyPortal();
+                            triggerButton.setEnabled(true);
+                        }
                         return;
                     }
                 } else if (loginAttempt == DriversPack.ATTEMPT_FAILED) {
                     if (userRequested) {
                         App.reportLoginAttemptFailed();
+                        triggerButton.setEnabled(true);
                     }
-                    syncButton.setEnabled(true);
                     return;
                 } else if (loginAttempt == DriversPack.CONNECTION_LOST) {
                     if (userRequested) {
                         App.reportConnectionLost();
+                        triggerButton.setEnabled(true);
                     }
-                    syncButton.setEnabled(true);
                     return;
                 }
-            }
 
-            //Here we go...
-            final List<WebElement> tabs;
-            try {
-                tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(".nav-tabs > li")));
-            } catch (Exception e){
-                if (userRequested) {
-                    App.reportConnectionLost();
+                final List<WebElement> tabs;
+                try {
+                    modulesDriver.navigate().to(Portal.CONTENTS_PAGE);
+                    Portal.nowOnPortal(modulesDriver);
+                    tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(".nav-tabs > li")));
+                } catch (Exception e) {
+                    if (userRequested) {
+                        App.reportConnectionLost();
+                        triggerButton.setEnabled(true);
+                    }
+                    return;
                 }
-                syncButton.setEnabled(true);
-                return;
-            }
-            //Firstly, code, name, year, semester, and credit hour at transcript tab
-            //Addition to startupCourses is only here; all the following loops only updates the details. this eradicates the possibility of adding running courses at tab-4
-            tabs.get(7).click();
-            final WebElement transcriptTable = allDriver.findElementByCssSelector(".table-bordered");
-            final WebElement transBody = transcriptTable.findElement(By.tagName("tbody"));
-            final List<WebElement> transRows = transBody.findElements(By.tagName("tr"));
-            final List<WebElement> semCaptions = transBody.findElements(By.className("warning"));
-            String vYear = null;
-            String vSemester = null;
-            for (WebElement transRow : transRows) {
-                if (transRow.getText().contains("Semester")) {
-                    vYear = transRow.getText().split(" ")[0];
-                    vSemester = transRow.getText().split(" ")[1]+" Semester";
-                } else {
-                    final List<WebElement> data = transRow.findElements(By.tagName("td"));
-                    foundCourses.add(new Course(vYear, vSemester, data.get(1).getText(), data.get(2).getText(), "", "", "", "", 0.0,
-                            Integer.parseInt(data.get(3).getText()), "", true));
-                }
-            }
-            final WebElement surrounds = allDriver.findElementsByCssSelector(".pull-right").get(3);
-            final String CGPA = surrounds.findElements(By.tagName("th")).get(1).getText();
-            Student.setCGPA(Double.parseDouble(CGPA));
 
-            //Secondly, add scores at grades tab
-            tabs.get(6).click();
-            final WebElement gradesTable = allDriver.findElementsByCssSelector(".table-warning").get(1);
-            final WebElement tBody = gradesTable.findElement(By.tagName("tbody"));
-            final List<WebElement> rows = tBody.findElements(By.tagName("tr"));
-            for(WebElement t : rows){
-                final List<WebElement> data = t.findElements(By.tagName("td"));
-                for (Course c : foundCourses) {
-                    if (c.getCode().equals(data.get(0).getText())) {
-                        c.setScore(Double.parseDouble(data.get(6).getText()));
+                //Firstly, code, name, year, semester, and credit hour at transcript tab
+                //Addition to startupCourses is only here; all the following loops only updates the details. this eradicates the possibility of adding running courses at tab-4
+                final ArrayList<Course> foundCourses = new ArrayList<>();
+                tabs.get(7).click();
+                final WebElement transcriptTable = modulesDriver.findElementByCssSelector(".table-bordered");
+                final WebElement transBody = transcriptTable.findElement(By.tagName("tbody"));
+                final List<WebElement> transRows = transBody.findElements(By.tagName("tr"));
+                final List<WebElement> semCaptions = transBody.findElements(By.className("warning"));
+                String vYear = null;
+                String vSemester = null;
+                for (WebElement transRow : transRows) {
+                    if (transRow.getText().contains("Semester")) {
+                        vYear = transRow.getText().split(" ")[0];
+                        vSemester = transRow.getText().split(" ")[1]+" Semester";
+                    } else {
+                        final List<WebElement> data = transRow.findElements(By.tagName("td"));
+                        foundCourses.add(new Course(vYear, vSemester, data.get(1).getText(), data.get(2).getText(),
+                                "", "", "", "", 0.0, Integer.parseInt(data.get(3).getText()), "", true));
                     }
                 }
-            }
+                final WebElement surrounds = modulesDriver.findElementsByCssSelector(".pull-right").get(3);
+                final String CGPA = surrounds.findElements(By.tagName("th")).get(1).getText();
+                Student.setCGPA(Double.parseDouble(CGPA));
 
-            //Finally, available lecturer names at all-registered tab
-            tabs.get(4).click();
-            final WebElement allRegisteredTable = allDriver.findElementByCssSelector(".table-warning");
-            final WebElement tableBody = allRegisteredTable.findElement(By.tagName("tbody"));
-            final List<WebElement> allRows = tableBody.findElements(By.tagName("tr"));
-            int l = 0;
-            while (l < allRows.size()) {
-                final List<WebElement> instantRow = allRows.get(l).findElements(By.tagName("td"));
-                for (Course c : foundCourses) {
-                    if (c.getCode().equals(instantRow.get(0).getText())) {
-                        c.setLecturer(instantRow.get(2).getText(), false);
+                //Secondly, add scores at grades tab
+                tabs.get(6).click();
+                final WebElement gradesTable = modulesDriver.findElementsByCssSelector(".table-warning").get(1);
+                final WebElement tBody = gradesTable.findElement(By.tagName("tbody"));
+                final List<WebElement> rows = tBody.findElements(By.tagName("tr"));
+                for(WebElement t : rows){
+                    final List<WebElement> data = t.findElements(By.tagName("td"));
+                    for (Course c : foundCourses) {
+                        if (c.getCode().equals(data.get(0).getText())) {
+                            c.setScore(Double.parseDouble(data.get(6).getText()));
+                        }
                     }
                 }
-                l++;
-            }
-            for (Course found : foundCourses) {
-                final Course existed = getModuleByCode(found.getCode());
-                if (existed == null) {//Does not exist?
-                    modulesMonitor.add(found);
-                } else {//Merge and replace
-                    Course.merge(found, existed);
-                    substitute(existed, found);
+
+                //Finally, available lecturer names at all-registered tab
+                tabs.get(4).click();
+                final WebElement allRegisteredTable = modulesDriver.findElementByCssSelector(".table-warning");
+                final WebElement tableBody = allRegisteredTable.findElement(By.tagName("tbody"));
+                final List<WebElement> allRows = tableBody.findElements(By.tagName("tr"));
+                int l = 0;
+                while (l < allRows.size()) {
+                    final List<WebElement> instantRow = allRows.get(l).findElements(By.tagName("td"));
+                    for (Course c : foundCourses) {
+                        if (c.getCode().equals(instantRow.get(0).getText())) {
+                            c.setLecturer(instantRow.get(2).getText(), false);
+                        }
+                    }
+                    l++;
                 }
+
+                for (Course found : foundCourses) {
+                    final Course existed = getModuleByCode(found.getCode());
+                    if (existed == null) {//does not exist?
+                        modulesMonitor.add(found);
+                    } else {//merge and replace
+                        Course.merge(found, existed);
+                        substitute(existed, found);
+                    }
+                }
+
+                final int foundCount = foundCourses.size();
+                final int semesterCount = semCaptions.size();
+                App.promptPlain("Sync Successful", "Synchronization of the modules completed successfully:\n" +
+                        Globals.checkPlurality(foundCount, "courses")+" were found in "+ Globals.checkPlurality(semesterCount, "semesters."));
+                triggerButton.setEnabled(true);
             }
-            final int foundCount = rows.size();
-            final int semesterCount = semCaptions.size();
-            App.promptPlain("Sync Successful", "Synchronization of the modules completed successfully:\n" +
-                    Globals.checkPlurality(foundCount, "courses")+" were found in "+ Globals.checkPlurality(semesterCount, "semesters."));
-            syncButton.setEnabled(true);
-        }
+        }).start();
     }
 
     /**
@@ -493,7 +489,7 @@ public class ModulesHandler {
     /**
      * Called to relief all major-courses based on this param:from
      */
-    private static void revokeMajors(String from){
+    private static void revokeMajors(String from) {
         for (Course course : modulesMonitor) {
             try {
                 final String courseCode = course.getCode().substring(0, 3);
@@ -505,7 +501,7 @@ public class ModulesHandler {
         }
     }
 
-    private static void resetMajors(String to){
+    private static void resetMajors(String to) {
         for (Course course : modulesMonitor) {
             try {
                 final String courseCode = course.getCode().substring(0, 3);
@@ -551,7 +547,7 @@ public class ModulesHandler {
     }
 
     public static void reportScoreInvalid(String invalidScore, Container root){
-        App.signalError(root,"Invalid score", invalidScore+" is not a valid score. Please try again.");
+        App.signalError(root,"Invalid Score", invalidScore+" is not a valid score. Please enter a correct value.");
     }
 
     public static void reportScoreOutOfRange(Container root){
@@ -562,158 +558,90 @@ public class ModulesHandler {
         return modulesMonitor;
     }
 
-    private static void setTablePreferences(KTable t){
-        t.setRowHeight(30);
-        t.setFont(KFontFactory.createPlainFont(15));
-        t.getTableHeader().setFont(KFontFactory.createBoldFont(16));
-        t.centerAlignAllColumns();
-        t.getColumnModel().getColumn(0).setPreferredWidth(70);
-        t.getColumnModel().getColumn(1).setPreferredWidth(280);
-        t.getColumnModel().getColumn(2).setPreferredWidth(250);
-        t.getColumnModel().getColumn(3).setPreferredWidth(50);
-    }
-
-    public static void serializeData(){
-        System.out.print("Serializing all modules... ");
-        final String[] allCourses = new String[modulesMonitor.size()];
-        for (int i = 0; i < allCourses.length; i++) {
-            allCourses[i] = modulesMonitor.get(i).exportContent();
-        }
-        MyClass.serialize(allCourses, "allCourses.ser");
-        System.out.println("Completed.");
-    }
-
-    public static void deserializeData(){
-        System.out.print("Deserializing all modules... ");
-        final String[] allCourses = (String[]) MyClass.deserialize("allCourses.ser");
-        for (String line : allCourses) {
-            modulesMonitor.add(Course.importFromSerial(line));
-        }
-        System.out.println("Completed.");
-    }
-
-    public JComponent presentForYearOne(){
-        return new YearOneHandler().getPresent();
-    }
-
-    public JComponent presentForYearTwo(){
-        return new YearTwoHandler().getPresent();
-    }
-
-    public JComponent presentForYearThree(){
-        return new YearThreeHandler().getPresent();
-    }
-
-    public JComponent presentForYearFour(){
-        return new YearFourHandler().getPresent();
-    }
-
     /**
-     * Deals with pretty much, everything of the first year, and present the entire frame work
-     * on a panel. All the subsequent colleagues do the same.
+     * Deals with pretty much, everything of the year, and presents the entire frame work
+     * on a panel.
      */
-    private static class YearOneHandler {
-        private String y1Name;
+    public static class ModuleYear {
         private KTable table1, table2;
         private KTable focusTable;
-        private KDefaultTableModel focusModel;
-        private JPopupMenu jPopupMenu;
-        private JMenuItem detailsItem, editItem, removeItem, confirmItem, newItem;
+        private KTableModel model1, model2;
+        private KTableModel focusModel;
+        private KMenuItem detailsItem, editItem, removeItem, confirmItem, newItem;
+        private JPopupMenu popupMenu;
 
-        private YearOneHandler(){
-            y1Name = Student.firstAcademicYear();
+        public ModuleYear(String yearName) {
+            setupTable1();
+            setupTable2();
+            ALL_MODELS.add(model1);
+            ALL_MODELS.add(model2);
 
-            setTableOne();
-            setTableTwo();
+            detailsItem = new KMenuItem(DETAILS);
+            detailsItem.addActionListener(e-> {
+                final Course course = getModuleByCode(String.valueOf(focusModel.getValueAt(focusTable.getSelectedRow(), 0)));
+                Course.exhibit(course);
+            });
 
-            detailsItem = new JMenuItem(DETAILS_STRING);
-            detailsItem.setFont(KFontFactory.createPlainFont(15));
-            detailsItem.addActionListener(e -> {
-                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                try {
-                    Course.exhibit(Board.getRoot(), Objects.requireNonNull(c));
-                } catch (NullPointerException npe){
-                    App.silenceException("No such course in list");
+            editItem = new KMenuItem(EDIT);
+            editItem.addActionListener(e-> {
+                final Course course = getModuleByCode(String.valueOf(focusModel.getValueAt(focusTable.getSelectedRow(), 0)));
+                if (course != null) {
+                    new ModuleEditor(course, focusModel).setVisible(true);
                 }
             });
 
-            editItem = new JMenuItem(EDIT_STRING);
-            editItem.setFont(KFontFactory.createPlainFont(15));
-            editItem.addActionListener(e -> {
-                final Course c = getModuleByCode(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0).toString());
-                try {
-                    SwingUtilities.invokeLater(() -> new ModuleEditor(Objects.requireNonNull(c), getFocusModel()).setVisible(true));
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
+            removeItem = new KMenuItem(DELETE);
+            removeItem.addActionListener(e-> {
+                final Course course = getModuleByCode(String.valueOf(focusModel.getValueAt(focusTable.getSelectedRow(), 0)));
+                if (course != null) {
+                    modulesMonitor.remove(course);
                 }
             });
 
-            removeItem = new JMenuItem(DELETE_STRING);
-            removeItem.setFont(KFontFactory.createPlainFont(15));
-            removeItem.addActionListener(e -> {
-                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                try {
-                    Objects.requireNonNull(c);
-                    if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+c.getName()+",\n" +
-                            "and that you wish to remove it from your collection?")) {
-                        modulesMonitor.remove(c);
-                    }
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
+            confirmItem = new KMenuItem(CONFIRM);
+            confirmItem.addActionListener(e-> {
+                final Course course = getModuleByCode(String.valueOf(focusModel.getValueAt(focusTable.getSelectedRow(), 0)));
+                if (course != null) {
+                    new Thread(()-> launchVerification(course)).start();
                 }
             });
 
-            confirmItem = new JMenuItem(CONFIRM_STRING);
-            confirmItem.setFont(KFontFactory.createPlainFont(15));
-            confirmItem.addActionListener(e -> {
-                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(),0)));
-                new Thread(()->{
-                    try {
-                        Objects.requireNonNull(c);
-                        launchVerification(c);
-                    } catch (NullPointerException npe) {
-                        App.silenceException("No such course in list");
-                    }
-                }).start();
+            newItem = new KMenuItem(ADD);
+            newItem.addActionListener(e->{
+                final ModuleAdder adder = new ModuleAdder(yearName, semesterName);
+                SwingUtilities.invokeLater(()-> adder.setVisible(true));
             });
 
-            newItem = new JMenuItem(ADD_STRING);
-            newItem.setFont(KFontFactory.createPlainFont(15));
-            newItem.addActionListener(e -> SwingUtilities.invokeLater(()-> new ModuleAdder(y1Name, semesterName).setVisible(true)));
-
-            jPopupMenu = new JPopupMenu();
-            jPopupMenu.add(detailsItem);
-            jPopupMenu.add(editItem);
-            jPopupMenu.add(removeItem);
-            jPopupMenu.add(confirmItem);
-            jPopupMenu.add(newItem);
+            popupMenu = new JPopupMenu();
+            popupMenu.add(confirmItem);
+            popupMenu.add(editItem);
+            popupMenu.add(detailsItem);
+            popupMenu.add(removeItem);
+            popupMenu.add(newItem);
         }
 
-        private void setTableOne(){
-            model1 = new KDefaultTableModel();
+        private void setupTable1() {
+            model1 = new KTableModel();
             model1.setColumnIdentifiers(COLUMN_IDENTIFIERS);
-            models[0] = model1;
 
-            table1 = new KTable(model1);
-            setTablePreferences(table1);
+            table1 = getSemesterTable(model1);
             table1.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     if (e.isPopupTrigger()) {
-                        setFocusTable(table1);
-                        setFocusModel(model1);
                         semesterName = Student.FIRST_SEMESTER;
-
-                        table1.getSelectionModel().setSelectionInterval(0, table1.rowAtPoint(e.getPoint()));
+                        focusTable = table1;
+                        focusModel = model1;
                         detailsItem.setEnabled(true);
                         editItem.setEnabled(true);
                         removeItem.setEnabled(true);
                         confirmItem.setEnabled(true);
-                        newItem.setEnabled(table1.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(table1, e.getX(), e.getY()));
+                        newItem.setEnabled(table1.getRowCount() < 6);
+                        table1.getSelectionModel().setSelectionInterval(0, table1.rowAtPoint(e.getPoint()));
+                        SwingUtilities.invokeLater(()-> popupMenu.show(table1, e.getX(), e.getY()));
                     }
                 }
+
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -721,31 +649,28 @@ public class ModulesHandler {
             });
         }
 
-        private void setTableTwo(){
-            model2 = new KDefaultTableModel();
+        private void setupTable2() {
+            model2 = new KTableModel();
             model2.setColumnIdentifiers(COLUMN_IDENTIFIERS);
-            models[1] = model2;
 
-            table2 = new KTable(model2);
-            setTablePreferences(table2);
+            table2 = getSemesterTable(model2);
             table2.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     if (e.isPopupTrigger()) {
-                        setFocusTable(table2);
-                        setFocusModel(model2);
                         semesterName = Student.SECOND_SEMESTER;
-
-                        table2.getSelectionModel().setSelectionInterval(0, table2.rowAtPoint(e.getPoint()));
+                        focusTable = table2;
+                        focusModel = model2;
                         detailsItem.setEnabled(true);
                         editItem.setEnabled(true);
                         removeItem.setEnabled(true);
                         confirmItem.setEnabled(true);
-                        newItem.setEnabled(table2.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(table2,e.getX(),e.getY()));
+                        newItem.setEnabled(table2.getRowCount() < 6);
+                        table2.getSelectionModel().setSelectionInterval(0, table2.rowAtPoint(e.getPoint()));
+                        SwingUtilities.invokeLater(()-> popupMenu.show(table2, e.getX(), e.getY()));
                     }
                 }
+
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
@@ -753,738 +678,110 @@ public class ModulesHandler {
             });
         }
 
-        private KPanel getPresent(){
-            final KScrollPane scrollPane1 = new KScrollPane(table1,false);
+        private void add(Course course){
+            if (course.getSemester().equals(Student.FIRST_SEMESTER)) {
+                model1.addRow(new String[] {course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
+            } else {
+                model2.addRow(new String[] {course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
+            }
+        }
+
+        private void remove(Course course){
+            if (course.getSemester().equals(Student.FIRST_SEMESTER)) {
+                model1.removeRow(model1.getRowOf(course.getCode()));
+            } else {
+                model2.removeRow(model2.getRowOf(course.getCode()));
+            }
+        }
+
+        private KTable getSemesterTable(KTableModel model){
+            final KTable table = new KTable(model);
+            table.setFont(KFontFactory.createPlainFont(15));
+            table.setRowHeight(30);
+            table.setHeaderHeight(30);
+            table.centerAlignAllColumns();
+            table.getTableHeader().setFont(KFontFactory.createBoldFont(16));
+            table.getColumnModel().getColumn(0).setPreferredWidth(70);
+            table.getColumnModel().getColumn(1).setPreferredWidth(280);
+            table.getColumnModel().getColumn(2).setPreferredWidth(250);
+            table.getColumnModel().getColumn(3).setPreferredWidth(50);
+            table.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() >= 2) {
+                        final int selectedRow = table.getSelectedRow();
+                        if (selectedRow >= 0) {
+                            Course.exhibit(getModuleByCode(String.valueOf(table.getValueAt(selectedRow, 0))));
+                            e.consume();
+                        }
+                    }
+                }
+            });
+            return table;
+        }
+
+        /**
+         * The entire present of this year in a Panel.
+         */
+        private KPanel getPresent() {
+            final KScrollPane scrollPane1 = table1.sizeMatchingScrollPane();
+            scrollPane1.setPreferredSize(new Dimension(840, 215));
             scrollPane1.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     if (e.isPopupTrigger()) {
-                        setFocusTable(table1);
-                        setFocusModel(model1);
                         semesterName = Student.FIRST_SEMESTER;
-
-                        table1.getSelectionModel().clearSelection();
+                        focusModel = model1;
+                        focusTable = table1;
+                        focusTable.getSelectionModel().clearSelection();
                         detailsItem.setEnabled(false);
                         editItem.setEnabled(false);
                         removeItem.setEnabled(false);
                         confirmItem.setEnabled(false);
-                        newItem.setEnabled(table1.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane1,e.getX(),e.getY()));
+                        newItem.setEnabled(table1.getRowCount() < 6);
+                        SwingUtilities.invokeLater(()-> popupMenu.show(scrollPane1, e.getX(), e.getY()));
                     }
                 }
+
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
                 }
             });
-            final KScrollPane scrollPane2 = new KScrollPane(table2,false);
+
+            final KScrollPane scrollPane2 = table2.sizeMatchingScrollPane();
+            scrollPane2.setPreferredSize(scrollPane1.getPreferredSize());
             scrollPane2.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     if (e.isPopupTrigger()) {
-                        setFocusTable(table2);
-                        setFocusModel(model2);
                         semesterName = Student.SECOND_SEMESTER;
-
-                        table2.getSelectionModel().clearSelection();
+                        focusModel = model2;
+                        focusTable = table2;
+                        focusTable.getSelectionModel().clearSelection();
                         detailsItem.setEnabled(false);
                         editItem.setEnabled(false);
                         removeItem.setEnabled(false);
                         confirmItem.setEnabled(false);
-                        newItem.setEnabled(table2.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane2,e.getX(),e.getY()));
+                        newItem.setEnabled(table2.getRowCount() < 6);
+                        SwingUtilities.invokeLater(()-> popupMenu.show(scrollPane2, e.getX(), e.getY()));
                     }
                 }
+
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     mousePressed(e);
                 }
             });
 
-            final KPanel present = new KPanel(new Dimension(825,540));
+            final KPanel present = new KPanel();
             present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
-            present.add(scrollPane1);
-            present.add(Box.createVerticalStrut(30));
-            present.add(KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
-            present.add(scrollPane2);
-            present.add(Box.createVerticalStrut(15));
+            present.addAll(new KPanel(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)),
+                    scrollPane1, Box.createVerticalStrut(15), new KPanel(new KLabel(Student.SECOND_SEMESTER,
+                            KFontFactory.createPlainFont(18), Color.BLUE)), scrollPane2, Box.createVerticalStrut(15));
             return present;
         }
 
-        private KTable getFocusTable(){
-            return focusTable;
-        }
-
-        private void setFocusTable(KTable table){
-            focusTable = table;
-        }
-
-        private KDefaultTableModel getFocusModel(){
-            return focusModel;
-        }
-
-        private void setFocusModel(KDefaultTableModel model){
-            focusModel = model;
-        }
-    }
-
-    private static class YearTwoHandler {
-        private String y2Name;
-        private KTable table3, table4;
-        private KTable focusTable;
-        private KDefaultTableModel focusModel;
-        private JPopupMenu jPopupMenu;
-        private JMenuItem detailsItem, editItem, removeItem, confirmItem, newItem;
-
-        private YearTwoHandler(){
-            y2Name = Student.secondAcademicYear();
-
-            setTableThree();
-            setTableFour();
-
-            detailsItem = new JMenuItem(DETAILS_STRING);
-            detailsItem.setFont(KFontFactory.createPlainFont(15));
-            detailsItem.addActionListener(e -> {
-                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                try {
-                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(), Objects.requireNonNull(c)));
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            });
-
-            editItem = new JMenuItem(EDIT_STRING);
-            editItem.setFont(KFontFactory.createPlainFont(15));
-            editItem.addActionListener(e -> {
-                final Course c = getModuleByCode(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0).toString());
-                try {
-                    SwingUtilities.invokeLater(()-> new ModuleEditor(Objects.requireNonNull(c), getFocusModel()).setVisible(true));
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            });
-
-            removeItem = new JMenuItem(DELETE_STRING);
-            removeItem.setFont(KFontFactory.createPlainFont(15));
-            removeItem.addActionListener(e -> {
-                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                try {
-                    Objects.requireNonNull(c);
-                    if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+c.getName()+",\n" +
-                            "and that you wish to remove it from your collection?")) {
-                        modulesMonitor.remove(c);
-                    }
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            });
-
-            confirmItem = new JMenuItem(CONFIRM_STRING);
-            confirmItem.setFont(KFontFactory.createPlainFont(15));
-            confirmItem.addActionListener(e -> {
-                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(),0)));
-                try {
-                    new Thread(()-> launchVerification(Objects.requireNonNull(c))).start();
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            });
-
-            newItem = new JMenuItem(ADD_STRING);
-            newItem.setFont(KFontFactory.createPlainFont(15));
-            newItem.addActionListener(e -> SwingUtilities.invokeLater(()-> new ModuleAdder(y2Name, semesterName).setVisible(true)));
-
-            jPopupMenu = new JPopupMenu();
-            jPopupMenu.add(detailsItem);
-            jPopupMenu.add(editItem);
-            jPopupMenu.add(removeItem);
-            jPopupMenu.add(confirmItem);
-            jPopupMenu.add(newItem);
-        }
-
-        private void setTableThree(){
-            model3 = new KDefaultTableModel();
-            model3.setColumnIdentifiers(COLUMN_IDENTIFIERS);
-            models[2] = model3;
-
-            table3 = new KTable(model3);
-            setTablePreferences(table3);
-            table3.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        setFocusTable(table3);
-                        setFocusModel(model3);
-                        semesterName = Student.FIRST_SEMESTER;
-
-                        table3.getSelectionModel().setSelectionInterval(0, table3.rowAtPoint(e.getPoint()));
-                        detailsItem.setEnabled(true);
-                        editItem.setEnabled(true);
-                        removeItem.setEnabled(true);
-                        confirmItem.setEnabled(true);
-                        newItem.setEnabled(table3.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(table3,e.getX(),e.getY()));
-                    }
-                }
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    mousePressed(e);
-                }
-            });
-        }
-
-        private void setTableFour(){
-            model4 = new KDefaultTableModel();
-            model4.setColumnIdentifiers(COLUMN_IDENTIFIERS);
-            models[3] = model4;
-
-            table4 = new KTable(model4);
-            setTablePreferences(table4);
-            table4.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        setFocusTable(table4);
-                        setFocusModel(model4);
-                        semesterName = Student.SECOND_SEMESTER;
-
-                        table4.getSelectionModel().setSelectionInterval(0, table4.rowAtPoint(e.getPoint()));
-                        detailsItem.setEnabled(true);
-                        editItem.setEnabled(true);
-                        removeItem.setEnabled(true);
-                        confirmItem.setEnabled(true);
-                        newItem.setEnabled(table4.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(table4,e.getX(),e.getY()));
-                    }
-                }
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    mousePressed(e);
-                }
-            });
-        }
-
-        private KPanel getPresent(){
-            final KScrollPane scrollPane3 = new KScrollPane(table3,false);
-            scrollPane3.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        setFocusTable(table3);
-                        setFocusModel(model3);
-                        semesterName = Student.FIRST_SEMESTER;
-
-                        table3.getSelectionModel().clearSelection();
-                        detailsItem.setEnabled(false);
-                        editItem.setEnabled(false);
-                        removeItem.setEnabled(false);
-                        confirmItem.setEnabled(false);
-                        newItem.setEnabled(table3.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane3,e.getX(),e.getY()));
-                    }
-                }
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    mousePressed(e);
-                }
-            });
-            final KScrollPane scrollPane4 = new KScrollPane(table4,false);
-            scrollPane4.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        setFocusTable(table4);
-                        setFocusModel(model4);
-                        semesterName = Student.SECOND_SEMESTER;
-
-                        table4.getSelectionModel().clearSelection();
-                        detailsItem.setEnabled(false);
-                        editItem.setEnabled(false);
-                        removeItem.setEnabled(false);
-                        confirmItem.setEnabled(false);
-                        newItem.setEnabled(table4.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane4,e.getX(),e.getY()));
-                    }
-                }
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    mousePressed(e);
-                }
-            });
-
-            final KPanel present = new KPanel(new Dimension(825,540));
-            present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
-            present.add(scrollPane3);
-            present.add(Box.createVerticalStrut(30));
-            present.add(KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
-            present.add(scrollPane4);
-            present.add(Box.createVerticalStrut(15));
-            return present;
-        }
-
-        private KTable getFocusTable(){
-            return focusTable;
-        }
-
-        private void setFocusTable(KTable table){
-            focusTable = table;
-        }
-
-        private KDefaultTableModel getFocusModel(){
-            return focusModel;
-        }
-
-        private void setFocusModel(KDefaultTableModel model){
-            focusModel = model;
-        }
-    }
-
-    private static class YearThreeHandler {
-        private String y3Name;
-        private KTable table5, table6;
-        private KTable focusTable;
-        private KDefaultTableModel focusModel;
-        private JPopupMenu jPopupMenu;
-        private JMenuItem detailsItem, editItem, removeItem, confirmItem, newItem;
-
-        private YearThreeHandler(){
-            y3Name = Student.thirdAcademicYear();
-
-            setTableFive();
-            setTableSix();
-
-            detailsItem = new JMenuItem(DETAILS_STRING);
-            detailsItem.setFont(KFontFactory.createPlainFont(15));
-            detailsItem.addActionListener(e -> {
-                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                try {
-                    SwingUtilities.invokeLater(() -> Course.exhibit(Board.getRoot(), Objects.requireNonNull(c)));
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            });
-
-            editItem = new JMenuItem(EDIT_STRING);
-            editItem.setFont(KFontFactory.createPlainFont(15));
-            editItem.addActionListener(e -> {
-                final Course c = getModuleByCode(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0).toString());
-                try {
-                    Objects.requireNonNull(c);
-                    SwingUtilities.invokeLater(()-> new ModuleEditor(c, getFocusModel()).setVisible(true));
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            });
-
-            removeItem = new JMenuItem(DELETE_STRING);
-            removeItem.setFont(KFontFactory.createPlainFont(15));
-            removeItem.addActionListener(e -> {
-                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                try {
-                    Objects.requireNonNull(c);
-                    if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+c.getName()+",\nand that you wish to remove it from your collection?")) {
-                        modulesMonitor.remove(c);
-                    }
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            });
-
-            confirmItem = new JMenuItem(CONFIRM_STRING);
-            confirmItem.setFont(KFontFactory.createPlainFont(15));
-            confirmItem.addActionListener(e -> {
-                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(),0)));
-                try {
-                    new Thread(()-> launchVerification(Objects.requireNonNull(c))).start();
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            });
-
-            newItem = new JMenuItem(ADD_STRING);
-            newItem.setFont(KFontFactory.createPlainFont(15));
-            newItem.addActionListener(e -> SwingUtilities.invokeLater(()-> new ModuleAdder(y3Name, semesterName).setVisible(true)));
-
-            jPopupMenu = new JPopupMenu();
-            jPopupMenu.add(detailsItem);
-            jPopupMenu.add(editItem);
-            jPopupMenu.add(removeItem);
-            jPopupMenu.add(confirmItem);
-            jPopupMenu.add(newItem);
-        }
-
-        private void setTableFive(){
-            model5 = new KDefaultTableModel();
-            model5.setColumnIdentifiers(COLUMN_IDENTIFIERS);
-            models[4] = model5;
-
-            table5 = new KTable(model5);
-            setTablePreferences(table5);
-            table5.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        setFocusTable(table5);
-                        setFocusModel(model5);
-                        semesterName = Student.FIRST_SEMESTER;
-
-                        table5.getSelectionModel().setSelectionInterval(0, table5.rowAtPoint(e.getPoint()));
-                        detailsItem.setEnabled(true);
-                        editItem.setEnabled(true);
-                        removeItem.setEnabled(true);
-                        confirmItem.setEnabled(true);
-                        newItem.setEnabled(table5.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(table5,e.getX(),e.getY()));
-                    }
-                }
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    mousePressed(e);
-                }
-            });
-        }
-
-        private void setTableSix(){
-            model6 = new KDefaultTableModel();
-            model6.setColumnIdentifiers(COLUMN_IDENTIFIERS);
-            models[5] = model6;
-
-            table6 = new KTable(model6);
-            setTablePreferences(table6);
-            table6.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        setFocusTable(table6);
-                        setFocusModel(model6);
-                        semesterName = Student.SECOND_SEMESTER;
-
-                        table6.getSelectionModel().setSelectionInterval(0, table6.rowAtPoint(e.getPoint()));
-                        detailsItem.setEnabled(true);
-                        editItem.setEnabled(true);
-                        removeItem.setEnabled(true);
-                        confirmItem.setEnabled(true);
-                        newItem.setEnabled(table6.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(table6,e.getX(),e.getY()));
-                    }
-                }
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    mousePressed(e);
-                }
-            });
-        }
-
-        private KPanel getPresent(){
-            final KScrollPane scrollPane5 = new KScrollPane(table5,false);
-            scrollPane5.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        setFocusTable(table5);
-                        setFocusModel(model5);
-                        semesterName = Student.FIRST_SEMESTER;
-
-                        table5.getSelectionModel().clearSelection();
-                        detailsItem.setEnabled(false);
-                        editItem.setEnabled(false);
-                        removeItem.setEnabled(false);
-                        confirmItem.setEnabled(false);
-                        newItem.setEnabled(table5.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane5,e.getX(),e.getY()));
-                    }
-                }
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    mousePressed(e);
-                }
-            });
-            final KScrollPane scrollPane6 = new KScrollPane(table6,false);
-            scrollPane6.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        setFocusTable(table6);
-                        setFocusModel(model6);
-                        semesterName = Student.SECOND_SEMESTER;
-
-                        table6.getSelectionModel().clearSelection();
-                        detailsItem.setEnabled(false);
-                        editItem.setEnabled(false);
-                        removeItem.setEnabled(false);
-                        confirmItem.setEnabled(false);
-                        newItem.setEnabled(table6.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane6,e.getX(),e.getY()));
-                    }
-                }
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    mousePressed(e);
-                }
-            });
-
-            final KPanel present = new KPanel(new Dimension(825,540));
-            present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
-            present.add(scrollPane5);
-            present.add(Box.createVerticalStrut(30));
-            present.add(KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
-            present.add(scrollPane6);
-            present.add(Box.createVerticalStrut(15));
-            return present;
-        }
-
-        private KTable getFocusTable(){
-            return focusTable;
-        }
-
-        private void setFocusTable(KTable table){
-            focusTable = table;
-        }
-
-        private KDefaultTableModel getFocusModel(){
-            return focusModel;
-        }
-
-        private void setFocusModel(KDefaultTableModel model){
-            focusModel = model;
-        }
-    }
-
-    private static class YearFourHandler {
-        private String y4Name;
-        private KTable table7, table8;
-        private KTable focusTable;
-        private KDefaultTableModel focusModel;
-        private JPopupMenu jPopupMenu;
-        private JMenuItem detailsItem, editItem, removeItem, confirmItem, newItem;
-
-        private YearFourHandler(){
-            y4Name = Student.finalAcademicYear();
-
-            setTableSeven();
-            setTableEight();
-
-            detailsItem = new JMenuItem(DETAILS_STRING);
-            detailsItem.setFont(KFontFactory.createPlainFont(15));
-            detailsItem.addActionListener(e -> {
-                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                try {
-                    SwingUtilities.invokeLater(()-> Course.exhibit(Board.getRoot(), Objects.requireNonNull(c)));
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            });
-
-            editItem = new JMenuItem(EDIT_STRING);
-            editItem.setFont(KFontFactory.createPlainFont(15));
-            editItem.addActionListener(e -> {
-                final Course c = getModuleByCode(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0).toString());
-                try {
-                    Objects.requireNonNull(c);
-                    SwingUtilities.invokeLater(()-> new ModuleEditor(c, getFocusModel()).setVisible(true));
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            });
-
-            removeItem = new JMenuItem(DELETE_STRING);
-            removeItem.setFont(KFontFactory.createPlainFont(15));
-            removeItem.addActionListener(e -> {
-                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(), 0)));
-                try {
-                    Objects.requireNonNull(c);
-                    if (App.showYesNoCancelDialog("Confirm Removal","Are you sure you did not do "+c.getName()+",\n" +
-                            "and that you wish to remove it from your collection?")) {
-                        modulesMonitor.remove(c);
-                    }
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            });
-
-            confirmItem = new JMenuItem(CONFIRM_STRING);
-            confirmItem.setFont(KFontFactory.createPlainFont(15));
-            confirmItem.addActionListener(e -> {
-                final Course c = getModuleByCode(String.valueOf(getFocusModel().getValueAt(getFocusTable().getSelectedRow(),0)));
-                try {
-                    new Thread(()->{
-                        Objects.requireNonNull(c);
-                        launchVerification(c);
-                    }).start();
-                } catch (NullPointerException npe) {
-                    App.silenceException("No such course in list");
-                }
-            });
-
-            newItem = new JMenuItem(ADD_STRING);
-            newItem.setFont(KFontFactory.createPlainFont(15));
-            newItem.addActionListener(e -> SwingUtilities.invokeLater(()-> new ModuleAdder(y4Name, semesterName).setVisible(true)));
-
-            jPopupMenu = new JPopupMenu();
-            jPopupMenu.add(detailsItem);
-            jPopupMenu.add(editItem);
-            jPopupMenu.add(removeItem);
-            jPopupMenu.add(confirmItem);
-            jPopupMenu.add(newItem);
-        }
-
-        private void setTableSeven(){
-            model7 = new KDefaultTableModel();
-            model7.setColumnIdentifiers(COLUMN_IDENTIFIERS);
-            models[6] = model7;
-
-            table7 = new KTable(model7);
-            setTablePreferences(table7);
-            table7.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        setFocusTable(table7);
-                        setFocusModel(model7);
-                        semesterName = Student.FIRST_SEMESTER;
-
-                        table7.getSelectionModel().setSelectionInterval(0, table7.rowAtPoint(e.getPoint()));
-                        detailsItem.setEnabled(true);
-                        editItem.setEnabled(true);
-                        removeItem.setEnabled(true);
-                        confirmItem.setEnabled(true);
-                        newItem.setEnabled(table7.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(table7,e.getX(),e.getY()));
-                    }
-                }
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    mousePressed(e);
-                }
-            });
-        }
-
-        private void setTableEight(){
-            model8 = new KDefaultTableModel();
-            model8.setColumnIdentifiers(COLUMN_IDENTIFIERS);
-            models[7] = model8;
-
-            table8 = new KTable(model8);
-            setTablePreferences(table8);
-            table8.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        setFocusTable(table8);
-                        setFocusModel(model8);
-                        semesterName = Student.SECOND_SEMESTER;
-
-                        table8.getSelectionModel().setSelectionInterval(0, table8.rowAtPoint(e.getPoint()));
-                        detailsItem.setEnabled(true);
-                        editItem.setEnabled(true);
-                        removeItem.setEnabled(true);
-                        confirmItem.setEnabled(true);
-                        newItem.setEnabled(table8.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(table8,e.getX(),e.getY()));
-                    }
-                }
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    mousePressed(e);
-                }
-            });
-        }
-
-        private KPanel getPresent(){
-            final KScrollPane scrollPane7 = new KScrollPane(table7,false);
-            scrollPane7.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        setFocusTable(table7);
-                        setFocusModel(model7);
-                        semesterName = Student.FIRST_SEMESTER;
-
-                        table7.getSelectionModel().clearSelection();
-                        detailsItem.setEnabled(false);
-                        editItem.setEnabled(false);
-                        removeItem.setEnabled(false);
-                        confirmItem.setEnabled(false);
-                        newItem.setEnabled(table7.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane7,e.getX(),e.getY()));
-                    }
-                }
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    mousePressed(e);
-                }
-            });
-            final KScrollPane scrollPane8 = new KScrollPane(table8,false);
-            scrollPane8.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        setFocusTable(table8);
-                        setFocusModel(model8);
-                        semesterName = Student.SECOND_SEMESTER;
-
-                        table8.getSelectionModel().clearSelection();
-                        detailsItem.setEnabled(false);
-                        editItem.setEnabled(false);
-                        removeItem.setEnabled(false);
-                        confirmItem.setEnabled(false);
-                        newItem.setEnabled(table8.getRowCount() <= 5);
-
-                        SwingUtilities.invokeLater(()-> jPopupMenu.show(scrollPane8,e.getX(),e.getY()));
-                    }
-                }
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    mousePressed(e);
-                }
-            });
-
-            final KPanel present = new KPanel(new Dimension(825,540));
-            present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
-            present.add(scrollPane7);
-            present.add(Box.createVerticalStrut(30));
-            present.add(KPanel.wantDirectAddition(new KSeparator(Color.BLACK,new Dimension(800,1))));
-            present.add(KPanel.wantDirectAddition(new KLabel(Student.SECOND_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)));
-            present.add(scrollPane8);
-            present.add(Box.createVerticalStrut(15));
-            return present;
-        }
-
-        private KTable getFocusTable(){
-            return focusTable;
-        }
-
-        private void setFocusTable(KTable table){
-            focusTable = table;
-        }
-
-        private KDefaultTableModel getFocusModel(){
-            return focusModel;
-        }
-
-        private void setFocusModel(KDefaultTableModel model){
-            focusModel = model;
-        }
     }
 
 
@@ -1498,16 +795,16 @@ public class ModulesHandler {
         String yearName, semesterName;
         KButton actionButton;
 
-        public ModuleAdder(String yearName, String semesterName){//The yearName and semesterName fields are provided-set, not editable
+        public ModuleAdder(String yearName, String semesterName){//the yearName and semesterName are provided-set, fields of them are never editable
             super("New Course");
-            this.setResizable(true);
-            this.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
+            setResizable(true);
+            setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
             this.yearName = yearName;
             this.semesterName = semesterName;
 
             final Font hintFont = KFontFactory.createBoldFont(16);
 
-            if (this instanceof MiscellaneousModulesHandler.MiscModuleAdder) {
+            if (this instanceof MiscellaneousModules.MiscModuleAdder) {
                 yearField = KTextField.rangeControlField(9);
             } else {
                 yearField = new KTextField();
@@ -1516,128 +813,126 @@ public class ModulesHandler {
             yearField.setText(yearName);
             yearField.setEditable(yearName == null);
             yearPanel = new KPanel(new BorderLayout());
-            yearPanel.add(KPanel.wantDirectAddition(new KLabel("Year:",hintFont)),BorderLayout.WEST);
-            yearPanel.add(KPanel.wantDirectAddition(yearField),BorderLayout.CENTER);
+            yearPanel.add(new KPanel(new KLabel("Year:", hintFont)),  BorderLayout.WEST);
+            yearPanel.add(new KPanel(yearField),BorderLayout.CENTER);
 
             semesterField = new KTextField(new Dimension(200,30));
             semesterField.setText(semesterName);
             semesterField.setEditable(semesterName == null);
             semesterPanel = new KPanel(new BorderLayout());
-            semesterPanel.add(KPanel.wantDirectAddition(new KLabel("Semester:",hintFont)),BorderLayout.WEST);
-            semesterPanel.add(KPanel.wantDirectAddition(semesterField),BorderLayout.CENTER);
+            semesterPanel.add(new KPanel(new KLabel("Semester:", hintFont)), BorderLayout.WEST);
+            semesterPanel.add(new KPanel(semesterField), BorderLayout.CENTER);
 
             codeField = KTextField.rangeControlField(10);
             codeField.setPreferredSize(new Dimension(125,30));
             final KPanel codePanel = new KPanel(new BorderLayout());
-            codePanel.add(KPanel.wantDirectAddition(new KLabel("Code:",hintFont)),BorderLayout.WEST);
-            codePanel.add(KPanel.wantDirectAddition(codeField),BorderLayout.CENTER);
+            codePanel.add(new KPanel(new KLabel("Code:", hintFont)), BorderLayout.WEST);
+            codePanel.add(new KPanel(codeField), BorderLayout.CENTER);
 
             nameField = new KTextField(new Dimension(300,30));
             final KPanel namePanel = new KPanel(new BorderLayout());
-            namePanel.add(KPanel.wantDirectAddition(new KLabel("Name:",hintFont)),BorderLayout.WEST);
-            namePanel.add(KPanel.wantDirectAddition(nameField),BorderLayout.CENTER);
+            namePanel.add(new KPanel(new KLabel("Name:", hintFont)), BorderLayout.WEST);
+            namePanel.add(new KPanel(nameField), BorderLayout.CENTER);
 
             lecturerField = new KTextField(new Dimension(300,30));
             final KPanel lecturerPanel = new KPanel(new BorderLayout());
-            lecturerPanel.add(KPanel.wantDirectAddition(new KLabel("Lecturer:",hintFont)),BorderLayout.WEST);
-            lecturerPanel.add(KPanel.wantDirectAddition(lecturerField),BorderLayout.CENTER);
+            lecturerPanel.add(new KPanel(new KLabel("Lecturer:", hintFont)), BorderLayout.WEST);
+            lecturerPanel.add(new KPanel(lecturerField), BorderLayout.CENTER);
 
             dayBox = new JComboBox<>(Course.getWeekDays());
             dayBox.setFont(KFontFactory.createPlainFont(15));
             timeBox = new JComboBox<>(Course.availableCoursePeriods());
             timeBox.setFont(KFontFactory.createPlainFont(15));
             final KPanel schedulePanel = new KPanel(new FlowLayout(FlowLayout.CENTER));//this a litte sort of an exception
-            schedulePanel.addAll(new KLabel("Day:",hintFont),dayBox);
-            schedulePanel.addAll(Box.createRigidArea(new Dimension(25, 30)),new KLabel("Time:",hintFont),timeBox);
+            schedulePanel.addAll(new KLabel("Day:", hintFont), dayBox);
+            schedulePanel.addAll(Box.createRigidArea(new Dimension(25, 30)), new KLabel("Time:", hintFont), timeBox);
 
             venueField = new KTextField(new Dimension(300,30));
             final KPanel venuePanel = new KPanel(new BorderLayout());
-            venuePanel.add(KPanel.wantDirectAddition(new KLabel("Venue:",hintFont)),BorderLayout.WEST);
-            venuePanel.add(KPanel.wantDirectAddition(venueField),BorderLayout.CENTER);
+            venuePanel.add(new KPanel(new KLabel("Venue:", hintFont)), BorderLayout.WEST);
+            venuePanel.add(new KPanel(venueField), BorderLayout.CENTER);
 
             requirementBox = new JComboBox<>(Course.availableCourseRequirements());
             requirementBox.setFont(KFontFactory.createPlainFont(15));
             requirementBox.setSelectedItem(Course.NONE);
             final KPanel requirementPanel = new KPanel(new BorderLayout());
-            requirementPanel.add(KPanel.wantDirectAddition(new KLabel("Requirement:",hintFont)),BorderLayout.WEST);
-            requirementPanel.add(KPanel.wantDirectAddition(requirementBox),BorderLayout.CENTER);
+            requirementPanel.add(new KPanel(new KLabel("Requirement:", hintFont)), BorderLayout.WEST);
+            requirementPanel.add(new KPanel(requirementBox), BorderLayout.CENTER);
 
             creditBox = new JComboBox<>(Course.availableCreditHours());
             creditBox.setFont(KFontFactory.createPlainFont(15));
             final KPanel creditPanel = new KPanel(new BorderLayout());
-            creditPanel.add(KPanel.wantDirectAddition(new KLabel("Credit Hours:",hintFont)),BorderLayout.WEST);
-            creditPanel.add(KPanel.wantDirectAddition(creditBox),BorderLayout.CENTER);
+            creditPanel.add(new KPanel(new KLabel("Credit Hours:", hintFont)), BorderLayout.WEST);
+            creditPanel.add(new KPanel(creditBox), BorderLayout.CENTER);
 
             scoreField = KTextField.rangeControlField(7);
             scoreField.setPreferredSize(new Dimension(125,30));
             final KPanel scorePanel = new KPanel(new BorderLayout());
-            scorePanel.add(KPanel.wantDirectAddition(new KLabel("Score:",hintFont)),BorderLayout.WEST);
-            scorePanel.add(KPanel.wantDirectAddition(scoreField),BorderLayout.CENTER);
+            scorePanel.add(new KPanel(new KLabel("Score:", hintFont)), BorderLayout.WEST);
+            scorePanel.add(new KPanel(scoreField), BorderLayout.CENTER);
 
             final KButton cancelButton = new KButton("Cancel");
-            cancelButton.addActionListener(e -> ModuleAdder.this.dispose());
+            cancelButton.addActionListener(e-> dispose());
 
             actionButton = new KButton("Add");
             actionButton.addActionListener(additionListener());
             final KPanel buttonsPanel = new KPanel(new FlowLayout(FlowLayout.RIGHT));
             buttonsPanel.addAll(cancelButton, actionButton);
 
-            this.getRootPane().setDefaultButton(actionButton);
-            final KPanel bigPane = new KPanel();
-            bigPane.setLayout(new BoxLayout(bigPane, BoxLayout.Y_AXIS));
-            bigPane.addAll(Box.createVerticalStrut(10),yearPanel,semesterPanel,codePanel,namePanel,lecturerPanel,schedulePanel,
-                    venuePanel,requirementPanel,creditPanel,scorePanel,Box.createVerticalStrut(30),buttonsPanel);
-            this.setContentPane(bigPane);
-            this.pack();
-            this.setMinimumSize(this.getPreferredSize());
-            this.setLocationRelativeTo(Board.getRoot());
+            getRootPane().setDefaultButton(actionButton);
+            final KPanel contentPanel = new KPanel();
+            contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+            contentPanel.addAll(Box.createVerticalStrut(10), yearPanel, semesterPanel, codePanel, namePanel,
+                    lecturerPanel, schedulePanel, venuePanel, requirementPanel, creditPanel, scorePanel,
+                    Box.createVerticalStrut(30), buttonsPanel);
+            setContentPane(contentPanel);
+            pack();
+            setMinimumSize(getPreferredSize());
+            setLocationRelativeTo(Board.getRoot());
         }
 
         private ActionListener additionListener(){
             return e-> {
-                if (Globals.isBlank(codeField.getText())) {
-                    App.signalError(ModuleAdder.this.getRootPane(),"No Code","Please provide the code of the course.");
+                if (codeField.isBlank()) {
+                    App.signalError(getRootPane(),"No Code", "Please provide the code of the course.");
                     codeField.requestFocusInWindow();
-                } else if (Globals.isBlank(nameField.getText())) {
-                    App.signalError(ModuleAdder.this.getRootPane(),"No Name","Please provide the name of the course.");
+                } else if (nameField.isBlank()) {
+                    App.signalError(getRootPane(),"No Name","Please provide the name of the course.");
                     nameField.requestFocusInWindow();
-                } else if (Globals.isBlank(scoreField.getText())) {
-                    App.signalError(ModuleAdder.this.getRootPane(),"Error","Please enter the score you get from this course.");
+                } else if (scoreField.isBlank()) {
+                    App.signalError(getRootPane(),"Error","Please enter the score you get from this course.");
                     scoreField.requestFocusInWindow();
                 } else {
                     double score;
                     try {
                         score = Double.parseDouble(scoreField.getText());
                     } catch (NumberFormatException formatError){
-                        reportScoreInvalid(scoreField.getText(), this.getRootPane());
+                        reportScoreInvalid(scoreField.getText(), getRootPane());
                         scoreField.requestFocusInWindow();
                         return;
                     }
                     if (score < 0 || score > 100) {
-                        reportScoreOutOfRange(this.getRootPane());
+                        reportScoreOutOfRange(getRootPane());
                         scoreField.requestFocusInWindow();
                         return;
                     }
+
                     if (existsInList(codeField.getText())) {
                         reportCodeDuplication(codeField.getText());
                         codeField.requestFocusInWindow();
                         return;
                     }
 
-                    final String day = String.valueOf(dayBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
-                            String.valueOf(dayBox.getSelectedItem());
-                    final String time = String.valueOf(timeBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
-                            String.valueOf(timeBox.getSelectedItem());
-                    final String lecturerName = lecturerField.getText();
                     final Course incomingCourse = new Course(yearName, semesterName, codeField.getText(), nameField.getText(),
-                            lecturerName, venueField.getText(), day, time, score, Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
+                            lecturerField.getText(), venueField.getText(), String.valueOf(dayBox.getSelectedItem()),
+                            String.valueOf(timeBox.getSelectedItem()), score, Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
                             String.valueOf(requirementBox.getSelectedItem()), false);
-                    incomingCourse.setLecturer(lecturerName, true);
                     modulesMonitor.add(incomingCourse);
-                    this.dispose();
+                    dispose();
                 }
             };
         }
+
     }
 
 
@@ -1645,67 +940,69 @@ public class ModulesHandler {
      * Extends the Adding-dialog to make it an editing-one. Cool uh...
      */
     private static class ModuleEditor extends ModuleAdder {
-        private KDefaultTableModel onModel;
+        private KTableModel onModel;
         private Course target;
 
         /**
          *
-         * @param eCourse The course on which edition is to be.
+         * @param course The course on which edition is to be.
          * @param onModel The model to perform the removal.
          */
-        private ModuleEditor(Course eCourse, KDefaultTableModel onModel) {
-            super(eCourse.getYear(), eCourse.getSemester());
-            this.setTitle(eCourse.getName());
-            this.target = eCourse;
+        private ModuleEditor(Course course, KTableModel onModel) {
+            super(course.getYear(), course.getSemester());
+            setTitle(course.getName());
+            this.target = course;
             this.onModel = onModel;
 
-            codeField.setText(eCourse.getCode());
-            codeField.setEditable(!eCourse.isVerified());
+            codeField.setText(course.getCode());
+            nameField.setText(course.getName());
+            lecturerField.setText(course.getLecturer());
+            lecturerField.setEditable(course.canEditTutorName());
+            dayBox.setSelectedItem(course.getDay());
+            timeBox.setSelectedItem(course.getTime());
+            venueField.setText(course.getVenue());
+            requirementBox.setSelectedItem(course.getRequirement());
+            creditBox.setSelectedItem(String.valueOf(course.getCreditHours()));
+            scoreField.setText(String.valueOf(course.getScore()));
 
-            nameField.setText(eCourse.getName());
-            nameField.setEditable(!eCourse.isVerified());
-
-            lecturerField.setText(eCourse.getLecturer());
-            lecturerField.setEditable(eCourse.isTutorsNameCustomizable());
-
-            dayBox.setSelectedItem(eCourse.getDay());
-            timeBox.setSelectedItem(eCourse.getTime());
-            venueField.setText(eCourse.getVenue());
-            requirementBox.setSelectedItem(eCourse.getRequirement());
-            creditBox.setSelectedItem(String.valueOf(eCourse.getCreditHours()));
-
-            scoreField.setText(String.valueOf(eCourse.getScore()));
-            scoreField.setEditable(!eCourse.isVerified());
+            if (course.isVerified()) {
+                codeField.setEditable(false);
+                nameField.setEditable(false);
+                scoreField.setEditable(false);
+            }
 
             actionButton.removeActionListener(actionButton.getActionListeners()[0]);
             actionButton.addActionListener(editionListener());
-            actionButton.setText("Refract");
+            actionButton.setText("Done");
         }
 
         private ActionListener editionListener(){
             return e-> {
-                if (Globals.isBlank(codeField.getText())) {
-                    App.signalError(ModuleEditor.this.getRootPane(),"No Code","Please provide the code of the course.");
+                if (codeField.isBlank()) {
+                    App.signalError(getRootPane(),"No Code", "Please provide the code of the course.");
                     codeField.requestFocusInWindow();
-                } else if (Globals.isBlank(nameField.getText())) {
-                    App.signalError(ModuleEditor.this.getRootPane(),"No Name","Please provide the name of the course.");
+                } else if (nameField.isBlank()) {
+                    App.signalError(getRootPane(),"No Name","Please provide the name of the course.");
                     nameField.requestFocusInWindow();
+                } else if (scoreField.isBlank()) {
+                    App.signalError(getRootPane(),"Error","Please enter the score you get from this course.");
+                    scoreField.requestFocusInWindow();
                 } else {
                     double score;
                     try {
                         score = Double.parseDouble(scoreField.getText());
                     } catch (NumberFormatException formatError){
-                        reportScoreInvalid(scoreField.getText(), this.getRootPane());
+                        reportScoreInvalid(scoreField.getText(), getRootPane());
                         scoreField.requestFocusInWindow();
                         return;
                     }
                     if (score < 0 || score > 100) {
-                        reportScoreOutOfRange(this.getRootPane());
+                        reportScoreOutOfRange(getRootPane());
                         scoreField.requestFocusInWindow();
                         return;
                     }
 
-                    //Check for exclusive existence in this table first
+                    //check for exclusive existence in this table first
                     for (int row = 0; row < onModel.getRowCount(); row++) {
                         if (row == onModel.getSelectedRow()) {
                             continue;
@@ -1717,26 +1014,42 @@ public class ModulesHandler {
                             return;
                         }
                     }
-                    //Check for general existence in other tables
+                    //check for general existence in other tables
                     if (existsInListExcept(onModel, codeField.getText())) {
                         reportCodeDuplication(codeField.getText());
                         codeField.requestFocusInWindow();
                         return;
                     }
 
-                    final String day = String.valueOf(dayBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
-                            String.valueOf(dayBox.getSelectedItem());
-                    final String time = String.valueOf(timeBox.getSelectedItem()).equals(Course.UNKNOWN) ? "":
-                            String.valueOf(timeBox.getSelectedItem());
-                    final Course course = new Course(yearField.getText(), semesterField.getText(), codeField.getText(),nameField.getText(),
-                            "", venueField.getText(), day,time, score,Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
-                            String.valueOf(requirementBox.getSelectedItem()), target.isVerified());
-                    course.setLecturer(lecturerField.getText(), lecturerField.isEditable());//Or, target.isTutorsNameCustomizable()
-
+                    final Course course = new Course(yearField.getText(), semesterField.getText(), codeField.getText(), nameField.getText(),
+                            lecturerField.getText(), venueField.getText(), String.valueOf(dayBox.getSelectedItem()), String.valueOf(timeBox.getSelectedItem()),
+                            score,Integer.parseInt(String.valueOf(creditBox.getSelectedItem())), String.valueOf(requirementBox.getSelectedItem()), target.isVerified());
                     substitute(target, course);
-                    this.dispose();
+                    dispose();
                 }
             };
+        }
+
+    }
+
+
+    public static void serializeData(){
+        final String[] modulesData = new String[modulesMonitor.size()];
+        for (int i = 0; i < modulesData.length; i++) {
+            modulesData[i] = modulesMonitor.get(i).exportContent();
+        }
+        Serializer.toDisk(modulesData, "modules.ser");
+    }
+
+    public static void deserializeData() {
+        final String[] modulesData = (String[]) Serializer.fromDisk("modules.ser");
+        if (modulesData == null) {
+            App.silenceException("Error reading Modules.");
+            return;
+        }
+
+        for (String dataLines : modulesData) {
+            modulesMonitor.add(Course.importFromSerial(dataLines));
         }
     }
 

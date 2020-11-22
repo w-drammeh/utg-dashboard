@@ -6,12 +6,12 @@ public abstract class KFontFactory implements Preference {
     public static final String FONT_NAME = "Tahoma";
 
 
-    public static Font createBoldFont(int size){
-        return new Font(FONT_NAME, Font.BOLD, size);
-    }
-
     public static Font createPlainFont(int size){
         return new Font(FONT_NAME, Font.PLAIN, size);
+    }
+
+    public static Font createBoldFont(int size){
+        return new Font(FONT_NAME, Font.BOLD, size);
     }
 
     public static Font createItalicFont(int size){
@@ -19,14 +19,15 @@ public abstract class KFontFactory implements Preference {
     }
 
     public static Font createBoldItalic(int size){
-        return new Font(FONT_NAME,Font.BOLD + Font.ITALIC,size);
+        return new Font(FONT_NAME, Font.BOLD + Font.ITALIC, size);
     }
 
     /**
-     * A font commonly used by all those big texts that appear at the top the the body.
+     * A font commonly used by all those big texts that appear at the top of the body.
+     * Normally, at the top-left
      */
     public static Font bodyHeaderFont(){
-        return createBoldFont(20);
+        return createPlainFont(20);
     }
 
 }

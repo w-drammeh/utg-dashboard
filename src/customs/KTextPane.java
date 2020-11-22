@@ -9,9 +9,9 @@ public class KTextPane extends JTextPane implements Preference {
 
     public KTextPane(String type, String text){
         super();
-        this.setContentType(type);
-        this.setText(text);
-        this.setPreferences();
+        setContentType(type);
+        setText(text);
+        setPreferences();
     }
 
     public static KTextPane wantHtmlFormattedPane(String htmlText){
@@ -19,13 +19,13 @@ public class KTextPane extends JTextPane implements Preference {
                 "</style> </head> <body>" +
                 htmlText +
                 "</body> </html>";
-        return new KTextPane("text/html", formattedText);
+        return new KTextPane(HTML_TYPE, formattedText);
     }
 
     public void setPreferences(){
-        this.setEditable(false);
-        this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        this.setFont(KFontFactory.createPlainFont(15));//In case of non-HTML
+        setEditable(false);
+        setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        setFont(KFontFactory.createPlainFont(15));//as in case of non-html
     }
 
 }

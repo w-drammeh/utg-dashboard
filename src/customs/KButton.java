@@ -1,7 +1,7 @@
 package customs;
 
 import main.App;
-import main.MyClass;
+import main.MComponent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,8 +9,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * The standard Dashboard button.
- * It is a convention that buttons modify their toolTips based on their states (on or off) as appropriate.
+ * The standard Dashboard Button.
+ * It is a convention that buttons modify their toolTips based on their states
+ * (on or off) as appropriate.
  */
 public class KButton extends JButton implements Preference {
     private String initialTip;
@@ -18,56 +19,56 @@ public class KButton extends JButton implements Preference {
 
     public KButton(){
         super();
-        this.setPreferences();
+        setPreferences();
     }
 
     public KButton(String text){
         super(text);
-        this.setPreferences();
+        setPreferences();
     }
 
     /**
-     * Constructs an iconified buttons; which, by default or under most UIs, is "dressed".
+     * Constructs an iconified button; which, by default or under most UIs, is "dressed".
      */
     public KButton(Icon icon){
         super(icon);
-        this.setPreferences();
+        setPreferences();
     }
 
-    public static KButton getIconifiedButton(String  iconName, int iWidth, int iHeight){
-        final KButton iconButton = new KButton(MyClass.scaleForMe(App.getIconURL(iconName), iWidth, iHeight));
+    public static KButton getIconifiedButton(String name, int width, int height){
+        final KButton iconButton = new KButton(MComponent.scale(App.getIconURL(name), width, height));
         iconButton.undress();
         return iconButton;
     }
 
     public void setStyle(Font font, Color foreground){
-        this.setFont(font);
-        this.setForeground(foreground);
+        setFont(font);
+        setForeground(foreground);
     }
 
     /**
      * Invoked to force "undressing" on buttons not constructed with getIconifiedButton(#).
      */
     public void undress(){
-        this.setBorderPainted(false);
-        this.setContentAreaFilled(false);
+        setBorderPainted(false);
+        setContentAreaFilled(false);
     }
 
-    public void dress(){
-        this.setBorderPainted(true);
-        this.setContentAreaFilled(true);
+    public void redress(){
+        setBorderPainted(true);
+        setContentAreaFilled(true);
     }
 
     /**
      * See KLabel.underline(Color, boolean)
      */
-    public void underline(Color background, boolean alwaysVisible){
-        final KSeparator separator = new KSeparator(background == null ? this.getForeground() : background);
-        this.setLayout(new BorderLayout());
-        this.add(separator, BorderLayout.SOUTH);
+    public void underline(Color foreground, boolean alwaysVisible){
+        final KSeparator separator = new KSeparator(foreground == null ? getForeground() : foreground);
+        setLayout(new BorderLayout());
+        add(separator, BorderLayout.SOUTH);
         if (!alwaysVisible) {
             separator.setVisible(false);
-            this.addMouseListener(new MouseAdapter(){
+            addMouseListener(new MouseAdapter(){
                 @Override
                 public void mouseEntered(MouseEvent e){
                     separator.setVisible(true);
@@ -81,31 +82,35 @@ public class KButton extends JButton implements Preference {
         }
     }
 
-    public void setText(int n){
-        this.setText(Integer.toString(n));
+    public void underline(boolean alwaysVisible){
+        underline(null, alwaysVisible);
     }
 
-    public void setToolTipText(int n) {
-        this.setToolTipText(Integer.toString(n));
+    public void setText(int n){
+        setText(Integer.toString(n));
+    }
+
+    public void setToolTipText(int n){
+        setToolTipText(Integer.toString(n));
     }
 
     @Override
     public void setEnabled(boolean b) {
         super.setEnabled(b);
-        this.setToolTipText(b ? initialTip : null);
+        setToolTipText(b ? initialTip : null);
     }
 
     @Override
     public void setToolTipText(String text) {
         super.setToolTipText(text);
         if (text != null) {
-            this.initialTip = text;
+            initialTip = text;
         }
     }
 
     @Override
     public JToolTip createToolTip(){
-        return KLabel.preferredTip();
+        return MComponent.preferredTip();
     }
 
     @Override

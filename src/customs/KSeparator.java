@@ -6,34 +6,42 @@ import java.awt.*;
 public class KSeparator extends JSeparator implements Preference {
 
 
-    public KSeparator(Color bg){
+    public KSeparator(Dimension dimension) {
         super();
-        this.setBackground(bg);
+        setPreferences();
+        setPreferredSize(dimension);
+    }
+
+    public KSeparator(Color foreground){
+        super();
+        setPreferences();
+        setForeground(foreground);
     }
 
     public KSeparator(int orientation){
         super(orientation);
+        setPreferences();
     }
 
-    public KSeparator(int orientation, Color bg){
+    public KSeparator(Dimension size, Color foreground, int orientation){
+        this(size);
+        setOrientation(orientation);
+        setForeground(foreground);
+    }
+
+    public KSeparator(int orientation, Color foreground){
         this(orientation);
-        this.setBackground(bg);
+        setForeground(foreground);
     }
 
-    public KSeparator(Color bg, Dimension dimension){
-        super();
-        this.setBackground(bg);
-        this.setPreferredSize(dimension);
-    }
-
-    public KSeparator(Dimension dimension) {
-        super();
-        this.setPreferredSize(dimension);
+    public KSeparator(Dimension dimension, Color foreground){
+        this(dimension);
+        setForeground(foreground);
     }
 
     @Override
     public void setPreferences() {
-
+        setOpaque(false);
     }
 
 }

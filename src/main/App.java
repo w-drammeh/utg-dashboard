@@ -9,11 +9,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
 /**
- * It is the center for generalized concepts. Any attempt to point to an icon, a sheet, etc, must directly
- * call this class.
- *
+ * It is the center for generalized concepts.
+ * Any attempt to point to an icon, a sheet, etc, must directly call this class.
  * As analogous to the Globals type which globalizes code operations, this class universalizes the
- * input output operations.
+ * input-output operations.
  */
 public class App {
     public static final int DIALOG_DISMISSED = 0;
@@ -34,7 +33,7 @@ public class App {
      * A centralized point for user verification. This obsoletes the call verifyUser(String)
      */
     public static int verifyUser(Component parent, String vString){
-        if (SettingsCore.noVerifyNeeded) {
+        if (Settings.noVerifyNeeded) {
             return VERIFICATION_TRUE;
         } else {
             final String input = requestInput(parent == null ? Board.getRoot() : parent, "Confirm ID", vString);
@@ -42,7 +41,7 @@ public class App {
                 return DIALOG_DISMISSED;
             } else if (Globals.isBlank(input)) {
                 return INPUT_BLANK;
-            } else if (input.equals(Student.getMatNumber() + "")) {
+            } else if (input.equals(Student.getMatNumber())) {
                 return VERIFICATION_TRUE;
             } else {
                 return VERIFICATION_FALSE;
@@ -73,15 +72,6 @@ public class App {
         return showYesNoCancelDialog(null, title, text);
     }
 
-    public static boolean showYesNoDialog(Component parent, String title, String text){
-        return JOptionPane.showConfirmDialog(parent == null ? Board.getRoot() : parent, dialogTextPanel(text),
-                title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
-    }
-
-    public static boolean showYesNoDialog(String title, String text){
-        return showYesNoDialog(null, title, text);
-    }
-
     public static boolean showOkCancelDialog(Component parent, String title, String text){
         return JOptionPane.showConfirmDialog(parent == null ? Board.getRoot() : parent, dialogTextPanel(text),
                 title, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;
@@ -91,6 +81,10 @@ public class App {
         return showOkCancelDialog(null, title, text);
     }
 
+    /**
+     * Requests an input from the user.
+     * Seemingly gives null if the dialog is dismissed.
+     */
     public static String requestInput(Component parent, String title, String text){
         return JOptionPane.showInputDialog(parent == null ? Board.getRoot() : parent, dialogTextPanel(text),
                 title, JOptionPane.PLAIN_MESSAGE);
@@ -145,7 +139,7 @@ public class App {
 
     public static void reportConnectionLost(Component parent) {
         signalError(parent == null ? Board.getRoot() : parent,"Connection Lost",
-                "Sorry, we're having troubles connecting to the portal.\n" +
+                "Sorry, we are having troubles connecting to the Portal.\n" +
                 "Please try again later.");
     }
 
@@ -164,7 +158,7 @@ public class App {
     }
 
     public static void reportLoginAttemptFailed() {
-        signalError(Board.getRoot(), "Login Failed","Dashboard has been denied access to your portal.\n" +
+        signalError(Board.getRoot(), "Login Failed", "Dashboard has been denied access to your portal.\n" +
                 "Please go to 'Home | Privacy & Settings | Customize Profile' tab to make sure the right credentials are given.");
     }
 
@@ -197,11 +191,6 @@ public class App {
 
     public static void reportBusyPortal(){
         reportBusyPortal(null);
-    }
-
-    public static void reportRefreshFailure(){
-        promptWarning(Board.getRoot(), "Refresh Failure","Dashboard could not refresh your portal - " +
-                "now reading a buffered instance since "+MDate.formatFully(Portal.getLastLogin()));
     }
 
     public static void silenceException(Exception e){

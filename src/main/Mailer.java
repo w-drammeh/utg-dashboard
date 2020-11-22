@@ -16,7 +16,6 @@ public class Mailer {
     public static final String DEVELOPERS_MAIL = "utgdashboard@gmail.com";
     public static final String FEEDBACK = "Feedback";
     public static final String DEVELOPERS_REQUEST = "Track";
-    public static int REVIEWS_COUNT_TODAY;//it's reset @anotherDay() in Board
 
 
     public Mailer(String subject, String content){
@@ -24,17 +23,6 @@ public class Mailer {
         this.content = content;
         this.senderMail = DEVELOPERS_MAIL;
         this.senderPsswd = "wdrammeh20";
-    }
-
-    /**
-     * Condition is checked for Reviews / Feedbacks only.
-     */
-    public static boolean canSend(){
-        return REVIEWS_COUNT_TODAY <= 3;
-    }
-
-    public static void reportQuickFeedbackDenial(){
-        App.promptWarning("Feedback Denied","Sorry, you can send no more than 3 reviews per day.\nPlease try again later.");
     }
 
     public boolean sendAs(String type) {
@@ -64,7 +52,6 @@ public class Mailer {
             if (type.equals(FEEDBACK)) {
                 App.promptPlain("Feedback Sent","Message sent successfully. Thank you for the feedback!");
             }
-            REVIEWS_COUNT_TODAY++;
             return true;
         } catch (MessagingException mex) {
             if (type.equals(FEEDBACK)) {

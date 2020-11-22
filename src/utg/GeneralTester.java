@@ -15,8 +15,8 @@ import javax.swing.*;
  */
 public class GeneralTester {
 
+
     public static void main(String[] args) {
-        Student.reset();
         forgeDetailsForTest();
         forgeActiveCoursesForTest();
         forgeCoursesForTest();
@@ -30,28 +30,28 @@ public class GeneralTester {
         Student.setMonthOfAdmission(9);
         Student.setYearOfAdmission(2017);
         Student.setSemester("2019/2020 second semester".toUpperCase());
-        Student.setFirstName("Your Surname");
-        Student.setLastName("Your name");
-        Student.setMatNumber(29786751);
+        Student.setFirstName("Jallow");
+        Student.setLastName("Ismaila");
+        Student.setMatNumber("22113377");
         Student.setMajor("Major");
         Student.setCGPA(3.954);
-        Student.setProgram("Bachelor of .. in ..");
-        Student.setSchool("...");
-        Student.setDivision("...");
-        Student.setAddress("Address");
-        Student.resetTelephones("3413910");
+        Student.setProgram("Bachelor of Science in Mathematics");
+        Student.setMinor("Minor");
+        Student.setSchool("Arts and Sciences");
+        Student.setDivision("Physical and Natural Sciences");
+        Student.setAddress("Sukuta");
+        Student.setTelephones("3413910");
         Student.setNationality("Gambia");
         Student.setDateOfBirth("01 Jan 1999");
         Student.setPortalMail("email@utg.edu.gm");
         Student.setPortalPassword("student@utg");
-//        Student.setMaritalStatue("");
-//        Student.setPlaceOfBirth("");
+        Student.setMaritalStatue("");
+        Student.setPlaceOfBirth("");
         Student.setLevel("Undergraduate".toUpperCase());
-        Student.setState("Running".toUpperCase());
+        Student.setStatus("Running".toUpperCase());
         //
         Board.postProcesses.add(()-> {
             Student.setMajorCode("MTH");
-            Student.setMinor("Minor");
             Student.setMinorCode("");
         });
     }

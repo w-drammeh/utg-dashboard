@@ -1,7 +1,7 @@
 package customs;
 
 import main.App;
-import main.MyClass;
+import main.MComponent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,86 +16,70 @@ import java.awt.event.MouseEvent;
 public class KLabel extends JLabel implements Preference {
 
 
-    public KLabel(String text){
-        super(text);
+    public KLabel(){
+        super();
+        setPreferences();
     }
 
-    public KLabel(){
-        this("");
+    public KLabel(String text){
+        super(text);
+        setPreferences();
     }
 
     public KLabel(String text, Font font){
-        super(text);
-        this.setFont(font);
+        this(text);
+        setFont(font);
     }
 
     public KLabel(String text, Font font, Color fg){
-        super(text);
-        this.setFont(font);
-        this.setForeground(fg);
+        this(text);
+        setStyle(font, fg);
     }
 
     public KLabel(Icon icon){
         super(icon);
+        setPreferences();
     }
 
-    public static KLabel wantIconLabel(String iName, int iWidth, int iHeight){
-        return new KLabel(MyClass.scaleForMe(App.getIconURL(iName), iWidth, iHeight));
+    public static KLabel wantIconLabel(String name, int width, int height){
+        return new KLabel(MComponent.scale(App.getIconURL(name), width, height));
     }
 
     /**
      * Used to construct a predefined-label. The text passed is always loaded or
-     * appended anytime setText(#) is invoked. The int-param determines the position (left or right)
-     * of this permanent-text.
-     * Giving any other than SwingConstants.LEFT or SwingConstants.RIGHT will provoke an IllegalArgumentException.
+     * appended anytime setText(String) is invoked on this instance.
+     * The int-param determines the position (left or right) of the permanent-text.
      */
     public static KLabel getPredefinedLabel(String permanentText, int position){
-        if (!(position == SwingConstants.LEFT || position == SwingConstants.RIGHT)) {
-            throw new IllegalArgumentException("Position must be one of SwingConstants.LEFT or SwingConstants.RIGHT");
-        }
-
-        return new KLabel(permanentText){
+        return new KLabel() {
             @Override
             public void setText(String text) {
-                if (position == SwingConstants.LEFT) {
-                    super.setText(permanentText+text);
-                } else {
-                    super.setText(text+permanentText);
-                }
+                super.setText(position == SwingConstants.LEFT ? permanentText + text : text + permanentText);
             }
         };
     }
 
-    /**
-     * Dashboard's standard toolTip for components.
-     */
-    public static JToolTip preferredTip(){
-        final JToolTip tip = new JToolTip();
-        tip.setFont(KFontFactory.createPlainFont(14));
-        tip.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
-        return tip;
-    }
-
     public void setStyle(Font f, Color fg){
-        this.setFont(f);
-        this.setForeground(fg);
+        setFont(f);
+        setForeground(fg);
     }
 
     /**
      * Underlines this label.
-     * The separator is always shown beneath this label if 'alwaysVisible', otherwise only on mouseFocus.
+     * The separator is always shown beneath this label if 'alwaysVisible',
+     * otherwise only on mouseFocus events.
      * Notice this call sets the layout Border, and puts the Separator beneath the component.
      * Whence should not be called otherwise.
-     * The line uses the Color-param as its foreground. If 'null', it will assume the
+     * The line uses the color-param as its foreground. If 'null', it will assume the
      * caller's foreground instead.
      */
-    public void underline(Color bg, boolean alwaysVisible){
-        final KSeparator separator = new KSeparator(bg == null ? this.getForeground() : bg);
-        this.setLayout(new BorderLayout());
-        this.add(separator, BorderLayout.SOUTH);
+    public void underline(Color foreground, boolean alwaysVisible){
+        final KSeparator separator = new KSeparator(foreground == null ? getForeground() : foreground);
+        setLayout(new BorderLayout());
+        add(separator, BorderLayout.SOUTH);
         if (!alwaysVisible) {
             separator.setVisible(false);
-            this.addMouseListener(new MouseAdapter() {
+            addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     separator.setVisible(true);
@@ -109,23 +93,26 @@ public class KLabel extends JLabel implements Preference {
         }
     }
 
+    public void underline(boolean alwaysVisible){
+        underline(null, alwaysVisible);
+    }
+
     public void setText(int n){
-        this.setText(Integer.toString(n));
+        setText(Integer.toString(n));
     }
 
     @Override
     public JToolTip createToolTip() {
-        return preferredTip();
+        return MComponent.preferredTip();
     }
 
     @Override
     public String toString() {
-        return this.getText();
+        return getText();
     }
 
     @Override
     public void setPreferences() {
-
     }
 
 }

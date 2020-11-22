@@ -151,9 +151,9 @@ public class MDate {
     }
 
     public static int getTimeValue(Date d){
-        return  (getPropertyFrom(d, Calendar.HOUR) + 12) * Globals.HOUR_IN_MILLI +
-                getPropertyFrom(d, Calendar.MINUTE) * Globals.MINUTE_IN_MILLI +
-                getPropertyFrom(d, Calendar.SECOND) * Globals.SECOND_IN_MILLI;
+        return  (getPropertyFrom(d, Calendar.HOUR) + 12) * Globals.HOUR +
+                getPropertyFrom(d, Calendar.MINUTE) * Globals.MINUTE +
+                getPropertyFrom(d, Calendar.SECOND) * Globals.SECOND;
     }
 
 }

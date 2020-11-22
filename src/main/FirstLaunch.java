@@ -7,43 +7,31 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 
 public class FirstLaunch extends KDialog {
+    private KPanel contentPane;
     private final Font bigFont = KFontFactory.createBoldFont(18);
-    private CardLayout CARDS = new CardLayout(){
+    private final CardLayout CARDS = new CardLayout(){
         @Override
         public void show(Container parent, String name) {
             super.show(parent, name);
             FirstLaunch.this.setTitle("Startup Settings - "+name);
         }
     };
-    private KPanel contentPane;
 
 
     public FirstLaunch(){
         super("Startup Settings - Major code");
-        setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
-        setDefaultCloseOperation(KDialog.DO_NOTHING_ON_CLOSE);
+        this.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
+        this.setDefaultCloseOperation(KDialog.DO_NOTHING_ON_CLOSE);
         contentPane = new KPanel(CARDS);
-        setContentPane(contentPane);
+        this.setContentPane(contentPane);
         CARDS.addLayoutComponent(contentPane.add(majorCodeComponent()), "Major code");
         CARDS.addLayoutComponent(contentPane.add(minorComponent()), "Minor");
         CARDS.addLayoutComponent(contentPane.add(emailComponent()), "Student mail");
         CARDS.addLayoutComponent(contentPane.add(imageComponent()), "Image icon");
         CARDS.addLayoutComponent(contentPane.add(welcomeComponent()), "Welcome");
-        setPreferredSize(new Dimension(600, 500));
-        pack();
-        setLocationRelativeTo(Board.getRoot());
-    }
-
-    private static void mountDataPlus(){
-        MyClass.mountUserData();
-        Student.setAbout("My name is "+Student.getFullNamePostOrder()+"\n" +
-                "The University of the Gambia\n" +
-                "School of "+Student.getSchool()+"\n" +
-                "Division of "+Student.getDivision()+"\n" +
-                Student.getMajor()+" program\n" +
-                String.join(" - ", String.valueOf(Student.getYearOfAdmission()),
-                        String.valueOf(Student.getExpectedYearOfGraduation())));
-        SettingsUI.descriptionArea.setText(Student.getAbout());
+        this.setPreferredSize(new Dimension(600, 500));
+        this.pack();
+        this.setLocationRelativeTo(Board.getRoot());
     }
 
     private Component majorCodeComponent(){
@@ -74,9 +62,8 @@ public class FirstLaunch extends KDialog {
 
         final KPanel majorPanel = new KPanel();
         majorPanel.setLayout(new BoxLayout(majorPanel, BoxLayout.Y_AXIS));
-        majorPanel.addAll(KPanel.wantDirectAddition(new KLabel("What's Your Major Code?", bigFont)), textPane,
-                KPanel.wantDirectAddition(majorCodeField),
-                ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,nextButton));
+        majorPanel.addAll(new KPanel(new KLabel("What's Your Major Code?", bigFont)), textPane, new KPanel(majorCodeField),
+                MComponent.contentBottomGap(), new KPanel(new FlowLayout(FlowLayout.RIGHT), nextButton));
         return majorPanel;
     }
 
@@ -94,7 +81,7 @@ public class FirstLaunch extends KDialog {
         minorNameField.setPreferredSize(new Dimension(350, 30));
         minorNameField.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2, true));
         minorNameField.setEditable(false);
-        minorNameField.addActionListener(e->minorCodeField.requestFocusInWindow());
+        minorNameField.addActionListener(e-> minorCodeField.requestFocusInWindow());
 
         minorCodeField.setPreferredSize(new Dimension(125, 30));
         minorCodeField.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2, true));
@@ -123,9 +110,9 @@ public class FirstLaunch extends KDialog {
 
         final KPanel kPanel = new KPanel();
         kPanel.setLayout(new BoxLayout(kPanel, BoxLayout.Y_AXIS));
-        kPanel.addAll(textPane, KPanel.wantDirectAddition(iDoButton, iDontButton),
-                KPanel.wantDirectAddition(new KLabel("Minor Program: ",KFontFactory.createBoldFont(16)),minorNameField),
-                KPanel.wantDirectAddition(new KLabel("Code: ",KFontFactory.createBoldFont(16)), minorCodeField));
+        kPanel.addAll(textPane, new KPanel(iDoButton, iDontButton),
+                new KPanel(new KLabel("Minor Program: ", KFontFactory.createBoldFont(16)), minorNameField),
+                new KPanel(new KLabel("Code: ", KFontFactory.createBoldFont(16)), minorCodeField));
 
         final KButton prevButton = new KButton("Back");
         prevButton.setFont(KFontFactory.createPlainFont(15));
@@ -154,9 +141,8 @@ public class FirstLaunch extends KDialog {
 
         final KPanel minorPanel = new KPanel();
         minorPanel.setLayout(new BoxLayout(minorPanel, BoxLayout.Y_AXIS));
-        minorPanel.addAll(KPanel.wantDirectAddition(new KLabel("Do You Minor a Program?", bigFont)), kPanel,
-                ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),
-                        null,prevButton, nextButton));
+        minorPanel.addAll(new KPanel(new KLabel("Do You Minor a Program?", bigFont)), kPanel,
+                MComponent.contentBottomGap(), new KPanel(new FlowLayout(FlowLayout.RIGHT), prevButton, nextButton));
         return minorPanel;
     }
 
@@ -179,16 +165,16 @@ public class FirstLaunch extends KDialog {
         psswdField.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2, true));
 
         final KButton setButton = new KButton("Set");
-        setButton.setFont(KFontFactory.createPlainFont(15));
+        setButton.setStyle(KFontFactory.createPlainFont(15), Color.BLUE);
         setButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        setButton.addActionListener(e->{
+        setButton.addActionListener(e-> {
             if (!emailField.hasText()) {
-                App.signalError("No Email", "To set a student mail, please provide it in the email field.");
+                App.signalError("No Email", "To set a student mail, please enter it in the email field.");
                 emailField.requestFocusInWindow();
                 return;
             }
             if (!psswdField.hasText()) {
-                App.signalError("No Email", "Please provide the password in the password field.");
+                App.signalError("No Password", "Please provide the password in the password field.");
                 psswdField.requestFocusInWindow();
                 return;
             }
@@ -203,8 +189,8 @@ public class FirstLaunch extends KDialog {
 
         final KPanel kPanel = new KPanel();
         kPanel.setLayout(new BoxLayout(kPanel, BoxLayout.Y_AXIS));
-        kPanel.addAll(textPane, KPanel.wantDirectAddition(new KLabel("Email: ",KFontFactory.createBoldFont(16)), emailField),
-                KPanel.wantDirectAddition(new KLabel("Password: ",KFontFactory.createBoldFont(16)), psswdField));
+        kPanel.addAll(textPane, new KPanel(new KLabel("Email: ", KFontFactory.createBoldFont(16)), emailField),
+                new KPanel(new KLabel("Password: " ,KFontFactory.createBoldFont(16)), psswdField));
 
         final KButton prevButton = new KButton("Back");
         prevButton.setFont(KFontFactory.createPlainFont(15));
@@ -216,9 +202,8 @@ public class FirstLaunch extends KDialog {
 
         final KPanel emailPanel = new KPanel();
         emailPanel.setLayout(new BoxLayout(emailPanel, BoxLayout.Y_AXIS));
-        emailPanel.addAll(KPanel.wantDirectAddition(new KLabel("Do you know you had a Student Mail?", bigFont)), kPanel,
-                ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),
-                        null,prevButton,skipButton,setButton));
+        emailPanel.addAll(new KPanel(new KLabel("Do you know you had a Student Mail?", bigFont)), kPanel,
+                MComponent.contentBottomGap(), new KPanel(new FlowLayout(FlowLayout.RIGHT), prevButton, skipButton, setButton));
         return emailPanel;
     }
 
@@ -239,14 +224,14 @@ public class FirstLaunch extends KDialog {
         setButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         setButton.addActionListener(e-> {
             Student.startSettingImage(this.getRootPane());
-            ComponentAssistant.repair(iPanel);
+            MComponent.empty(iPanel);
             iPanel.add(new KLabel(Student.getIcon()));
-            ComponentAssistant.ready(iPanel);
+            MComponent.ready(iPanel);
         });
 
         final KPanel nicePanel = new KPanel();
         nicePanel.setLayout(new BoxLayout(nicePanel, BoxLayout.Y_AXIS));
-        nicePanel.addAll(textPane, iPanel, KPanel.wantDirectAddition(setButton));
+        nicePanel.addAll(textPane, iPanel, new KPanel(setButton));
 
         final KButton prevButton = new KButton("Back");
         prevButton.setFont(KFontFactory.createPlainFont(15));
@@ -262,9 +247,8 @@ public class FirstLaunch extends KDialog {
 
         final KPanel imgPanel = new KPanel();
         imgPanel.setLayout(new BoxLayout(imgPanel, BoxLayout.Y_AXIS));
-        imgPanel.addAll(KPanel.wantDirectAddition(new KLabel("You Look Nice!", bigFont)), nicePanel,
-                ComponentAssistant.contentBottomGap(), KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),
-                        null,prevButton,finishButton));
+        imgPanel.addAll(new KPanel(new KLabel("You Look Nice!", bigFont)), nicePanel,
+                MComponent.contentBottomGap(), new KPanel(new FlowLayout(FlowLayout.RIGHT), prevButton, finishButton));
         return imgPanel;
     }
 
@@ -276,7 +260,7 @@ public class FirstLaunch extends KDialog {
                 "<p>Please see <b>Home | FAQs & Help | Dashboard Tips</b> to get yourself quickly familiar with the vast features " +
                 "of Dashboard.</p>" +
                 "<p>Finally, by seeing this dialog, it means Dashboard has already created a root folder in your home directory - " +
-                MyClass.rootDir+". You may want to check out for this folder and the <b>README.txt</b> file therein.</p>" +
+                Serializer.ROOT_DIR +". You may want to check out for this folder and the <b>README.txt</b> file therein.</p>" +
                 "<p style='text-align: center;'>Thank you for using <b>Dashboard</b></p>";
         final KTextPane textPane = KTextPane.wantHtmlFormattedPane(mailText);
         textPane.setBackground(Color.WHITE);
@@ -289,9 +273,21 @@ public class FirstLaunch extends KDialog {
 
         final KPanel welcomePanel = new KPanel();
         welcomePanel.setLayout(new BoxLayout(welcomePanel, BoxLayout.Y_AXIS));
-        welcomePanel.addAll(KPanel.wantDirectAddition(new KLabel("Voila!", bigFont)), textPane,
-                KPanel.wantDirectAddition(new FlowLayout(),null,startButton), Box.createVerticalStrut(50));
+        welcomePanel.addAll(new KPanel(new KLabel("Voila!", bigFont)), textPane, new KPanel(startButton),
+                Box.createVerticalStrut(50));
         return welcomePanel;
+    }
+
+    private static void mountDataPlus(){
+        Serializer.mountUserData();
+        Student.setAbout("My name is "+Student.getFullNamePostOrder()+"\n" +
+                "The University of the Gambia\n" +
+                "School of "+Student.getSchool()+"\n" +
+                "Division of "+Student.getDivision()+"\n" +
+                Student.getMajor()+" Program\n" +
+                String.join(" - ", String.valueOf(Student.getYearOfAdmission()),
+                        String.valueOf(Student.getExpectedYearOfGraduation())));
+        SettingsUI.descriptionArea.setText(Student.getAbout());
     }
 
 }

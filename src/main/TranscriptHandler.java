@@ -20,14 +20,11 @@ import java.util.Objects;
 /**
  * While the generator type gets the components used by Board,
  * this handles the print and export actions.
+ * This class does not make use of the customs.
  */
 public class TranscriptHandler {
-    public static final String UNCLASSIFIED = "None";
-    public static final String THIRD_CLASS = "\"Cum laude\" - With Praise!";
-    public static final String SECOND_CLASS = "\"Magna Cum laude\" - With Great Honor!";
-    public static final String FIRST_CLASS = "\"Summa Cum laude\" - With Greatest Honor!";
-    private static KDialog exportDialog;
-    private static KPanel exportPanel;
+    private static JDialog exportDialog;
+    private static JPanel exportPanel;
     private static LookAndFeel currentLookAndFeel;
     private static boolean secondaryExportNeeded;
     private static int secondaryStartIndex;
@@ -38,32 +35,33 @@ public class TranscriptHandler {
         attachTitlePlus();
         addDetails();
 
-        final KDefaultTableModel primaryModel = new KDefaultTableModel();
+        final KTableModel primaryModel = new KTableModel();
         primaryModel.setColumnIdentifiers(TranscriptGenerator.HEADS);
-        final List<Course> l = Memory.listRequested();
-        for (int i = 0; i < l.size(); i++) {
+        final List<Course> memory = Memory.listRequested();
+        for (int i = 0; i < memory.size(); i++) {
             if (i == 26) {
                 secondaryExportNeeded = true;
                 secondaryStartIndex = i;
                 break;
             }
-            final Course c = l.get(i);
-            primaryModel.addRow(new String[] {c.getCode(),c.getName(),Integer.toString(c.getCreditHours()),
-                    c.getGrade(),Double.toString(c.getQualityPoint())});
+            final Course course = memory.get(i);
+            primaryModel.addRow(new String[] {course.getCode(), course.getName(), Integer.toString(course.getCreditHours()),
+                    course.getGrade(), Double.toString(course.getQualityPoint())});
         }
 
         if (secondaryExportNeeded) {
-            final int r = l.size() - secondaryStartIndex;
-            if (r > 5) {
+            final int dif = memory.size() - secondaryStartIndex;
+            if (dif > 5) {
                 int t = secondaryStartIndex;
                 for (; t < (secondaryStartIndex + 4); t++) {
-                    final Course c = l.get(t);
-                    primaryModel.addRow(new String[] {c.getCode(),c.getName(),Integer.toString(c.getCreditHours()),
-                            c.getGrade(),Double.toString(c.getQualityPoint())});
+                    final Course course = memory.get(t);
+                    primaryModel.addRow(new String[] {course.getCode(), course.getName(), Integer.toString(course.getCreditHours()),
+                            course.getGrade(), Double.toString(course.getQualityPoint())});
                 }
                 secondaryStartIndex = t;
             }
         }
+
         final KTable primaryTable = new KTable(primaryModel);
         primaryTable.setFont(KFontFactory.createPlainFont(11));
         primaryTable.getColumnModel().getColumn(0).setPreferredWidth(90);
@@ -77,7 +75,7 @@ public class TranscriptHandler {
         primaryTable.centerAlignColumns(2, 3, 4);
 //        primaryTable.getColumnModel().getColumn(2).setHeaderValue(KTextPane.wantHtmlFormattedPane("CREDIT<br>VALUE"));
 
-        final KScrollPane scrollPane = KScrollPane.getSizeMatchingScrollPane(primaryTable,3);
+        final KScrollPane scrollPane = primaryTable.sizeMatchingScrollPane();
         scrollPane.setBounds(20, 285, scrollPane.getPreferredSize().width, scrollPane.getPreferredSize().height);//which were set earlier
         exportPanel.add(scrollPane);
 
@@ -86,12 +84,13 @@ public class TranscriptHandler {
                     125, 200, 45,"AVERAGE","QUALITY POINT", " "+Student.getCGPA()+" ");
             lastNotLeast.setBounds(lastNotLeast.getX(),lastNotLeast.getY(),lastNotLeast.getWidth(),50);
             exportPanel.add(lastNotLeast);
-        }//Then it shall be added later... (in secondary) to the secondaryExportPanel
+        }//then it shall be added later... (in secondary) to the secondaryExportPanel
+
         repairDialog();
     }
 
     private static void repairPanel(){
-        exportPanel = new KPanel();
+        exportPanel = new JPanel();
         exportPanel.setBackground(Color.WHITE);
         exportPanel.addContainerListener(new ContainerAdapter() {
             @Override
@@ -104,8 +103,8 @@ public class TranscriptHandler {
 
     private static void repairDialog(){
         exportDialog = new KDialog();
-        exportDialog.setSize(594, 842);
         exportDialog.setUndecorated(true);
+        exportDialog.setSize(594, 842);
         exportDialog.setContentPane(exportPanel);
         exportDialog.setLocationRelativeTo(null);
     }
@@ -118,7 +117,8 @@ public class TranscriptHandler {
         labelsPanel.setBounds(175, 40, 375, 75);
         labelsPanel.add(new KLabel("THE UNIVERSITY OF THE GAMBIA", KFontFactory.createBoldFont(17)));
         labelsPanel.add(new KLabel("STUDENT ACADEMIC RECORDS", KFontFactory.createBoldFont(17)));
-        exportPanel.addAll(uLogo, labelsPanel);
+        exportPanel.add(uLogo);
+        exportPanel.add(labelsPanel);
     }
 
     private static void addDetails(){
@@ -134,7 +134,7 @@ public class TranscriptHandler {
     private static KPanel newDetailPanel(int x, int y, int leftMostWidth, int totalWidth, int totalHeight, String... strings){
         final Font hereFont = KFontFactory.createPlainFont(10);
 
-        final KPanel l = new KPanel(new Dimension(leftMostWidth, totalHeight)){
+        final KPanel l = new KPanel(leftMostWidth, totalHeight){
             @Override
             public Component add(Component comp) {
                 comp.setBackground(Color.WHITE);
@@ -157,7 +157,7 @@ public class TranscriptHandler {
                     new KLabel(strings[1].toUpperCase(), hereFont));
         } else if (strings.length == 3) {
             l.setLayout(new BoxLayout(l, BoxLayout.Y_AXIS));
-            l.addAll(KPanel.wantDirectAddition(new KLabel(strings[0], hereFont)), KPanel.wantDirectAddition(new KLabel(strings[1].toUpperCase(), hereFont)));
+            l.addAll(new KPanel(new KLabel(strings[0], hereFont)), new KPanel(new KLabel(strings[1].toUpperCase(), hereFont)));
 
             r.setLayout(new BoxLayout(r, BoxLayout.X_AXIS));
             r.addAll(new KPanel(), new KLabel(strings[2].toUpperCase(), hereFont), new KPanel());
@@ -174,7 +174,8 @@ public class TranscriptHandler {
     }
 
     /**
-     * The only public call; the gate-way to the functionality of this class.
+     * The only public call;
+     * the gate-way to the functionality of this class.
      */
     public static void exportNow(){
         currentLookAndFeel = UIManager.getLookAndFeel();
@@ -191,10 +192,11 @@ public class TranscriptHandler {
             return;
         }
 
-        try {//This look change is visibly-silent as it does not update the component-tree-UI on already visible containers
+        try {//this look change is visibly-silent as it does not update the component-tree-UI on already visible containers
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (Exception ignored) {
         }
+
         setUpPrimaryExportation();
         exportDialog.setVisible(true);
         final Document document = new Document();
@@ -205,7 +207,6 @@ public class TranscriptHandler {
             final PdfTemplate template = contentByte.createTemplate(595.0F, 842.0F);
             final Graphics2D graphics = template.createGraphicsShapes(595.0F, 842.0F);
             contentByte.addTemplate(template, 0, 0);
-
             exportPanel.printAll(graphics);
             graphics.dispose();
             document.close();
@@ -213,21 +214,21 @@ public class TranscriptHandler {
             if (secondaryExportNeeded) {
                 launchSecondaryExport(savePath);
             }
-            reportExportSuccessful(savePath);
+            reportSuccess(savePath);
         } catch (Exception e){
-            reportExportError(e);
+            reportError(e);
         } finally {
             exportDialog.dispose();
         }
     }
 
     private static void launchSecondaryExport(File savePath) throws FileNotFoundException, DocumentException {
-        final KDefaultTableModel secondaryModel = new KDefaultTableModel();
+        final KTableModel secondaryModel = new KTableModel();
         secondaryModel.setColumnIdentifiers(TranscriptGenerator.HEADS);
-        final List<Course> l = Memory.listRequested();
-        for (int i = secondaryStartIndex; i < l.size(); i++) {
-            final Course c = l.get(i);
-            secondaryModel.addRow(new String[] {c.getCode(),c.getName(),Integer.toString(c.getCreditHours()),c.getGrade(),
+        final List<Course> memory = Memory.listRequested();
+        for (int i = secondaryStartIndex; i < memory.size(); i++) {
+            final Course c = memory.get(i);
+            secondaryModel.addRow(new String[] {c.getCode(), c.getName(), Integer.toString(c.getCreditHours()), c.getGrade(),
                     Double.toString(c.getQualityPoint())});
         }
 
@@ -242,15 +243,16 @@ public class TranscriptHandler {
         secondaryTable.getTableHeader().setVisible(false);
         secondaryTable.centerAlignColumns(2, 3, 4);
 
-        final KScrollPane scrollPane = KScrollPane.getSizeMatchingScrollPane(secondaryTable,3);
+        final KScrollPane scrollPane = secondaryTable.sizeMatchingScrollPane();
         scrollPane.setBounds(20,30, scrollPane.getPreferredSize().width, scrollPane.getPreferredSize().height);
 
         final KPanel lastNotLeast = newDetailPanel(350,(scrollPane.getY()+scrollPane.getHeight()+10),115,
-                230, 45, "AVERAGE","QUALITY POINT", " "+Student.getCGPA()+" ");
-        lastNotLeast.setBounds(lastNotLeast.getX(),lastNotLeast.getY(),lastNotLeast.getWidth(),50);
+                230, 45, "AVERAGE", "QUALITY POINT", " "+Student.getCGPA()+" ");
+        lastNotLeast.setBounds(lastNotLeast.getX(), lastNotLeast.getY(), lastNotLeast.getWidth(),50);
 
         repairPanel();
-        exportPanel.addAll(scrollPane, lastNotLeast);
+        exportPanel.add(scrollPane);
+        exportPanel.add(lastNotLeast);
         repairDialog();
 
         exportDialog.setVisible(true);
@@ -266,15 +268,15 @@ public class TranscriptHandler {
         document.close();
     }
 
-    private static void reportExportSuccessful(File file){
+    private static void reportSuccess(File file){
         SettingsUI.setLookTo(currentLookAndFeel.getName());
-        App.promptPlain("Export Successful", "Your Transcript is been successfully exported to "+file);
+        App.promptPlain("Successful", "Your Transcript is been exported successfully to "+file);
     }
 
-    private static void reportExportError(Exception e){
+    private static void reportError(Exception e){
         SettingsUI.setLookTo(currentLookAndFeel.getName());
         App.signalError("Error", "Sorry, we experienced unusual problems during the export.\n" +
-                "Please, try again.\nError Message = " + e.getMessage());
+                "Error Message = " + e.getMessage());
     }
 
 }

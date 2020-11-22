@@ -7,16 +7,17 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * The course model with almost all the concrete attributes of a course.
- * It has a generalized constructor, passing all the fields at that very instance of creation.
- * A course may be verified in only two ways: those that are provided to the Memory type by
- * PrePortal are automatically "verified" set; those that are put into the table by the
- * user can be verified through the Portal.
+ * The main.Course models a course.
+ * It has a generalized constructor, passing all the fundamental attributes
+ * at that very instance of creation.
+ * A course may be verified in two ways:
+ * 1) those that are provided to the main.Memory type by main.PrePortal through
+ * main.ModulesHandler.STARTUP_COURSES are automatically "verified" set;
+ * 2) those that are put into the table by the user can be verified through the Portal.
  */
 public class Course {
     /*
-     * And this is how they're passed to the constructor. This order should remain religious
-     * for backward-compatibility sake and de-serialization.
+     * This order should remain religious for backward-compatibility and deserialization sake.
      */
     private String year;
     private String semester;
@@ -29,8 +30,8 @@ public class Course {
     private double score;
     private int creditHours;
     private String requirement;
-    private boolean isValidated;
-    private boolean tutorsNameIsCustomizable;
+    private boolean isVerified;
+    private boolean lecturerNameChangeability;
 //    Requirement options
     public static final String MAJOR_OBLIGATORY = "Major Obligatory";
     public static final String MINOR_OBLIGATORY = "Minor Obligatory";
@@ -45,86 +46,278 @@ public class Course {
     /**
      * The unknown constant
      */
-    public static final String UNKNOWN = "Unknown";
-    /**
-     * For separating multiple values in a single line serial data.
-     */
-    public static final String VALUE_SEPARATOR = "::";
+    public static final String UNKNOWN = Globals.UNKNOWN;
 
 
-    /**
-     * Do not give null to these args., give the empty string instead.
-     * At least for this implementation.
-     */
-    public Course(String year, String semester, String id, String name, String tutor, String place, String day, String time,
-                  double score, int creditHours, String requirement, boolean validity){
+    public Course(String year, String semester, String code, String name, String tutor, String place, String day, String time,
+                  double score, int creditHours, String requirement, boolean verified) {
         this.year = year;
         this.semester = semester;
-        this.code = id.toUpperCase();
+        this.code = code.toUpperCase();
         this.name = name;
         this.lecturer = tutor;
         this.venue = place;
-        this.day = day;
-        this.time = time;
+        this.day = day.equals(UNKNOWN) ? "" : day;
+        this.time = time.equals(UNKNOWN) ? "" : time;
         this.score = score;
         this.creditHours = creditHours;
-        this.requirement = Globals.isBlank(requirement) ? NONE : requirement;
-        this.isValidated = validity;
-
-        if (requirement.equals(NONE)) {
+        this.isVerified = verified;
+        this.lecturerNameChangeability = !verified;
+        this.requirement = Globals.hasText(requirement) ? requirement : NONE;
+        if (this.requirement.equals(NONE)) {
             try {
-                final String vitalPart = code.substring(0, 3);
-                if (vitalPart.equals(Student.getMajorCode())) {
+                final String requirementPart = this.code.substring(0, 3);
+                if (requirementPart.equals(Student.getMajorCode())) {
                     this.setRequirement(MAJOR_OBLIGATORY);
-                } else if (vitalPart.equals(Student.getMinorCode())) {
+                } else if (requirementPart.equals(Student.getMinorCode())) {
                     this.setRequirement(MINOR_OBLIGATORY);
-                } else if (vitalPart.equals(DER)) {
+                } else if (requirementPart.equals(DER)) {
                     this.setRequirement(DIVISIONAL_REQUIREMENT);
-                } else if (vitalPart.equals(GER)) {
+                } else if (requirementPart.equals(GER)) {
                     this.setRequirement(GENERAL_REQUIREMENT);
                 }
-            } catch (StringIndexOutOfBoundsException e){
-                App.silenceException("Malformed code -"+code+". Requirement could not be determined.");
+            } catch (StringIndexOutOfBoundsException ignored){
             }
         }
     }
 
-    /**
-     * This is a re-construction process of retrieving the course whose exportContent() is this dataLines.
-     * Exceptions throwable by this operation must be handled with great care across implementations.
-     */
-    public static Course importFromSerial(String dataLines){
-        final String[] data = dataLines.split("\n");
-        double score = 0D;
-        try {
-            score = Double.parseDouble(data[8]);
-        } catch (Exception e) {
-            App.silenceException("Warning: error reading score for "+data[3]);
-        }
-        int credits = 3;
-        try {
-            credits = Integer.parseInt(data[9]);
-        } catch (Exception e) {
-            App.silenceException("Warning: error reading credit hours for "+data[3]);
-        }
-        boolean state = false;
-        try {
-            state = Boolean.parseBoolean(data[11]);
-        } catch (Exception e) {
-            App.silenceException("Warning: error reading validity of "+data[3]);
-        }
+    public String getYear() {
+        return year;
+    }
 
-        final String[] lectComponents = data[4].split(VALUE_SEPARATOR);
-        final String lecturerName = lectComponents[0];
-        final boolean lecturerNameEditable = Boolean.parseBoolean(lectComponents[1]);
-        final Course serialCourse = new Course(data[0], data[1], data[2], data[3], lecturerName, data[5], data[6], data[7],
-                score, credits, data[10], state);
-        serialCourse.setLecturer(lecturerName, lecturerNameEditable);
-        return serialCourse;
+    public void setYear(String year) {
+        this.year = year;
+    }
+
+    public String getSemester() {
+        return semester;
+    }
+
+    public void setSemester(String semester) {
+        this.semester = semester;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLecturer() {
+        return lecturer;
+    }
+
+    public void setLecturer(String lecturer, boolean changeable) {
+        this.lecturer = lecturer;
+        this.lecturerNameChangeability = changeable;
+    }
+
+    public String getVenue() {
+        return venue;
+    }
+
+    public void setVenue(String venue) {
+        this.venue = venue;
+    }
+
+    public String getDay() {
+        return day;
+    }
+
+    public void setDay(String day) {
+        this.day = day;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
+
+    public int getCreditHours() {
+        return creditHours;
+    }
+
+    public void setCreditHours(int creditHours) {
+        this.creditHours = creditHours;
+    }
+
+    public String getRequirement() {
+        return requirement;
     }
 
     /**
-     * Gets a grade based on the score.
+     * The only options passable are those defined in herein
+     */
+    public void setRequirement(String requirement) {
+        this.requirement = requirement;
+    }
+
+    public boolean isVerified() {
+        return isVerified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.isVerified = verified;
+    }
+
+//    field assistants
+
+    /**
+     * A compound-string of the code and name.
+     */
+    public String getAbsoluteName() {
+        return String.join(" ", code, name);
+    }
+
+    /**
+     * A compound-string of the year and semester. This is useful, especially
+     * in comparing if courses were done in the same semester.
+     */
+    public String getAbsoluteSemesterName(){
+        return String.join(" ", year, semester);
+    }
+
+    public boolean isFirstSemester(){
+        return semester.equals(Student.FIRST_SEMESTER);
+    }
+
+    public boolean isSecondSemester(){
+        return semester.equals(Student.SECOND_SEMESTER);
+    }
+
+    public boolean isSummerSemester(){
+        return semester.equals(Student.SUMMER_SEMESTER);
+    }
+
+    public boolean isFirstYear(){
+        return year.equals(Student.firstAcademicYear());
+    }
+
+    public boolean isSecondYear(){
+        return year.equals(Student.secondAcademicYear());
+    }
+
+    public boolean isThirdYear(){
+        return year.equals(Student.thirdAcademicYear());
+    }
+
+    public boolean isFourthYear(){
+        return year.equals(Student.finalAcademicYear());
+    }
+
+    /**
+     * A course is marked miscellaneous if its year falls out of the student's
+     * four years bachelor's program specification.
+     */
+    public boolean isMisc() {
+        final String y = year;
+        return !(y.equals(Student.firstAcademicYear()) || y.equals(Student.secondAcademicYear()) ||
+                y.equals(Student.thirdAcademicYear()) || y.equals(Student.finalAcademicYear()));
+    }
+
+    public String getSchedule(){
+        if (Globals.hasText(day) && Globals.hasText(time)) {
+            return String.join(" ", day, time);
+        } else if (Globals.hasText(day) && Globals.isBlank(time)) {
+            return String.join(" - ", day, "Unknown time");
+        } else if (Globals.isBlank(day) && Globals.hasText(time)) {
+            return String.join(" - ", time, "Unknown day");
+        } else {
+            return "";
+        }
+    }
+
+    public boolean isMajor() {
+        return requirement.contains("Major");
+    }
+
+    public boolean isMajorObligatory() {
+        return requirement.equals(MAJOR_OBLIGATORY);
+    }
+
+    public boolean isMajorElective() {
+        return requirement.equals(MAJOR_OPTIONAL);
+    }
+
+    public boolean isMinor() {
+        return requirement.contains("Minor");
+    }
+
+    public boolean isMinorObligatory() {
+        return requirement.equals(MINOR_OBLIGATORY);
+    }
+
+    public boolean isMinorElective() {
+        return requirement.equals(MINOR_OPTIONAL);
+    }
+
+    public boolean isDivisional() {
+        return requirement.contains("Divisional");
+    }
+
+    public boolean isGeneral() {
+        return requirement.contains("General");
+    }
+
+    public boolean isUnclassified() {
+        return requirement.equals(NONE);
+    }
+
+    public String getGrade() {
+        return gradeOf(score);
+    }
+
+    public String getGradeComment() {
+        return gradeCommentOf(score);
+    }
+
+    public double getQualityPoint() {
+        return pointsOf(getGrade());
+    }
+
+    /**
+     * A lecturer's name of a module is changeable iff it was not actually found on the Portal
+     */
+    public boolean canEditTutorName() {
+        return Globals.isBlank(lecturer) || lecturerNameChangeability;
+    }
+
+    /**
+     * Gets the list-index of this course. This is useful for substitution and editing
+     */
+    public int getListIndex() {
+        final List<Course> monitor = ModulesHandler.getModulesMonitor();
+        for (int i = 0; i < monitor.size(); i++) {
+            if (code.equals(monitor.get(i).code)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Gets a grade based on the given score
      */
     private static String gradeOf(double score) {
         String grade = "F";//0-39, 0
@@ -149,7 +342,6 @@ public class Course {
         } else if (score > 89 && score < 101) {
             grade = "A+";//90-100, 4.3
         }
-
         return grade;
     }
 
@@ -171,7 +363,7 @@ public class Course {
     }
 
     /**
-     * Gets a point based on the grade.
+     * Gets a point based on the grade
      */
     private static double pointsOf(String grade){
         double point = 0;
@@ -210,13 +402,90 @@ public class Course {
         return point;
     }
 
+    /**
+     * Exports the contents of this course to a string
+     * E.g:
+     * 2016/2017
+     * First Semester
+     * MTH002
+     * Calculus 1
+     * Amadou Keita
+     * ...
+     *
+     */
+    public String exportContent(){
+        return year + "\n" +
+                semester + "\n" +
+                code + "\n" +
+                name + "\n" +
+                lecturer + "\n" +
+                venue + "\n" +
+                day + "\n" +
+                time + "\n" +
+                score + "\n" +
+                creditHours + "\n" +
+                requirement + "\n" +
+                isVerified + "\n" +
+                lecturerNameChangeability;
+    }
+
+    /**
+     * This is a re-construction process of retrieving the course whose exportContent() is this dataLines.
+     * Exceptions throwable by this operation must be handled with great care across implementations.
+     */
+    public static Course importFromSerial(String dataLines) {
+        final String[] data = dataLines.split("\n");
+        double score = 0D;
+        try {
+            score = Double.parseDouble(data[8]);
+        } catch (Exception e) {
+            App.silenceException("Error reading score for "+data[3]);
+        }
+        int creditsHours = 3;
+        try {
+            creditsHours = Integer.parseInt(data[9]);
+        } catch (Exception e) {
+            App.silenceException("Error reading credit hours for "+data[3]);
+        }
+        boolean isConfirmed = false;
+        try {
+            isConfirmed = Boolean.parseBoolean(data[11]);
+        } catch (Exception e) {
+            App.silenceException("Error reading validity of " + data[3]);
+        }
+        boolean tutorNameChangeability = false;
+        try {
+            tutorNameChangeability = Boolean.parseBoolean(data[12]);
+        } catch (Exception e) {
+            App.silenceException("Error reading lecturer name's status of " + data[3]);
+        }
+
+        final Course serialCourse = new Course(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7],
+                score, creditsHours, data[10], isConfirmed);
+        serialCourse.lecturerNameChangeability = tutorNameChangeability;
+        return serialCourse;
+    }
+
+    /**
+     * When a course is from sync, merge if its like existed
+     */
+    public static void merge(Course incoming, Course outgoing) {
+        incoming.setDay(outgoing.day);
+        incoming.setTime(outgoing.time);
+        incoming.setVenue(outgoing.venue);
+        incoming.setRequirement(outgoing.requirement);
+        if (incoming.canEditTutorName()) {
+            incoming.setLecturer(outgoing.getLecturer(), true);
+        }
+    }
+
     public static String[] availableCoursePeriods(){
         return new String[] {UNKNOWN, "8:00", "8:30", "9:00", "11:00", "11:30", "14:00", "14:30", "15:00", "17:00",
                 "17:30", "20:00"};
     }
 
     public static String[] getWeekDays(){
-        return new String[]{UNKNOWN, "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays", "Sundays"};
+        return new String[] {UNKNOWN, "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays", "Sundays"};
     }
 
     /**
@@ -235,332 +504,93 @@ public class Course {
     }
 
     /**
-     * When a course is from sync, it should be merged if its like existed
-     */
-    public static void merge(Course incoming, Course outgoing) {
-        incoming.setDay(outgoing.getDay());
-        incoming.setTime(outgoing.getTime());
-        incoming.setVenue(outgoing.getVenue());
-        incoming.setRequirement(outgoing.getRequirement());
-        final boolean incomingIsLecturerSet = Globals.hasText(incoming.getLecturer());
-        if (!incomingIsLecturerSet) {
-            incoming.setLecturer(outgoing.getLecturer(), true);
-        }
-    }
-
-    public String getYear() {
-        return year;
-    }
-
-    public void setYear(String year) {
-        this.year = year;
-    }
-
-    public String getSemester() {
-        return semester;
-    }
-
-    public void setSemester(String semester) {
-        this.semester = semester;
-    }
-
-    /**
-     * Returns a compound-string of the year and semester. This is useful, especially
-     * in comparing if courses were done in the same semester.
-     */
-    public String getAbsoluteSemesterName(){
-        return this.getYear()+" "+this.getSemester();
-    }
-
-    public boolean isFirstSemester(){
-        return this.getSemester().equals(Student.FIRST_SEMESTER);
-    }
-
-    public boolean isSecondSemester(){
-        return this.getSemester().equals(Student.SECOND_SEMESTER);
-    }
-
-    public boolean isSummerSemester(){
-        return this.getSemester().equals(Student.SUMMER_SEMESTER);
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAbsoluteName() {
-        return code+" "+name;
-    }
-
-    public String getLecturer() {
-        return lecturer;
-    }
-
-    public void setLecturer(String lecturer, boolean allowChange) {
-        this.lecturer = lecturer;
-        this.tutorsNameIsCustomizable = allowChange;
-    }
-
-    public String getVenue() {
-        return venue;
-    }
-
-    public void setVenue(String venue) {
-        this.venue = venue;
-    }
-
-    public String getDay() {
-        return day;
-    }
-
-    public void setDay(String day) {
-        this.day = day;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    public String schedule(){
-        if (Globals.hasText(day) && Globals.hasText(time)) {
-            return String.join(" ", day, time);
-        } else if (Globals.hasText(day) && !Globals.hasText(time)) {
-            return String.join(" - ", day, "Unknown time");
-        } else if (!Globals.hasText(day) && Globals.hasText(time)) {
-            return String.join(" - ", time, "Unknown day");
-        } else {
-            return "";
-        }
-    }
-
-    public String getRequirement() {
-        return requirement;
-    }
-
-    /**
-     * The only options passable are those defined in herein the Course type.
-     */
-    public void setRequirement(String newRequirement) {
-        this.requirement = newRequirement;
-    }
-
-    public boolean isMajor() {
-        return this.getRequirement().contains("Major");
-    }
-
-    public boolean isMajorObligatory() {
-        return this.getRequirement().equals(MAJOR_OBLIGATORY);
-    }
-
-    public boolean isMajorElective() {
-        return this.getRequirement().equals(MAJOR_OPTIONAL);
-    }
-
-    public boolean isMinor() {
-        return this.getRequirement().contains("Minor");
-    }
-
-    public boolean isMinorObligatory() {
-        return this.getRequirement().equals(MINOR_OBLIGATORY);
-    }
-
-    public boolean isMinorElective() {
-        return this.getRequirement().equals(MINOR_OPTIONAL);
-    }
-
-    public boolean isDivisional() {
-        return this.getRequirement().contains("Divisional");
-    }
-
-    public boolean isGeneral() {
-        return this.getRequirement().contains("General");
-    }
-
-    public boolean isUnclassified() {
-        return this.getRequirement().equals(NONE);
-    }
-
-    public double getScore() {
-        return score;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
-    }
-
-    public int getCreditHours() {
-        return creditHours;
-    }
-
-    public void setCreditHours(int creditHours) {
-        this.creditHours = creditHours;
-    }
-
-    public boolean isVerified() {
-        return isValidated;
-    }
-
-    public String getGrade() {
-        return gradeOf(this.getScore());
-    }
-
-    public String getGradeComment() {
-        return gradeCommentOf(this.getScore());
-    }
-
-    public double getQualityPoint(){
-        return pointsOf(this.getGrade());
-    }
-
-    /**
-     * A lecturer's name of a module is changeable iff it was not actually found on the portal.
-     */
-    public boolean isTutorsNameCustomizable(){
-        return !Globals.hasText(lecturer) || tutorsNameIsCustomizable;
-    }
-
-    /**
-     * Gets the list-index of this course. This is useful for substitution and editing.
-     */
-    public int getListIndex(){
-        final List<Course> list = ModulesHandler.getModulesMonitor();
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).code.equals(this.code)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Exports the contents of this course to a string in value-line format.
-     * E.g:
-     * Calculus 1
-     * Amadou Keita
-     * ...
-     *
-     */
-    public String exportContent(){
-        return year+"\n" +
-                semester+"\n" +
-                code+"\n" +
-                name+"\n" +
-                lecturer+VALUE_SEPARATOR+isTutorsNameCustomizable()+"\n" +
-                venue+"\n" +
-                day+"\n" +
-                time+"\n" +
-                score+"\n" +
-                creditHours+"\n" +
-                requirement+"\n" +
-                isValidated+"\n";
-    }
-
-    /**
-     * A course is marked misc if its year falls out of the student's
-     * four years bachelor's program specification.
-     */
-    public boolean isMisc(){
-        final String y = this.getYear();
-        return !(y.equals(Student.firstAcademicYear()) || y.equals(Student.secondAcademicYear()) || y.equals(Student.thirdAcademicYear()) || y.equals(Student.finalAcademicYear()));
-    }
-
-    /**
-     * Nicely exhibits a course. This is to be an instance-call in a future-release.
+     * Nicely exhibits a course.
+     * If the course is null, nothing is done.
      */
     public static void exhibit(Component base, Course course){
-        final KDialog exhibitDialog = new KDialog(course.getName()+(course.isMisc() ? " - Miscellaneous" : ""));
-        exhibitDialog.setResizable(true);
-        exhibitDialog.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
+        if (course == null) {
+            return;
+        }
+
+        final KDialog dialog = new KDialog(course.name+(course.isMisc() ? " - Miscellaneous" : ""));
+        dialog.setResizable(true);
+        dialog.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
 
         final Font hintFont = KFontFactory.createBoldFont(15);
         final Font valueFont = KFontFactory.createPlainFont(15);
 
         final KPanel codePanel = new KPanel(new BorderLayout());
-        codePanel.add(KPanel.wantDirectAddition(new KLabel("Code:",hintFont)),BorderLayout.WEST);
-        codePanel.add(KPanel.wantDirectAddition(new KLabel(course.getCode(),valueFont)),BorderLayout.CENTER);
+        codePanel.add(new KPanel(new KLabel("Code:", hintFont)), BorderLayout.WEST);
+        codePanel.add(new KPanel(new KLabel(course.code, valueFont)), BorderLayout.CENTER);
 
         final KPanel namePanel = new KPanel(new BorderLayout());
-        namePanel.add(KPanel.wantDirectAddition(new KLabel("Name:",hintFont)),BorderLayout.WEST);
-        namePanel.add(KPanel.wantDirectAddition(new KLabel(course.getName(),valueFont)),BorderLayout.CENTER);
+        namePanel.add(new KPanel(new KLabel("Name:", hintFont)), BorderLayout.WEST);
+        namePanel.add(new KPanel(new KLabel(course.name, valueFont)), BorderLayout.CENTER);
 
         final KPanel lectPanel = new KPanel(new BorderLayout());
-        lectPanel.add(KPanel.wantDirectAddition(new KLabel("Tutor:",hintFont)),BorderLayout.WEST);
-        lectPanel.add(KPanel.wantDirectAddition(new KLabel(course.getLecturer(),valueFont)),BorderLayout.CENTER);
+        lectPanel.add(new KPanel(new KLabel("Lecturer:", hintFont)), BorderLayout.WEST);
+        lectPanel.add(new KPanel(new KLabel(course.lecturer, valueFont)), BorderLayout.CENTER);
 
         final KPanel yearPanel = new KPanel(new BorderLayout());
-        yearPanel.add(KPanel.wantDirectAddition(new KLabel("Academic Year:",hintFont)),BorderLayout.WEST);
-        yearPanel.add(KPanel.wantDirectAddition(new KLabel(course.getYear(),valueFont)),BorderLayout.CENTER);
+        yearPanel.add(new KPanel(new KLabel("Academic Year:", hintFont)), BorderLayout.WEST);
+        yearPanel.add(new KPanel(new KLabel(course.year, valueFont)), BorderLayout.CENTER);
 
         final KPanel semesterPanel = new KPanel(new BorderLayout());
-        semesterPanel.add(KPanel.wantDirectAddition(new KLabel("Semester:",hintFont)),BorderLayout.WEST);
-        semesterPanel.add(KPanel.wantDirectAddition(new KLabel(course.getSemester(),valueFont)),BorderLayout.CENTER);
+        semesterPanel.add(new KPanel(new KLabel("Semester:", hintFont)), BorderLayout.WEST);
+        semesterPanel.add(new KPanel(new KLabel(course.semester,valueFont)), BorderLayout.CENTER);
 
         final KPanel typePanel = new KPanel(new BorderLayout());
-        typePanel.add(KPanel.wantDirectAddition(new KLabel("Requirement:",hintFont)),BorderLayout.WEST);
-        typePanel.add(KPanel.wantDirectAddition(new KLabel(course.getRequirement(),valueFont)),BorderLayout.CENTER);
+        typePanel.add(new KPanel(new KLabel("Requirement:", hintFont)), BorderLayout.WEST);
+        typePanel.add(new KPanel(new KLabel(course.requirement, valueFont)), BorderLayout.CENTER);
 
         final KPanel schedulePanel = new KPanel(new BorderLayout());
-        schedulePanel.add(KPanel.wantDirectAddition(new KLabel("Schedule:",hintFont)),BorderLayout.WEST);
-        schedulePanel.add(KPanel.wantDirectAddition(new KLabel(course.schedule(),valueFont)),BorderLayout.CENTER);
+        schedulePanel.add(new KPanel(new KLabel("Schedule:", hintFont)), BorderLayout.WEST);
+        schedulePanel.add(new KPanel(new KLabel(course.getSchedule(), valueFont)), BorderLayout.CENTER);
 
         final KPanel venuePanel = new KPanel(new BorderLayout());
-        venuePanel.add(KPanel.wantDirectAddition(new KLabel("Venue:",hintFont)),BorderLayout.WEST);
-        venuePanel.add(KPanel.wantDirectAddition(new KLabel(course.getVenue(),valueFont)),BorderLayout.CENTER);
+        venuePanel.add(new KPanel(new KLabel("Venue:", hintFont)), BorderLayout.WEST);
+        venuePanel.add(new KPanel(new KLabel(course.venue, valueFont)), BorderLayout.CENTER);
 
         final KPanel creditPanel = new KPanel(new BorderLayout());
-        creditPanel.add(KPanel.wantDirectAddition(new KLabel("Credit Hours:",hintFont)),BorderLayout.WEST);
-        creditPanel.add(KPanel.wantDirectAddition(new KLabel(course.getCreditHours()+"",valueFont)),BorderLayout.CENTER);
+        creditPanel.add(new KPanel(new KLabel("Credit Hours:", hintFont)), BorderLayout.WEST);
+        creditPanel.add(new KPanel(new KLabel(Integer.toString(course.creditHours), valueFont)), BorderLayout.CENTER);
 
         final KPanel scorePanel = new KPanel(new BorderLayout());
-        scorePanel.add(KPanel.wantDirectAddition(new KLabel("Final Score:",hintFont)),BorderLayout.WEST);
-        scorePanel.add(KPanel.wantDirectAddition(new KLabel(course.getScore()+"",valueFont)),BorderLayout.CENTER);
+        scorePanel.add(new KPanel(new KLabel("Final Score:", hintFont)), BorderLayout.WEST);
+        scorePanel.add(new KPanel(new KLabel(Double.toString(course.score), valueFont)), BorderLayout.CENTER);
 
         final KPanel gradePanel = new KPanel(new BorderLayout());
-        gradePanel.add(KPanel.wantDirectAddition(new KLabel("Grade:",hintFont)),BorderLayout.WEST);
-        gradePanel.add(KPanel.wantDirectAddition(new KLabel(course.getGrade()+"  ["+course.getGradeComment()+"]",valueFont)),BorderLayout.CENTER);
+        gradePanel.add(new KPanel(new KLabel("Grade:", hintFont)), BorderLayout.WEST);
+        gradePanel.add(new KPanel(new KLabel(course.getGrade()+"  ("+course.getGradeComment()+")", valueFont)), BorderLayout.CENTER);
 
         final KPanel gradeValuePanel = new KPanel(new BorderLayout());
-        gradeValuePanel.add(KPanel.wantDirectAddition(new KLabel("Grade Value:",hintFont)),BorderLayout.WEST);
-        gradeValuePanel.add(KPanel.wantDirectAddition(new KLabel(course.getQualityPoint()+"",valueFont)),BorderLayout.CENTER);
+        gradeValuePanel.add(new KPanel(new KLabel("Grade Value:", hintFont)), BorderLayout.WEST);
+        gradeValuePanel.add(new KPanel(new KLabel(Double.toString(course.getQualityPoint()), valueFont)), BorderLayout.CENTER);
 
         final KPanel statusPanel = new KPanel(new BorderLayout());
-        statusPanel.add(KPanel.wantDirectAddition(new KLabel("Status:",hintFont)),BorderLayout.WEST);
-        statusPanel.add(KPanel.wantDirectAddition(new KLabel(course.isVerified() ? "Confirmed" : "Unverified",valueFont,course.isVerified() ? Color.BLUE : Color.RED)),BorderLayout.CENTER);
+        statusPanel.add(new KPanel(new KLabel("Status:", hintFont)), BorderLayout.WEST);
+        final KLabel vLabel = course.isVerified ? new KLabel("Confirmed", valueFont, Color.BLUE) :
+                new KLabel("Unknown", valueFont, Color.RED);
+        statusPanel.add(new KPanel(vLabel), BorderLayout.CENTER);
 
         final KButton closeButton = new KButton("Close");
-        closeButton.addActionListener(e -> exhibitDialog.dispose());
+        closeButton.addActionListener(e -> dialog.dispose());
 
         final KPanel contentPanel = new KPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.addAll(codePanel,namePanel,lectPanel,yearPanel,semesterPanel,schedulePanel,venuePanel,typePanel,creditPanel,scorePanel,gradePanel,gradeValuePanel,statusPanel,
-                ComponentAssistant.contentBottomGap(),KPanel.wantDirectAddition(new FlowLayout(FlowLayout.RIGHT),null,closeButton));
-
-        exhibitDialog.getRootPane().setDefaultButton(closeButton);
-        exhibitDialog.setContentPane(contentPanel);
-        exhibitDialog.pack();
-        exhibitDialog.setMinimumSize(exhibitDialog.getPreferredSize());
-        exhibitDialog.setLocationRelativeTo(base == null ? Board.getRoot() : base);
-        exhibitDialog.setVisible(true);
+        contentPanel.addAll(codePanel, namePanel, lectPanel, yearPanel, semesterPanel, schedulePanel, venuePanel,
+                typePanel, creditPanel, scorePanel, gradePanel, gradeValuePanel, statusPanel,
+                MComponent.contentBottomGap(), new KPanel(new FlowLayout(FlowLayout.RIGHT), closeButton));
+        dialog.getRootPane().setDefaultButton(closeButton);
+        dialog.setContentPane(contentPanel);
+        dialog.pack();
+        dialog.setMinimumSize(dialog.getPreferredSize());
+        dialog.setLocationRelativeTo(base == null ? Board.getRoot() : base);
+        SwingUtilities.invokeLater(()-> dialog.setVisible(true));
     }
 
     public static void exhibit(Course c){
-        exhibit(Board.getRoot(), c);
+        exhibit(null, c);
     }
 
 }

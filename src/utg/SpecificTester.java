@@ -1,6 +1,6 @@
 package utg;
 
-import main.Login;
+import main.About;
 
 /**
  * This type is intended for testing a specific component / functionality of the project.
@@ -17,8 +17,7 @@ import main.Login;
 public class SpecificTester {
 
     public static void main(String[] args) {
-//        new MyDashboard().setVisible(true);
-        new Login(null).setVisible(true);
+        new About().setVisible(true);
     }
 
 }
