@@ -22,8 +22,7 @@ public class Welcome extends KDialog {
         super("Welcome");
         this.setSize(PREFERRED_WIDTH + 50, 575);
 
-        final KPanel topPanel = KPanel.wantDirectAddition(new KLabel("Personal Dashboard",
-                KFontFactory.createBoldFont(25)));
+        final KPanel topPanel = KPanel.wantDirectAddition(new KLabel("Personal Dashboard", KFontFactory.createBoldFont(25)));
         topPanel.setBackground(Color.WHITE);
 
         final String broughtString = "Proudly brought to you by the <b>Dashboard Project</b>. Dashboard comes with solutions long-anticipated by the UTG Students, " +
