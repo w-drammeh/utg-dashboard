@@ -480,20 +480,29 @@ public class Student {
         }
     }
 
-    public static int firstYear(){
+    private static int firstYear(){
         return yearOfAdmission;
     }
 
-    public static int secondYear(){
+    private static int secondYear(){
         return firstYear() + 1;
     }
 
-    public static int thirdYear(){
+    private static int thirdYear(){
         return secondYear() + 1;
     }
 
-    public static int finalYear(){
-        return thirdYear() + 1;
+    private static int finalYear(){
+        return yearOfAdmission + 4;
+    }
+
+//    if this is readable from the portal, then be it.
+    public static boolean isGraduated(){
+        return levelNumber > 400;
+    }
+
+    public static String getYearOfGraduation() {
+        return isGraduated() ? Integer.toString(finalYear()) : "N/A";
     }
 
     public static String firstAcademicYear(){
@@ -601,8 +610,6 @@ public class Student {
     }
 
     /**
-     * Remember, this call must be accompanied by a file!
-     * So it will send it to setUserIcon() as an icon to be set.
      * It will also notify the containers harboring the icon. One of such known component:
      * imagePanel at main.Board
      * If the parsing-file is null, nothing is done.
