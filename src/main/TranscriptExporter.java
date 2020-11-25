@@ -15,9 +15,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-/**
- * Supports exportation of both the old, and new transcript formats.
- */
 public class TranscriptExporter {
     private Document document;
     private Rectangle pageSize;
@@ -58,7 +55,6 @@ public class TranscriptExporter {
         addUserData();
         addTable();
         document.close();
-        outputStream.flush();
         outputStream.close();
         SwingUtilities.invokeLater(()-> App.promptPlain("Successful",
                 "Your Transcript is been exported successfully to "+savePath));
