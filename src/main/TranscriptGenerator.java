@@ -90,13 +90,13 @@ public class TranscriptGenerator implements Activity {
         final KCheckBox detailsCheck = new KCheckBox("Show Details", false);
         detailsCheck.setFont(KFontFactory.createPlainFont(15));
         detailsCheck.setFocusable(false);
-        detailsCheck.setCursor(MComponent.HAND_CURSOR);
         detailsCheck.addItemListener(itemEvent -> detailPanel.setVisible(itemEvent.getStateChange() == ItemEvent.SELECTED));
 
         final KButton downloadButton = new KButton("Export");
+        downloadButton.setPreferredSize(new Dimension(100, 30));
         downloadButton.undress();
+        downloadButton.underline(false);
         downloadButton.setStyle(KFontFactory.createPlainFont(16), Color.BLUE);
-        downloadButton.setToolTipText("Export Transcript to PDF");
         downloadButton.setCursor(MComponent.HAND_CURSOR);
         downloadButton.addActionListener(actionEvent-> {
             try {
@@ -108,7 +108,7 @@ public class TranscriptGenerator implements Activity {
 
         final KPanel topPanel = new KPanel(new BorderLayout());
         topPanel.add(new KPanel(new KLabel("My Transcript", KFontFactory.bodyHeaderFont())), BorderLayout.WEST);
-        topPanel.add(new KPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5), detailsCheck, downloadButton), BorderLayout.EAST);
+        topPanel.add(new KPanel(new FlowLayout(), detailsCheck, downloadButton), BorderLayout.EAST);
         return topPanel;
     }
 
