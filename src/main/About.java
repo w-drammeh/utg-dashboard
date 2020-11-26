@@ -175,7 +175,7 @@ public class About extends KDialog {
                 reportBlankReview(reviewTextArea);
             } else {
                 MComponent.toggle(reviewTextArea, reviewSender);
-                reviewSender.setText("Sending Review...");
+                reviewSender.setText("Sending...");
                 if (Internet.isInternetAvailable()) {
                     final Mailer gMailer = new Mailer("Dashboard Feedback | Review | "+Student.getFullNamePostOrder(),
                             reviewTextArea.getText());
@@ -210,7 +210,7 @@ public class About extends KDialog {
                 reportBlankReview(suggestionTextArea);
             } else {
                 MComponent.toggle(suggestionTextArea,suggestionSender);
-                suggestionSender.setText("Sending Suggestion...");
+                suggestionSender.setText("Sending...");
                 if (Internet.isInternetAvailable()) {
                     final Mailer gMailer = new Mailer("Dashboard Feedback | Suggestion |"+Student.getFullNamePostOrder(),
                             suggestionTextArea.getText());
@@ -256,7 +256,7 @@ public class About extends KDialog {
 
             new Thread(()-> {
                 MComponent.toggle(answerTitleField, answerTextArea, answerSender);
-                answerSender.setText("Sending FAQ...");
+                answerSender.setText("Sending...");
                 if (Internet.isInternetAvailable()) {
                     final Mailer gMailer = new Mailer("Dashboard Feedback | FAQ & Answer"+Student.getFullNamePostOrder(),
                             "Question: "+answerTitleField.getText()+"\nAnswer: "+answerTextArea.getText());
@@ -302,7 +302,7 @@ public class About extends KDialog {
                 reportBlankReview(bugTextArea);
             } else {
                 MComponent.toggle(bugTextArea,bugSender);
-                bugSender.setText("Reporting Bug...");
+                bugSender.setText("Sending...");
                 if (Internet.isInternetAvailable()) {
                     final Mailer gMailer = new Mailer("Dashboard Feedback | A Bug Report | "+
                             Student.getFullNamePostOrder(), bugTextArea.getText());

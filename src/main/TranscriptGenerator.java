@@ -63,14 +63,14 @@ public class TranscriptGenerator implements Activity {
 
         final KPanel midLiner = new KPanel();
         midLiner.setLayout(new BoxLayout(midLiner, BoxLayout.Y_AXIS));
-        midLiner.setBorder(BorderFactory.createEmptyBorder(5,5,10,5));
+        midLiner.setBorder(BorderFactory.createEmptyBorder(5,5,15,5));
         midLiner.addAll(detailPanel, Box.createVerticalStrut(20),
-                table.sizeMatchingScrollPane(), Box.createVerticalStrut(10), getPointPanel());
+                table.sizeMatchingScrollPane(), Box.createVerticalStrut(10), getPointPanel(),
+                Box.createVerticalStrut(10), new KPanel(classificationLabel));
 
         final KPanel transcriptUI = new KPanel(new BorderLayout());
         transcriptUI.add(topLayer(), BorderLayout.NORTH);
         transcriptUI.add(new KScrollPane(midLiner), BorderLayout.CENTER);
-        transcriptUI.add(new KPanel(classificationLabel), BorderLayout.SOUTH);
         Board.addCard(transcriptUI, "Transcript");
     }
 

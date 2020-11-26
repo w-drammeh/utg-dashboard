@@ -573,14 +573,15 @@ public class Student {
     }
 
     public static void startSettingImage(Component parent){
+        final Component actualParent = parent == null ? Board.getRoot() : parent;
         final String homeDir = System.getProperty("user.home");
         final String picturesDir = homeDir + "/Pictures";
         final JFileChooser fileChooser = new JFileChooser(new File(picturesDir).exists() ? picturesDir : homeDir);
         fileChooser.setMultiSelectionEnabled(false);
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        final int selection = fileChooser.showOpenDialog(parent == null ? Board.getRoot() : parent);
+        final int selection = fileChooser.showOpenDialog(actualParent);
         if (selection == JFileChooser.APPROVE_OPTION) {
-            fireIconChange(fileChooser.getSelectedFile());
+            fireIconChange(fileChooser.getSelectedFile(), actualParent);
         }
     }
 
@@ -593,30 +594,28 @@ public class Student {
      * imagePanel at main.Board
      * If the parsing-file is null, nothing is done.
      */
-    private static void fireIconChange(File imageFile){
+    private static void fireIconChange(File imageFile, Component c){
         if (imageFile != null) {
             try {
                 final ImageIcon newIcon = MComponent.scale(imageFile.toURI().toURL(), ICON_WIDTH, ICON_HEIGHT);
                 if (newIcon == null) {
-                    App.signalError("Error", "Could not set the image icon to "+imageFile.getAbsolutePath()+".\n" +
+                    App.signalError(c, "Error", "Could not set the image icon to "+imageFile.getAbsolutePath()+".\n" +
                             "Is that an image file? If it's not, try again with a valid image file, otherwise it is of an unsupported type.");
                     return;
                 }
                 userIcon = newIcon;
-                effectImageChangeOnComponents();
-                App.promptPlain("Successful","Image icon has been changed successfully.");
+                effectIconChanges();
             } catch (Exception e) {
-                App.signalError("Error","An error occurred while attempting to change the image icon.\n" +
+                App.signalError(c, "Error","An error occurred while attempting to change the image icon.\n" +
                         "Please try again, preferably, with a different choice.");
             }
         }
     }
 
     /**
-     * Should always be called on icon amendments.
-     * It effects the visual changes on all the containers of the icon.
+     * Effects visual changes on the containers holding the icon.
      */
-    private static void effectImageChangeOnComponents() {
+    private static void effectIconChanges() {
         MComponent.empty(Board.getImagePanel());
         Board.getImagePanel().add(new KLabel(userIcon));
         MComponent.ready(Board.getImagePanel());
@@ -625,13 +624,13 @@ public class Student {
     public static void fireIconReset(){
         if (App.showYesNoCancelDialog("Confirm reset","This action will remove your image icon. Continue?")) {
             userIcon = DEFAULT_ICON;
-            effectImageChangeOnComponents();
+            effectIconChanges();
         }
     }
 
     public static void fireIconDefaultSet(){
         userIcon = SHOOTER_ICON;
-        effectImageChangeOnComponents();
+        effectIconChanges();
     }
 
     /**

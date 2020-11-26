@@ -222,7 +222,7 @@ public class FirstLaunch extends KDialog {
         setButton.setForeground(Color.BLUE);
         setButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         setButton.addActionListener(e-> {
-            Student.startSettingImage(this.getRootPane());
+            Student.startSettingImage(getRootPane());
             MComponent.empty(iPanel);
             iPanel.add(new KLabel(Student.getIcon()));
             MComponent.ready(iPanel);
