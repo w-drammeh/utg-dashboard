@@ -184,7 +184,6 @@ public class FirstLaunch extends KDialog {
             Student.setStudentPassword(psswdField.getText());
             SettingsUI.studentPsswdField.setText(psswdField.getText());
             CARDS.show(contentPane, "Image icon");
-            Student.mayReportIncoming();
         });
 
         final KPanel kPanel = new KPanel();

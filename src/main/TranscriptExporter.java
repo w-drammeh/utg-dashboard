@@ -33,8 +33,8 @@ public class TranscriptExporter {
 
     public void exportNow() throws IOException, DocumentException {
         String savePath;
-        final String homeDir = System.getProperty("user.home"),
-                documentsDir = homeDir+"/Documents";
+        final String homeDir = System.getProperty("user.home");
+        final String documentsDir = homeDir+"/Documents";
         final JFileChooser fileChooser = new JFileChooser(new File(documentsDir).exists() ? documentsDir : homeDir);
         fileChooser.setDialogTitle("Select Destination");
         fileChooser.setMultiSelectionEnabled(false);
@@ -45,7 +45,7 @@ public class TranscriptExporter {
             return;
         }
 
-        final File outputFile = new File(savePath+Serializer.FILE_SEPARATOR+"transcript.pdf");
+        final File outputFile = new File(savePath+Serializer.FILE_SEPARATOR+Student.getNameAcronym()+"-transcript.pdf");
         final FileOutputStream outputStream = new FileOutputStream(outputFile);
         PdfWriter.getInstance(document, outputStream);
 

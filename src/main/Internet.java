@@ -18,7 +18,7 @@ public class Internet {
      */
     public static boolean isInternetAvailable(){
         try {
-            final boolean isAvailable = isHostAvailable("google.com") || isHostAvailable("utg.gm") ||
+            final boolean isAvailable = isHostAvailable("google.com") || isHostAvailable("github.com") ||
                     isHostAvailable("facebook.com");
             if (isAvailable && Board.isAppReady()) {
                 new Thread(Board::online).start();//should not delay the return

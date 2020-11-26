@@ -334,11 +334,11 @@ public final class Board extends KFrame {
             postProcesses.add(()-> Runtime.getRuntime().addShutdownHook(shutDownThread));
         } else {
             Runtime.getRuntime().addShutdownHook(shutDownThread);
-            postProcesses.add(()-> {
-                RunningCoursesGenerator.uploadInitials();
-                ModulesHandler.uploadModules();
-            });
         }
+        postProcesses.add(()-> {
+            RunningCoursesGenerator.uploadInitials();
+            ModulesHandler.uploadModules();
+        });
     }
 
     private JComponent generateHomePage(){
@@ -506,8 +506,9 @@ public final class Board extends KFrame {
         }
     }
 
+//    already forged on a thread
     public static void online() {
-        Student.mayReportIncoming();
+
     }
 
 }

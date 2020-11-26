@@ -38,6 +38,11 @@ public class ModulesHandler {
 
 
     public ModulesHandler() {
+        yearOne = new ModuleYear(Student.firstAcademicYear());
+        yearTwo = new ModuleYear(Student.secondAcademicYear());
+        yearThree = new ModuleYear(Student.thirdAcademicYear());
+        yearFour = new ModuleYear(Student.finalAcademicYear());
+
         modulesMonitor = new ArrayList<>() {
             @Override
             public boolean add(Course course) {
@@ -93,11 +98,6 @@ public class ModulesHandler {
                 return super.remove(course);
             }
         };
-
-        yearOne = new ModuleYear(Student.firstAcademicYear());
-        yearTwo = new ModuleYear(Student.secondAcademicYear());
-        yearThree = new ModuleYear(Student.thirdAcademicYear());
-        yearFour = new ModuleYear(Student.finalAcademicYear());
     }
 
     public Component yearOnePresent(){

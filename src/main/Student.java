@@ -1,7 +1,6 @@
 package main;
 
 import customs.KLabel;
-import utg.Dashboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,7 +59,6 @@ public class Student {
      */
     private static int levelNumber;
     private static double CGPA;
-    public static boolean isReported;
     private static ImageIcon userIcon;
     public static final String FIRST_SEMESTER = "First Semester";
     public static final String SECOND_SEMESTER = "Second Semester";
@@ -557,35 +555,16 @@ public class Student {
         return Globals.hasText(Student.minor);
     }
 
+    public static String getNameAcronym(){
+        return (lastName.charAt(0)+""+firstName.charAt(0)).toLowerCase();
+    }
+
     public static String predictedStudentMailAddress(){
-        return (lastName.charAt(0)+""+firstName.charAt(0)+matNumber).toLowerCase()+"@utg.edu.gm";
+        return getNameAcronym()+matNumber+"@utg.edu.gm";
     }
 
     public static String predictedStudentPassword(){
         return matNumber;//"student@utg"?
-    }
-
-    public static void mayReportIncoming() {
-        if (isReported) {
-            return;
-        }
-        final Timer reportTimer = new Timer(Globals.MINUTE, null);
-        reportTimer.setInitialDelay(0);
-        reportTimer.addActionListener(e-> new Thread(()-> {
-            final Mailer incomingReporter = new Mailer("Incoming Report",
-                    "A student has successfully launched Dashboard-"+ Dashboard.VERSION+" with the following requested credentials\n{\n" +
-                    "Name: "+getFullNamePostOrder()+"\n" +
-                    "Program: "+program+"\n" +
-                    "Level: "+level+"\n" +
-                    "OS: "+System.getProperty("os.name")+"\n" +
-                    "Telephone: "+getTelephone()+"\n" +
-                            "}");
-            if (incomingReporter.sendAs(Mailer.DEVELOPERS_REQUEST)) {
-                isReported = true;
-                reportTimer.stop();
-            }
-        }).start());
-        reportTimer.start();
     }
 
     private static void reportCriticalInfoMissing(Component parent, String info) {
@@ -697,7 +676,6 @@ public class Student {
         dataMap.put("status", status.toUpperCase());
         dataMap.put("cg", CGPA);
         dataMap.put("aboutMe", about);
-        dataMap.put("isReported", isReported);
         dataMap.put("nameFormat", nameFormat);
         dataMap.put("extra", ADDITIONAL_DATA);
         if (!isDefaultIconSet()) {
@@ -745,7 +723,6 @@ public class Student {
         about = (String) dataMap.get("aboutMe");
         setNameFormat((String) dataMap.get("nameFormat"));
         ADDITIONAL_DATA = (LinkedHashMap<String, String>) dataMap.get("extra");
-        isReported = (boolean) dataMap.get("isReported");
         if (dataMap.containsKey("shooterIcon")) {
             Board.postProcesses.add(Student::fireIconDefaultSet);
         } else if (dataMap.containsKey("userIcon")) {

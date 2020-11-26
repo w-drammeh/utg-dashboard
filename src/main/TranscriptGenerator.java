@@ -80,7 +80,9 @@ public class TranscriptGenerator implements Activity {
         minorLabel.setText(Student.isDoingMinor() ? Student.getMinor().toUpperCase() : "NONE");
         CGPALabel.setText(Double.toString(Student.getCGPA()));
         classificationLabel.setText(Student.upperClassDivision());
-        classificationLabel.setForeground(classificationLabel.getText().contains("None") ? Color.RED : Color.BLUE);
+        if (classificationLabel.getText().equals("None")) {
+            classificationLabel.getParent().setVisible(false);
+        }
     }
 
 //    all the components needed at the top. may be a label to the left, buttons to the right
@@ -196,10 +198,6 @@ public class TranscriptGenerator implements Activity {
         final KPanel kPanel = new KPanel(new BorderLayout());
         kPanel.add(avgPanel, BorderLayout.EAST);
         return kPanel;
-    }
-
-    public static String getMinorState() {
-        return minorLabel.getText();
     }
 
 }

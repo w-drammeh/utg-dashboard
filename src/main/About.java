@@ -154,9 +154,9 @@ public class About extends KDialog {
 
     private KPanel getFeedbackCard(){
         final String bettermentText = "<b>Help make Dashboard better by giving the developers a Review</b>." +
-                "<p>You may <b>Report a Bug</b> to be fixed, make a <b>Suggestion</b> to be implemented in a future release, or " +
-                "provide an <b>Answer</b> to a Frequently Asked Question. By clicking Send, your review shall be delivered to " +
-                "the developer's mail - "+Mailer.DEVELOPERS_MAIL+". Your student-mail is used for this purpose.</p>";
+                "<p>You may <b>Report a Bug</b> to be fixed, make a <b>Suggestion</b> to be implemented in a future release, " +
+                "or provide an <b>Answer</b> to a Frequently Asked Question. By clicking Send, your review shall be delivered " +
+                "to the developers' mail address: "+Mailer.DEVELOPERS_MAIL+". Your student-mail might be is used for this purpose.</p>";
 
         final Border lineBorder = BorderFactory.createLineBorder(Color.BLUE, 1,true);
         final Border spaceBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
@@ -179,7 +179,7 @@ public class About extends KDialog {
                 if (Internet.isInternetAvailable()) {
                     final Mailer gMailer = new Mailer("Dashboard Feedback | Review | "+Student.getFullNamePostOrder(),
                             reviewTextArea.getText());
-                    if (gMailer.sendAs(Mailer.FEEDBACK)) {
+                    if (gMailer.send()) {
                         reviewTextArea.setText(null);
                     }
                 } else {
@@ -214,7 +214,7 @@ public class About extends KDialog {
                 if (Internet.isInternetAvailable()) {
                     final Mailer gMailer = new Mailer("Dashboard Feedback | Suggestion |"+Student.getFullNamePostOrder(),
                             suggestionTextArea.getText());
-                    if (gMailer.sendAs(Mailer.FEEDBACK)) {
+                    if (gMailer.send()) {
                         suggestionTextArea.setText(null);
                     }
                 } else {
@@ -260,7 +260,7 @@ public class About extends KDialog {
                 if (Internet.isInternetAvailable()) {
                     final Mailer gMailer = new Mailer("Dashboard Feedback | FAQ & Answer"+Student.getFullNamePostOrder(),
                             "Question: "+answerTitleField.getText()+"\nAnswer: "+answerTextArea.getText());
-                    if (gMailer.sendAs(Mailer.FEEDBACK)) {
+                    if (gMailer.send()) {
                         answerTitleField.setText(null);
                         answerTextArea.setText(null);
                     }
@@ -306,7 +306,7 @@ public class About extends KDialog {
                 if (Internet.isInternetAvailable()) {
                     final Mailer gMailer = new Mailer("Dashboard Feedback | A Bug Report | "+
                             Student.getFullNamePostOrder(), bugTextArea.getText());
-                    if (gMailer.sendAs(Mailer.FEEDBACK)) {
+                    if (gMailer.send()) {
                         bugTextArea.setText(null);
                     }
                     bugTextArea.setEditable(true);

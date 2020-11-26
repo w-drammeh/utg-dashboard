@@ -76,6 +76,9 @@ public class PrePortal {
     public static synchronized void startFixingDriver(){
         if (driver == null) {
             driver = DriversPack.forgeNew(true);
+            if (driver != null) {
+                Runtime.getRuntime().addShutdownHook(new Thread(driver::quit));
+            }
         }
     }
 
@@ -315,7 +318,6 @@ public class PrePortal {
             Login.appendToStatus("Plus "+runningCount+" registered courses this semester");
         }
 
-        Student.initialize();
         Login.notifyCompletion();
     }
 
