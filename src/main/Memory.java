@@ -16,7 +16,7 @@ public class Memory {
      * Never directly add or withdraw from this list - all such must be directed
      * by the monitor at main.ModulesHandler
      */
-    private static final ArrayList<Course> VERIFIED_LIST = new ArrayList<>() {
+    private static final ArrayList<Course> VERIFIED_LIST = new ArrayList<Course>() {
         @Override
         public boolean add(Course course) {
             return course.isVerified() && super.add(course);

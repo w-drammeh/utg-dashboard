@@ -184,7 +184,11 @@ public class Student {
 
     public static String getVisiblePortalMail(){
         final int l = portalMail.split("@")[0].length();
-        return portalMail.substring(0, 2)+"*".repeat(l - 3)+portalMail.charAt(l - 1)+"@utg.edu.gm";
+        String t = "*";
+        while (t.length() < (l - 3)) {
+            t += t;
+        }
+        return portalMail.substring(0, 2)+t+portalMail.charAt(l - 1)+"@utg.edu.gm";
     }
 
     public static void setPortalMail(String portalMail) {
@@ -568,7 +572,7 @@ public class Student {
     }
 
     private static void reportCriticalInfoMissing(Component parent, String info) {
-        App.promptWarning(parent, info+" Missing","It turns out that your "+info+" was not found.\n" +
+        App.promptWarning(parent, info+" Missing","It turns out that your \""+info+"\" was not found.\n" +
                 "This can lead to inaccurate analysis and prediction.\nPlease refer your department for this problem.");
     }
 

@@ -95,7 +95,7 @@ public class TranscriptGenerator implements Activity {
 
         final KButton downloadButton = new KButton("Export");
         downloadButton.undress();
-        downloadButton.setStyle(KFontFactory.createBoldFont(16), Color.BLUE);
+        downloadButton.setStyle(KFontFactory.createPlainFont(16), Color.BLUE);
         downloadButton.setToolTipText("Export Transcript to PDF");
         downloadButton.setCursor(MComponent.HAND_CURSOR);
         downloadButton.addActionListener(actionEvent-> {

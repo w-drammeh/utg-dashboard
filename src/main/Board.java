@@ -49,7 +49,7 @@ public final class Board extends KFrame {
     private static KButton toPortalButton;
     private static KButton notificationButton;
     private static Board appInstance;
-    public static final ArrayList<Runnable> postProcesses = new ArrayList<>() {
+    public static final ArrayList<Runnable> postProcesses = new ArrayList<Runnable>() {
         @Override
         public boolean add(Runnable runnable) {
             if (isAppReady()) {
@@ -302,6 +302,7 @@ public final class Board extends KFrame {
         comeHomeButton.addActionListener(e-> cardBoard.show(bodyLayer,"Home"));
         comeHomeButton.setMnemonic(KeyEvent.VK_H);
         boardRoot.add(comeHomeButton);
+        boardRoot.setDefaultButton(comeHomeButton);
     }
 
     @Override
@@ -309,8 +310,7 @@ public final class Board extends KFrame {
         if (b) {
             super.setVisible(true);
             if (Dashboard.isFirst()) {
-                final FirstLaunch firstLaunch = new FirstLaunch();
-                SwingUtilities.invokeLater(()-> firstLaunch.setVisible(true));
+                new FirstLaunch().setVisible(true);
             }
             for (Runnable runnable : postProcesses) {
                 runnable.run();

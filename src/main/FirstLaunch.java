@@ -94,14 +94,14 @@ public class FirstLaunch extends KDialog {
             }
         });
 
-        final JRadioButton iDoButton = new JRadioButton("Am Doing Minor");
+        final JRadioButton iDoButton = new JRadioButton("Am doing Minor");
         iDoButton.setFont(KFontFactory.createPlainFont(15));
         iDoButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         iDoButton.addItemListener(e -> {
             minorNameField.setEditable(e.getStateChange() == ItemEvent.SELECTED);
             minorCodeField.setEditable(e.getStateChange() == ItemEvent.SELECTED);
         });
-        final JRadioButton iDontButton = new JRadioButton("Am Not Doing Minor", true);
+        final JRadioButton iDontButton = new JRadioButton("Am not doing a Minor", true);
         iDontButton.setFont(KFontFactory.createPlainFont(15));
         iDontButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         final ButtonGroup choicesGroup = new ButtonGroup();
@@ -252,13 +252,13 @@ public class FirstLaunch extends KDialog {
     }
 
     private Component welcomeComponent(){
-        final String mailText = "<b>"+Student.getLastName()+", you are all set... Dashboard is all yours!</b>" +
-                "<p>"+Student.getFullName()+", you've just started a new journey into your student-hood at <i>The University of the Gambia</i>. " +
+        final String mailText = "<b>You are all set... Dashboard is all yours!</b>" +
+                "<p>"+Student.getFullName()+", you've just started a new journey into your student-hood at <b>The University of the Gambia</b>. " +
                 "By seeing this dialog means that you've completed setting up your <b>Personal Dashboard</b>. Dashboard is flexible: it does so much " +
                 "while asking you almost nothing.</p>" +
                 "<p>Please see <b>Home | FAQs & Help | Dashboard Tips</b> to get yourself quickly familiar with the vast features " +
                 "of Dashboard.</p>" +
-                "<p>Finally, by seeing this dialog, it means Dashboard has already created a root folder in your home directory - " +
+                "<p>Finally, by seeing this dialog, it means Dashboard has already mounted a root folder in your home directory: " +
                 Serializer.ROOT_DIR +". You may want to check out for this folder and the <b>README.txt</b> file therein.</p>" +
                 "<p style='text-align: center;'>Thank you for using <b>Dashboard</b></p>";
         final KTextPane textPane = KTextPane.wantHtmlFormattedPane(mailText);

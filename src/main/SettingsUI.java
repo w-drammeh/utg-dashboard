@@ -621,7 +621,7 @@ public class SettingsUI implements Activity {
         syncChecking.setCursor(handCursor);
         syncChecking.addItemListener(e-> Portal.setAutoSync((e.getStateChange() == ItemEvent.SELECTED)));
 
-        nameFormatBox = new JComboBox<>(new String[]{"First Name first", "Last Name first"}) {
+        nameFormatBox = new JComboBox<String>(new String[]{"First Name first", "Last Name first"}) {
             @Override
             public JToolTip createToolTip() {
                 return MComponent.preferredTip();
@@ -637,7 +637,7 @@ public class SettingsUI implements Activity {
         final KPanel nameFormatPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         nameFormatPanel.addAll(new KLabel("Change Name Format:", H_FONT), Box.createRigidArea(new Dimension(30,25)), nameFormatBox);
 
-        bgBox = new JComboBox<>(Settings.backgroundNames()) {
+        bgBox = new JComboBox<String>(Settings.backgroundNames()) {
             @Override
             public JToolTip createToolTip() {
                 return MComponent.preferredTip();
@@ -655,7 +655,7 @@ public class SettingsUI implements Activity {
         final KPanel bgPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         bgPanel.addAll(new KLabel("Change Background:", H_FONT), Box.createRigidArea(new Dimension(30,25)), bgBox);
 
-        looksBox = new JComboBox<>(Settings.getLookNames()) {
+        looksBox = new JComboBox<String>(Settings.getLookNames()) {
             @Override
             public JToolTip createToolTip() {
                 return MComponent.preferredTip();
@@ -676,10 +676,8 @@ public class SettingsUI implements Activity {
         lafPanel.addAll(new KLabel("Change Look & Feel:", H_FONT), Box.createRigidArea(new Dimension(30,25)), looksBox);
 
         final KButton outButton = new KButton("Sign out");
-        outButton.setPreferredSize(new Dimension(125, 30));
-        outButton.setStyle(KFontFactory.createBoldFont(15), Color.BLUE);
+        outButton.setStyle(KFontFactory.createPlainFont(16), Color.BLUE);
         outButton.undress();
-        outButton.underline(true);
         outButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         outButton.addActionListener(e-> {
             if (App.showOkCancelDialog("Sign out?", "By signing out, all your data will be lost.")) {

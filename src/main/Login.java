@@ -179,16 +179,14 @@ public class Login extends KDialog {
      * PrePortal should call this after it's done all its tasks.
      */
     public static void notifyCompletion(){
-        closeButton.setEnabled(false);
-        appendToStatus("#####");
         appendToStatus("Now running Pre-Dashboard builds....... Please wait");
+        closeButton.setEnabled(false);
         Student.initialize();
         final KButton enter = new KButton();
         enter.setFocusable(true);
-        final Board firstBoard = new Board();
         enter.addActionListener(e-> {
+            new Board().setVisible(true);
             instance.dispose();
-            firstBoard.setVisible(true);
         });
         rootPane.add(enter);
         rootPane.setDefaultButton(enter);

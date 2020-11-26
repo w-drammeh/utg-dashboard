@@ -45,7 +45,7 @@ public class TranscriptExporter {
             return;
         }
 
-        final File outputFile = new File(savePath+Serializer.FILE_SEPARATOR+Student.getNameAcronym()+"-transcript.pdf");
+        final File outputFile = new File(savePath+Serializer.FILE_SEPARATOR+"transcript-"+Student.getNameAcronym()+".pdf");
         final FileOutputStream outputStream = new FileOutputStream(outputFile);
         PdfWriter.getInstance(document, outputStream);
 
@@ -138,7 +138,7 @@ public class TranscriptExporter {
         return cell;
     }
 
-    public void addTable() throws DocumentException {
+    private void addTable() throws DocumentException {
         final PdfPTable headTable = new PdfPTable(HEAD.length);
         headTable.setTotalWidth(maxUsableWidth);
         headTable.setLockedWidth(true);

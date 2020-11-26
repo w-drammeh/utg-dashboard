@@ -20,7 +20,7 @@ public class News {
     private KButton refreshButton;
     private KLabel accessLabel;
     private static String accessTime;
-    private static final ArrayList<NewsSavior> NEWS_DATA = new ArrayList<>() {
+    private static final ArrayList<NewsSavior> NEWS_DATA = new ArrayList<NewsSavior>() {
         @Override
         public boolean contains(Object o) {
             for (NewsSavior savior : NEWS_DATA) {

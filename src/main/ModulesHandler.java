@@ -43,7 +43,7 @@ public class ModulesHandler {
         yearThree = new ModuleYear(Student.thirdAcademicYear());
         yearFour = new ModuleYear(Student.finalAcademicYear());
 
-        modulesMonitor = new ArrayList<>() {
+        modulesMonitor = new ArrayList<Course>() {
             @Override
             public boolean add(Course course) {
                 if (course.isMisc()) {
