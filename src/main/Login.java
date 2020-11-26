@@ -185,8 +185,8 @@ public class Login extends KDialog {
         final KButton enter = new KButton();
         enter.setFocusable(true);
         enter.addActionListener(e-> {
-            new Board().setVisible(true);
             instance.dispose();
+            new Board().setVisible(true);
         });
         rootPane.add(enter);
         rootPane.setDefaultButton(enter);
