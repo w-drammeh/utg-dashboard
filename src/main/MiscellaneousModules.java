@@ -201,7 +201,7 @@ public class MiscellaneousModules {
                                     "If you've done this module in your third year, consider adding it in the appropriate place.");
                     yearField.requestFocusInWindow();
                     return;
-                } else if (givenYear.equals(Student.finalAcademicYear())) {
+                } else if (givenYear.equals(Student.fourthAcademicYear())) {
                     App.signalError("Error",
                             "Sorry, the year you provided ["+givenYear+"] corresponds your fourth academic year.\n" +
                                     "By convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\n" +
@@ -318,7 +318,7 @@ public class MiscellaneousModules {
                                     "If you've done this module in your third year, consider adding it in the appropriate place.");
                     yearField.requestFocusInWindow();
                     return;
-                } else if (givenYear.equals(Student.finalAcademicYear())) {
+                } else if (givenYear.equals(Student.fourthAcademicYear())) {
                     App.signalError("Error",
                             "Sorry, the year you provided ["+givenYear+"] corresponds your fourth academic year.\n" +
                             "By convention, Dashboard restricts the addition of specific resources to the miscellaneous table.\n" +

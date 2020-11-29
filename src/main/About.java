@@ -125,9 +125,9 @@ public class About extends KDialog {
 
         final KButton moreButton = new KButton("Read More...");
         moreButton.undress();
+        moreButton.setStyle(KFontFactory.createPlainFont(14), Color.BLUE);
         moreButton.underline(false);
         moreButton.setPreferredSize(new Dimension(130, 30));
-        moreButton.setStyle(KFontFactory.createPlainFont(14), Color.BLUE);
         moreButton.setCursor(MComponent.HAND_CURSOR);
         moreButton.addActionListener(listener);
 

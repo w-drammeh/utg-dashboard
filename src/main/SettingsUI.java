@@ -678,6 +678,8 @@ public class SettingsUI implements Activity {
         final KButton outButton = new KButton("Sign out");
         outButton.setStyle(KFontFactory.createPlainFont(16), Color.BLUE);
         outButton.undress();
+        outButton.underline(false);
+        outButton.setPreferredSize(new Dimension(110, 30));
         outButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         outButton.addActionListener(e-> {
             if (App.showOkCancelDialog("Sign out?", "By signing out, all your data will be lost.")) {

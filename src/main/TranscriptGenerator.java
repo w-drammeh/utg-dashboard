@@ -94,9 +94,9 @@ public class TranscriptGenerator implements Activity {
 
         final KButton downloadButton = new KButton("Export");
         downloadButton.setPreferredSize(new Dimension(100, 30));
+        downloadButton.setStyle(KFontFactory.createPlainFont(16), Color.BLUE);
         downloadButton.undress();
         downloadButton.underline(false);
-        downloadButton.setStyle(KFontFactory.createPlainFont(16), Color.BLUE);
         downloadButton.setCursor(MComponent.HAND_CURSOR);
         downloadButton.addActionListener(actionEvent-> {
             try {

@@ -494,8 +494,8 @@ public class Student {
         return secondYear() + 1;
     }
 
-    private static int finalYear(){
-        return yearOfAdmission + 4;
+    private static int fourthYear(){
+        return thirdYear() + 1;
     }
 
 //    if this is readable from the portal, then be it.
@@ -504,7 +504,7 @@ public class Student {
     }
 
     public static String getYearOfGraduation() {
-        return isGraduated() ? Integer.toString(finalYear()) : "N/A";
+        return isGraduated() ? Integer.toString(fourthYear()) : "N/A";
     }
 
     public static String firstAcademicYear(){
@@ -516,11 +516,11 @@ public class Student {
     }
 
     public static String thirdAcademicYear(){
-        return thirdYear() + "/" + finalYear();
+        return thirdYear() + "/" + fourthYear();
     }
 
-    public static String finalAcademicYear(){
-        return finalYear() + "/" + (finalYear() + 1);
+    public static String fourthAcademicYear(){
+        return fourthYear() + "/" + (fourthYear() + 1);
     }
 
     public static boolean isFirstYear(){
@@ -535,7 +535,7 @@ public class Student {
         return levelNumber == 300;
     }
 
-    public static boolean isFinalYear(){
+    public static boolean isFourthYear(){
         return levelNumber == 400;
     }
 

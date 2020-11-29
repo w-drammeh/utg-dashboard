@@ -41,7 +41,7 @@ public class ModulesHandler {
         yearOne = new ModuleYear(Student.firstAcademicYear());
         yearTwo = new ModuleYear(Student.secondAcademicYear());
         yearThree = new ModuleYear(Student.thirdAcademicYear());
-        yearFour = new ModuleYear(Student.finalAcademicYear());
+        yearFour = new ModuleYear(Student.fourthAcademicYear());
 
         modulesMonitor = new ArrayList<Course>() {
             @Override
@@ -56,7 +56,7 @@ public class ModulesHandler {
                     yearTwo.add(course);
                 } else if (course.getYear().equals(Student.thirdAcademicYear())) {
                     yearThree.add(course);
-                } else if (course.getYear().equals(Student.finalAcademicYear())) {
+                } else if (course.getYear().equals(Student.fourthAcademicYear())) {
                     yearFour.add(course);
                 }
                 Memory.mayRemember(course);
