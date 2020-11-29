@@ -223,7 +223,7 @@ public class Course {
     }
 
     public boolean isFourthYear(){
-        return year.equals(Student.finalAcademicYear());
+        return year.equals(Student.fourthAcademicYear());
     }
 
     /**
@@ -233,7 +233,7 @@ public class Course {
     public boolean isMisc() {
         final String y = year;
         return !(y.equals(Student.firstAcademicYear()) || y.equals(Student.secondAcademicYear()) ||
-                y.equals(Student.thirdAcademicYear()) || y.equals(Student.finalAcademicYear()));
+                y.equals(Student.thirdAcademicYear()) || y.equals(Student.fourthAcademicYear()));
     }
 
     public String getSchedule(){

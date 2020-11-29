@@ -20,7 +20,7 @@ public class News {
     private KButton refreshButton;
     private KLabel accessLabel;
     private static String accessTime;
-    private static final ArrayList<NewsSavior> NEWS_DATA = new ArrayList<>() {
+    private static final ArrayList<NewsSavior> NEWS_DATA = new ArrayList<NewsSavior>() {
         @Override
         public boolean contains(Object o) {
             for (NewsSavior savior : NEWS_DATA) {
@@ -53,7 +53,7 @@ public class News {
 
         present = new KPanel();
         present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-        present.add(new KPanel(accessLabel));//then only add using addPenultimate(Component)
+        present.add(new KPanel(new FlowLayout(FlowLayout.CENTER, 5, 20), accessLabel));//then only add using addPenultimate(Component)
 
         final KPanel page = new KPanel(new BorderLayout());
         page.add(northPanel, BorderLayout.NORTH);
@@ -107,7 +107,7 @@ public class News {
         final KTextPane textPane = KTextPane.wantHtmlFormattedPane(body.substring(0, body.length() - (header.length() + 13)));
 
         final KButton extendedReader = new KButton();
-        extendedReader.setFont(KFontFactory.createPlainFont(14));
+        extendedReader.setFont(KFontFactory.createPlainFont(15));
         extendedReader.setCursor(MComponent.HAND_CURSOR);
         if (allContent == null) {
             final AllReader dialogReader = new AllReader(header, body, null);
@@ -128,7 +128,7 @@ public class News {
             }
         };
         niceBox.setBackground(Color.WHITE);
-        niceBox.setPreferredSize(new Dimension(975, 150));
+        niceBox.setPreferredSize(new Dimension(970, 150));
         niceBox.setBorder(BorderFactory.createLineBorder(Color.BLUE));
         niceBox.add(hLabel, BorderLayout.NORTH);
         niceBox.add(textPane, BorderLayout.CENTER);
@@ -137,7 +137,7 @@ public class News {
         readerWrap.setBackground(Color.WHITE);
 
         niceBox.add(readerWrap, BorderLayout.SOUTH);
-        return new KPanel(niceBox);
+        return new KPanel(new FlowLayout(FlowLayout.CENTER, 5, 5), niceBox);
     }
 
 //    push if any
@@ -222,7 +222,7 @@ public class News {
                 final Document specificDocument = Jsoup.connect(HOME_SITE + associatedLink).get();
                 this.allContent = specificDocument.select(".entry-content").outerHtml();
                 this.textPane.setText(allContent);
-                primaryButton.setText("Continue Reading");
+                primaryButton.setText("Continue reading...");
                 primaryButton.setForeground(Color.BLUE);
                 primaryButton.removeActionListener(primaryButton.getActionListeners()[0]);
                 primaryButton.addActionListener(e-> setVisible(true));

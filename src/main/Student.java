@@ -1,7 +1,6 @@
 package main;
 
 import customs.KLabel;
-import utg.Dashboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,7 +59,6 @@ public class Student {
      */
     private static int levelNumber;
     private static double CGPA;
-    public static boolean isReported;
     private static ImageIcon userIcon;
     public static final String FIRST_SEMESTER = "First Semester";
     public static final String SECOND_SEMESTER = "Second Semester";
@@ -186,7 +184,11 @@ public class Student {
 
     public static String getVisiblePortalMail(){
         final int l = portalMail.split("@")[0].length();
-        return portalMail.substring(0, 2)+"*".repeat(l - 3)+portalMail.charAt(l - 1)+"@utg.edu.gm";
+        String t = "*";
+        while (t.length() < (l - 3)) {
+            t += t;
+        }
+        return portalMail.substring(0, 2)+t+portalMail.charAt(l - 1)+"@utg.edu.gm";
     }
 
     public static void setPortalMail(String portalMail) {
@@ -480,20 +482,29 @@ public class Student {
         }
     }
 
-    public static int firstYear(){
+    private static int firstYear(){
         return yearOfAdmission;
     }
 
-    public static int secondYear(){
+    private static int secondYear(){
         return firstYear() + 1;
     }
 
-    public static int thirdYear(){
+    private static int thirdYear(){
         return secondYear() + 1;
     }
 
-    public static int finalYear(){
+    private static int fourthYear(){
         return thirdYear() + 1;
+    }
+
+//    if this is readable from the portal, then be it.
+    public static boolean isGraduated(){
+        return levelNumber > 400;
+    }
+
+    public static String getYearOfGraduation() {
+        return isGraduated() ? Integer.toString(fourthYear()) : "N/A";
     }
 
     public static String firstAcademicYear(){
@@ -505,11 +516,11 @@ public class Student {
     }
 
     public static String thirdAcademicYear(){
-        return thirdYear() + "/" + finalYear();
+        return thirdYear() + "/" + fourthYear();
     }
 
-    public static String finalAcademicYear(){
-        return finalYear() + "/" + (finalYear() + 1);
+    public static String fourthAcademicYear(){
+        return fourthYear() + "/" + (fourthYear() + 1);
     }
 
     public static boolean isFirstYear(){
@@ -524,7 +535,7 @@ public class Student {
         return levelNumber == 300;
     }
 
-    public static boolean isFinalYear(){
+    public static boolean isFourthYear(){
         return levelNumber == 400;
     }
 
@@ -548,51 +559,33 @@ public class Student {
         return Globals.hasText(Student.minor);
     }
 
+    public static String getNameAcronym(){
+        return (lastName.charAt(0)+""+firstName.charAt(0)).toLowerCase();
+    }
+
     public static String predictedStudentMailAddress(){
-        return (lastName.charAt(0)+""+firstName.charAt(0)+matNumber).toLowerCase()+"@utg.edu.gm";
+        return getNameAcronym()+matNumber+"@utg.edu.gm";
     }
 
     public static String predictedStudentPassword(){
         return matNumber;//"student@utg"?
     }
 
-    public static void mayReportIncoming() {
-        if (isReported) {
-            return;
-        }
-        final Timer reportTimer = new Timer(Globals.MINUTE, null);
-        reportTimer.setInitialDelay(0);
-        reportTimer.addActionListener(e-> new Thread(()-> {
-            final Mailer incomingReporter = new Mailer("Incoming Report",
-                    "A student has successfully launched Dashboard-"+ Dashboard.VERSION+" with the following requested credentials\n{\n" +
-                    "Name: "+getFullNamePostOrder()+"\n" +
-                    "Program: "+program+"\n" +
-                    "Level: "+level+"\n" +
-                    "OS: "+System.getProperty("os.name")+"\n" +
-                    "Telephone: "+getTelephone()+"\n" +
-                            "}");
-            if (incomingReporter.sendAs(Mailer.DEVELOPERS_REQUEST)) {
-                isReported = true;
-                reportTimer.stop();
-            }
-        }).start());
-        reportTimer.start();
-    }
-
     private static void reportCriticalInfoMissing(Component parent, String info) {
-        App.promptWarning(parent, info+" Missing","It turns out that your "+info+" was not found.\n" +
+        App.promptWarning(parent, info+" Missing","It turns out that your \""+info+"\" was not found.\n" +
                 "This can lead to inaccurate analysis and prediction.\nPlease refer your department for this problem.");
     }
 
     public static void startSettingImage(Component parent){
+        final Component actualParent = parent == null ? Board.getRoot() : parent;
         final String homeDir = System.getProperty("user.home");
         final String picturesDir = homeDir + "/Pictures";
         final JFileChooser fileChooser = new JFileChooser(new File(picturesDir).exists() ? picturesDir : homeDir);
         fileChooser.setMultiSelectionEnabled(false);
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        final int selection = fileChooser.showOpenDialog(parent == null ? Board.getRoot() : parent);
+        final int selection = fileChooser.showOpenDialog(actualParent);
         if (selection == JFileChooser.APPROVE_OPTION) {
-            fireIconChange(fileChooser.getSelectedFile());
+            fireIconChange(fileChooser.getSelectedFile(), actualParent);
         }
     }
 
@@ -601,36 +594,32 @@ public class Student {
     }
 
     /**
-     * Remember, this call must be accompanied by a file!
-     * So it will send it to setUserIcon() as an icon to be set.
      * It will also notify the containers harboring the icon. One of such known component:
      * imagePanel at main.Board
      * If the parsing-file is null, nothing is done.
      */
-    private static void fireIconChange(File imageFile){
+    private static void fireIconChange(File imageFile, Component c){
         if (imageFile != null) {
             try {
                 final ImageIcon newIcon = MComponent.scale(imageFile.toURI().toURL(), ICON_WIDTH, ICON_HEIGHT);
                 if (newIcon == null) {
-                    App.signalError("Error", "Could not set the image icon to "+imageFile.getAbsolutePath()+".\n" +
+                    App.signalError(c, "Error", "Could not set the image icon to "+imageFile.getAbsolutePath()+".\n" +
                             "Is that an image file? If it's not, try again with a valid image file, otherwise it is of an unsupported type.");
                     return;
                 }
                 userIcon = newIcon;
-                effectImageChangeOnComponents();
-                App.promptPlain("Successful","Image icon has been changed successfully.");
+                effectIconChanges();
             } catch (Exception e) {
-                App.signalError("Error","An error occurred while attempting to change the image icon.\n" +
+                App.signalError(c, "Error","An error occurred while attempting to change the image icon.\n" +
                         "Please try again, preferably, with a different choice.");
             }
         }
     }
 
     /**
-     * Should always be called on icon amendments.
-     * It effects the visual changes on all the containers of the icon.
+     * Effects visual changes on the containers holding the icon.
      */
-    private static void effectImageChangeOnComponents() {
+    private static void effectIconChanges() {
         MComponent.empty(Board.getImagePanel());
         Board.getImagePanel().add(new KLabel(userIcon));
         MComponent.ready(Board.getImagePanel());
@@ -639,13 +628,13 @@ public class Student {
     public static void fireIconReset(){
         if (App.showYesNoCancelDialog("Confirm reset","This action will remove your image icon. Continue?")) {
             userIcon = DEFAULT_ICON;
-            effectImageChangeOnComponents();
+            effectIconChanges();
         }
     }
 
     public static void fireIconDefaultSet(){
         userIcon = SHOOTER_ICON;
-        effectImageChangeOnComponents();
+        effectIconChanges();
     }
 
     /**
@@ -690,7 +679,6 @@ public class Student {
         dataMap.put("status", status.toUpperCase());
         dataMap.put("cg", CGPA);
         dataMap.put("aboutMe", about);
-        dataMap.put("isReported", isReported);
         dataMap.put("nameFormat", nameFormat);
         dataMap.put("extra", ADDITIONAL_DATA);
         if (!isDefaultIconSet()) {
@@ -738,7 +726,6 @@ public class Student {
         about = (String) dataMap.get("aboutMe");
         setNameFormat((String) dataMap.get("nameFormat"));
         ADDITIONAL_DATA = (LinkedHashMap<String, String>) dataMap.get("extra");
-        isReported = (boolean) dataMap.get("isReported");
         if (dataMap.containsKey("shooterIcon")) {
             Board.postProcesses.add(Student::fireIconDefaultSet);
         } else if (dataMap.containsKey("userIcon")) {

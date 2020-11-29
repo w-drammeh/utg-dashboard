@@ -23,7 +23,6 @@ public class PrePortal {
     public static final ActionListener CANCEL_LISTENER = e-> {
         if (App.showYesNoCancelDialog(Login.getRoot(), "Cancel", "Do you really want to terminate the process?")) {
             Login.getInstance().dispose();
-            driver.quit();
             System.exit(0);
         }
     };
@@ -40,7 +39,7 @@ public class PrePortal {
             return;
         }
         Login.replaceLastUpdate("Setting up the driver....... Successful");
-        Login.appendToStatus("Now contacting utg.......");
+        Login.appendToStatus("Now contacting utg.gm.......");
         loadWaiter = new WebDriverWait(driver, Portal.MAXIMUM_WAIT_TIME);
 //        make sure we are at the login page
         if (DriversPack.isIn(driver)) {
@@ -76,6 +75,9 @@ public class PrePortal {
     public static synchronized void startFixingDriver(){
         if (driver == null) {
             driver = DriversPack.forgeNew(true);
+            if (driver != null) {
+                Runtime.getRuntime().addShutdownHook(new Thread(driver::quit));
+            }
         }
     }
 
@@ -315,7 +317,8 @@ public class PrePortal {
             Login.appendToStatus("Plus "+runningCount+" registered courses this semester");
         }
 
-        Student.initialize();
+        Login.appendToStatus("#####");
+        driver.quit();
         Login.notifyCompletion();
     }
 

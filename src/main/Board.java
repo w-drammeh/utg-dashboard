@@ -49,7 +49,7 @@ public final class Board extends KFrame {
     private static KButton toPortalButton;
     private static KButton notificationButton;
     private static Board appInstance;
-    public static final ArrayList<Runnable> postProcesses = new ArrayList<>() {
+    public static final ArrayList<Runnable> postProcesses = new ArrayList<Runnable>() {
         @Override
         public boolean add(Runnable runnable) {
             if (isAppReady()) {
@@ -131,7 +131,6 @@ public final class Board extends KFrame {
 
     /**
      * This call sets up the thorax-region of the Dashboard.
-     *
      * Total height to be covered is 230, and the 30 is for the bigButtons to lie beneath.
      * This is horizontally partitioned into 3 sections with widths as follows:
      * imagePart 300
@@ -243,17 +242,17 @@ public final class Board extends KFrame {
         detailsPart.add(moreDetails, BorderLayout.SOUTH);
 
         final KButton toHome = new KButton("HOME");
-        toHome.setPreferredSize(new Dimension(225, toHome.getPreferredSize().height));
+        toHome.setPreferredSize(new Dimension(225, 30));
         toHome.setFont(KFontFactory.createBoldFont(16));
         toHome.addActionListener(e-> showCard("Home"));
 
         final KButton toTasks = new KButton("MY TASKS+");
-        toTasks.setPreferredSize(new Dimension(225, toTasks.getPreferredSize().height));
+        toTasks.setPreferredSize(new Dimension(225, 30));
         toTasks.setFont(toHome.getFont());
         toTasks.addActionListener(e-> showCard("Tasks"));
 
         final KButton toNews = new KButton("NEWS");
-        toNews.setPreferredSize(new Dimension(225, toNews.getPreferredSize().height));
+        toNews.setPreferredSize(new Dimension(225, 30));
         toNews.setFont(toHome.getFont());
         toNews.addActionListener(e-> showCard("News"));
 
@@ -271,7 +270,7 @@ public final class Board extends KFrame {
                 }
             }
         };
-        notificationButton.setPreferredSize(new Dimension(225, notificationButton.getPreferredSize().height));
+        notificationButton.setPreferredSize(new Dimension(225, 30));
         notificationButton.setFont(toHome.getFont());
         notificationButton.addActionListener(e-> showCard("Notifications"));
 
@@ -302,6 +301,7 @@ public final class Board extends KFrame {
         comeHomeButton.addActionListener(e-> cardBoard.show(bodyLayer,"Home"));
         comeHomeButton.setMnemonic(KeyEvent.VK_H);
         boardRoot.add(comeHomeButton);
+        boardRoot.setDefaultButton(comeHomeButton);
     }
 
     @Override
@@ -309,8 +309,7 @@ public final class Board extends KFrame {
         if (b) {
             super.setVisible(true);
             if (Dashboard.isFirst()) {
-                final FirstLaunch firstLaunch = new FirstLaunch();
-                SwingUtilities.invokeLater(()-> firstLaunch.setVisible(true));
+                new FirstLaunch().setVisible(true);
             }
             for (Runnable runnable : postProcesses) {
                 runnable.run();
@@ -334,11 +333,11 @@ public final class Board extends KFrame {
             postProcesses.add(()-> Runtime.getRuntime().addShutdownHook(shutDownThread));
         } else {
             Runtime.getRuntime().addShutdownHook(shutDownThread);
-            postProcesses.add(()-> {
-                RunningCoursesGenerator.uploadInitials();
-                ModulesHandler.uploadModules();
-            });
         }
+        postProcesses.add(()-> {
+            RunningCoursesGenerator.uploadInitials();
+            ModulesHandler.uploadModules();
+        });
     }
 
     private JComponent generateHomePage(){
@@ -506,8 +505,9 @@ public final class Board extends KFrame {
         }
     }
 
+//    already forged on a thread
     public static void online() {
-        Student.mayReportIncoming();
+
     }
 
 }

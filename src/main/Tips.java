@@ -19,7 +19,7 @@ public class Tips implements Activity {
         helpCard = new CardLayout();
         final KPanel centerPanel = new KPanel(helpCard);//There's north, and this is the center
         final KLabel showingLabel = new KLabel("Showing Dashboard Tips", KFontFactory.createBoldFont(17));
-        final KComboBox<String> helpBox = new KComboBox<>(new String[] {"Dashboard Tips", "UTG FAQs"}) {
+        final KComboBox<String> helpBox = new KComboBox<String>(new String[] {"Dashboard Tips", "UTG FAQs"}) {
             @Override
             public JToolTip createToolTip() {
                 return MComponent.preferredTip();

@@ -12,10 +12,11 @@ import java.util.Properties;
  * Or G-mailer
  */
 public class Mailer {
-    private String subject, content, senderMail, senderPsswd;
+    private String subject;
+    private String content;
+    private String senderMail;
+    private String senderPsswd;
     public static final String DEVELOPERS_MAIL = "utgdashboard@gmail.com";
-    public static final String FEEDBACK = "Feedback";
-    public static final String DEVELOPERS_REQUEST = "Track";
 
 
     public Mailer(String subject, String content){
@@ -25,7 +26,7 @@ public class Mailer {
         this.senderPsswd = "wdrammeh20";
     }
 
-    public boolean sendAs(String type) {
+    public boolean send() {
         final String host = "smtp.gmail.com";
 
         final Properties properties = System.getProperties();
@@ -49,15 +50,11 @@ public class Mailer {
             transport.connect(host, senderMail, senderPsswd);
             transport.sendMessage(message, message.getAllRecipients());
             transport.close();
-            if (type.equals(FEEDBACK)) {
-                App.promptPlain("Feedback Sent","Message sent successfully. Thank you for the feedback!");
-            }
+            App.promptPlain("Successful","Message sent successfully. Thank you for the feedback!");
             return true;
         } catch (MessagingException mex) {
-            if (type.equals(FEEDBACK)) {
-                App.signalError("Feedback Unsent","Sorry, an error was encountered while sending the feedback.\n" +
-                        "Please try again later.");
-            }
+            App.signalError("Error","Sorry, an error was encountered while sending the feedback.\n" +
+                    "Try again later.");
             return false;
         }
     }

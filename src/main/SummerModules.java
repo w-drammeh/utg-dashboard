@@ -156,7 +156,7 @@ public class SummerModules {
             super(null, Student.SUMMER_SEMESTER);
             setTitle("New Summer Course");
             availableYearsBox = new JComboBox<>(new String[] {Student.firstAcademicYear(), Student.secondAcademicYear(),
-                    Student.thirdAcademicYear(), Student.finalAcademicYear()});
+                    Student.thirdAcademicYear(), Student.fourthAcademicYear()});
             availableYearsBox.setFont(KFontFactory.createPlainFont(15));
             yearPanel.removeLast();
             yearPanel.add(new KPanel(availableYearsBox), BorderLayout.CENTER);

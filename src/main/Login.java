@@ -114,20 +114,19 @@ public class Login extends KDialog {
             App.signalError(rootPane,"No Password", "Password Field cannot be blank. Please insert a password.");
             passwordField.requestFocusInWindow();
         } else {
-            if (!Internet.isInternetAvailable()) {
-                App.signalError(rootPane,"Internet Error","Internet connection is required to set up Dashboard.\n" +
-                        "Please connect to the internet and try again.");
-                return;
-            }
-            final boolean permission = App.showOkCancelDialog(rootPane,"Permission Checkpoint",
-                    "By clicking Login, you hereby permit Dashboard to go through your portal\n" +
-                            "and acknowledge the safety of your data with it.");
-            if (permission) {
-                Login.setInputState(false);
-            } else {
-                return;
-            }
-            new Thread(()-> PrePortal.launchVerification(emailField.getText(), String.valueOf(passwordField.getPassword()))).start();
+            new Thread(()-> {
+                setInputState(false);
+                appendToStatus("Checking network status.......");
+                if (Internet.isInternetAvailable()) {
+                    replaceLastUpdate("Checking network status....... Available");
+                    PrePortal.launchVerification(emailField.getText(), String.valueOf(passwordField.getPassword()));
+                } else {
+                    replaceLastUpdate("Checking network status....... Unavailable");
+                    App.signalError(rootPane, "Internet Error", "Internet connection is required to set up Dashboard.\n" +
+                            "Please connect to the internet and try again.");
+                    setInputState(true);
+                }
+            }).start();
         }
     }
 
@@ -180,17 +179,14 @@ public class Login extends KDialog {
      * PrePortal should call this after it's done all its tasks.
      */
     public static void notifyCompletion(){
-        closeButton.setEnabled(false);
-        appendToStatus("#####");
         appendToStatus("Now running Pre-Dashboard builds....... Please wait");
+        closeButton.setEnabled(false);
+        Student.initialize();
         final KButton enter = new KButton();
         enter.setFocusable(true);
-        final Board firstBoard = new Board();
-        RunningCoursesGenerator.uploadInitials();
-        ModulesHandler.uploadModules();
         enter.addActionListener(e-> {
             instance.dispose();
-            firstBoard.setVisible(true);
+            new Board().setVisible(true);
         });
         rootPane.add(enter);
         rootPane.setDefaultButton(enter);

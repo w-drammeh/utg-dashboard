@@ -38,7 +38,12 @@ public class ModulesHandler {
 
 
     public ModulesHandler() {
-        modulesMonitor = new ArrayList<>() {
+        yearOne = new ModuleYear(Student.firstAcademicYear());
+        yearTwo = new ModuleYear(Student.secondAcademicYear());
+        yearThree = new ModuleYear(Student.thirdAcademicYear());
+        yearFour = new ModuleYear(Student.fourthAcademicYear());
+
+        modulesMonitor = new ArrayList<Course>() {
             @Override
             public boolean add(Course course) {
                 if (course.isMisc()) {
@@ -51,7 +56,7 @@ public class ModulesHandler {
                     yearTwo.add(course);
                 } else if (course.getYear().equals(Student.thirdAcademicYear())) {
                     yearThree.add(course);
-                } else if (course.getYear().equals(Student.finalAcademicYear())) {
+                } else if (course.getYear().equals(Student.fourthAcademicYear())) {
                     yearFour.add(course);
                 }
                 Memory.mayRemember(course);
@@ -93,11 +98,6 @@ public class ModulesHandler {
                 return super.remove(course);
             }
         };
-
-        yearOne = new ModuleYear(Student.firstAcademicYear());
-        yearTwo = new ModuleYear(Student.secondAcademicYear());
-        yearThree = new ModuleYear(Student.thirdAcademicYear());
-        yearFour = new ModuleYear(Student.finalAcademicYear());
     }
 
     public Component yearOnePresent(){

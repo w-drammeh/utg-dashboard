@@ -72,7 +72,7 @@ public class ModulesGenerator implements Activity {
         final KButton y4Button = getControlButton("Year Four");
         y4Button.addActionListener(e-> {
             setOnButton(y4Button);
-            indicator.setText("Final Year: " + Student.finalAcademicYear());
+            indicator.setText("Final Year: " + Student.fourthAcademicYear());
             residentLayout.show(residentPanel, "Year4");
         });
 

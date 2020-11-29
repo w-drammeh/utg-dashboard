@@ -26,7 +26,7 @@ public class RunningCoursesGenerator implements Activity {
     private static JPopupMenu modulePopupMenu;
     private static KLabel hintLabel;
     public static final ArrayList<RunningCourse> STARTUP_REGISTRATIONS = new ArrayList<>();
-    private static final ArrayList<RunningCourse> ACTIVE_COURSES = new ArrayList<>() {
+    private static final ArrayList<RunningCourse> ACTIVE_COURSES = new ArrayList<RunningCourse>() {
         @Override
         public boolean add(RunningCourse course) {
             activeModel.addRow(new String[] {course.getCode(), course.getName(), course.getLecturer(), course.getSchedule(),
@@ -108,7 +108,7 @@ public class RunningCoursesGenerator implements Activity {
     }
 
     public static void effectNoticeUpdate(){
-        noticeLabel.setText(Portal.getRegistrationNotice()+("  (Last updated: "+Portal.getLastRegistrationNoticeUpdate()+")"));
+        noticeLabel.setText(Portal.getRegistrationNotice());
     }
 
     public static synchronized void fixRunningDriver(){
