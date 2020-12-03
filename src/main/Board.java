@@ -41,9 +41,9 @@ public final class Board extends KFrame {
      * 'Home', 'News', 'Tasks', and 'Notifications'.
      */
     private static CardLayout cardBoard;
-    private static KPanel imagePanel;//Left-most top, lies the image
-    private static KLabel stateIndicator;//This is locally triggered
-    private static KLabel levelIndicator;//Very dormant in changes anyway
+    private static KPanel imagePanel;//left-most top, lies the image
+    private static KLabel stateIndicator;//this is locally triggered
+    private static KLabel levelIndicator;//very dormant in changes anyway
     private static KLabel semesterIndicator;
     private static KLabel nameLabel;
     private static KButton toPortalButton;
@@ -61,7 +61,6 @@ public final class Board extends KFrame {
     public static final Thread shutDownThread = new Thread(Serializer::mountUserData);
 
 //    Collaborators declaration. The order in which these will be initialized does matter!
-//    Home Panels
     private RunningCoursesGenerator runningCoursesGenerator;
     private ModulesGenerator modulesGenerator;
     private SettingsUI settingsUI;
@@ -69,6 +68,7 @@ public final class Board extends KFrame {
     private Analysis analysisGenerator;
     private Tips faqsGenerator;
     private About myDashboard;
+    private News newsPresent;
 
 
     public Board() {
@@ -116,7 +116,7 @@ public final class Board extends KFrame {
 //        outlined / big buttons
         new TasksGenerator();
         new NotificationGenerator();
-        new News();
+        newsPresent = new News();
 
 
         final Timer dayTimer = new Timer(Globals.DAY, e-> anotherDay());
@@ -151,7 +151,7 @@ public final class Board extends KFrame {
         imagePanel.addMouseListener(new MouseAdapter(){
             @Override
             public void mousePressed(MouseEvent e) {
-                if (e.isPopupTrigger()) {//For linux (or unix-liked) systems
+                if (e.isPopupTrigger()) {//For unix-based systems
                     resetOption.setEnabled(!Student.isDefaultIconSet());
                     shooterOption.setEnabled(!Student.isShooterIconSet());
                     imageOptionsPop.show(imagePanel, e.getX(), e.getY());
@@ -189,8 +189,8 @@ public final class Board extends KFrame {
         final KPanel horizontalWrapper = new KPanel();
         horizontalWrapper.setLayout(new BoxLayout(horizontalWrapper, BoxLayout.X_AXIS));
         horizontalWrapper.addAll(new KPanel(), toPortalButton, new KPanel());
-        midPart.add(horizontalWrapper);//Notice how the last space is automatically left blank.
-        // Besides, the height and the spaces do not seem to count
+        midPart.add(horizontalWrapper);//notice how the last space is automatically left blank.
+        //besides, the height and the spaces do not seem to count
 
         final KButton aUtgButton = new KButton("About UTG");
         aUtgButton.undress();
@@ -242,19 +242,20 @@ public final class Board extends KFrame {
         detailsPart.add(moreDetails, BorderLayout.SOUTH);
 
         final KButton toHome = new KButton("HOME");
-        toHome.setPreferredSize(new Dimension(225, 30));
         toHome.setFont(KFontFactory.createBoldFont(16));
         toHome.addActionListener(e-> showCard("Home"));
+        final int height = toHome.getPreferredSize().height;
+        toHome.setPreferredSize(new Dimension(225, height));
 
         final KButton toTasks = new KButton("MY TASKS+");
-        toTasks.setPreferredSize(new Dimension(225, 30));
+        toTasks.setPreferredSize(new Dimension(225, height));
         toTasks.setFont(toHome.getFont());
         toTasks.addActionListener(e-> showCard("Tasks"));
 
         final KButton toNews = new KButton("NEWS");
-        toNews.setPreferredSize(new Dimension(225, 30));
+        toNews.setPreferredSize(new Dimension(225, height));
         toNews.setFont(toHome.getFont());
-        toNews.addActionListener(e-> showCard("News"));
+        toNews.addActionListener(e-> newsPresent.answerActivity());
 
         notificationButton = new KButton("NOTIFICATIONS"){
             @Override
@@ -266,11 +267,11 @@ public final class Board extends KFrame {
                 } else {
                     super.setForeground(Color.RED);
                     super.setCursor(MComponent.HAND_CURSOR);
-                    //programmatically display the tooltip
+                    //Todo: programmatically display the tooltip
                 }
             }
         };
-        notificationButton.setPreferredSize(new Dimension(225, 30));
+        notificationButton.setPreferredSize(new Dimension(225, height));
         notificationButton.setFont(toHome.getFont());
         notificationButton.addActionListener(e-> showCard("Notifications"));
 

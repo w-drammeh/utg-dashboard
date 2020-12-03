@@ -43,7 +43,7 @@ public class KScrollPane extends JScrollPane implements Preference {
 
 //    seems to have no effect except on sight
     public void toTop(){
-        getVerticalScrollBar().setValue(getVerticalScrollBar().getMinimum());
+        getVerticalScrollBar().setValue(0);
     }
 
 //    seems to have no effect except on sight

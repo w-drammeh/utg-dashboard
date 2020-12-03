@@ -522,7 +522,6 @@ public class RunningCoursesGenerator implements Activity {
         addButton.redress();
         addButton.setText("Add");
         addButton.setFont(KFontFactory.createPlainFont(16));
-        addButton.setCursor(MComponent.HAND_CURSOR);
         addButton.addActionListener(e-> {
             if (activeTable.getRowCount() >= 6) {
                 App.signalError("Error","The maximum number of registrations per semester is six (6) courses.");

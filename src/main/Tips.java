@@ -11,11 +11,11 @@ import java.awt.*;
 public class Tips implements Activity {
     private CardLayout helpCard;
     private KScrollPane tipsPane, faqsPane;
-    private boolean isFirst;
+    private boolean isFirstView;
 
 
     public Tips(){
-        isFirst = true;
+        isFirstView = true;
         helpCard = new CardLayout();
         final KPanel centerPanel = new KPanel(helpCard);//There's north, and this is the center
         final KLabel showingLabel = new KLabel("Showing Dashboard Tips", KFontFactory.createBoldFont(17));
@@ -56,12 +56,12 @@ public class Tips implements Activity {
     @Override
     public void answerActivity() {
         Board.showCard("Faqs & Help");
-        if (isFirst) {
+        if (isFirstView) {
             SwingUtilities.invokeLater(()-> {
                 tipsPane.toTop();
                 faqsPane.toTop();
             });
-            isFirst = false;
+            isFirstView = false;
         }
     }
 

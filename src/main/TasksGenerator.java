@@ -45,13 +45,12 @@ public class TasksGenerator {
 
         final KButton returnButton = new KButton("Return");
         returnButton.setFont(TASK_BUTTONS_FONT);
-        returnButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         returnButton.addActionListener(e-> {
             cardLayout.show(inPanel,"Home");
             hintLabel.setText("");
         });
         returnButton.setMnemonic(KeyEvent.VK_BACK_SPACE);
-        returnButton.setToolTipText("(Alt + Back_Space)");
+        returnButton.setToolTipText("Back (Alt+Back_Space)");
 
         final KPanel upperPanel = new KPanel(new BorderLayout());
         upperPanel.add(new KPanel(hintLabel), BorderLayout.WEST);

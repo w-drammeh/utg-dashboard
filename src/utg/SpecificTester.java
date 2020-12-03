@@ -1,6 +1,11 @@
 package utg;
 
-import main.About;
+import main.News;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import java.util.List;
 
 /**
  * This type is intended for testing a specific component / functionality of the project.
@@ -16,8 +21,12 @@ import main.About;
  */
 public class SpecificTester {
 
-    public static void main(String[] args) {
-        new About().setVisible(true);
+    public static void main(String[] args) throws Exception {
+        final Document doc = Jsoup.connect(News.NEWS_SITE).get();
+        final List<Element> elements = doc.getElementsByTag("article");
+        for (Element element : elements) {
+            System.out.println(element.getElementsByTag("a").attr("href"));
+        }
     }
 
 }

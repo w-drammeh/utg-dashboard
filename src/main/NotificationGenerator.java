@@ -59,7 +59,6 @@ public class NotificationGenerator {
     private Component dashboardComponent() {
         final KButton clearButton = new KButton("Remove all");
         clearButton.setFont(KFontFactory.createPlainFont(15));
-        clearButton.setCursor(MComponent.HAND_CURSOR);
         clearButton.addActionListener(clearAction());
         clearButton.setToolTipText("Clear Notifications");
 
@@ -123,7 +122,6 @@ public class NotificationGenerator {
 
         refreshButton = new KButton("Update Alerts");
         refreshButton.setFont(KFontFactory.createPlainFont(15));
-        refreshButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         refreshButton.addActionListener(e-> updateNotices(true));
 
         portalPanel = new KPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));

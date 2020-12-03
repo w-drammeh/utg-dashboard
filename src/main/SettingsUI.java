@@ -682,9 +682,9 @@ public class SettingsUI implements Activity {
         outButton.setPreferredSize(new Dimension(110, 30));
         outButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         outButton.addActionListener(e-> {
-            if (App.showOkCancelDialog("Sign out?", "By signing out, all your data will be lost.")) {
-                final int vInt = App.verifyUser("To sign out, enter your matriculation number below.\n" +
-                        "We hope this tool has been of great help to you.");
+            if (App.showOkCancelDialog("Sign out", "Are are sure you want to sign out?\n" +
+                    "By signing out, all your data will be lost.")) {
+                final int vInt = App.verifyUser("Enter your matriculation number to sign out");
 
                 if (vInt == App.VERIFICATION_TRUE) {
                     if (Serializer.unMountUserData()) {
