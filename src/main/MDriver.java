@@ -11,7 +11,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 /**
  * Handles driver-related operations, including setting and donating them.
  */
-public class DriversPack {
+public class MDriver {
     public static final int CONNECTION_LOST = 0;
     public static final int ATTEMPT_FAILED = 1;
     public static final int ATTEMPT_SUCCEEDED = 2;

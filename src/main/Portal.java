@@ -66,15 +66,15 @@ public class Portal {
     private static void launchPortal(Component clickable){
         try {
             if (portalDriver == null) {
-                portalDriver = DriversPack.forgeNew(false);
+                portalDriver = MDriver.forgeNew(false);
                 if (portalDriver == null) {
                     App.reportMissingDriver();
                     return;
                 }
             }
 
-            final int loginAttempt = DriversPack.attemptLogin(portalDriver);
-            if (loginAttempt == DriversPack.ATTEMPT_SUCCEEDED) {
+            final int loginAttempt = MDriver.attemptLogin(portalDriver);
+            if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
                 portalDriver.navigate().to(Portal.CONTENTS_PAGE);
             }
         } finally {
@@ -142,7 +142,7 @@ public class Portal {
     }
 
     public static String getLastAdmissionNoticeUpdate(){
-        return lastAdmissionNoticeUpdate == null ? "Never" : MDate.formatFully(lastAdmissionNoticeUpdate);
+        return lastAdmissionNoticeUpdate == null ? "Never" : MDate.format(lastAdmissionNoticeUpdate);
     }
 
     public static String getRegistrationNotice(){
@@ -160,7 +160,7 @@ public class Portal {
     }
 
     public static String getLastRegistrationNoticeUpdate(){
-        return lastRegistrationNoticeUpdate == null ? "Never" : MDate.formatFully(lastRegistrationNoticeUpdate);
+        return lastRegistrationNoticeUpdate == null ? "Never" : MDate.format(lastRegistrationNoticeUpdate);
     }
 
     /**

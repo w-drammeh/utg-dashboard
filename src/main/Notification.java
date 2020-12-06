@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,17 +26,17 @@ public class Notification implements Serializable {
     public static final ArrayList<Notification> NOTIFICATIONS = new ArrayList<>();
 
 
-    private Notification(String heading, String vText, String information, Date time) {
+    private Notification(String heading, String vText, String information) {
         this.heading = heading;
         this.text = vText;
         this.information = information;
-        this.time = time;
+        this.time = new Date();
         this.shower = new Exhibitor(this);
         this.layer = new NotificationLayer(this);
     }
 
     public static void create(String heading, String vText, String information) {
-        final Notification incoming = new Notification(heading, vText, information, new Date());
+        final Notification incoming = new Notification(heading, vText, information);
         NotificationGenerator.join(incoming);
         NOTIFICATIONS.add(incoming);
     }
@@ -93,8 +93,10 @@ public class Notification implements Serializable {
             disposeButton.setFocusable(true);
             disposeButton.addActionListener(closeListener());
 
-            final KPanel lowerPart = new KPanel(new FlowLayout(FlowLayout.RIGHT));
-            lowerPart.addAll(deleteButton, disposeButton);
+            final KPanel lowerPart = new KPanel(new BorderLayout());
+            lowerPart.add(new KPanel(new KLabel(MDate.format(notification.time), KFontFactory.createPlainFont(16))),
+                    BorderLayout.WEST);
+            lowerPart.add(new KPanel(deleteButton, disposeButton), BorderLayout.EAST);
 
             final KPanel contentPanel = new KPanel();
             contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
@@ -126,8 +128,8 @@ public class Notification implements Serializable {
                     Color.BLUE)), BorderLayout.WEST);
             innerLabel = new KLabel(alert.text, KFontFactory.createPlainFont(16), alert.isRead ? null : Color.RED);
             add(new KPanel(innerLabel), BorderLayout.CENTER);
-            add(new KPanel(new KLabel(MDate.formatFully(alert.time),
-                    KFontFactory.createPlainFont(16), Color.GRAY)), BorderLayout.EAST);
+            add(new KPanel(new KLabel(MDate.formatDateOnly(alert.time), KFontFactory.createPlainFont(16), Color.GRAY)),
+                    BorderLayout.EAST);
         }
 
         private static MouseListener forgeListener(NotificationLayer layer){

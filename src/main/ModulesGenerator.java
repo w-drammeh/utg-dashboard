@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -99,8 +99,8 @@ public class ModulesGenerator implements Activity {
         residentLayout.addLayoutComponent(residentPanel.add(handlerInstance.yearTwoPresent()),"Year2");
         residentLayout.addLayoutComponent(residentPanel.add(handlerInstance.yearThreePresent()),"Year3");
         residentLayout.addLayoutComponent(residentPanel.add(handlerInstance.yearFourPresent()),"Year4");
-        residentLayout.addLayoutComponent(residentPanel.add(new SummerModules().getPresent()),"Summer");
-        residentLayout.addLayoutComponent(residentPanel.add(new MiscellaneousModules().getPresent()),"misc");
+        residentLayout.addLayoutComponent(residentPanel.add(new SummerModule().getPresent()),"Summer");
+        residentLayout.addLayoutComponent(residentPanel.add(new MiscellaneousModule().getPresent()),"misc");
 
         final KPanel modulesActivity = new KPanel(new BorderLayout());
         modulesActivity.add(headerPanel, BorderLayout.NORTH);

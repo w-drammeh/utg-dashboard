@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;

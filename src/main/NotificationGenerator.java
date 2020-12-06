@@ -1,7 +1,7 @@
 package main;
 
-import customs.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -132,7 +132,7 @@ public class NotificationGenerator {
 
     private static synchronized void setupDriver() {
         if (noticeDriver == null) {
-            noticeDriver = DriversPack.forgeNew(true);
+            noticeDriver = MDriver.forgeNew(true);
         }
     }
 
@@ -214,8 +214,8 @@ public class NotificationGenerator {
                 return;
             }
 
-            final int loginTry = DriversPack.attemptLogin(noticeDriver);
-            if (loginTry == DriversPack.ATTEMPT_SUCCEEDED) {
+            final int loginTry = MDriver.attemptLogin(noticeDriver);
+            if (loginTry == MDriver.ATTEMPT_SUCCEEDED) {
                 final boolean renew = Portal.startRenewingNotices(noticeDriver, userRequested);
                 if (renew) {
                     App.promptPlain("Successful", "The \"Admission\" and \"Registration\" Notices are updated successfully.");
@@ -223,13 +223,13 @@ public class NotificationGenerator {
                     App.signalError("Error", "Something went wrong while updating the Notices.\n" +
                             "Please try again.");
                 }
-            } else if (loginTry == DriversPack.ATTEMPT_FAILED) {
+            } else if (loginTry == MDriver.ATTEMPT_FAILED) {
                 if (userRequested) {
                     App.reportLoginAttemptFailed();
                 }
                 setNoticeComponents(true);
                 return;
-            } else if (loginTry == DriversPack.CONNECTION_LOST) {
+            } else if (loginTry == MDriver.CONNECTION_LOST) {
                 if (userRequested) {
                     App.reportConnectionLost();
                 }

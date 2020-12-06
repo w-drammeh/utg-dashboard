@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,14 +8,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class SummerModules {
+public class SummerModule {
     private KMenuItem detailsItem, editItem, removeItem, confirmItem, newItem;
     private JPopupMenu popupMenu;
     private static KTable summerTable;
     public static KTableModel summerModel;
 
 
-    public SummerModules(){
+    public SummerModule(){
         setupTable();
         configurePopup();
     }

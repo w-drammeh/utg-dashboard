@@ -1,4 +1,4 @@
-package customs;
+package proto;
 
 import main.App;
 import main.MComponent;

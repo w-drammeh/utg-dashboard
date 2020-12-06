@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -813,11 +813,11 @@ public class TaskSelf {
                 final Date assignmentDeadline = MDate.parse(assignmentSelf.deadLine+" 0:0:0");
 
                 final KTextField dField = KTextField.newDayField();
-                dField.setText(MDate.getPropertyFrom(assignmentDeadline, Calendar.DATE));
+                dField.setText(MDate.getProperty(assignmentDeadline, Calendar.DATE));
                 final KTextField mField = KTextField.newMonthField();
-                mField.setText(MDate.getPropertyFrom(assignmentDeadline, Calendar.MONTH));
+                mField.setText(MDate.getProperty(assignmentDeadline, Calendar.MONTH));
                 final KTextField yField = KTextField.newYearField();
-                yField.setText(MDate.getPropertyFrom(assignmentDeadline, Calendar.YEAR));
+                yField.setText(MDate.getProperty(assignmentDeadline, Calendar.YEAR));
                 final KPanel datesPanel = new KPanel(new FlowLayout(FlowLayout.CENTER));
                 datesPanel.addAll(new KLabel("D", valsFont), dField, Box.createRigidArea(new Dimension(20, 30)),
                         new KLabel("M", valsFont), mField, Box.createRigidArea(new Dimension(20, 30)),
@@ -898,9 +898,9 @@ public class TaskSelf {
                 final Calendar eveCalendar = Calendar.getInstance();
                 eveCalendar.setTime(MDate.parse(this.dateDue+" 0:0:0"));
                 eveCalendar.add(Calendar.DATE, -1);
-                if (MDate.sameDay(eveCalendar.getTime(), new Date())) {
+                if (MDate.isSameDay(eveCalendar.getTime(), new Date())) {
                     signalEveNotice();
-                } else if(MDate.sameDay(MDate.parse(this.dateDue+" 0:0:0"), new Date())) {
+                } else if(MDate.isSameDay(MDate.parse(this.dateDue+" 0:0:0"), new Date())) {
                     endState();
                     setUpUI();
                     MComponent.ready(this.eventLayer);
@@ -995,7 +995,7 @@ public class TaskSelf {
             final Calendar eveCalendar = Calendar.getInstance();
             eveCalendar.setTime(MDate.parse(this.dateDue+" 0:0:0"));
             eveCalendar.add(Calendar.DATE, -1);
-            if (MDate.sameDay(eveCalendar.getTime(), new Date())) {
+            if (MDate.isSameDay(eveCalendar.getTime(), new Date())) {
                 signalEveNotice();
             }
             final int residue = Globals.DAY - MDate.getTimeValue(new Date());

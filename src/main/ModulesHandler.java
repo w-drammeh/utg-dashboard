@@ -1,11 +1,11 @@
 package main;
 
-import customs.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +15,9 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Todo: keep track of all the venues, rooms, lecturer-names the user gives and recommend them on appropriate dialogs
+ */
 public class ModulesHandler {
     /**
      * Value keeps changing to the semester-table currently receiving focus.
@@ -47,9 +50,9 @@ public class ModulesHandler {
             @Override
             public boolean add(Course course) {
                 if (course.isMisc()) {
-                    MiscellaneousModules.welcome(course);
+                    MiscellaneousModule.welcome(course);
                 } else if (course.isSummerSemester()) {
-                    SummerModules.welcome(course);
+                    SummerModule.welcome(course);
                 } else if (course.getYear().equals(Student.firstAcademicYear())) {
                     yearOne.add(course);
                 } else if (course.getYear().equals(Student.secondAcademicYear())) {
@@ -82,9 +85,9 @@ public class ModulesHandler {
                 }
 
                 if (course.isMisc()) {
-                    MiscellaneousModules.ridOf(course);
+                    MiscellaneousModule.ridOf(course);
                 } else if (course.isSummerSemester()) {
-                    SummerModules.ridOf(course);
+                    SummerModule.ridOf(course);
                 } else if (course.isFirstYear()) {
                     yearOne.remove(course);
                 } else if (course.isSecondYear()) {
@@ -172,7 +175,7 @@ public class ModulesHandler {
                 defaultTableModel.setValueAt(recent.getName(), targetRow, 1);
                 defaultTableModel.setValueAt(recent.getLecturer(), targetRow, 2);
                 defaultTableModel.setValueAt(recent.getGrade(), targetRow, 3);
-                if (defaultTableModel == SummerModules.summerModel || defaultTableModel == MiscellaneousModules.miscModel) {
+                if (defaultTableModel == SummerModule.summerModel || defaultTableModel == MiscellaneousModule.miscModel) {
                     defaultTableModel.setValueAt(recent.getYear(), targetRow, 4);
                 }
                 break;
@@ -206,7 +209,7 @@ public class ModulesHandler {
 
     public static synchronized void fixModulesDriver(){
         if (modulesDriver == null) {
-            modulesDriver = DriversPack.forgeNew(true);
+            modulesDriver = MDriver.forgeNew(true);
         }
     }
 
@@ -234,16 +237,16 @@ public class ModulesHandler {
 
         synchronized (modulesDriver){
             final WebDriverWait loadWaiter = new WebDriverWait(modulesDriver, Portal.MAXIMUM_WAIT_TIME);
-            final int loginAttempt = DriversPack.attemptLogin(modulesDriver);
-            if (loginAttempt == DriversPack.ATTEMPT_SUCCEEDED) {
+            final int loginAttempt = MDriver.attemptLogin(modulesDriver);
+            if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
                 if (Portal.isPortalBusy(modulesDriver)) {
                     App.reportBusyPortal();
                     return;
                 }
-            } else if (loginAttempt == DriversPack.ATTEMPT_FAILED) {
+            } else if (loginAttempt == MDriver.ATTEMPT_FAILED) {
                 App.reportLoginAttemptFailed();
                 return;
-            } else if (loginAttempt == DriversPack.CONNECTION_LOST) {
+            } else if (loginAttempt == MDriver.CONNECTION_LOST) {
                 App.reportConnectionLost();
                 return;
             }
@@ -360,8 +363,8 @@ public class ModulesHandler {
 
             synchronized (modulesDriver){
                 final WebDriverWait loadWaiter = new WebDriverWait(modulesDriver, 30);
-                final int loginAttempt = DriversPack.attemptLogin(modulesDriver);
-                if (loginAttempt == DriversPack.ATTEMPT_SUCCEEDED) {
+                final int loginAttempt = MDriver.attemptLogin(modulesDriver);
+                if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
                     if (Portal.isPortalBusy(modulesDriver)) {
                         if (userRequested) {
                             App.reportBusyPortal();
@@ -369,13 +372,13 @@ public class ModulesHandler {
                         }
                         return;
                     }
-                } else if (loginAttempt == DriversPack.ATTEMPT_FAILED) {
+                } else if (loginAttempt == MDriver.ATTEMPT_FAILED) {
                     if (userRequested) {
                         App.reportLoginAttemptFailed();
                         triggerButton.setEnabled(true);
                     }
                     return;
-                } else if (loginAttempt == DriversPack.CONNECTION_LOST) {
+                } else if (loginAttempt == MDriver.CONNECTION_LOST) {
                     if (userRequested) {
                         App.reportConnectionLost();
                         triggerButton.setEnabled(true);
@@ -804,7 +807,7 @@ public class ModulesHandler {
 
             final Font hintFont = KFontFactory.createBoldFont(16);
 
-            if (this instanceof MiscellaneousModules.MiscModuleAdder) {
+            if (this instanceof MiscellaneousModule.MiscModuleAdder) {
                 yearField = KTextField.rangeControlField(9);
             } else {
                 yearField = new KTextField();

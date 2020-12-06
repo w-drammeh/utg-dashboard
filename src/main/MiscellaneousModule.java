@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,14 +8,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class MiscellaneousModules {
+public class MiscellaneousModule {
     private KMenuItem detailsItem, editItem, removeItem, confirmItem, newItem;
     private JPopupMenu jPopupMenu;
     private static KTable miscTable;
     public static KTableModel miscModel;
 
 
-    public MiscellaneousModules(){
+    public MiscellaneousModule(){
         setupTable();
         configurePopUp();
     }

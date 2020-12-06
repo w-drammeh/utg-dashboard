@@ -1,6 +1,6 @@
 package main;
 
-import customs.KLabel;
+import proto.KLabel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -501,10 +501,6 @@ public class Student {
 //    if this is readable from the portal, then be it.
     public static boolean isGraduated(){
         return levelNumber > 400;
-    }
-
-    public static String getYearOfGraduation() {
-        return isGraduated() ? Integer.toString(fourthYear()) : "N/A";
     }
 
     public static String firstAcademicYear(){

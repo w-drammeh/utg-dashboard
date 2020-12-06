@@ -1,4 +1,4 @@
-package customs;
+package proto;
 
 import java.awt.*;
 

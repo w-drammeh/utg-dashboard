@@ -3,7 +3,7 @@
     Description: Flexible and elegant student management system of the University of The Gambia
     Development Language: Java
     Source Packages:
-        customs
+        proto
         icons
         main
         utg
@@ -16,13 +16,13 @@
 
 >>Notes to Overview
     Source Packages (4 packages):
-        customs:
+        proto (prototype):
             Classes of this package extends the standard JDK for initialization of project-based components.
         icons:
             The image icons used in building the Dashboard are placed in this package for uniform access.
         main:
             It's the residential package for all the classes, interfaces, and types used in the project.
-            Classes of this package make good use of the customs package and interacts with one-another
+            Classes of this package make good use of the proto package and interacts with one-another
             to make Dashboard what it is.
         utg:
             Contains classes for testing and running the project from every aspects with the real runner

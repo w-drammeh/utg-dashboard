@@ -15,6 +15,6 @@ interface Activity {
      * as it traditionally use to be.
      * By convention, this call should physically be placed directly beneath the constructor.
      */
-    public void answerActivity();
+    void answerActivity();
 
 }

@@ -1,9 +1,9 @@
 package main;
 
-import customs.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import proto.*;
 import utg.Dashboard;
 
 import javax.swing.*;
@@ -157,7 +157,7 @@ public class News implements Activity {
         niceBox.add(hLabel, BorderLayout.NORTH);
         niceBox.add(textPane, BorderLayout.CENTER);
         niceBox.add(readerWrap, BorderLayout.SOUTH);
-        return new KPanel(niceBox);
+        return new KPanel(new FlowLayout(FlowLayout.CENTER, 0, 5), niceBox);
     }
 
 //    push if any

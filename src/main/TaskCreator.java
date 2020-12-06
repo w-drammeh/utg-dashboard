@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -310,7 +310,7 @@ public class TaskCreator {
         	if (Globals.isBlank(dField.getText()) || Globals.isBlank(mField.getText()) || Globals.isBlank(yField.getText())) {
         		return "";
         	}
-        	final String sep = MDate.VAL_SEPARATOR;
+        	final String sep = MDate.SEPARATOR;
         	return dField.getText()+sep+mField.getText()+sep+yField.getText();
         }
     }
@@ -418,7 +418,7 @@ public class TaskCreator {
             if(Globals.isBlank(dayField.getText()) || Globals.isBlank(monthField.getText()) || Globals.isBlank(yearField.getText())) {
                 return "";
             }
-            final String sep = MDate.VAL_SEPARATOR;
+            final String sep = MDate.SEPARATOR;
             return dayField.getText()+sep+monthField.getText()+sep+yearField.getText();
         }
 

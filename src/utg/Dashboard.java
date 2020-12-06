@@ -6,7 +6,8 @@ import javax.swing.*;
 import java.io.File;
 
 /**
- * @author Muhammed W. Drammeh
+ * @author Muhammed W. Drammeh <wakadrammeh@gmail.com>
+ *
  * This is the actual runner type.
  * In a nutshell, it reads from a serializable state if existed, or triggers a new instance if not -
  * or otherwise found inconsistent.

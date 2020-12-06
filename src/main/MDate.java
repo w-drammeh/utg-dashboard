@@ -7,29 +7,40 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class MDate {
-    public static final String VAL_SEPARATOR = "/";
+    public static final String SEPARATOR = "/";
     private static final SimpleDateFormat standardFormat = new SimpleDateFormat(
-            "dd"+VAL_SEPARATOR+"MM"+VAL_SEPARATOR+"yyyy H:m:s");
+            "dd"+ SEPARATOR +"MM"+ SEPARATOR +"yyyy H:m:s");
 
 
-    public static String now(){
-        return standardFormat.format(new Date());
-    }
-
-    public static String formatDateOnly(Date d){
-        return formatFully(d).split(" ")[0];
-    }
-
-    public static String formatFully(Date d){
+    /**
+     * Gets a String representation of this date fully-formatted as specified by the standard format.
+     * This includes both the date and time.
+     */
+    public static String format(Date d){
         return standardFormat.format(d);
     }
 
-    public static int thisYear(){
-        return Calendar.getInstance().get(Calendar.YEAR);
+    /**
+     * Get only the date (and not the time) of this date instance.
+     */
+    public static String formatDateOnly(Date d){
+        return standardFormat.format(d).split(" ")[0];
     }
 
-    public static int thisMonth(){
+    public static String now(){
+        return format(new Date());
+    }
+
+    public static String today(){
+        return formatDateOnly(new Date());
+    }
+
+    public static int getMonth(){
         return Calendar.getInstance().get(Calendar.MONTH) + 1;
+    }
+
+    public static int getYear(){
+        return Calendar.getInstance().get(Calendar.YEAR);
     }
 
     public static Date parse(String dateValue){
@@ -44,7 +55,7 @@ public class MDate {
     /**
      * Gets the specified calendar property from the given date.
      */
-    public static int getPropertyFrom(Date date, int value){
+    public static int getProperty(Date date, int value){
         final Calendar t = Calendar.getInstance();
         t.setTime(date);
         if (value == Calendar.MONTH) {
@@ -142,7 +153,7 @@ public class MDate {
      * Returns true if the values presented by date1 and date2 fall in the same day.
      * This method / condition is rough, and time ignorant.
      */
-    public static boolean sameDay(Date d1, Date d2) {
+    public static boolean isSameDay(Date d1, Date d2) {
         return formatDateOnly(d1).equals(formatDateOnly(d2));
     }
 
@@ -151,9 +162,9 @@ public class MDate {
     }
 
     public static int getTimeValue(Date d){
-        return  (getPropertyFrom(d, Calendar.HOUR) + 12) * Globals.HOUR +
-                getPropertyFrom(d, Calendar.MINUTE) * Globals.MINUTE +
-                getPropertyFrom(d, Calendar.SECOND) * Globals.SECOND;
+        return  (getProperty(d, Calendar.HOUR) + 12) * Globals.HOUR +
+                getProperty(d, Calendar.MINUTE) * Globals.MINUTE +
+                getProperty(d, Calendar.SECOND) * Globals.SECOND;
     }
 
 }

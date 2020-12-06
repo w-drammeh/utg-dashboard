@@ -1,7 +1,7 @@
 package main;
 
 import com.lowagie.text.DocumentException;
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;

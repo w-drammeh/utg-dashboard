@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 import utg.Dashboard;
 
 import javax.swing.*;

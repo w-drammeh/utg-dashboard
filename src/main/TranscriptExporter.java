@@ -4,17 +4,26 @@ import com.lowagie.text.Font;
 import com.lowagie.text.Image;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.*;
-import com.lowagie.text.pdf.PdfPCell;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Random;
 
+/**
+ * Physical differences with the official transcript:
+ * 1. Background - the official has transparent UTG logos; this has a "Confidential" text
+ * 2. No page numbering for this
+ * 3. Single table-header - the official has headers per-page
+ * 4. Variation in foreground and background colours of the headers
+ * 5. Layout - the official uses more pages
+ */
 public class TranscriptExporter {
     private Document document;
     private Rectangle pageSize;
@@ -26,7 +35,7 @@ public class TranscriptExporter {
 
 
     public TranscriptExporter(){
-        document = new Document();
+        document = new Document(PageSize.A4, 35, 35, 30, 50);
         pageSize = document.getPageSize();
         maxUsableWidth = (int)(pageSize.getWidth() - pageSize.getWidth()/25) - 5;
     }
@@ -34,7 +43,7 @@ public class TranscriptExporter {
     public void exportNow() throws IOException, DocumentException {
         String savePath;
         final String homeDir = System.getProperty("user.home");
-        final String documentsDir = homeDir+"/Documents";
+        final String documentsDir = homeDir+Serializer.FILE_SEPARATOR+"Documents";
         final JFileChooser fileChooser = new JFileChooser(new File(documentsDir).exists() ? documentsDir : homeDir);
         fileChooser.setDialogTitle("Select Destination");
         fileChooser.setMultiSelectionEnabled(false);
@@ -47,7 +56,8 @@ public class TranscriptExporter {
 
         final File outputFile = new File(savePath+Serializer.FILE_SEPARATOR+"transcript-"+Student.getNameAcronym()+".pdf");
         final FileOutputStream outputStream = new FileOutputStream(outputFile);
-        PdfWriter.getInstance(document, outputStream);
+        final PdfWriter pdfWriter = PdfWriter.getInstance(document, outputStream);
+        pdfWriter.setPageEvent(new WatermarkEvent());
 
         document.open();
         addMetaData();
@@ -64,6 +74,7 @@ public class TranscriptExporter {
         document.addAuthor("Muhammed W. Drammeh");
         document.addTitle("UTG Student Transcript");
         document.addCreator("UTG Student Dashboard");
+        document.addSubject("Non-official UTG Transcript");
         document.addCreationDate();
     }
 
@@ -76,17 +87,18 @@ public class TranscriptExporter {
         final Paragraph line2 = new Paragraph(new Phrase("STUDENT ACADEMIC RECORDS",
                 new Font(Font.TIMES_ROMAN, 13, Font.BOLD)));
         line2.setAlignment(Paragraph.ALIGN_CENTER);
-        line2.setSpacingAfter(45);
+        line2.setSpacingAfter(50);
 
         final Image logo = new Jpeg(App.getIconURL("UTGLogo.jpg"));
         logo.scaleAbsolute(65, 80);
-        logo.setAbsolutePosition(pageSize.getWidth() - 90, pageSize.getHeight() - 129);
+        logo.setAbsolutePosition(pageSize.getWidth() - 90, pageSize.getHeight() - 123);
 
         document.add(line1);
         document.add(line2);
         document.add(logo);
     }
 
+//    Todo: consider "year graduated" for graduated students; for the "expected" is no substitute for it
     private void addUserData() throws DocumentException {
         final int detailTableWidth = (int)(pageSize.getWidth()/2) - 50;
         final int longCellHeight = 30;
@@ -113,7 +125,7 @@ public class TranscriptExporter {
         rightTable.setLockedWidth(true);
         rightTable.setWidths(new int[] {30, 50});
         rightTable.addCell(newDataCell("YEAR GRADUATED", hintFont, longCellHeight));
-        rightTable.addCell(newDataCell(Student.getYearOfGraduation(), valueFont, longCellHeight));
+        rightTable.addCell(newDataCell(String.valueOf(Student.getExpectedYearOfGraduation()), valueFont, longCellHeight));
         rightTable.addCell(newDataCell("MAJOR", hintFont, longCellHeight));
         rightTable.addCell(newDataCell(Student.getProgram(), valueFont, longCellHeight));
         rightTable.addCell(newDataCell("MINOR", hintFont, shortCellHeight));
@@ -134,6 +146,7 @@ public class TranscriptExporter {
         final PdfPCell cell = new PdfPCell(new Phrase(text, font));
         cell.setPadding(5);
         cell.setBorderWidth(1F);
+        cell.setVerticalAlignment(PdfPCell.ALIGN_MIDDLE);
         cell.setFixedHeight(height);
         return cell;
     }
@@ -216,6 +229,41 @@ public class TranscriptExporter {
         cell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
         cell.setPadding(5);
         return cell;
+    }
+
+
+//    Todo: consider the link-like text at the bottom left - figures blindly generated
+    private static class WatermarkEvent extends PdfPageEventHelper {
+        private String k;
+
+        private WatermarkEvent() {
+            final Random r = new Random();
+            k = ""+r.nextInt(10)+r.nextInt(10)+r.nextInt(10)+r.nextInt(10)+r.nextInt(10);
+        }
+
+        @Override
+        public void onEndPage(PdfWriter writer, Document document) {
+            final PdfContentByte contentByte = writer.getDirectContentUnder();
+            final Rectangle pageSize = document.getPageSize();
+
+            final Font textFont = FontFactory.getFont(FontFactory.HELVETICA, 7);
+
+            final String date = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
+            final Phrase dateText = new Phrase(date, textFont);
+            ColumnText.showTextAligned(contentByte, Element.ALIGN_LEFT, dateText,
+                        15, pageSize.getHeight() - 15, 0F);
+
+            final Phrase utlText = new Phrase("UTG Transcript", textFont);
+            ColumnText.showTextAligned(contentByte, Element.ALIGN_CENTER, utlText,
+                        pageSize.getWidth()/2, pageSize.getHeight() - 15, 0F);
+
+            final Phrase linkText = new Phrase("https://utg.gm/records/transcript/print/"+k, textFont);
+            ColumnText.showTextAligned(contentByte, Element.ALIGN_LEFT, linkText, 15, 20, 0F);
+
+            final Phrase waterMark = new Phrase("CONFIDENTIAL",
+                        FontFactory.getFont(FontFactory.HELVETICA, 75, Font.BOLD, new GrayColor(.85F)));
+            ColumnText.showTextAligned(contentByte, Element.ALIGN_CENTER, waterMark, 297.5F, 421, 45);
+        }
     }
 
 }

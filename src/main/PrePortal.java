@@ -42,9 +42,9 @@ public class PrePortal {
         Login.appendToStatus("Now contacting utg.gm.......");
         loadWaiter = new WebDriverWait(driver, Portal.MAXIMUM_WAIT_TIME);
 //        make sure we are at the login page
-        if (DriversPack.isIn(driver)) {
-            final int logoutAttempt = DriversPack.attemptLogout(driver);
-            if (logoutAttempt != DriversPack.ATTEMPT_SUCCEEDED) {
+        if (MDriver.isIn(driver)) {
+            final int logoutAttempt = MDriver.attemptLogout(driver);
+            if (logoutAttempt != MDriver.ATTEMPT_SUCCEEDED) {
                 Login.replaceLastUpdate("Now contacting utg....... Failed");
                 App.reportConnectionLost(Login.getRoot());
                 Login.setInputState(true);
@@ -52,13 +52,13 @@ public class PrePortal {
             }
         }
 //        then proceed
-        final int loginAttempt = DriversPack.attemptLogin(driver, email, password);
-        if (loginAttempt == DriversPack.ATTEMPT_SUCCEEDED) {
+        final int loginAttempt = MDriver.attemptLogin(driver, email, password);
+        if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
             Login.replaceLastUpdate("Now contacting utg....... Ok");
             temporaryName = driver.findElement(By.className("media-heading")).getText();
             Login.appendToStatus("Login successfully : " + temporaryName);
             onPortal();
-        } else if (loginAttempt == DriversPack.ATTEMPT_FAILED) {
+        } else if (loginAttempt == MDriver.ATTEMPT_FAILED) {
             Login.replaceLastUpdate("Now contacting utg....... Done");
             Login.appendToStatus("Verification failed : No such student");
             App.signalError(Login.getRoot(),"Invalid Credentials","The information you provided,\n" +
@@ -74,7 +74,7 @@ public class PrePortal {
 
     public static synchronized void startFixingDriver(){
         if (driver == null) {
-            driver = DriversPack.forgeNew(true);
+            driver = MDriver.forgeNew(true);
             if (driver != null) {
                 Runtime.getRuntime().addShutdownHook(new Thread(driver::quit));
             }

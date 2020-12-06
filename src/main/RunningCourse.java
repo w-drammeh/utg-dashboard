@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +8,6 @@ import java.io.Serializable;
 
 /**
  * A model for the registered courses.
- * A weaker form with limited resources.
  */
 public class RunningCourse implements Serializable {
     private String code;
@@ -32,7 +31,6 @@ public class RunningCourse implements Serializable {
         this. time = time.equals(Course.UNKNOWN) ? "" : time;
         this.isConfirmed = onPortal;
     }
-
 
     public String getCode(){
         return code;
@@ -98,7 +96,6 @@ public class RunningCourse implements Serializable {
         this.isConfirmed = onPortal;
     }
 
-//
     public String getAbsoluteName(){
         return String.join(" ", code, name);
     }
@@ -128,20 +125,16 @@ public class RunningCourse implements Serializable {
 
     public static RunningCourse importFromSerial(String dataLines){
         final String[] data = dataLines.split("\n");
-        boolean onPortalState = false;
+        boolean validity = false;
         try {
-            onPortalState = Boolean.parseBoolean(data[7]);
+            validity = Boolean.parseBoolean(data[7]);
         } catch (Exception e) {
-            App.silenceException("Warning: error reading validity of the registered course "+data[3]);
+            App.silenceException("Error reading validity of registered course "+data[3]);
         }
-        return new RunningCourse(data[0], data[1], data[2], data[3], data[4], data[5], data[6], onPortalState);
+        return new RunningCourse(data[0], data[1], data[2], data[3], data[4], data[5], data[6], validity);
     }
 
-    public static void exhibit(RunningCourse course, Component base){
-        if (course == null) {
-            return;
-        }
-
+    public static void exhibit(RunningCourse course, Component base) throws NullPointerException {
         final KDialog dialog = new KDialog(course.name);
         dialog.setResizable(true);
         dialog.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
@@ -195,7 +188,7 @@ public class RunningCourse implements Serializable {
         SwingUtilities.invokeLater(()-> dialog.setVisible(true));
     }
 
-    public static void exhibit(RunningCourse runningCourse){
+    public static void exhibit(RunningCourse runningCourse) throws NullPointerException {
         exhibit(runningCourse, null);
     }
 

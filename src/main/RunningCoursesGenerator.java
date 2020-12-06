@@ -1,11 +1,11 @@
 package main;
 
-import customs.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -113,29 +113,16 @@ public class RunningCoursesGenerator implements Activity {
 
     public static synchronized void fixRunningDriver(){
         if (activeDriver == null) {
-            activeDriver = DriversPack.forgeNew(true);
+            activeDriver = MDriver.forgeNew(true);
         }
     }
 
     /**
-     * Goes ahead and launch search for the selected row's data.
-     * As for the approach, the codes is the weapon. If a module is found with the same code,
-     * the added module will be replaced; otherwise not found.
+     * Checks-out this course for the currently running semester using its code.
+     * If it's found, it shall be replaced; otherwise, an attempt will be made to register it.
      */
-    private static void launchConfirmationSequence() {
-        final String targetCode = String.valueOf(activeModel.getValueAt(activeTable.getSelectedRow(),0));
-        final RunningCourse targetCourse = getByCode(targetCode);
-        if (targetCourse == null) {
-            return;
-        }
-
-        if (!App.showOkCancelDialog("Checkout "+targetCourse.getName(),
-                "Dashboard will initiate a handshake with your portal, and notify you if\n\"" +
-                        targetCourse.getName()+"\" is among the courses you registered this semester.\n \n" +
-                "Please refer to "+ Tips.reference("Running Courses | Verification"))) {
-            return;
-        }
-
+    private static void startCheckout(RunningCourse targetCourse) {
+        final String targetCode = targetCourse.getCode();
         final String initialValue = String.valueOf(activeModel.getValueAt(activeModel.getRowOf(targetCode),
                 activeModel.getColumnCount() - 1));
         activeModel.setValueAt("Verifying...", activeModel.getRowOf(targetCode), activeModel.getColumnCount() - 1);
@@ -159,8 +146,8 @@ public class RunningCoursesGenerator implements Activity {
 
         synchronized (activeDriver){
             final WebDriverWait loadWaiter = new WebDriverWait(activeDriver, Portal.MAXIMUM_WAIT_TIME);
-            final int loginAttempt = DriversPack.attemptLogin(activeDriver);
-            if (loginAttempt == DriversPack.ATTEMPT_SUCCEEDED) {
+            final int loginAttempt = MDriver.attemptLogin(activeDriver);
+            if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
                 if (Portal.isPortalBusy(activeDriver)) {
                     App.reportBusyPortal();
                     final int targetRow = activeModel.getRowOf(targetCode);
@@ -169,14 +156,14 @@ public class RunningCoursesGenerator implements Activity {
                     }
                     return;
                 }
-            } else if (loginAttempt == DriversPack.CONNECTION_LOST) {
+            } else if (loginAttempt == MDriver.CONNECTION_LOST) {
                 App.reportConnectionLost();
                 final int targetRow = activeModel.getRowOf(targetCode);
                 if (targetRow >= 0) {
                     activeModel.setValueAt(initialValue, targetRow, activeModel.getColumnCount() - 1);
                 }
                 return;
-            } else if (loginAttempt == DriversPack.ATTEMPT_FAILED) {
+            } else if (loginAttempt == MDriver.ATTEMPT_FAILED) {
                 App.reportLoginAttemptFailed();
                 final int targetRow = activeModel.getRowOf(targetCode);
                 if (targetRow >= 0) {
@@ -206,7 +193,7 @@ public class RunningCoursesGenerator implements Activity {
             final boolean registered = captions.get(captions.size() - 1).getText().equals(Student.getSemester());
             if (!registered) {
                 App.promptWarning("Checkout Failed","The attempt to checkout '"+targetCourse.getName()+"' was unsuccessful.\n" +
-                        "You may have not have registered for this semester.");
+                        "It seems like you haven't registered any for this semester yet.");
                 final int targetRow = activeModel.getRowOf(targetCode);
                 if (targetRow >= 0) {
                     activeModel.setValueAt(initialValue, targetRow, activeModel.getColumnCount() - 1);
@@ -286,8 +273,8 @@ public class RunningCoursesGenerator implements Activity {
 
                 synchronized (activeDriver){
                     final WebDriverWait loadWaiter = new WebDriverWait(activeDriver, Portal.MAXIMUM_WAIT_TIME);
-                    final int loginAttempt = DriversPack.attemptLogin(activeDriver);
-                    if (loginAttempt == DriversPack.ATTEMPT_SUCCEEDED) {
+                    final int loginAttempt = MDriver.attemptLogin(activeDriver);
+                    if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
                         if (Portal.isPortalBusy(activeDriver)) {
                             if (userRequested) {
                                 App.reportBusyPortal();
@@ -295,13 +282,13 @@ public class RunningCoursesGenerator implements Activity {
                             matchItem.setEnabled(true);
                             return;
                         }
-                    } else if (loginAttempt == DriversPack.CONNECTION_LOST) {
+                    } else if (loginAttempt == MDriver.CONNECTION_LOST) {
                         if (userRequested) {
                             App.reportConnectionLost();
                         }
                         matchItem.setEnabled(true);
                         return;
-                    } else if (loginAttempt == DriversPack.ATTEMPT_FAILED) {
+                    } else if (loginAttempt == MDriver.ATTEMPT_FAILED) {
                         if (userRequested) {
                             App.reportLoginAttemptFailed();
                         }
@@ -446,13 +433,25 @@ public class RunningCoursesGenerator implements Activity {
         final KMenuItem detailsItem = new KMenuItem("Details");
         detailsItem.addActionListener(e-> {
             final String code = String.valueOf(activeModel.getValueAt(activeTable.getSelectedRow(), 0));
-            RunningCourse.exhibit(getByCode(code));
+            try {
+                RunningCourse.exhibit(getByCode(code));
+            } catch (NullPointerException npe) {
+                App.silenceException(npe);
+            }
         });
 
         final KMenuItem checkItem = new KMenuItem("Checkout");
-        checkItem.addActionListener(e-> {
-            new Thread(RunningCoursesGenerator::launchConfirmationSequence).start();
-        });
+        checkItem.addActionListener(e-> new Thread(()-> {
+            final String targetCode = String.valueOf(activeModel.getValueAt(activeTable.getSelectedRow(),0));
+            final RunningCourse targetCourse = getByCode(targetCode);
+            if (targetCourse != null) {
+                final boolean confirm = App.showYesNoCancelDialog("Checkout",
+                        String.format("Do you want to checkout for %s?", targetCourse.getAbsoluteName()));
+                if (confirm) {
+                    startCheckout(targetCourse);
+                }
+            }
+        }).start());
 
         final KMenuItem removeItem = new KMenuItem("Remove");
         removeItem.addActionListener(e-> {
@@ -498,7 +497,12 @@ public class RunningCoursesGenerator implements Activity {
                 if (e.getClickCount() >= 2) {
                     final int selectedRow = activeTable.getSelectedRow();
                     if (selectedRow >= 0) {
-                        RunningCourse.exhibit(getByCode(String.valueOf(activeTable.getValueAt(selectedRow, 0))));
+                        final String code = String.valueOf(activeTable.getValueAt(selectedRow, 0));
+                        try {
+                            RunningCourse.exhibit(getByCode(code));
+                        } catch (NullPointerException npe) {
+                            App.silenceException(npe);
+                        }
                         e.consume();
                     }
                 }
@@ -530,7 +534,7 @@ public class RunningCoursesGenerator implements Activity {
             }
         });
 
-        hintLabel = new KLabel("For more actions, right-click on a course (at any row).", KFontFactory.createBoldFont(16),
+        hintLabel = new KLabel("For more actions, right-click on a course (at any row).", KFontFactory.createPlainFont(16),
                 Color.BLUE);
         hintLabel.setVisible(activeModel.getRowCount() > 0);
 
@@ -545,11 +549,13 @@ public class RunningCoursesGenerator implements Activity {
     }
 
 
+//    Todo: an option to checkout now
     private static class RunningCourseAdder extends KDialog {
-        KPanel layers;
         KTextField codeField, nameField, lecturerField, venueField, roomField;
         JComboBox<String> daysBox, hoursBox;
         KButton doneButton;
+        KPanel checkPanel;
+        KPanel contentPanel;
 
         private RunningCourseAdder(){
             super("New Registered Course");
@@ -559,27 +565,27 @@ public class RunningCoursesGenerator implements Activity {
             codeField = KTextField.rangeControlField(10);
             codeField.setPreferredSize(new Dimension(150, 30));
             final KPanel codeLayer = new KPanel(new BorderLayout());
-            codeLayer.add(new KPanel(dialogLabel("Course Code:")), BorderLayout.WEST);
+            codeLayer.add(new KPanel(newHintLabel("Course Code:")), BorderLayout.WEST);
             codeLayer.add(new KPanel(codeField), BorderLayout.CENTER);
 
             nameField = new KTextField(new Dimension(325,30));
             final KPanel nameLayer = new KPanel(new BorderLayout());
-            nameLayer.add(new KPanel(dialogLabel("Course Name:")), BorderLayout.WEST);
+            nameLayer.add(new KPanel(newHintLabel("Course Name:")), BorderLayout.WEST);
             nameLayer.add(new KPanel(nameField), BorderLayout.CENTER);
 
             lecturerField = new KTextField(new Dimension(325,30));
             final KPanel lecturerLayer = new KPanel(new BorderLayout());
-            lecturerLayer.add(new KPanel(dialogLabel("Lecturer's Name:")), BorderLayout.WEST);
+            lecturerLayer.add(new KPanel(newHintLabel("Lecturer's Name:")), BorderLayout.WEST);
             lecturerLayer.add(new KPanel(lecturerField), BorderLayout.CENTER);
 
             venueField = new KTextField(new Dimension(275,30));
             final KPanel placeLayer = new KPanel(new BorderLayout());
-            placeLayer.add(new KPanel(dialogLabel("Venue / Campus:")), BorderLayout.WEST);
+            placeLayer.add(new KPanel(newHintLabel("Venue / Campus:")), BorderLayout.WEST);
             placeLayer.add(new KPanel(venueField), BorderLayout.CENTER);
 
             roomField = new KTextField(new Dimension(325, 30));
             final KPanel roomLayer = new KPanel(new BorderLayout());
-            roomLayer.add(new KPanel(dialogLabel("Lecture Room:")), BorderLayout.WEST);
+            roomLayer.add(new KPanel(newHintLabel("Lecture Room:")), BorderLayout.WEST);
             roomLayer.add(new KPanel(roomField), BorderLayout.CENTER);
 
             daysBox = new JComboBox<>(Course.getWeekDays());
@@ -587,8 +593,16 @@ public class RunningCoursesGenerator implements Activity {
             hoursBox = new JComboBox<>(Course.availableCoursePeriods());
             hoursBox.setFont(daysBox.getFont());
             final KPanel scheduleLayer = new KPanel(new FlowLayout(FlowLayout.CENTER));
-            scheduleLayer.addAll(dialogLabel("Day:"), daysBox, Box.createRigidArea(new Dimension(50, 30)),
-                    dialogLabel("Time:"), hoursBox);
+            scheduleLayer.addAll(newHintLabel("Day:"), daysBox, Box.createRigidArea(new Dimension(50, 30)),
+                    newHintLabel("Time:"), hoursBox);
+
+            final KCheckBox instantCheck = new KCheckBox("Checkout now", true);
+            instantCheck.setFont(KFontFactory.createPlainFont(15));
+            instantCheck.setForeground(Color.BLUE);
+            instantCheck.setCursor(MComponent.HAND_CURSOR);
+            instantCheck.setFocusable(false);
+            checkPanel = new KPanel(instantCheck);
+            ((FlowLayout) checkPanel.getLayout()).setVgap(10);
 
             final KButton cancelButton = new KButton("Cancel");
             cancelButton.addActionListener(e-> dispose());
@@ -611,27 +625,32 @@ public class RunningCoursesGenerator implements Activity {
                         return;
                     }
 
-                    ACTIVE_COURSES.add(new RunningCourse(codeField.getText(), nameField.getText(), lecturerField.getText(),
+                    final RunningCourse addedCourse = new RunningCourse(codeField.getText(), nameField.getText(), lecturerField.getText(),
                             venueField.getText(), roomField.getText(), String.valueOf(daysBox.getSelectedItem()),
-                            String.valueOf(hoursBox.getSelectedItem()), false));
+                            String.valueOf(hoursBox.getSelectedItem()), false);
+                    ACTIVE_COURSES.add(addedCourse);
                     dispose();
-                    SwingUtilities.invokeLater(()-> Notification.create("Local Registration", nameField.getText()+
-                            " is locally added, and may not be on your portal", generateNotificationWarning(nameField.getText())));
+                    if (instantCheck.isSelected()) {
+                        new Thread(()-> startCheckout(addedCourse)).start();
+                    } else {
+                        Notification.create("Local Registration", nameField.getText()+
+                                " is locally added, and may not be on your portal", generateNotificationWarning(nameField.getText()));
+                    }
                 }
             });
 
             getRootPane().setDefaultButton(doneButton);
-            layers = new KPanel();
-            layers.setLayout(new BoxLayout(layers, BoxLayout.Y_AXIS));
-            layers.addAll(codeLayer, nameLayer, lecturerLayer, placeLayer, roomLayer, scheduleLayer,
+            contentPanel = new KPanel();
+            contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+            contentPanel.addAll(codeLayer, nameLayer, lecturerLayer, placeLayer, roomLayer, scheduleLayer, checkPanel,
                     MComponent.contentBottomGap(), new KPanel(new FlowLayout(FlowLayout.RIGHT), cancelButton, doneButton));
-            setContentPane(layers);
+            setContentPane(contentPanel);
             pack();
             setMinimumSize(getPreferredSize());
             setLocationRelativeTo(Board.getRoot());
         }
 
-        private static KLabel dialogLabel(String string) {
+        private static KLabel newHintLabel(String string) {
             return new KLabel(string, KFontFactory.createBoldFont(16));
         }
     }
@@ -650,13 +669,13 @@ public class RunningCoursesGenerator implements Activity {
             daysBox.setSelectedItem(original.getDay());
             hoursBox.setSelectedItem(original.getTime());
 
-            doneButton.removeActionListener(doneButton.getActionListeners()[0]);
             if (original.isConfirmed()) {
                 codeField.setEditable(false);
                 nameField.setEditable(false);
                 lecturerField.setEditable(false);
             }
-
+            contentPanel.remove(checkPanel);
+            doneButton.removeActionListener(doneButton.getActionListeners()[0]);
             doneButton.addActionListener(e-> {
                 if (codeField.isBlank()) {
                     App.signalError(getRootPane(),"No Code", "Please provide the code of the course.");
