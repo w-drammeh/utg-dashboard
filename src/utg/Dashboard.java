@@ -6,7 +6,8 @@ import javax.swing.*;
 import java.io.File;
 
 /**
- * @author Muhammed W. Drammeh
+ * @author Muhammed W. Drammeh <wakadrammeh@gmail.com>
+ *
  * This is the actual runner type.
  * In a nutshell, it reads from a serializable state if existed, or triggers a new instance if not -
  * or otherwise found inconsistent.
@@ -97,8 +98,8 @@ public class Dashboard {
         Portal.deSerialize();
         SwingUtilities.invokeLater(()-> {
             final Board lastBoard = new Board();
-            RunningCoursesGenerator.deserializeModules();
-            ModulesHandler.deserializeData();
+            RunningCourseActivity.deserializeModules();
+            ModuleHandler.deserializeData();
             TaskSelf.deSerializeAll();
             Notification.deSerializeAll();
             PREVIEW.dispose();

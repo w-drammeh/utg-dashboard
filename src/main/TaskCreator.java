@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -50,7 +50,7 @@ public class TaskCreator {
             quitButton.addActionListener(e -> this.dispose());
             createButton = new KButton("Create");
             createButton.setFocusable(true);
-            createButton.addActionListener(TasksGenerator.TodoHandler.additionWaiter());
+            createButton.addActionListener(TaskActivity.TodoHandler.additionWaiter());
 
             this.getRootPane().setDefaultButton(createButton);
             final KPanel contentPlate = new KPanel();
@@ -111,7 +111,7 @@ public class TaskCreator {
             final KButton cancelButton = new KButton("Cancel");
             cancelButton.addActionListener(e -> this.dispose());
             createButton = new KButton("Create");
-            createButton.addActionListener(TasksGenerator.ProjectsHandler.additionWaiter());
+            createButton.addActionListener(TaskActivity.ProjectsHandler.additionWaiter());
             this.getRootPane().setDefaultButton(createButton);
 
             final KPanel contentPlate = new KPanel();
@@ -155,7 +155,7 @@ public class TaskCreator {
             final Font hintsFont = KFontFactory.createPlainFont(16);
 
             final KPanel importPanel = new KPanel();
-            final String[] activeNames = RunningCoursesGenerator.names();
+            final String[] activeNames = RunningCourseActivity.names();
             if (activeNames.length == 0) {
                 importPanel.add(new KLabel("No registration found to import",KFontFactory.createPlainFont(16)));
             } else {
@@ -242,7 +242,7 @@ public class TaskCreator {
             final KButton cancelButton = new KButton("Cancel");
             cancelButton.addActionListener(e -> this.dispose());
             final KButton addButton = new KButton("Add");
-            addButton.addActionListener(TasksGenerator.AssignmentsHandler.additionListener());
+            addButton.addActionListener(TaskActivity.AssignmentsHandler.additionListener());
 
             final KPanel contentPlate = new KPanel();
             contentPlate.setLayout(new BoxLayout(contentPlate,BoxLayout.Y_AXIS));
@@ -310,7 +310,7 @@ public class TaskCreator {
         	if (Globals.isBlank(dField.getText()) || Globals.isBlank(mField.getText()) || Globals.isBlank(yField.getText())) {
         		return "";
         	}
-        	final String sep = MDate.VAL_SEPARATOR;
+        	final String sep = MDate.SEPARATOR;
         	return dField.getText()+sep+mField.getText()+sep+yField.getText();
         }
     }
@@ -335,7 +335,7 @@ public class TaskCreator {
             dateLabel.setFont(KFontFactory.createBoldFont(16));
 
             final KPanel importPanel = new KPanel();
-            final String[] activeNames = RunningCoursesGenerator.names();
+            final String[] activeNames = RunningCourseActivity.names();
             if (activeNames.length == 0) {
                 importPanel.add(new KLabel("No registration found to import",KFontFactory.createPlainFont(16)));
             } else {
@@ -399,7 +399,7 @@ public class TaskCreator {
             cancelButton.addActionListener(e -> this.dispose());
 
             final KButton addButton = new KButton("Add");
-            addButton.addActionListener(TasksGenerator.EventsHandler.newListener());//No fear - if value was not one of the specified 3, compiler won't reach this line
+            addButton.addActionListener(TaskActivity.EventsHandler.newListener());//No fear - if value was not one of the specified 3, compiler won't reach this line
 
             this.getRootPane().setDefaultButton(addButton);
             contentPanel.addAll(titleLayer, datesLayer, MComponent.contentBottomGap(),
@@ -418,7 +418,7 @@ public class TaskCreator {
             if(Globals.isBlank(dayField.getText()) || Globals.isBlank(monthField.getText()) || Globals.isBlank(yearField.getText())) {
                 return "";
             }
-            final String sep = MDate.VAL_SEPARATOR;
+            final String sep = MDate.SEPARATOR;
             return dayField.getText()+sep+monthField.getText()+sep+yearField.getText();
         }
 

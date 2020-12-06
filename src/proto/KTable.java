@@ -1,4 +1,4 @@
-package customs;
+package proto;
 
 import main.App;
 import main.MComponent;
@@ -8,7 +8,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 
 /**
- * This type works hand-in-hand with the customs.KTableModel type, and share their
+ * This type works hand-in-hand with the proto.KTableModel type, and share their
  * mutual-functionality
  */
 public class KTable extends JTable implements Preference {

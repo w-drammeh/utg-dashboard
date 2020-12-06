@@ -12,9 +12,9 @@ public class Memory {
      * There should be no chance of adding unverified modules.
      * Accessors of this list - noticeably, the Transcript and Analysis - should refresh calls
      * prior to any activity-answer.
-     * This list must remain updated by the monitor in ModulesHandler.
+     * This list must remain updated by the monitor in ModuleHandler.
      * Never directly add or withdraw from this list - all such must be directed
-     * by the monitor at main.ModulesHandler
+     * by the monitor at main.ModuleHandler
      */
     private static final ArrayList<Course> VERIFIED_LIST = new ArrayList<Course>() {
         @Override
@@ -24,26 +24,26 @@ public class Memory {
     };
 
     /**
-     * May be called only by the modulesMonitor at ModulesHandler
+     * May be called only by the modulesMonitor at ModuleHandler
      */
     public static void mayRemember(Course course){
         if (VERIFIED_LIST.add(course)) {
-            TranscriptGenerator.TRANSCRIPT_MODEL.addRow(new String[] {course.getCode(), course.getName(),
+            TranscriptActivity.TRANSCRIPT_MODEL.addRow(new String[] {course.getCode(), course.getName(),
                     Integer.toString(course.getCreditHours()), course.getGrade(), Double.toString(course.getQualityPoint())});
         }
     }
 
     /**
-     * May be called only by the modulesMonitor at ModulesHandler
+     * May be called only by the modulesMonitor at ModuleHandler
      */
     public static void mayForget(Course course){
         if (VERIFIED_LIST.remove(course)) {
-            TranscriptGenerator.TRANSCRIPT_MODEL.removeRow(TranscriptGenerator.TRANSCRIPT_MODEL.getRowOf(course.getCode()));
+            TranscriptActivity.TRANSCRIPT_MODEL.removeRow(TranscriptActivity.TRANSCRIPT_MODEL.getRowOf(course.getCode()));
         }
     }
 
     /**
-     * May be called only by the modulesMonitor at ModulesHandler
+     * May be called only by the modulesMonitor at ModuleHandler
      */
     public static void mayReplace(Course outgoing, Course incoming){
         final int t = indexOf(outgoing.getCode());

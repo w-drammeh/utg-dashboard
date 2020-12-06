@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -191,7 +191,7 @@ public class Login extends KDialog {
         rootPane.add(enter);
         rootPane.setDefaultButton(enter);
         replaceLastUpdate("Now running Pre-Dashboard builds....... Completed");
-        appendToStatus("Your Dashboard is ready : Press 'Enter' to launch");
+        appendToStatus("Your Dashboard is ready : Press \"Enter\" to launch");
         appendToStatus("------------------------------------------------------------------------------------------------------------------------------------------");
         appendToStatus("                                                <<<<------- Enter ------>>>>");
         appendToStatus("-");

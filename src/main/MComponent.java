@@ -1,6 +1,6 @@
 package main;
 
-import customs.KFontFactory;
+import proto.KFontFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -78,7 +78,7 @@ public class MComponent {
      * This is particularly ideal under box-layouts.
      */
     public static Component contentBottomGap(){
-        return Box.createVerticalStrut(25);
+        return Box.createVerticalStrut(15);
     }
 
 }

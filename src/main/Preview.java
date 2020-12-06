@@ -1,9 +1,9 @@
 package main;
 
-import customs.KDialog;
-import customs.KFontFactory;
-import customs.KLabel;
-import customs.KPanel;
+import proto.KDialog;
+import proto.KFontFactory;
+import proto.KLabel;
+import proto.KPanel;
 
 import javax.swing.*;
 import java.awt.*;

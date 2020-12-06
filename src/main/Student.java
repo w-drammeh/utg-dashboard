@@ -1,6 +1,6 @@
 package main;
 
-import customs.KLabel;
+import proto.KLabel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -297,7 +297,7 @@ public class Student {
     public static void setMajorCode(String majorCode) {
         majorCode = majorCode.toUpperCase();
         SettingsUI.majorCodeField.setText(majorCode);
-        ModulesHandler.effectMajorCodeChanges(Student.majorCode, majorCode);
+        ModuleHandler.effectMajorCodeChanges(Student.majorCode, majorCode);
         Student.majorCode = majorCode;
     }
 
@@ -308,7 +308,7 @@ public class Student {
     public static void setMinorCode(String minorCode){
         minorCode = minorCode.toUpperCase();
         SettingsUI.minorCodeField.setText(minorCode);
-        ModulesHandler.effectMinorCodeChanges(Student.minorCode, minorCode);
+        ModuleHandler.effectMinorCodeChanges(Student.minorCode, minorCode);
         Student.minorCode = minorCode;
     }
 
@@ -501,10 +501,6 @@ public class Student {
 //    if this is readable from the portal, then be it.
     public static boolean isGraduated(){
         return levelNumber > 400;
-    }
-
-    public static String getYearOfGraduation() {
-        return isGraduated() ? Integer.toString(fourthYear()) : "N/A";
     }
 
     public static String firstAcademicYear(){

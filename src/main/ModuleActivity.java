@@ -1,19 +1,19 @@
 package main;
 
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class ModulesGenerator implements Activity {
+public class ModuleActivity implements Activity {
     private KButton onButton;
     private KLabel indicator;
     private CardLayout residentLayout;//there's a 'residentPanel'
-    private ModulesHandler handlerInstance;
+    private ModuleHandler handlerInstance;
     private KButton refreshButton;
 
 
-    public ModulesGenerator() {
+    public ModuleActivity() {
         indicator = new KLabel("First Year: "+Student.firstAcademicYear(), KFontFactory.bodyHeaderFont());
 
         final KButton tipShower = KButton.getIconifiedButton("warn.png", 25, 25);
@@ -31,14 +31,14 @@ public class ModulesGenerator implements Activity {
         refreshButton.setFont(KFontFactory.createPlainFont(15));
         refreshButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         refreshButton.setToolTipText("Synchronize Courses");
-        refreshButton.addActionListener(e-> ModulesHandler.startThoroughSync(true, refreshButton));
+        refreshButton.addActionListener(e-> ModuleHandler.startThoroughSync(true, refreshButton));
 
         final KPanel headerPanel = new KPanel(new BorderLayout());
         headerPanel.add(new KPanel(indicator), BorderLayout.WEST);
         headerPanel.add(new KPanel(tipShower), BorderLayout.CENTER);
         headerPanel.add(new KPanel(refreshButton), BorderLayout.EAST);
 
-        handlerInstance = new ModulesHandler();
+        handlerInstance = new ModuleHandler();
         residentLayout = new CardLayout();
         final KPanel residentPanel = new KPanel(residentLayout) {
             @Override
@@ -99,8 +99,8 @@ public class ModulesGenerator implements Activity {
         residentLayout.addLayoutComponent(residentPanel.add(handlerInstance.yearTwoPresent()),"Year2");
         residentLayout.addLayoutComponent(residentPanel.add(handlerInstance.yearThreePresent()),"Year3");
         residentLayout.addLayoutComponent(residentPanel.add(handlerInstance.yearFourPresent()),"Year4");
-        residentLayout.addLayoutComponent(residentPanel.add(new SummerModules().getPresent()),"Summer");
-        residentLayout.addLayoutComponent(residentPanel.add(new MiscellaneousModules().getPresent()),"misc");
+        residentLayout.addLayoutComponent(residentPanel.add(new SummerModule().getPresent()),"Summer");
+        residentLayout.addLayoutComponent(residentPanel.add(new MiscellaneousModule().getPresent()),"misc");
 
         final KPanel modulesActivity = new KPanel(new BorderLayout());
         modulesActivity.add(headerPanel, BorderLayout.NORTH);

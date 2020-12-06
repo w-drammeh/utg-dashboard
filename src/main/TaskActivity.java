@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +16,7 @@ import java.util.Objects;
  * in Board to make it come to sight at the corresponding big-button click.
  * It serves as the intermediary between all the so-called TaskSelf, Helpers, etc. and the Board.
  */
-public class TasksGenerator {
+public class TaskActivity {
     private CardLayout cardLayout;
     private KPanel inPanel;
     private static KButton todoBigButton;
@@ -29,7 +29,7 @@ public class TasksGenerator {
     private static final int CONTENTS_POSITION = FlowLayout.LEFT;
 
 
-    public TasksGenerator(){
+    public TaskActivity(){
         hintLabel = KLabel.getPredefinedLabel("My Tasks", SwingConstants.LEFT);
         hintLabel.setStyle(KFontFactory.bodyHeaderFont(), Color.BLUE);
 
@@ -800,7 +800,7 @@ public class TasksGenerator {
             eventsReside.remove(event.getEventLayer());
             MComponent.ready(eventsReside);
             if (event.isPending()) {
-                TasksGenerator.EventsHandler.renewCount(-1);
+                TaskActivity.EventsHandler.renewCount(-1);
             }
         }
 

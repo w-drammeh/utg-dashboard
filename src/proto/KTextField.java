@@ -1,4 +1,4 @@
-package customs;
+package proto;
 
 import main.Globals;
 import main.MComponent;
@@ -92,7 +92,7 @@ public class KTextField extends JTextField implements Preference {
     public static KTextField newYearField(){
         final KTextField yearField = digitPlusRangeControlField(4);
         yearField.setPreferredSize(new Dimension(75,30));
-        yearField.setText(String.valueOf(MDate.thisYear()));
+        yearField.setText(String.valueOf(MDate.getYear()));
         return yearField;
     }
 

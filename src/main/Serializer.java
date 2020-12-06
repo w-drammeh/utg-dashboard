@@ -120,8 +120,8 @@ public class Serializer {
         Student.serializeData();
         Portal.serialize();
         Settings.serialize();
-        RunningCoursesGenerator.serializeModules();
-        ModulesHandler.serializeData();
+        RunningCourseActivity.serializeModules();
+        ModuleHandler.serializeData();
         TaskSelf.serializeAll();
         Notification.serializeAll();
         News.serializeData();

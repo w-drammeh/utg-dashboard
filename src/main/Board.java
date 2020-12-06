@@ -1,6 +1,6 @@
 package main;
 
-import customs.*;
+import proto.*;
 import utg.Dashboard;
 
 import javax.swing.*;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * @author Muhammed W. Drammeh
+ * @author Muhammed W. Drammeh <wakadrammeh@gmail.com>
  *
  * The ultimate class of UI.
  * When using Dashboard, the user actually interacts with an instance of this
@@ -61,10 +61,10 @@ public final class Board extends KFrame {
     public static final Thread shutDownThread = new Thread(Serializer::mountUserData);
 
 //    Collaborators declaration. The order in which these will be initialized does matter!
-    private RunningCoursesGenerator runningCoursesGenerator;
-    private ModulesGenerator modulesGenerator;
+    private RunningCourseActivity runningCourseActivity;
+    private ModuleActivity moduleActivity;
     private SettingsUI settingsUI;
-    private TranscriptGenerator transcriptGenerator;
+    private TranscriptActivity transcriptActivity;
     private Analysis analysisGenerator;
     private Tips faqsGenerator;
     private About myDashboard;
@@ -106,16 +106,16 @@ public final class Board extends KFrame {
         setUpBody();
         setContentPane(boardContent);
 
-        runningCoursesGenerator = new RunningCoursesGenerator();
-        modulesGenerator = new ModulesGenerator();
+        runningCourseActivity = new RunningCourseActivity();
+        moduleActivity = new ModuleActivity();
         settingsUI = new SettingsUI();
-        transcriptGenerator = new TranscriptGenerator();
+        transcriptActivity = new TranscriptActivity();
         analysisGenerator = new Analysis();
         faqsGenerator = new Tips();
         myDashboard = new About();
 //        outlined / big buttons
-        new TasksGenerator();
-        new NotificationGenerator();
+        new TaskActivity();
+        new NotificationActivity();
         newsPresent = new News();
 
 
@@ -241,20 +241,22 @@ public final class Board extends KFrame {
         detailsPart.add(labelIcon, BorderLayout.CENTER);
         detailsPart.add(moreDetails, BorderLayout.SOUTH);
 
+        final int outlinesWidth = 215;
+        final Font outlinesFont = KFontFactory.createBoldFont(15);
+
         final KButton toHome = new KButton("HOME");
-        toHome.setFont(KFontFactory.createBoldFont(16));
+        toHome.setFont(outlinesFont);
         toHome.addActionListener(e-> showCard("Home"));
-        final int height = toHome.getPreferredSize().height;
-        toHome.setPreferredSize(new Dimension(225, height));
+        toHome.setPreferredSize(new Dimension(outlinesWidth, toHome.getPreferredSize().height));
 
         final KButton toTasks = new KButton("MY TASKS+");
-        toTasks.setPreferredSize(new Dimension(225, height));
-        toTasks.setFont(toHome.getFont());
+        toTasks.setPreferredSize(new Dimension(outlinesWidth, toTasks.getPreferredSize().height));
+        toTasks.setFont(outlinesFont);
         toTasks.addActionListener(e-> showCard("Tasks"));
 
         final KButton toNews = new KButton("NEWS");
-        toNews.setPreferredSize(new Dimension(225, height));
-        toNews.setFont(toHome.getFont());
+        toNews.setPreferredSize(new Dimension(outlinesWidth, toNews.getPreferredSize().height));
+        toNews.setFont(outlinesFont);
         toNews.addActionListener(e-> newsPresent.answerActivity());
 
         notificationButton = new KButton("NOTIFICATIONS"){
@@ -271,11 +273,11 @@ public final class Board extends KFrame {
                 }
             }
         };
-        notificationButton.setPreferredSize(new Dimension(225, height));
-        notificationButton.setFont(toHome.getFont());
+        notificationButton.setPreferredSize(new Dimension(outlinesWidth, notificationButton.getPreferredSize().height));
+        notificationButton.setFont(outlinesFont);
         notificationButton.addActionListener(e-> showCard("Notifications"));
 
-        final KPanel bigButtonsPanel = new KPanel(1_000, 30);
+        final KPanel bigButtonsPanel = new KPanel(new FlowLayout(FlowLayout.CENTER, 10, 5), new Dimension(1_000, 30));
         bigButtonsPanel.addAll(toHome, toTasks, toNews, notificationButton);
 
         final KPanel thoraxPanel = new KPanel(1_000,230);
@@ -336,8 +338,8 @@ public final class Board extends KFrame {
             Runtime.getRuntime().addShutdownHook(shutDownThread);
         }
         postProcesses.add(()-> {
-            RunningCoursesGenerator.uploadInitials();
-            ModulesHandler.uploadModules();
+            RunningCourseActivity.uploadInitials();
+            ModuleHandler.uploadModules();
         });
     }
 
@@ -346,7 +348,7 @@ public final class Board extends KFrame {
         runPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                runningCoursesGenerator.answerActivity();
+                runningCourseActivity.answerActivity();
             }
         });
 
@@ -354,7 +356,7 @@ public final class Board extends KFrame {
         completedPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                modulesGenerator.answerActivity();
+                moduleActivity.answerActivity();
             }
         });
 
@@ -370,7 +372,7 @@ public final class Board extends KFrame {
         transcriptPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                transcriptGenerator.answerActivity();
+                transcriptActivity.answerActivity();
             }
         });
 
@@ -449,7 +451,7 @@ public final class Board extends KFrame {
         return appInstance != null && appInstance.isShowing();
     }
 
-//    As used by NotificationGenerator to adjust the toolTip
+//    As used by NotificationActivity to adjust the toolTip
     public static KButton getNotificationButton() {
         return notificationButton;
     }
@@ -462,11 +464,11 @@ public final class Board extends KFrame {
         final String semester = Student.getSemester();
         if (isAppReady()) {
             semesterIndicator.setText(semester);
-            RunningCoursesGenerator.semesterBigLabel.setText(semester);
+            RunningCourseActivity.semesterBigLabel.setText(semester);
         } else {
             postProcesses.add(()-> {
                 semesterIndicator.setText(semester);
-                RunningCoursesGenerator.semesterBigLabel.setText(semester);
+                RunningCourseActivity.semesterBigLabel.setText(semester);
             });
         }
     }
@@ -500,9 +502,9 @@ public final class Board extends KFrame {
      */
     private void anotherDay(){
         if (Portal.isAutoSynced()) {
-            RunningCoursesGenerator.startMatching(false);
-            ModulesHandler.startThoroughSync(false, null);
-            NotificationGenerator.updateNotices(false);
+            RunningCourseActivity.startMatching(false);
+            ModuleHandler.startThoroughSync(false, null);
+            NotificationActivity.updateNotices(false);
         }
     }
 
