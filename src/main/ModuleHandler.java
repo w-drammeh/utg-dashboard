@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Todo: keep track of all the venues, rooms, lecturer-names the user gives and recommend them on appropriate dialogs
  */
-public class ModulesHandler {
+public class ModuleHandler {
     /**
      * Value keeps changing to the semester-table currently receiving focus.
      */
@@ -40,7 +40,7 @@ public class ModulesHandler {
     public static final String ADD = "Add";
 
 
-    public ModulesHandler() {
+    public ModuleHandler() {
         yearOne = new ModuleYear(Student.firstAcademicYear());
         yearTwo = new ModuleYear(Student.secondAcademicYear());
         yearThree = new ModuleYear(Student.thirdAcademicYear());

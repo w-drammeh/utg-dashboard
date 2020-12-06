@@ -37,7 +37,7 @@ public class Notification implements Serializable {
 
     public static void create(String heading, String vText, String information) {
         final Notification incoming = new Notification(heading, vText, information);
-        NotificationGenerator.join(incoming);
+        NotificationActivity.join(incoming);
         NOTIFICATIONS.add(incoming);
     }
 
@@ -87,7 +87,7 @@ public class Notification implements Serializable {
             textScroll.setPreferredSize(new Dimension(550,235));
 
             final KButton deleteButton = new KButton("Remove");
-            deleteButton.addActionListener(NotificationGenerator.deleteAction(notification));
+            deleteButton.addActionListener(NotificationActivity.deleteAction(notification));
 
             final KButton disposeButton = new KButton("Close");
             disposeButton.setFocusable(true);
@@ -144,7 +144,7 @@ public class Notification implements Serializable {
                     SwingUtilities.invokeLater(()-> layer.notification.shower.setVisible(true));
                     if (!layer.notification.isRead()) {
                         layer.notification.justRead();
-                        NotificationGenerator.effectCount(-1);
+                        NotificationActivity.effectCount(-1);
                     }
                 }
 
@@ -169,7 +169,7 @@ public class Notification implements Serializable {
             for (Notification alert : savedAlerts) {
                 alert.shower = new Exhibitor(alert);
                 alert.layer = new NotificationLayer(alert);
-                NotificationGenerator.join(alert);
+                NotificationActivity.join(alert);
                 NOTIFICATIONS.add(alert);
             }
         }

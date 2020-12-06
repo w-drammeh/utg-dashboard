@@ -12,9 +12,9 @@ import java.util.List;
  * at that very instance of creation.
  * A course may be verified in two ways:
  * 1) those that are provided to the main.Memory type by main.PrePortal through
- * main.ModulesHandler.STARTUP_COURSES are automatically "verified" set;
+ * main.ModuleHandler.STARTUP_COURSES are automatically "verified" set;
  * 2) those that are put into the table by the user can be verified (checked-out) in the Portal
- * by main.ModulesHandler.
+ * by main.ModuleHandler.
  */
 public class Course {
     /*
@@ -308,7 +308,7 @@ public class Course {
      * Gets the list-index of this course. This is useful for substitution and editing
      */
     public int getListIndex() {
-        final List<Course> monitor = ModulesHandler.getModulesMonitor();
+        final List<Course> monitor = ModuleHandler.getModulesMonitor();
         for (int i = 0; i < monitor.size(); i++) {
             if (code.equals(monitor.get(i).code)) {
                 return i;

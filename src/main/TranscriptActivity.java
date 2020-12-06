@@ -18,7 +18,7 @@ import java.util.Objects;
  * And the cgpa is always set before the upperDivision is re-checked!
  * Feel free of what this class presents, because what's printed is independent of it.
  */
-public class TranscriptGenerator implements Activity {
+public class TranscriptActivity implements Activity {
     /**
      * Holds the logo, labels, as well as the details.
      */
@@ -31,7 +31,7 @@ public class TranscriptGenerator implements Activity {
     public static final String[] HEADS = {"COURSE CODE", "COURSE DESCRIPTION", "CREDIT VALUE", "GRADE", "QUALITY POINT"};
 
 
-    public TranscriptGenerator(){
+    public TranscriptActivity(){
         minorLabel = new KLabel("", KFontFactory.createBoldFont(15));
         CGPALabel = new KLabel("", KFontFactory.createBoldFont(16));
         classificationLabel = new KLabel("", KFontFactory.createPlainFont(15));
@@ -54,7 +54,7 @@ public class TranscriptGenerator implements Activity {
                 if (e.getClickCount() >= 2) {
                     final int selectedRow = table.getSelectedRow();
                     if (selectedRow >= 0) {
-                        Course.exhibit(ModulesHandler.getModuleByCode(String.valueOf(TRANSCRIPT_MODEL.getValueAt(selectedRow, 0))));
+                        Course.exhibit(ModuleHandler.getModuleByCode(String.valueOf(TRANSCRIPT_MODEL.getValueAt(selectedRow, 0))));
                         e.consume();
                     }
                 }

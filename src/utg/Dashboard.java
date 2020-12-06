@@ -98,8 +98,8 @@ public class Dashboard {
         Portal.deSerialize();
         SwingUtilities.invokeLater(()-> {
             final Board lastBoard = new Board();
-            RunningCoursesGenerator.deserializeModules();
-            ModulesHandler.deserializeData();
+            RunningCourseActivity.deserializeModules();
+            ModuleHandler.deserializeData();
             TaskSelf.deSerializeAll();
             Notification.deSerializeAll();
             PREVIEW.dispose();

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class RunningCoursesGenerator implements Activity {
+public class RunningCourseActivity implements Activity {
     private static KTable activeTable;
     private static KTableModel activeModel;
     private static FirefoxDriver activeDriver;
@@ -55,7 +55,7 @@ public class RunningCoursesGenerator implements Activity {
     };
 
 
-    public RunningCoursesGenerator() {
+    public RunningCourseActivity() {
         semesterBigLabel = new KLabel(Student.getSemester(), KFontFactory.bodyHeaderFont());
         semesterBigLabel.setPreferredSize(new Dimension(925, 35));
         semesterBigLabel.setHorizontalAlignment(SwingConstants.CENTER);

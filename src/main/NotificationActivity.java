@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class NotificationGenerator {
+public class NotificationActivity {
     private CardLayout cardLayout;
     private static KPanel dashboardPanel;
     private static KPanel portalPanel;
@@ -24,7 +24,7 @@ public class NotificationGenerator {
     private static int unreadCount;
 
 
-    public NotificationGenerator() {
+    public NotificationActivity() {
         cardLayout = new CardLayout();
         final KPanel centerPanel = new KPanel(cardLayout);
         cardLayout.addLayoutComponent(centerPanel.add(dashboardComponent()), "dashboard");

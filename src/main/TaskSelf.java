@@ -61,7 +61,7 @@ public class TaskSelf {
                     if (this.exhibition != null && this.exhibition.isShowing()) {
                         this.exhibition.dispose();
                     }
-                    TasksGenerator.TodoHandler.transferTask(this, null, true);
+                    TaskActivity.TodoHandler.transferTask(this, null, true);
                     this.signalDoneNotice();
                 }
             });
@@ -243,7 +243,7 @@ public class TaskSelf {
                     if (exhibition != null && exhibition.isShowing()) {
                         exhibition.dispose();
                     }
-                    TasksGenerator.ProjectsHandler.performIComplete(this,true);
+                    TaskActivity.ProjectsHandler.performIComplete(this,true);
                     signalCompletionNotice();
                 }
             });
@@ -274,13 +274,13 @@ public class TaskSelf {
             terminationButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             terminationButton.setPreferredSize(optionsDim);
             terminationButton.setToolTipText("Remove this Project");
-            terminationButton.addActionListener(TasksGenerator.ProjectsHandler.removalListener(this));
+            terminationButton.addActionListener(TaskActivity.ProjectsHandler.removalListener(this));
 
             completionButton = KButton.getIconifiedButton("mark.png", 20, 20);
             completionButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             completionButton.setPreferredSize(optionsDim);
             completionButton.setToolTipText("Mark as Complete");
-            completionButton.addActionListener(e -> TasksGenerator.ProjectsHandler.performIComplete(this, false));
+            completionButton.addActionListener(e -> TaskActivity.ProjectsHandler.performIComplete(this, false));
 
             moreOptions = KButton.getIconifiedButton("options.png", 20, 20);
             moreOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -313,7 +313,7 @@ public class TaskSelf {
             terminationButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             terminationButton.setPreferredSize(new Dimension(30, 30));
             terminationButton.setToolTipText("Remove this Project");
-            terminationButton.addActionListener(TasksGenerator.ProjectsHandler.removalListener(this));
+            terminationButton.addActionListener(TaskActivity.ProjectsHandler.removalListener(this));
 
             moreOptions = KButton.getIconifiedButton("options.png", 20, 20);
             moreOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -487,7 +487,7 @@ public class TaskSelf {
                     if (deadlineEditor != null && deadlineEditor.isShowing()) {
                         deadlineEditor.dispose();
                     }
-                    TasksGenerator.AssignmentsHandler.transferAssignment(this, null, true);
+                    TaskActivity.AssignmentsHandler.transferAssignment(this, null, true);
                     this.signalSubmissionNotice();
                 }
             });
@@ -904,7 +904,7 @@ public class TaskSelf {
                     endState();
                     setUpUI();
                     MComponent.ready(this.eventLayer);
-                    TasksGenerator.EventsHandler.renewCount(-1);
+                    TaskActivity.EventsHandler.renewCount(-1);
                 }
             });
             timer.start();
@@ -917,7 +917,7 @@ public class TaskSelf {
                 canceller.addActionListener(e -> {
                     if (App.showYesNoCancelDialog("Confirm Termination",
                             "Do you really wish to cancel this " + (this.isTest() ? "Test?" : this.isExam() ? "Exam?" : "Event?"))) {
-                        TasksGenerator.EventsHandler.deleteEvent(this);
+                        TaskActivity.EventsHandler.deleteEvent(this);
                         this.isPending = false;
                         this.timer.stop();
                     }
@@ -927,7 +927,7 @@ public class TaskSelf {
                 canceller.setToolTipText("Remove this Event");
                 canceller.addActionListener(e -> {
                     if (App.showYesNoCancelDialog("Confirm Removal","Do you wish to remove this "+(isTest() ? "Test?" : isExam() ? "Exam?" : "Event?"))) {
-                        TasksGenerator.EventsHandler.deleteEvent(this);
+                        TaskActivity.EventsHandler.deleteEvent(this);
                     }
                 });
             }
@@ -1005,10 +1005,10 @@ public class TaskSelf {
 
 
     public static void serializeAll(){
-        Serializer.toDisk(TasksGenerator.TodoHandler.TODOS, "todos.ser");
-        Serializer.toDisk(TasksGenerator.ProjectsHandler.PROJECTS, "projects.ser");
-        Serializer.toDisk(TasksGenerator.AssignmentsHandler.ASSIGNMENTS, "assignments.ser");
-        Serializer.toDisk(TasksGenerator.EventsHandler.EVENTS, "events.ser");
+        Serializer.toDisk(TaskActivity.TodoHandler.TODOS, "todos.ser");
+        Serializer.toDisk(TaskActivity.ProjectsHandler.PROJECTS, "projects.ser");
+        Serializer.toDisk(TaskActivity.AssignmentsHandler.ASSIGNMENTS, "assignments.ser");
+        Serializer.toDisk(TaskActivity.EventsHandler.EVENTS, "events.ser");
     }
 
     public static void deSerializeAll(){
@@ -1025,7 +1025,7 @@ public class TaskSelf {
                     }
                 }
                 todoSelf.setUpUI();
-                TasksGenerator.TodoHandler.receiveFromSerials(todoSelf);
+                TaskActivity.TodoHandler.receiveFromSerials(todoSelf);
             }
         }
 
@@ -1045,7 +1045,7 @@ public class TaskSelf {
                 } else {
                     projectSelf.setUpDoneUI();
                 }
-                TasksGenerator.ProjectsHandler.receiveFromSerials(projectSelf);
+                TaskActivity.ProjectsHandler.receiveFromSerials(projectSelf);
             }
         }
 
@@ -1062,7 +1062,7 @@ public class TaskSelf {
                     }
                 }
                 assignmentSelf.setUpUI();
-                TasksGenerator.AssignmentsHandler.receiveFromSerials(assignmentSelf);
+                TaskActivity.AssignmentsHandler.receiveFromSerials(assignmentSelf);
             }
         }
 
@@ -1079,7 +1079,7 @@ public class TaskSelf {
                     }
                 }
                 eventSelf.setUpUI();
-                TasksGenerator.EventsHandler.receiveFromSerials(eventSelf);
+                TaskActivity.EventsHandler.receiveFromSerials(eventSelf);
             }
         }
     }

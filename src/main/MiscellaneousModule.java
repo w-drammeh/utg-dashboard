@@ -38,7 +38,7 @@ public class MiscellaneousModule {
     private void setupTable(){
         miscModel = new KTableModel();
         miscModel.setColumnIdentifiers(new String[] {"CODE", "NAME", "LECTURER", "GRADE", "YEAR"});
-        ModulesHandler.ALL_MODELS.add(miscModel);
+        ModuleHandler.ALL_MODELS.add(miscModel);
 
         miscTable = new KTable(miscModel);
         miscTable.setRowHeight(30);
@@ -69,7 +69,7 @@ public class MiscellaneousModule {
                 if (e.getClickCount() >= 2) {
                     final int selectedRow = miscTable.getSelectedRow();
                     if (selectedRow >= 0) {
-                        Course.exhibit(ModulesHandler.getModuleByCode(String.valueOf(miscTable.getValueAt(selectedRow, 0))));
+                        Course.exhibit(ModuleHandler.getModuleByCode(String.valueOf(miscTable.getValueAt(selectedRow, 0))));
                     }
                     e.consume();
                 }
@@ -78,39 +78,39 @@ public class MiscellaneousModule {
     }
 
     private void configurePopUp(){
-        detailsItem = new KMenuItem(ModulesHandler.DETAILS);
+        detailsItem = new KMenuItem(ModuleHandler.DETAILS);
         detailsItem.addActionListener(e-> SwingUtilities.invokeLater(()-> {
-            final Course course = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(
+            final Course course = ModuleHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(
                     miscTable.getSelectedRow(), 0)));
             Course.exhibit(course);
         }));
 
-        editItem = new KMenuItem(ModulesHandler.EDIT);
+        editItem = new KMenuItem(ModuleHandler.EDIT);
         editItem.addActionListener(e-> {
-            final Course course = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
+            final Course course = ModuleHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
             if (course != null) {
                 final  MiscModuleEditor editor = new MiscModuleEditor(course);
                 SwingUtilities.invokeLater(()-> editor.setVisible(true));
             }
         });
 
-        removeItem = new KMenuItem(ModulesHandler.DELETE);
+        removeItem = new KMenuItem(ModuleHandler.DELETE);
         removeItem.addActionListener(e-> {
-            final Course course = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
+            final Course course = ModuleHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
             if (course != null) {
-                ModulesHandler.getModulesMonitor().remove(course);
+                ModuleHandler.getModulesMonitor().remove(course);
             }
         });
 
-        confirmItem = new KMenuItem(ModulesHandler.CONFIRM);
+        confirmItem = new KMenuItem(ModuleHandler.CONFIRM);
         confirmItem.addActionListener(e-> {
-            final Course course = ModulesHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
+            final Course course = ModuleHandler.getModuleByCode(String.valueOf(miscModel.getValueAt(miscTable.getSelectedRow(), 0)));
             if (course != null) {
-                new Thread(()-> ModulesHandler.launchVerification(course)).start();
+                new Thread(()-> ModuleHandler.launchVerification(course)).start();
             }
         });
 
-        newItem = new KMenuItem(ModulesHandler.ADD);
+        newItem = new KMenuItem(ModuleHandler.ADD);
         newItem.addActionListener(e-> {
             final MiscModuleAdder adder = new MiscModuleAdder();
             SwingUtilities.invokeLater(()-> adder.setVisible(true));
@@ -152,7 +152,7 @@ public class MiscellaneousModule {
     }
 
 
-    public static class MiscModuleAdder extends ModulesHandler.ModuleAdder {
+    public static class MiscModuleAdder extends ModuleHandler.ModuleAdder {
         JComboBox<String> semestersBox;
 
         private MiscModuleAdder(){
@@ -224,19 +224,19 @@ public class MiscellaneousModule {
                     try {
                         score = Double.parseDouble(scoreField.getText());
                     } catch (NumberFormatException formatError){
-                        ModulesHandler.reportScoreInvalid(scoreField.getText(), getRootPane());
+                        ModuleHandler.reportScoreInvalid(scoreField.getText(), getRootPane());
                         scoreField.requestFocusInWindow();
                         return;
                     }
 
                     if (score < 0 || score > 100) {
-                        ModulesHandler.reportScoreOutOfRange(getRootPane());
+                        ModuleHandler.reportScoreOutOfRange(getRootPane());
                         scoreField.requestFocusInWindow();
                         return;
                     }
 
-                    if (ModulesHandler.existsInList(codeField.getText())) {
-                        ModulesHandler.reportCodeDuplication(codeField.getText());
+                    if (ModuleHandler.existsInList(codeField.getText())) {
+                        ModuleHandler.reportCodeDuplication(codeField.getText());
                         codeField.requestFocusInWindow();
                         return;
                     }
@@ -245,7 +245,7 @@ public class MiscellaneousModule {
                             codeField.getText(), nameField.getText(), lecturerField.getText(), venueField.getText(),
                             String.valueOf(dayBox.getSelectedItem()), String.valueOf(timeBox.getSelectedItem()), score,
                             Integer.parseInt(String.valueOf(creditBox.getSelectedItem())), String.valueOf(requirementBox.getSelectedItem()), false);
-                    ModulesHandler.getModulesMonitor().add(course);
+                    ModuleHandler.getModulesMonitor().add(course);
                     dispose();
                 }
             };
@@ -341,12 +341,12 @@ public class MiscellaneousModule {
                     try {
                         score = Double.parseDouble(scoreField.getText());
                     } catch (NumberFormatException formatError){
-                        ModulesHandler.reportScoreInvalid(scoreField.getText(), this.getRootPane());
+                        ModuleHandler.reportScoreInvalid(scoreField.getText(), this.getRootPane());
                         scoreField.requestFocusInWindow();
                         return;
                     }
                     if (score < 0 || score > 100) {
-                        ModulesHandler.reportScoreOutOfRange(this.getRootPane());
+                        ModuleHandler.reportScoreOutOfRange(this.getRootPane());
                         scoreField.requestFocusInWindow();
                         return;
                     }
@@ -357,14 +357,14 @@ public class MiscellaneousModule {
                         }
                         final String tempCode = String.valueOf(miscModel.getValueAt(row, 0));
                         if (tempCode.equalsIgnoreCase(codeField.getText())) {
-                            ModulesHandler.reportCodeDuplication(codeField.getText());
+                            ModuleHandler.reportCodeDuplication(codeField.getText());
                             codeField.requestFocusInWindow();
                             return;
                         }
                     }
 
-                    if (ModulesHandler.existsInListExcept(miscModel, codeField.getText())) {
-                        ModulesHandler.reportCodeDuplication(codeField.getText());
+                    if (ModuleHandler.existsInListExcept(miscModel, codeField.getText())) {
+                        ModuleHandler.reportCodeDuplication(codeField.getText());
                         codeField.requestFocusInWindow();
                         return;
                     }
@@ -373,7 +373,7 @@ public class MiscellaneousModule {
                             codeField.getText(), nameField.getText(), lecturerField.getText(),venueField.getText(), String.valueOf(dayBox.getSelectedItem()),
                             String.valueOf(timeBox.getSelectedItem()), score, Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
                             String.valueOf(requirementBox.getSelectedItem()), target.isVerified());
-                    ModulesHandler.substitute(target, course);
+                    ModuleHandler.substitute(target, course);
                     dispose();
                 }
             };

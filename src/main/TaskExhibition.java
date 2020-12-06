@@ -85,11 +85,11 @@ public class TaskExhibition {
 
             final KButton doneButton = new KButton("Mark as Done");
             doneButton.setForeground(Color.BLUE);
-            doneButton.addActionListener(e -> TasksGenerator.TodoHandler.transferTask(theTask,this,false));
+            doneButton.addActionListener(e -> TaskActivity.TodoHandler.transferTask(theTask,this,false));
 
             final KButton removeButton = new KButton("Remove");
             removeButton.setForeground(Color.RED);
-            removeButton.addActionListener(TasksGenerator.TodoHandler.removalWaiter(theTask,this));
+            removeButton.addActionListener(TaskActivity.TodoHandler.removalWaiter(theTask,this));
 
             final KButton closeButton = new KButton("Close");
             closeButton.addActionListener(e -> this.dispose());
@@ -253,11 +253,11 @@ public class TaskExhibition {
 
             final KButton submitButton = new KButton("Mark as Submit");
             submitButton.setForeground(Color.BLUE);
-            submitButton.addActionListener(e-> TasksGenerator.AssignmentsHandler.transferAssignment(assignment,this,false));
+            submitButton.addActionListener(e-> TaskActivity.AssignmentsHandler.transferAssignment(assignment,this,false));
 
             final KButton removeButton = new KButton("Remove");
             removeButton.setForeground(Color.RED);
-            removeButton.addActionListener(TasksGenerator.AssignmentsHandler.removalListener(assignment, this));
+            removeButton.addActionListener(TaskActivity.AssignmentsHandler.removalListener(assignment, this));
 
             final KButton closeButton = new KButton("Close");
             closeButton.setFocusable(true);

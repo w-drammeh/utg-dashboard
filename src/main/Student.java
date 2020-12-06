@@ -297,7 +297,7 @@ public class Student {
     public static void setMajorCode(String majorCode) {
         majorCode = majorCode.toUpperCase();
         SettingsUI.majorCodeField.setText(majorCode);
-        ModulesHandler.effectMajorCodeChanges(Student.majorCode, majorCode);
+        ModuleHandler.effectMajorCodeChanges(Student.majorCode, majorCode);
         Student.majorCode = majorCode;
     }
 
@@ -308,7 +308,7 @@ public class Student {
     public static void setMinorCode(String minorCode){
         minorCode = minorCode.toUpperCase();
         SettingsUI.minorCodeField.setText(minorCode);
-        ModulesHandler.effectMinorCodeChanges(Student.minorCode, minorCode);
+        ModuleHandler.effectMinorCodeChanges(Student.minorCode, minorCode);
         Student.minorCode = minorCode;
     }
 
