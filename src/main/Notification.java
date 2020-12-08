@@ -120,7 +120,7 @@ public class Notification implements Serializable {
 
         private NotificationLayer(Notification alert) {
             this.notification = alert;
-            setPreferredSize(new Dimension(1_000, 35));
+            setPreferredSize(new Dimension(975, 35));
             setCursor(MComponent.HAND_CURSOR);
             addMouseListener(forgeListener(this));
             setLayout(new BorderLayout());

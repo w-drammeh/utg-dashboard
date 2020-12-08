@@ -17,22 +17,21 @@ public class Tips implements Activity {
     public Tips(){
         isFirstView = true;
         helpCard = new CardLayout();
-        final KPanel centerPanel = new KPanel(helpCard);//There's north, and this is the center
-        final KLabel showingLabel = new KLabel("Showing Dashboard Tips", KFontFactory.createBoldFont(17));
+        final KPanel centerPanel = new KPanel(helpCard);
+        final KLabel showingLabel = new KLabel("Dashboard Tips", KFontFactory.bodyHeaderFont());
         final KComboBox<String> helpBox = new KComboBox<String>(new String[] {"Dashboard Tips", "UTG FAQs"}) {
             @Override
             public JToolTip createToolTip() {
                 return MComponent.preferredTip();
             }
         };
-        helpBox.setToolTipText("Change Activity");
         helpBox.addActionListener(e-> {
             if (helpBox.getSelectedIndex() == 0) {
                 helpCard.show(centerPanel,"tips");
-                showingLabel.setText("Showing Dashboard Tips");
+                showingLabel.setText("Dashboard Tips");
             } else if (helpBox.getSelectedIndex() == 1) {
                 helpCard.show(centerPanel,"faqs");
-                showingLabel.setText("Showing UTG FAQs & Answers");
+                showingLabel.setText("UTG FAQs & Answers");
             }
         });
 
@@ -40,9 +39,9 @@ public class Tips implements Activity {
         northPanel.add(new KPanel(showingLabel), BorderLayout.WEST);
         northPanel.add(new KPanel(helpBox), BorderLayout.EAST);
 
-        final KPanel allHelpPlace = new KPanel(new BorderLayout());
-        allHelpPlace.add(northPanel, BorderLayout.NORTH);
-        allHelpPlace.add(centerPanel, BorderLayout.CENTER);
+        final KPanel tipActivity = new KPanel(new BorderLayout());
+        tipActivity.add(northPanel, BorderLayout.NORTH);
+        tipActivity.add(centerPanel, BorderLayout.CENTER);
 
         generateTips();
         generateFAQs();
@@ -50,7 +49,7 @@ public class Tips implements Activity {
         helpCard.addLayoutComponent(centerPanel.add(tipsPane),"tips");
         helpCard.addLayoutComponent(centerPanel.add(faqsPane),"faqs");
 
-        Board.addCard(allHelpPlace, "Faqs & Help");
+        Board.addCard(tipActivity, "Faqs & Help");
     }
 
     @Override
@@ -167,7 +166,7 @@ public class Tips implements Activity {
         final String utgTip = "You can visit the UTG official site to learn more about the University of the Gambia. To do this, click the About UTG " +
                 "Button appearing at the top-right of your Dashboard.";
 
-        final KPanel tipsPlace = new KPanel(975, 2_210);
+        final KPanel tipsPlace = new KPanel(975, 2_200);
         tipsPlace.setLayout(new BoxLayout(tipsPlace, BoxLayout.Y_AXIS));
         tipsPlace.addAll(head("Running Courses"), write(runningTip), subHead("Verification"),
                 write(verificationTip), subHead("Matching"), write(matchingTip),
@@ -181,21 +180,27 @@ public class Tips implements Activity {
                 head("Analysis"), write(analysisTip),
                 head("Other Tips and Universal Access"), subHead("Go Portal"), write(goPortalTip),
                 subHead("Come Home"), write(comeHomeTip), subHead("About UTG"), write(utgTip));
-        tipsPane = new KScrollPane(tipsPlace);
+        tipsPane = new KScrollPane(new KPanel(new FlowLayout(FlowLayout.CENTER, 0, 0), tipsPlace));
     }
 
     private KPanel head(String topic) {
-        return new KPanel(new KLabel(topic, KFontFactory.createBoldFont(18), Color.BLUE));
+        final KLabel headLabel = new KLabel(topic, KFontFactory.createBoldFont(18), Color.BLUE);
+        final KPanel headPanel = new KPanel(headLabel);
+        headPanel.setBackground(Color.WHITE);
+        headPanel.setReflectTheme(false);
+        return headPanel;
     }
 
     private KPanel subHead(String subTopic) {
-        return new KPanel(new FlowLayout(FlowLayout.LEFT), new KLabel(subTopic, KFontFactory.createPlainFont(16), Color.BLUE));
+        final KLabel subHeadLabel = new KLabel(subTopic, KFontFactory.createPlainFont(17), Color.BLUE);
+        final KPanel subHeadPanel =  new KPanel(new FlowLayout(FlowLayout.LEFT), subHeadLabel);
+        subHeadPanel.setBackground(Color.WHITE);
+        subHeadPanel.setReflectTheme(false);
+        return subHeadPanel;
     }
 
     private KTextPane write(String note) {
-        final KTextPane tipTextPane = KTextPane.wantHtmlFormattedPane(note);
-        tipTextPane.setOpaque(false);
-        return tipTextPane;
+        return KTextPane.wantHtmlFormattedPane(note);
     }
 
 //    UTG Faqs
@@ -213,37 +218,33 @@ public class Tips implements Activity {
                 "Mat. Number followed by @utg.edu.gm, whilst the password is simply the Mat. Number. This is quite predictable and vulnerable, " +
                 "so it is strongly recommended that you change it. Visit the faulty of your department for this changes.";
 
-        //Let user answer a faq
-        final String contributeString = "<i>Do you know an answer to a problem faced by you or any other student " +
-                "which is not stated above? Then do not hesitate to let your brothers and sisters benefit from it " +
-                "by giving it to us. Simply go to 'Home | Personal Dashboard | Feedback | Answer a FAQ'</i>";
-
-        final KPanel downPanel = new KPanel(975, 115);
-        downPanel.setLayout(new BoxLayout(downPanel, BoxLayout.Y_AXIS));
-        downPanel.addAll(new KPanel(new KSeparator(new Dimension(775,1), Color.BLACK)), write(contributeString));
-
         final KPanel faqsPlace = new KPanel();
-        faqsPlace.setLayout(new BoxLayout(faqsPlace, BoxLayout.Y_AXIS));
         faqsPlace.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        faqsPlace.setLayout(new BoxLayout(faqsPlace, BoxLayout.Y_AXIS));
         faqsPlace.addAll(provideAnswerToFaq(mailQ, mailA, 150), Box.createVerticalStrut(10),
-                provideAnswerToFaq(changePortalMailQ, changePortalMailA, 125), Box.createVerticalStrut(25),
-                downPanel);//to be continued...
-        faqsPane = new KScrollPane(faqsPlace);
+                provideAnswerToFaq(changePortalMailQ, changePortalMailA, 125));//to be continued...
+        faqsPane = new KScrollPane(new KPanel(new FlowLayout(FlowLayout.CENTER, 0, 0), faqsPlace));
     }
 
     private KPanel provideAnswerToFaq(String problem, String answer, int height){
         final Font hintFont = KFontFactory.createBoldFont(15);
 
         final KPanel quesPanel = new KPanel(new BorderLayout());
-        quesPanel.add(new KPanel(new KLabel("Question:", hintFont)), BorderLayout.WEST);
+        final KPanel quesLabelPanel = new KPanel(new KLabel("Question:", hintFont));
+        quesLabelPanel.setReflectTheme(false);
+        quesLabelPanel.setBackground(Color.WHITE);
+        quesPanel.add(quesLabelPanel, BorderLayout.WEST);
         quesPanel.add(write(problem), BorderLayout.CENTER);
 
         final KPanel ansPanel = new KPanel(new BorderLayout());
-        ansPanel.add(new KPanel(new KLabel("Answer:", hintFont)), BorderLayout.WEST);
+        final KPanel ansLabelPanel = new KPanel(new KLabel("Answer:", hintFont));
+        ansLabelPanel.setReflectTheme(false);
+        ansLabelPanel.setBackground(Color.WHITE);
+        ansPanel.add(ansLabelPanel, BorderLayout.WEST);
         ansPanel.add(write(answer), BorderLayout.CENTER);
 
         final KPanel onePanel = new KPanel(975, height);
-        onePanel.setBorder(BorderFactory.createLineBorder(Color.BLUE,2));
+        onePanel.setBorder(BorderFactory.createLineBorder(Color.BLUE,2, true));
         onePanel.setLayout(new BoxLayout(onePanel, BoxLayout.Y_AXIS));
         onePanel.addAll(quesPanel, ansPanel);
         return onePanel;

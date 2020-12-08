@@ -130,7 +130,10 @@ public class News implements Activity {
      */
     private KPanel packNews(String header, String body, String link, String allContent) {
         final KLabel hLabel = new KLabel(header, KFontFactory.createBoldFont(18), Color.BLUE);
-        hLabel.setOpaque(false);
+        final KPanel headerWrap = new KPanel(new FlowLayout(FlowLayout.LEFT), hLabel);
+        headerWrap.setReflectTheme(false);
+        headerWrap.setBackground(Color.WHITE);
+
         final KTextPane textPane = KTextPane.wantHtmlFormattedPane(body.substring(0, body.length() - (header.length() + 13)));
 
         final NewsDialog newsDialog = new NewsDialog(header, body, link, allContent);
@@ -148,19 +151,20 @@ public class News implements Activity {
         }
 
         final KPanel readerWrap = new KPanel(new FlowLayout(FlowLayout.RIGHT), extendedReader);
+        readerWrap.setReflectTheme(false);
         readerWrap.setBackground(Color.WHITE);
 
         final KPanel niceBox = new KPanel(new BorderLayout());
         niceBox.setBackground(Color.WHITE);
-        niceBox.setPreferredSize(new Dimension(975, 150));
+        niceBox.setPreferredSize(new Dimension(975, 165));
         niceBox.setBorder(BorderFactory.createLineBorder(Color.BLUE));
-        niceBox.add(hLabel, BorderLayout.NORTH);
+        niceBox.add(headerWrap, BorderLayout.NORTH);
         niceBox.add(textPane, BorderLayout.CENTER);
         niceBox.add(readerWrap, BorderLayout.SOUTH);
         return new KPanel(new FlowLayout(FlowLayout.CENTER, 0, 5), niceBox);
     }
 
-//    push if any
+//    push, but if any
     public void pushNews() {
         final ArrayList<NewsSavior> savedNews = (ArrayList<NewsSavior>) Serializer.fromDisk("news.ser");
         if (savedNews == null) {

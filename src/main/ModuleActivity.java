@@ -9,7 +9,6 @@ public class ModuleActivity implements Activity {
     private KButton onButton;
     private KLabel indicator;
     private CardLayout residentLayout;//there's a 'residentPanel'
-    private ModuleHandler handlerInstance;
     private KButton refreshButton;
 
 
@@ -38,12 +37,14 @@ public class ModuleActivity implements Activity {
         headerPanel.add(new KPanel(tipShower), BorderLayout.CENTER);
         headerPanel.add(new KPanel(refreshButton), BorderLayout.EAST);
 
-        handlerInstance = new ModuleHandler();
+        final ModuleHandler handler = new ModuleHandler();
         residentLayout = new CardLayout();
         final KPanel residentPanel = new KPanel(residentLayout) {
             @Override
             public Component add(Component comp) {
-                return super.add(new KScrollPane(comp));
+                final KScrollPane scrollPane = new KScrollPane(comp);
+                scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 0, true));
+                return super.add(scrollPane);
             }
         };
         final KButton y1Button = getControlButton("Year One");
@@ -95,10 +96,10 @@ public class ModuleActivity implements Activity {
         controlPanel.addAll(y1Button, y2Button, y3Button, y4Button, new KSeparator(new Dimension(125,1)),
                 summerButton, miscButton);
 
-        residentLayout.addLayoutComponent(residentPanel.add(handlerInstance.yearOnePresent()),"Year1");
-        residentLayout.addLayoutComponent(residentPanel.add(handlerInstance.yearTwoPresent()),"Year2");
-        residentLayout.addLayoutComponent(residentPanel.add(handlerInstance.yearThreePresent()),"Year3");
-        residentLayout.addLayoutComponent(residentPanel.add(handlerInstance.yearFourPresent()),"Year4");
+        residentLayout.addLayoutComponent(residentPanel.add(handler.yearOnePresent()),"Year1");
+        residentLayout.addLayoutComponent(residentPanel.add(handler.yearTwoPresent()),"Year2");
+        residentLayout.addLayoutComponent(residentPanel.add(handler.yearThreePresent()),"Year3");
+        residentLayout.addLayoutComponent(residentPanel.add(handler.yearFourPresent()),"Year4");
         residentLayout.addLayoutComponent(residentPanel.add(new SummerModule().getPresent()),"Summer");
         residentLayout.addLayoutComponent(residentPanel.add(new MiscellaneousModule().getPresent()),"misc");
 

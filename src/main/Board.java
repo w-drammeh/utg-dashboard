@@ -68,6 +68,8 @@ public final class Board extends KFrame {
     private Analysis analysisGenerator;
     private Tips faqsGenerator;
     private About myDashboard;
+    private TaskActivity taskActivity;
+    private NotificationActivity alertActivity;
     private News newsPresent;
 
 
@@ -86,6 +88,7 @@ public final class Board extends KFrame {
             }
         });
 
+        Settings.deSerialize();
         Settings.allLooksInfo = UIManager.getInstalledLookAndFeels();
         if (!Dashboard.isFirst()) {
             for (UIManager.LookAndFeelInfo lookAndFeelInfo : Settings.allLooksInfo) {
@@ -106,6 +109,7 @@ public final class Board extends KFrame {
         setUpBody();
         setContentPane(boardContent);
 
+        Portal.deSerialize();
         runningCourseActivity = new RunningCourseActivity();
         moduleActivity = new ModuleActivity();
         settingsUI = new SettingsUI();
@@ -114,8 +118,8 @@ public final class Board extends KFrame {
         faqsGenerator = new Tips();
         myDashboard = new About();
 //        outlined / big buttons
-        new TaskActivity();
-        new NotificationActivity();
+        taskActivity = new TaskActivity();
+        alertActivity = new NotificationActivity();
         newsPresent = new News();
 
 
@@ -192,19 +196,21 @@ public final class Board extends KFrame {
         midPart.add(horizontalWrapper);//notice how the last space is automatically left blank.
         //besides, the height and the spaces do not seem to count
 
-        final KButton aUtgButton = new KButton("About UTG");
-        aUtgButton.undress();
-        aUtgButton.setStyle(KFontFactory.createBoldFont(14), Color.BLUE);
-        aUtgButton.setToolTipText("Learn more about UTG");
-        aUtgButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        aUtgButton.addActionListener(e -> new Thread(()-> {
-            aUtgButton.setEnabled(false);
+        final KButton aboutUTGButton = new KButton("About UTG");
+        aboutUTGButton.setStyle(KFontFactory.createPlainFont(15), Color.BLUE);
+        aboutUTGButton.undress();
+        aboutUTGButton.underline(true);
+        aboutUTGButton.setPreferredSize(new Dimension(125, 30));
+        aboutUTGButton.setToolTipText("Learn more about UTG");
+        aboutUTGButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        aboutUTGButton.addActionListener(e-> new Thread(()-> {
+            aboutUTGButton.setEnabled(false);
             try {
                 Desktop.getDesktop().browse(URI.create(News.HOME_SITE));
             } catch (Exception e1) {
                 App.signalError(e1);
             } finally {
-                aUtgButton.setEnabled(true);
+                aboutUTGButton.setEnabled(true);
             }
         }).start());
 
@@ -216,7 +222,7 @@ public final class Board extends KFrame {
 
         final KPanel upperDetails = new KPanel(new BorderLayout());
         upperDetails.add(statePanel, BorderLayout.WEST);
-        upperDetails.add(aUtgButton, BorderLayout.EAST);
+        upperDetails.add(aboutUTGButton, BorderLayout.EAST);
 
         final KLabel labelIcon = KLabel.wantIconLabel("UTGLogo.gif", 125, 85);
 
@@ -224,7 +230,7 @@ public final class Board extends KFrame {
         if (Student.getSchool().contains("Unknown")) {
             schoolLabel.setText("Unknown School");
         }
-        final KLabel divLabel = new KLabel("Division of "+Student.getDivision(), KFontFactory.createBoldFont(17));
+        final KLabel divLabel = new KLabel("Department of "+Student.getDivision(), KFontFactory.createBoldFont(17));
         if (Student.getDivision().contains("Unknown")) {
             divLabel.setText("Unknown Division");
         }
@@ -246,17 +252,17 @@ public final class Board extends KFrame {
 
         final KButton toHome = new KButton("HOME");
         toHome.setFont(outlinesFont);
-        toHome.addActionListener(e-> showCard("Home"));
         toHome.setPreferredSize(new Dimension(outlinesWidth, toHome.getPreferredSize().height));
+        toHome.addActionListener(e-> showCard("Home"));
 
         final KButton toTasks = new KButton("MY TASKS+");
-        toTasks.setPreferredSize(new Dimension(outlinesWidth, toTasks.getPreferredSize().height));
         toTasks.setFont(outlinesFont);
-        toTasks.addActionListener(e-> showCard("Tasks"));
+        toTasks.setPreferredSize(new Dimension(outlinesWidth, toTasks.getPreferredSize().height));
+        toTasks.addActionListener(e-> taskActivity.answerActivity());
 
         final KButton toNews = new KButton("NEWS");
-        toNews.setPreferredSize(new Dimension(outlinesWidth, toNews.getPreferredSize().height));
         toNews.setFont(outlinesFont);
+        toNews.setPreferredSize(new Dimension(outlinesWidth, toNews.getPreferredSize().height));
         toNews.addActionListener(e-> newsPresent.answerActivity());
 
         notificationButton = new KButton("NOTIFICATIONS"){
@@ -269,13 +275,13 @@ public final class Board extends KFrame {
                 } else {
                     super.setForeground(Color.RED);
                     super.setCursor(MComponent.HAND_CURSOR);
-                    //Todo: programmatically display the tooltip
+                    //Todo: signal a desktop notification
                 }
             }
         };
-        notificationButton.setPreferredSize(new Dimension(outlinesWidth, notificationButton.getPreferredSize().height));
         notificationButton.setFont(outlinesFont);
-        notificationButton.addActionListener(e-> showCard("Notifications"));
+        notificationButton.setPreferredSize(new Dimension(outlinesWidth, notificationButton.getPreferredSize().height));
+        notificationButton.addActionListener(e-> alertActivity.answerActivity());
 
         final KPanel bigButtonsPanel = new KPanel(new FlowLayout(FlowLayout.CENTER, 10, 5), new Dimension(1_000, 30));
         bigButtonsPanel.addAll(toHome, toTasks, toNews, notificationButton);
@@ -331,16 +337,14 @@ public final class Board extends KFrame {
     }
 
     private void completeBuild() {
-        if (Dashboard.isFirst()) {//is there anything to remember?
-            postProcesses.add(SettingsUI::loadDefaults);
-            postProcesses.add(()-> Runtime.getRuntime().addShutdownHook(shutDownThread));
+        if (Dashboard.isFirst()) {
+            postProcesses.add(()-> {
+                SettingsUI.loadDefaults();
+                Runtime.getRuntime().addShutdownHook(shutDownThread);
+            });
         } else {
             Runtime.getRuntime().addShutdownHook(shutDownThread);
         }
-        postProcesses.add(()-> {
-            RunningCourseActivity.uploadInitials();
-            ModuleHandler.uploadModules();
-        });
     }
 
     private JComponent generateHomePage(){
@@ -411,7 +415,7 @@ public final class Board extends KFrame {
 
         final KPanel jumperPanel = new KPanel(new BorderLayout());
         jumperPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        jumperPanel.add(KPanel.wantDirectAddition(null, new Dimension(225,30), jumpLabel), BorderLayout.NORTH);
+        jumperPanel.add(new KPanel(new Dimension(225,30), jumpLabel), BorderLayout.NORTH);
         jumperPanel.add(KLabel.wantIconLabel(iconName, iWidth, iHeight), BorderLayout.CENTER);
         jumperPanel.addMouseListener(new MouseAdapter() {
             @Override

@@ -16,7 +16,7 @@ import java.util.Objects;
  * in Board to make it come to sight at the corresponding big-button click.
  * It serves as the intermediary between all the so-called TaskSelf, Helpers, etc. and the Board.
  */
-public class TaskActivity {
+public class TaskActivity implements Activity {
     private CardLayout cardLayout;
     private KPanel inPanel;
     private static KButton todoBigButton;
@@ -59,8 +59,13 @@ public class TaskActivity {
         final KPanel activityPanel = new KPanel(new BorderLayout());
         activityPanel.add(upperPanel, BorderLayout.NORTH);
         activityPanel.add(inPanel);
-
+        TaskSelf.deSerializeAll();
         Board.addCard(activityPanel, "Tasks");
+    }
+
+    @Override
+    public void answerActivity() {
+        Board.showCard("Tasks");
     }
 
     /**

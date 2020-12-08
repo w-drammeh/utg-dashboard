@@ -6,6 +6,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import proto.*;
+import utg.Dashboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -101,6 +102,7 @@ public class ModuleHandler {
                 return super.remove(course);
             }
         };
+        uploadModules();
     }
 
     public Component yearOnePresent(){
@@ -119,9 +121,11 @@ public class ModuleHandler {
         return yearFour.getPresent();
     }
 
-    public static void uploadModules() {
-        for (Course c : STARTUP_COURSES) {
-            modulesMonitor.add(c);
+    private static void uploadModules() {
+        if (Dashboard.isFirst()) {
+            modulesMonitor.addAll(STARTUP_COURSES);
+        } else {
+            deserializeData();
         }
     }
 
@@ -566,6 +570,7 @@ public class ModuleHandler {
      * on a panel.
      */
     public static class ModuleYear {
+        private String yearName;
         private KTable table1, table2;
         private KTable focusTable;
         private KTableModel model1, model2;
@@ -574,6 +579,7 @@ public class ModuleHandler {
         private JPopupMenu popupMenu;
 
         public ModuleYear(String yearName) {
+            this.yearName = yearName;
             setupTable1();
             setupTable2();
             ALL_MODELS.add(model1);
@@ -728,7 +734,6 @@ public class ModuleHandler {
          */
         private KPanel getPresent() {
             final KScrollPane scrollPane1 = table1.sizeMatchingScrollPane();
-            scrollPane1.setPreferredSize(new Dimension(840, 215));
             scrollPane1.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
@@ -753,7 +758,6 @@ public class ModuleHandler {
             });
 
             final KScrollPane scrollPane2 = table2.sizeMatchingScrollPane();
-            scrollPane2.setPreferredSize(scrollPane1.getPreferredSize());
             scrollPane2.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
@@ -779,12 +783,14 @@ public class ModuleHandler {
 
             final KPanel present = new KPanel();
             present.setLayout(new BoxLayout(present, BoxLayout.Y_AXIS));
-            present.addAll(new KPanel(new KLabel(Student.FIRST_SEMESTER, KFontFactory.createPlainFont(18), Color.BLUE)),
-                    scrollPane1, Box.createVerticalStrut(15), new KPanel(new KLabel(Student.SECOND_SEMESTER,
-                            KFontFactory.createPlainFont(18), Color.BLUE)), scrollPane2, Box.createVerticalStrut(15));
+            present.addAll(new KPanel(semesterHead(Student.FIRST_SEMESTER)), scrollPane1, Box.createVerticalStrut(15),
+                    new KPanel(semesterHead(Student.SECOND_SEMESTER)), scrollPane2, Box.createVerticalStrut(15));
             return present;
         }
 
+        private KLabel semesterHead(String semester){
+            return new KLabel(yearName+" "+semester, KFontFactory.createPlainFont(17), Color.BLUE);
+        }
     }
 
 
@@ -1048,11 +1054,10 @@ public class ModuleHandler {
         final String[] modulesData = (String[]) Serializer.fromDisk("modules.ser");
         if (modulesData == null) {
             App.silenceException("Error reading Modules.");
-            return;
-        }
-
-        for (String dataLines : modulesData) {
-            modulesMonitor.add(Course.importFromSerial(dataLines));
+        } else {
+            for (String dataLines : modulesData) {
+                modulesMonitor.add(Course.importFromSerial(dataLines));
+            }
         }
     }
 

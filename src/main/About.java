@@ -86,7 +86,7 @@ public class About extends KDialog {
     }
 
     private KPanel getCreditsCard(){
-        final KLabel iconLabel = KLabel.wantIconLabel("muhammed.jpg", 140, 150);
+        final KLabel iconLabel = KLabel.wantIconLabel("author.jpg", 140, 150);
         final ActionListener exhibitAction = e-> new SpecificExhibitor().setVisible(true);
 
         final Font specialFont = KFontFactory.createPlainFont(15);
@@ -386,7 +386,7 @@ public class About extends KDialog {
     }
 
 
-    private class SpecificExhibitor extends KDialog {
+    private static class SpecificExhibitor extends KDialog {
 
         private SpecificExhibitor(){
             super("Dashboard Author");
@@ -442,7 +442,6 @@ public class About extends KDialog {
             pack();
             setLocationRelativeTo(getRootPane());
         }
-
     }
 
 }

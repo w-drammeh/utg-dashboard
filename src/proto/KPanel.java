@@ -7,14 +7,10 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+//Todo: some panels do not comply with theme changes regarding their background-colour
 public class KPanel extends JPanel implements Preference {
-    public static final List<KPanel> ALL_PANELS = new ArrayList<KPanel>(){
-        @Override
-        public boolean add(KPanel panel) {
-            panel.setBackground(Settings.currentBackground());
-            return super.add(panel);
-        }
-    };
+    private boolean reflectTheme;
+    public static final List<KPanel> ALL_PANELS = new ArrayList<>();
 
 
     public KPanel(){
@@ -52,18 +48,9 @@ public class KPanel extends JPanel implements Preference {
         setPreferredSize(dimension);
     }
 
-//    layout cannot be null; you either set it or leave it
     public KPanel(LayoutManager layout, Dimension dimension, Component... components){
         this(layout, dimension);
         addAll(components);
-    }
-
-//    this is now obsolete?
-    public static KPanel wantDirectAddition(LayoutManager layout, Dimension dimension, Component... components){
-        final KPanel kPanel = new KPanel(layout == null ? new FlowLayout() : layout);
-        kPanel.setPreferredSize(dimension);
-        kPanel.addAll(components);
-        return kPanel;
     }
 
     /**
@@ -78,7 +65,6 @@ public class KPanel extends JPanel implements Preference {
         }
     }
 
-//    does nothing if there is no component in this instance
     public void removeLast() {
         final int count = getComponentCount();
         if (count >= 1) {
@@ -100,7 +86,17 @@ public class KPanel extends JPanel implements Preference {
         }
     }
 
-    public void setPreferences() {
+    public void setReflectTheme(boolean reflectTheme){
+        this.reflectTheme = reflectTheme;
+    }
+
+    public boolean getReflectTheme(){
+        return reflectTheme;
+    }
+
+    public void setPreferences(){
+        setBackground(Settings.currentBackground());
+        reflectTheme = true;
         ALL_PANELS.add(this);
     }
 

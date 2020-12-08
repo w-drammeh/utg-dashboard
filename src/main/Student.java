@@ -1,6 +1,7 @@
 package main;
 
 import proto.KLabel;
+import utg.Dashboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +9,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-// Customizable, but some details of the user cannot be directly modified
 public class Student {
     private static String firstName;
     private static String lastName;
@@ -60,6 +60,7 @@ public class Student {
     private static int levelNumber;
     private static double CGPA;
     private static ImageIcon userIcon;
+    private static LinkedHashMap<String, String> additionalData;
     public static final String FIRST_SEMESTER = "First Semester";
     public static final String SECOND_SEMESTER = "Second Semester";
     public static final String SUMMER_SEMESTER = "Summer Semester";
@@ -73,7 +74,6 @@ public class Student {
     public static final String THIRD_CLASS = "\"Cum laude\" - With Praise!";
     public static final String SECOND_CLASS = "\"Magna Cum laude\" - With Great Honor!";
     public static final String FIRST_CLASS = "\"Summa Cum laude\" - With Greatest Honor!";
-    private static LinkedHashMap<String, String> ADDITIONAL_DATA = new LinkedHashMap<>();
     private static String nameFormat = "First Name first";
 
 
@@ -376,7 +376,7 @@ public class Student {
     }
 
     public static LinkedHashMap<String, String> getAdditional(){
-        return ADDITIONAL_DATA;
+        return additionalData;
     }
 
     public static String currentNameFormat(){
@@ -392,50 +392,51 @@ public class Student {
         return nameFormat.startsWith("First") ? getFullName() : getFullNamePostOrder();
     }
 
-    /**
-     * Called during fresh-start to initialize user data just from the Portal,
-     * as given by PrePortal.
-     */
     public static void initialize() {
-        final Object[] initials = PrePortal.USER_DATA.toArray();
-        firstName = (String) initials[0];
-        lastName = (String) initials[1];
-        program = (String) initials[2];
-        try {
-            matNumber = (String) initials[3];
-        } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(), "Mat Number");
-        }
-        major = (String) initials[4];
-        school = (String) initials[5];
-        division = (String) initials[6];
-        nationality = (String) initials[7];
-        try {
-            monthOfAdmission = Integer.parseInt((String) initials[8]);
-        } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(), "Month of Admission");
-        }
-        try {
-            yearOfAdmission = Integer.parseInt((String) initials[9]);
-        } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(),"Year of Admission");
-        }
-        address = (String) initials[10];
-        maritalStatue = (String) initials[11];
-        dateOfBirth = (String) initials[12];
-        telephones = (String) initials[13];
-        portalMail = (String) initials[14];
-        portalPassword = (String) initials[15];
-        try {
-            CGPA = Double.parseDouble((String) initials[19]);
-        } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(), "CGPA");
-        }
-        setLevel((String)(initials[17]));
-        setSemester((String)(initials[16]));
-        setStatus((String)(initials[18]));
+        if (Dashboard.isFirst()) {
+            final Object[] initials = PrePortal.USER_DATA.toArray();
+            firstName = (String) initials[0];
+            lastName = (String) initials[1];
+            program = (String) initials[2];
+            try {
+                matNumber = (String) initials[3];
+            } catch (Exception e){
+                reportCriticalInfoMissing(Login.getRoot(), "Mat Number");
+            }
+            major = (String) initials[4];
+            school = (String) initials[5];
+            division = (String) initials[6];
+            nationality = (String) initials[7];
+            try {
+                monthOfAdmission = Integer.parseInt((String) initials[8]);
+            } catch (Exception e){
+                reportCriticalInfoMissing(Login.getRoot(), "Month of Admission");
+            }
+            try {
+                yearOfAdmission = Integer.parseInt((String) initials[9]);
+            } catch (Exception e){
+                reportCriticalInfoMissing(Login.getRoot(),"Year of Admission");
+            }
+            address = (String) initials[10];
+            maritalStatue = (String) initials[11];
+            dateOfBirth = (String) initials[12];
+            telephones = (String) initials[13];
+            portalMail = (String) initials[14];
+            portalPassword = (String) initials[15];
+            try {
+                CGPA = Double.parseDouble((String) initials[19]);
+            } catch (Exception e){
+                reportCriticalInfoMissing(Login.getRoot(), "CGPA");
+            }
+            setLevel((String)(initials[17]));
+            setSemester((String)(initials[16]));
+            setStatus((String)(initials[18]));
 //
-        minor = majorCode = minorCode = "";
+            minor = majorCode = minorCode = "";
+            additionalData = new LinkedHashMap<>();
+        } else {
+            deserializeData();
+        }
     }
 
     public static String getFullName() {
@@ -676,7 +677,7 @@ public class Student {
         dataMap.put("cg", CGPA);
         dataMap.put("aboutMe", about);
         dataMap.put("nameFormat", nameFormat);
-        dataMap.put("extra", ADDITIONAL_DATA);
+        dataMap.put("extra", additionalData);
         if (!isDefaultIconSet()) {
             if (isShooterIconSet()) {
                 dataMap.put("shooterIcon", "Shooter");
@@ -688,7 +689,7 @@ public class Student {
         Serializer.toDisk(dataMap, "core.ser");
     }
 
-    public static void deserializeData() throws NullPointerException {
+    private static void deserializeData() throws NullPointerException {
         final HashMap<String, Object> dataMap = (HashMap) Serializer.fromDisk("core.ser");
         if (dataMap == null) {
             throw new NullPointerException();
@@ -721,7 +722,7 @@ public class Student {
         placeOfBirth = (String) dataMap.get("pob");
         about = (String) dataMap.get("aboutMe");
         setNameFormat((String) dataMap.get("nameFormat"));
-        ADDITIONAL_DATA = (LinkedHashMap<String, String>) dataMap.get("extra");
+        additionalData = (LinkedHashMap<String, String>) dataMap.get("extra");
         if (dataMap.containsKey("shooterIcon")) {
             Board.postProcesses.add(Student::fireIconDefaultSet);
         } else if (dataMap.containsKey("userIcon")) {

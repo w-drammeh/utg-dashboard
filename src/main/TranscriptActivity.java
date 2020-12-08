@@ -27,8 +27,8 @@ public class TranscriptActivity implements Activity {
     private static KLabel CGPALabel;
     private static KLabel minorLabel;
     private static KLabel classificationLabel;
-    public static final KTableModel TRANSCRIPT_MODEL = new KTableModel();
     public static final String[] HEADS = {"COURSE CODE", "COURSE DESCRIPTION", "CREDIT VALUE", "GRADE", "QUALITY POINT"};
+    public static final KTableModel TRANSCRIPT_MODEL = new KTableModel(HEADS);
 
 
     public TranscriptActivity(){
@@ -68,10 +68,10 @@ public class TranscriptActivity implements Activity {
                 table.sizeMatchingScrollPane(), Box.createVerticalStrut(10), getPointPanel(),
                 Box.createVerticalStrut(10), new KPanel(classificationLabel));
 
-        final KPanel transcriptUI = new KPanel(new BorderLayout());
-        transcriptUI.add(topLayer(), BorderLayout.NORTH);
-        transcriptUI.add(new KScrollPane(midLiner), BorderLayout.CENTER);
-        Board.addCard(transcriptUI, "Transcript");
+        final KPanel activityPanel = new KPanel(new BorderLayout());
+        activityPanel.add(topLayer(), BorderLayout.NORTH);
+        activityPanel.add(new KScrollPane(midLiner), BorderLayout.CENTER);
+        Board.addCard(activityPanel, "Transcript");
     }
 
     @Override

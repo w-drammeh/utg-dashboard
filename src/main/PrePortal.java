@@ -75,9 +75,6 @@ public class PrePortal {
     public static synchronized void startFixingDriver(){
         if (driver == null) {
             driver = MDriver.forgeNew(true);
-            if (driver != null) {
-                Runtime.getRuntime().addShutdownHook(new Thread(driver::quit));
-            }
         }
     }
 
@@ -145,7 +142,7 @@ public class PrePortal {
         }
         try {
             division = iGroup.get(0).getText().split("\n")[1];
-            division = division.replace("Division of ", "");//if present
+            division = division.replace("Division of ", "").replace("Department of", "");
         } catch (Exception e) {
             App.silenceException("Error reading department");
         }

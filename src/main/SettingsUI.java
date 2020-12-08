@@ -756,11 +756,12 @@ public class SettingsUI implements Activity {
     private static void effectBackgroundChanges() {
         final Color background = Settings.currentBackground();
         for (KPanel panel : KPanel.ALL_PANELS) {
-            panel.setBackground(background);
+            if (panel.getReflectTheme()) {
+                panel.setBackground(background);
+            }
         }
     }
 
-    //or reset
     public static void loadDefaults() {
         userChecking.setSelected(true);
         Settings.noVerifyNeeded = false;

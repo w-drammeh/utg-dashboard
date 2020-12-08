@@ -7,10 +7,9 @@ import java.io.*;
 import java.util.Formatter;
 
 public class Serializer {
-    public static final String FILE_SEPARATOR = System.getProperty("file.separator");
-    public static final String ROOT_DIR = System.getProperty("user.home") + FILE_SEPARATOR + "Dashboard";
-    public static final String SERIALS_DIR = ROOT_DIR + FILE_SEPARATOR + "serials";
-    public static final String OUTPUT_DIR = ROOT_DIR + FILE_SEPARATOR + "outputs";
+    public static final String ROOT_DIR = System.getProperty("user.home") + File.separator + "Dashboard";
+    public static final String SERIALS_DIR = ROOT_DIR + File.separator + "serials";
+    public static final String OUTPUT_DIR = ROOT_DIR + File.separator + "outputs";
 
 
     /**
@@ -21,7 +20,7 @@ public class Serializer {
         try {
             final File serialsPath = new File(SERIALS_DIR);
             if (serialsPath.exists() || serialsPath.mkdirs()) {
-                final FileOutputStream fileOutputStream = new FileOutputStream(serialsPath + FILE_SEPARATOR + name);
+                final FileOutputStream fileOutputStream = new FileOutputStream(serialsPath + File.separator + name);
                 final ObjectOutputStream out = new ObjectOutputStream(fileOutputStream);
                 out.writeObject(obj);
                 out.close();
@@ -43,7 +42,7 @@ public class Serializer {
     public static Object fromDisk(String serName) {
         Object serObject = null;
         try {
-            final FileInputStream fileInputStream = new FileInputStream(SERIALS_DIR + FILE_SEPARATOR + serName);
+            final FileInputStream fileInputStream = new FileInputStream(SERIALS_DIR + File.separator + serName);
             final ObjectInputStream in = new ObjectInputStream(fileInputStream);
             serObject = in.readObject();
             in.close();
@@ -85,8 +84,8 @@ public class Serializer {
                 "Minor: "+Student.getMinor()+"\n" +
                 "Minor Code: "+Student.getMinorCode()+"\n" +
                 "Program: "+Student.getProgram()+"\n" +
-                "School: School of "+Student.getSchool()+"\n" +
-                "Department: Division of "+Student.getDivision()+"\n" +
+                "School: "+Student.getSchool()+"\n" +
+                "Department: "+Student.getDivision()+"\n" +
                 "Address: "+Student.getAddress()+"\n" +
                 "Telephone: "+Student.getTelephone()+"\n" +
                 "Nationality: "+Student.getNationality()+"\n" +
@@ -102,7 +101,7 @@ public class Serializer {
         try {
             final File outputsPath = new File(OUTPUT_DIR);
             if (outputsPath.exists() || outputsPath.mkdirs()) {
-                final Formatter formatter = new Formatter(OUTPUT_DIR + FILE_SEPARATOR + "user.txt");
+                final Formatter formatter = new Formatter(OUTPUT_DIR + File.separator + "user.txt");
                 formatter.format(data);
                 formatter.close();
             } else {
@@ -132,7 +131,7 @@ public class Serializer {
             FileUtils.deleteDirectory(new File(ROOT_DIR));
             return true;
         } catch (IOException ioe) {
-            final File userData = new File(SERIALS_DIR + FILE_SEPARATOR + "core.ser");
+            final File userData = new File(SERIALS_DIR + File.separator + "core.ser");
             return userData.delete();
         }
     }

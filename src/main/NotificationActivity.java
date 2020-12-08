@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class NotificationActivity {
+public class NotificationActivity implements Activity {
     private CardLayout cardLayout;
     private static KPanel dashboardPanel;
     private static KPanel portalPanel;
@@ -52,12 +52,17 @@ public class NotificationActivity {
         final KPanel activityPanel = new KPanel(new BorderLayout());
         activityPanel.add(northPanel, BorderLayout.NORTH);
         activityPanel.add(centerPanel, BorderLayout.CENTER);
-
+        Notification.deSerializeAll();
         Board.addCard(activityPanel, "Notifications");
     }
 
+    @Override
+    public void answerActivity() {
+        Board.showCard("Notifications");
+    }
+
     private Component dashboardComponent() {
-        final KButton clearButton = new KButton("Remove all");
+        final KButton clearButton = new KButton("Remove All");
         clearButton.setFont(KFontFactory.createPlainFont(15));
         clearButton.addActionListener(clearAction());
         clearButton.setToolTipText("Clear Notifications");
