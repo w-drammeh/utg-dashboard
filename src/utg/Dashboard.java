@@ -41,7 +41,7 @@ public class Dashboard {
 
     private static void freshStart(){
         isFirst = true;
-        new Thread(PrePortal::startFixingDriver).start();
+//        new Thread(PrePortal::startFixingDriver).start();
         final Welcome welcome = new Welcome();
         PREVIEW.dispose();
         welcome.setVisible(true);
@@ -52,6 +52,9 @@ public class Dashboard {
         if (initialize) {
             try {
                 Student.initialize();
+                if (Student.isTrial()) {
+                    rebuildNow(false);
+                }
             } catch (NullPointerException e) {
                 App.silenceException("Error reading user data.");
                 freshStart();
@@ -98,6 +101,10 @@ public class Dashboard {
             PREVIEW.dispose();
             lastBoard.setVisible(true);
         });
+    }
+
+    public static void setFirst(boolean first){
+        isFirst = first;
     }
 
     public static boolean isFirst() {

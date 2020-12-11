@@ -53,27 +53,25 @@ public class Serializer {
 
     public static void placeReadMeFile(){
         final String readMeText = "This jar file, or its derivatives (Linux Executables, Windows Executables, etc.)\n" +
-                "were compiled and distributed by Muhammed W. Drammeh <wakadrammeh@gmail.com> Tue Jan 28, 2020 10:33:15 GMT.\n\n" +
-                "Kindly report all problems to "+Mailer.DEVELOPERS_MAIL+".\n\n" +
+                "were compiled and distributed by Muhammed W. Drammeh <wakadrammeh@gmail.com> "+MDate.today()+".\n\n" +
+                "Kindly report all issues, and feedback to "+Mailer.DEVELOPERS_MAIL+".\n\n" +
                 "Do not modify or delete this file, or any other files in the \"serials\" directory.\n" +
                 "Modifying files in the \"serials\" path can interrupt the 'Launch Sequences' which might cause Dashboard\n" +
-                "to force a new instance, removing all your details and setting preferences. Thus, you'll have to login again.\n\n" +
+                "to force a new instance, removing all your saved details and setting preferences. Thus, you'll have to login again.\n\n" +
                 "This project is a FOSS [Free & Open Source Software]. So, you are hereby permitted to make changes provided\n" +
                 "you very well know and can make those changes.\n\n" +
                 "--Compilation Version = "+ Dashboard.VERSION;
         try {
-            final Formatter formatter = new Formatter(ROOT_DIR + "/README.txt");
+            final Formatter formatter = new Formatter(ROOT_DIR+File.separator+"README.txt");
             formatter.format(readMeText);
             formatter.close();
         } catch (FileNotFoundException e) {
-            App.silenceException("Error: unable to place README.txt file");
+            App.silenceException("Error: unable to place README file");
         }
     }
 
     public static void placeUserDetails(){
-        final String data = "\t\t----This file shall contain the fundamental details of the student / user----\n" +
-                "Do not bother modify this file - all modifications are discarded at every \"collapse\".\n\n" +
-                "Month of Admission: "+ Student.getMonthOfAdmissionName()+"\n" +
+        final String data = "Month of Admission: "+ Student.getMonthOfAdmissionName()+"\n" +
                 "Year of Admission: "+Student.getYearOfAdmission()+"\n" +
                 "Current Semester: "+Student.getSemester().toUpperCase()+"\n" +
                 "First Name: "+Student.getFirstName()+"\n" +
@@ -105,7 +103,7 @@ public class Serializer {
                 formatter.format(data);
                 formatter.close();
             } else {
-                App.silenceException("Error placing user text file; cannot create directory");
+                App.silenceException("Error: unable to place output file: "+outputsPath);
             }
         } catch (FileNotFoundException e) {
             App.silenceException(e);
@@ -115,15 +113,17 @@ public class Serializer {
     public static void mountUserData(){
         toDisk(System.getProperty("user.name"), "user-name.ser");
         placeReadMeFile();
-        placeUserDetails();
-        Student.serializeData();
-        Portal.serialize();
         Settings.serialize();
-        RunningCourseActivity.serializeModules();
-        ModuleHandler.serializeData();
-        TaskSelf.serializeAll();
-        Notification.serializeAll();
-        News.serializeData();
+        if (!Student.isTrial()) {
+            placeUserDetails();
+            Portal.serialize();
+            RunningCourseActivity.serialize();
+            ModuleHandler.serialize();
+        }
+        Student.serialize();
+        TaskSelf.serialize();
+        Notification.serialize();
+        News.serialize();
     }
 
     public static boolean unMountUserData(){

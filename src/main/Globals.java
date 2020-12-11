@@ -29,14 +29,11 @@ public class Globals {
         }
     }
 
-    /**
-     * Convenient way of !Globals.isBlank(String)
-     */
     public static boolean hasText(String t){
-        return !isBlank(t);
+        return !hasNoText(t);
     }
 
-    public static boolean isBlank(String t){
+    public static boolean hasNoText(String t){
         if (t == null) {
             return true;
         }

@@ -81,7 +81,7 @@ public class Notification implements Serializable {
             setResizable(true);
 
             final String decidedText = notification.getInformation() == null ? notification.getText() : notification.getInformation();
-            final KTextPane noticePane = KTextPane.wantHtmlFormattedPane(decidedText);
+            final KTextPane noticePane = KTextPane.htmlFormattedPane(decidedText);
 
             final KScrollPane textScroll = new KScrollPane(noticePane);
             textScroll.setPreferredSize(new Dimension(550,235));
@@ -157,7 +157,7 @@ public class Notification implements Serializable {
     }
 
 
-    public static void serializeAll() {
+    public static void serialize() {
         Serializer.toDisk(NOTIFICATIONS, "alerts.ser");
     }
 

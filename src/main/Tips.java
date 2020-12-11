@@ -18,7 +18,7 @@ public class Tips implements Activity {
         isFirstView = true;
         helpCard = new CardLayout();
         final KPanel centerPanel = new KPanel(helpCard);
-        final KLabel showingLabel = new KLabel("Dashboard Tips", KFontFactory.bodyHeaderFont());
+        final KLabel showingLabel = new KLabel("Dashboard Tips", KFontFactory.BODY_HEAD_FONT);
         final KComboBox<String> helpBox = new KComboBox<String>(new String[] {"Dashboard Tips", "UTG FAQs"}) {
             @Override
             public JToolTip createToolTip() {
@@ -200,7 +200,7 @@ public class Tips implements Activity {
     }
 
     private KTextPane write(String note) {
-        return KTextPane.wantHtmlFormattedPane(note);
+        return KTextPane.htmlFormattedPane(note);
     }
 
 //    UTG Faqs

@@ -56,6 +56,10 @@ public class Memory {
         return VERIFIED_LIST;
     }
 
+    public static boolean isAnalysisAvailable(){
+        return !VERIFIED_LIST.isEmpty();
+    }
+
     /**
      * Returns a course which can be used for experimentation by this class of experimentation.
      */
@@ -102,7 +106,7 @@ public class Memory {
     public static ArrayList<String> filterLecturers(){
         final ArrayList<String> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
-            if (!(requiredList.contains(c.getLecturer()) || Globals.isBlank(c.getLecturer()))) {
+            if (!(requiredList.contains(c.getLecturer()) || Globals.hasNoText(c.getLecturer()))) {
                 requiredList.add(c.getLecturer());
             }
         }
@@ -274,7 +278,7 @@ public class Memory {
     public static ArrayList<String> getLecturersByYear(String yearName){
         final ArrayList<String> requiredList = new ArrayList<>();
         for (Course c : getFractionByYear(yearName)) {
-            if (!(requiredList.contains(c.getLecturer()) || Globals.isBlank(c.getLecturer()))) {
+            if (!(requiredList.contains(c.getLecturer()) || Globals.hasNoText(c.getLecturer()))) {
                 requiredList.add(c.getLecturer());
             }
         }
@@ -284,7 +288,7 @@ public class Memory {
     public static ArrayList<Course> getFractionByLecturer(String lName){
         final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
-            if (!Globals.isBlank(c.getLecturer()) && c.getLecturer().equals(lName)) {
+            if (!Globals.hasNoText(c.getLecturer()) && c.getLecturer().equals(lName)) {
                 requiredList.add(c);
             }
         }

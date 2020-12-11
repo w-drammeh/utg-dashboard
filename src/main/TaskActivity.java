@@ -1,6 +1,7 @@
 package main;
 
 import proto.*;
+import utg.Dashboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,7 +32,7 @@ public class TaskActivity implements Activity {
 
     public TaskActivity(){
         hintLabel = KLabel.getPredefinedLabel("My Tasks", SwingConstants.LEFT);
-        hintLabel.setStyle(KFontFactory.bodyHeaderFont(), Color.BLUE);
+        hintLabel.setStyle(KFontFactory.BODY_HEAD_FONT, Color.BLUE);
 
         cardLayout = new CardLayout();
         inPanel = new KPanel(cardLayout);
@@ -59,7 +60,9 @@ public class TaskActivity implements Activity {
         final KPanel activityPanel = new KPanel(new BorderLayout());
         activityPanel.add(upperPanel, BorderLayout.NORTH);
         activityPanel.add(inPanel);
-        TaskSelf.deSerializeAll();
+        if (!Dashboard.isFirst()) {
+            TaskSelf.deSerializeAll();
+        }
         Board.addCard(activityPanel, "Tasks");
     }
 
@@ -198,7 +201,7 @@ public class TaskActivity implements Activity {
             return e -> {
                 final String name = todoCreator.getDescriptionField().getText();
                 int givenDays = 0;
-                if (Globals.isBlank(name)) {
+                if (Globals.hasNoText(name)) {
                     App.signalError(todoCreator.getRootPane(), "Blank Name", "Please specify a name for the task");
                     todoCreator.getDescriptionField().requestFocusInWindow();
                 } else if (name.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
@@ -378,7 +381,7 @@ public class TaskActivity implements Activity {
             return e -> {
                 final String name = projectCreator.getNameField().getText();
                 int givenDays = 0;
-                if (Globals.isBlank(name)) {
+                if (Globals.hasNoText(name)) {
                     App.signalError("Blank Name","Please specify a name for the project");
                     projectCreator.getNameField().requestFocusInWindow();
                 } else if (name.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
@@ -552,14 +555,14 @@ public class TaskActivity implements Activity {
         public static ActionListener additionListener(){
             return e -> {
                 final String name = assignmentCreator.getNameField().getText();
-                if (Globals.isBlank(name)) {
+                if (Globals.hasNoText(name)) {
                     App.signalError(assignmentCreator.getRootPane(), "Blank Name", "Please provide the name of the course");
                     assignmentCreator.getNameField().requestFocusInWindow();
                 } else if (name.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
                     App.signalError(assignmentCreator.getRootPane(), "Error", "Sorry, the subject name cannot exceed "+
                             TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters.");
                     assignmentCreator.getNameField().requestFocusInWindow();
-                } else if (Globals.isBlank(assignmentCreator.getProvidedDeadLine())) {
+                } else if (Globals.hasNoText(assignmentCreator.getProvidedDeadLine())) {
                     App.signalError(assignmentCreator.getRootPane(), "Deadline Error", "Please fill out all the fields for the deadline. You can change them later.");
                 } else {
                     final String type = assignmentCreator.isGroup() ? "Group Assignment" : "Individual Assignment";
@@ -749,14 +752,14 @@ public class TaskActivity implements Activity {
                     return;
                 }
                 String tName = requiredCreator.getDescriptionField().getText();
-                if (Globals.isBlank(tName)) {
+                if (Globals.hasNoText(tName)) {
                     App.signalError(requiredCreator.getRootPane(), "No Name", "Please specify a name for the event.");
                     requiredCreator.getDescriptionField().requestFocusInWindow();
                 } else if (tName.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
                     App.signalError(requiredCreator.getRootPane(), "Error", "Sorry, the event's name should be at most "+
                             TaskCreator.TASKS_DESCRIPTION_LIMIT+" characters.");
                     requiredCreator.getDescriptionField().requestFocusInWindow();
-                } else if (Globals.isBlank(requiredCreator.getProvidedDate())) {
+                } else if (Globals.hasNoText(requiredCreator.getProvidedDate())) {
                     App.signalError(requiredCreator.getRootPane(), "Error", "Please provide all the fields for the date of the "+
                             (requiredCreator.type()));
                 } else {

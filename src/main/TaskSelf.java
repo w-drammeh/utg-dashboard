@@ -522,7 +522,7 @@ public class TaskSelf {
             this.deadlineIndicator.setOpaque(false);
 
             if (this.isGroup()) {
-                groupLabel = KLabel.wantIconLabel("group.png",20,20);
+                groupLabel = KLabel.createIcon("group.png",20,20);
                 groupLabel.setText(memberCount <= 1 ? "1 Member" : memberCount+" Members");
                 groupLabel.setFont(KFontFactory.createPlainFont(17));
                 groupLabel.setToolTipText("View Participants");
@@ -544,7 +544,7 @@ public class TaskSelf {
                     }
                 });
             } else {
-                groupLabel = KLabel.wantIconLabel("personal.png", 20, 20);
+                groupLabel = KLabel.createIcon("personal.png", 20, 20);
                 groupLabel.setText("Personal");
             }
             groupLabel.setFont(KFontFactory.createPlainFont(16));
@@ -738,7 +738,7 @@ public class TaskSelf {
                 memberAdder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 memberAdder.addActionListener(e -> {
                     final String newMemberName = App.requestInput(this.getRootPane(),"New Member","Enter member's name below:\n \n");
-                    if (newMemberName != null && !Globals.isBlank(newMemberName)) {
+                    if (newMemberName != null && !Globals.hasNoText(newMemberName)) {
                         if (newMemberName.length() > 30) {
                             App.signalError("Error", "Sorry, a member's name cannot exceed 30 characters.");
                         } else {
@@ -828,13 +828,13 @@ public class TaskSelf {
 
                 final KButton setButton = new KButton("Set");
                 setButton.addActionListener(e1 -> {
-                    if (Globals.isBlank(dField.getText())) {
+                    if (Globals.hasNoText(dField.getText())) {
                         App.signalError(this.getRootPane(),"Error", "Please specify the day");
                         dField.requestFocusInWindow();
-                    } else if (Globals.isBlank(mField.getText())) {
+                    } else if (Globals.hasNoText(mField.getText())) {
                         App.signalError(this.getRootPane(),"Error", "Please specify the month");
                         mField.requestFocusInWindow();
-                    } else if (Globals.isBlank(yField.getText())) {
+                    } else if (Globals.hasNoText(yField.getText())) {
                         App.signalError(this.getRootPane(),"Error", "Please specify the year");
                         yField.requestFocusInWindow();
                     } else {
@@ -1004,7 +1004,7 @@ public class TaskSelf {
     }
 
 
-    public static void serializeAll(){
+    public static void serialize(){
         Serializer.toDisk(TaskActivity.TodoHandler.TODOS, "todos.ser");
         Serializer.toDisk(TaskActivity.ProjectsHandler.PROJECTS, "projects.ser");
         Serializer.toDisk(TaskActivity.AssignmentsHandler.ASSIGNMENTS, "assignments.ser");

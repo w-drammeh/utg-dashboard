@@ -33,13 +33,13 @@ public class App {
      * A centralized point for user verification. This obsoletes the call verifyUser(String)
      */
     public static int verifyUser(Component parent, String vString){
-        if (Settings.noVerifyNeeded) {
+        if (Settings.noVerifyNeeded || Student.isTrial()) {
             return VERIFICATION_TRUE;
         } else {
             final String input = requestInput(parent == null ? Board.getRoot() : parent, "Confirm ID", vString);
             if (input == null) {
                 return DIALOG_DISMISSED;
-            } else if (Globals.isBlank(input)) {
+            } else if (Globals.hasNoText(input)) {
                 return INPUT_BLANK;
             } else if (input.equals(Student.getMatNumber())) {
                 return VERIFICATION_TRUE;
@@ -148,7 +148,7 @@ public class App {
     }
 
     public static void reportNoInternet(Component parent) {
-        signalError(parent == null ? Board.getRoot() : parent, "No Internet",
+        signalError(parent == null ? Board.getRoot() : parent, "Internet Error",
                 "Sorry, we're having troubles connecting to the internet.\n" +
                 "Please connect and try again.");
     }

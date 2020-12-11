@@ -20,6 +20,8 @@ public class MDriver {
     /**
      * Returns a fresh driver as appropriate for the currently running OS.
      * Nullability must be checked prior to any attempt of usage.
+     *
+     * Todo: separate the setup from the assignment
      */
     public static synchronized FirefoxDriver forgeNew(boolean headless) {
         FirefoxDriver firefoxDriver = null;

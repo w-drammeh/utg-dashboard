@@ -1,6 +1,9 @@
 package main;
 
+import proto.KButton;
 import proto.KFontFactory;
+import proto.KLabel;
+import proto.KPanel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,7 +20,7 @@ public class MComponent {
      * relative to the given width and height.
      * The exception generative by this call is silenced!
      */
-    public static ImageIcon scale(URL url, int width, int height) {
+    public static ImageIcon scaleIcon(URL url, int width, int height) {
         ImageIcon icon = null;
         try {
             final BufferedImage buf = ImageIO.read(url);
@@ -26,6 +29,10 @@ public class MComponent {
             App.silenceException(e);
         }
         return icon;
+    }
+
+    public static ImageIcon scaleIcon(String iconName, int width, int height) {
+        return scaleIcon(App.getIconURL(iconName), width, height);
     }
 
     /**
@@ -78,7 +85,33 @@ public class MComponent {
      * This is particularly ideal under box-layouts.
      */
     public static Component contentBottomGap(){
-        return Box.createVerticalStrut(15);
+        return Box.createVerticalStrut(20);
+    }
+
+    public static Component createUnavailableActivity(String activityName){
+        final KLabel label1 = new KLabel(activityName, KFontFactory.createBoldFont(30));
+        final KLabel label2 = new KLabel("This activity is unsupported for \"Trial Users\"",
+                KFontFactory.createPlainFont(20), Color.DARK_GRAY);
+        final KLabel label3 = new KLabel("If you are a student of The University of The Gambia, you may...",
+                KFontFactory.createPlainFont(20), Color.GRAY);
+        final KButton loginButton = new KButton("Login now");
+        loginButton.setStyle(KFontFactory.createPlainFont(20), Color.BLUE);
+        loginButton.setPreferredSize(new Dimension(150, 35));
+        loginButton.setCursor(HAND_CURSOR);
+        loginButton.undress();
+        loginButton.underline(false);
+        loginButton.addActionListener(Login.loginAction(loginButton));
+
+        final KPanel innerPanel = new KPanel();
+        innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
+        innerPanel.addAll(new KPanel(label1), new KPanel(label2),
+                new KPanel(new FlowLayout(FlowLayout.CENTER, 5, 25), label3, loginButton));
+
+        final KPanel outerPanel = new KPanel(new BorderLayout());
+        outerPanel.add(Box.createVerticalStrut(100), BorderLayout.NORTH);
+        outerPanel.add(innerPanel, BorderLayout.CENTER);
+        outerPanel.add(Box.createVerticalStrut(150), BorderLayout.SOUTH);
+        return outerPanel;
     }
 
 }

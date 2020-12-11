@@ -102,6 +102,7 @@ public class ModuleHandler {
                 return super.remove(course);
             }
         };
+
         uploadModules();
     }
 
@@ -123,7 +124,9 @@ public class ModuleHandler {
 
     private static void uploadModules() {
         if (Dashboard.isFirst()) {
-            modulesMonitor.addAll(STARTUP_COURSES);
+            for (Course c : STARTUP_COURSES) {
+                modulesMonitor.add(c);
+            }
         } else {
             deserializeData();
         }
@@ -1042,7 +1045,7 @@ public class ModuleHandler {
     }
 
 
-    public static void serializeData(){
+    public static void serialize(){
         final String[] modulesData = new String[modulesMonitor.size()];
         for (int i = 0; i < modulesData.length; i++) {
             modulesData[i] = modulesMonitor.get(i).exportContent();

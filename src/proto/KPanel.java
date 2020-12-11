@@ -65,6 +65,12 @@ public class KPanel extends JPanel implements Preference {
         }
     }
 
+    public void removeAll(Component... list){
+        for (Component c : list) {
+            remove(c);
+        }
+    }
+
     public void removeLast() {
         final int count = getComponentCount();
         if (count >= 1) {

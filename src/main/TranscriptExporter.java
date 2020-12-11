@@ -54,7 +54,7 @@ public class TranscriptExporter {
             return;
         }
 
-        final File outputFile = new File(savePath+File.separator+"transcript-"+Student.getNameAcronym()+".pdf");
+        final File outputFile = new File(savePath+File.separator+"transcript-"+Student.getAcronym()+".pdf");
         final FileOutputStream outputStream = new FileOutputStream(outputFile);
         final PdfWriter pdfWriter = PdfWriter.getInstance(document, outputStream);
         pdfWriter.setPageEvent(new WatermarkEvent());

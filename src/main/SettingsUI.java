@@ -10,16 +10,21 @@ import java.util.Objects;
 
 public class SettingsUI implements Activity {
     private static KPanel aboutComponent;
-    /**
-     * For technical harboring of the contacts as labels.
-     */
-    private static KLabel msLabel, pobLabel;
-    private static KCheckBox userChecking, exitChecking, instantToolTip, tipDismissible, syncChecking;
+    private static KLabel msLabel;
+    private static KLabel pobLabel;
+    private static KLabel fNameLabel;
+    private static KLabel lNameLabel;
+    private static KLabel natLabel;
+    private static KLabel addressLabel;
+    private static KCheckBox userChecking;
+    private static KCheckBox exitChecking;
+    private static KCheckBox instantToolTip;
+    private static KCheckBox tipDismissible;
+    private static KCheckBox syncChecking;
     private static JComboBox<String> nameFormatBox, bgBox, looksBox;
-    private static final String changeHint = "Enter your Mat. Number to effect this changes:";
+    private static final String changeHint = "Enter your Matriculation Number to effect this changes:";
     private static final Font H_FONT = KFontFactory.createBoldFont(16);//generally for the hints
     private static final Font V_FONT = KFontFactory.createPlainFont(17);//for the values
-
     public static final KTextField minorField = new KTextField(new Dimension(320,30));
     public static final KLabel minorLabel = new KLabel(Student.getMinor(), V_FONT);
     public static final KTextField majorCodeField = KTextField.rangeControlField(3);
@@ -39,10 +44,10 @@ public class SettingsUI implements Activity {
         final Color tabColor = Color.BLUE;
         settingsTab.setTabComponentAt(0, new KLabel("About Me", tabFont, tabColor));
         settingsTab.setTabComponentAt(1, new KLabel("Customize Profile", tabFont, tabColor));
-        settingsTab.setTabComponentAt(2, new KLabel("Dashboard Settings", tabFont, tabColor));
+        settingsTab.setTabComponentAt(2, new KLabel("Customize Dashboard", tabFont, tabColor));
 
         final KPanel settingsUI = new KPanel(new BorderLayout());
-        settingsUI.add(new KPanel(new KLabel("Personalization", KFontFactory.createPlainFont(20), Color.BLUE)),
+        settingsUI.add(new KPanel(new KLabel("Personalization", KFontFactory.BODY_HEAD_FONT, Color.BLUE)),
                 BorderLayout.NORTH);
         settingsUI.add(settingsTab, BorderLayout.CENTER);
 
@@ -77,15 +82,18 @@ public class SettingsUI implements Activity {
 
         final KPanel fNamePanel = new KPanel(new BorderLayout());
         fNamePanel.add(new KPanel(new KLabel("First Name:", H_FONT)), BorderLayout.WEST);
-        fNamePanel.add(new KPanel(new KLabel(Student.getFirstName(), V_FONT)), BorderLayout.CENTER);
+        fNameLabel = new KLabel(Student.getFirstName(), V_FONT);
+        fNamePanel.add(new KPanel(fNameLabel), BorderLayout.CENTER);
 
         final KPanel lNamePanel = new KPanel(new BorderLayout());
         lNamePanel.add(new KPanel(new KLabel("Last Name:", H_FONT)), BorderLayout.WEST);
-        lNamePanel.add(new KPanel(new KLabel(Student.getLastName(), V_FONT)), BorderLayout.CENTER);
+        lNameLabel = new KLabel(Student.getLastName(), V_FONT);
+        lNamePanel.add(new KPanel(lNameLabel), BorderLayout.CENTER);
 
         final KPanel natPanel = new KPanel(new BorderLayout());
         natPanel.add(new KPanel(new KLabel("Nationality:", H_FONT)), BorderLayout.WEST);
-        natPanel.add(new KPanel(new KLabel(Student.getNationality(), V_FONT)), BorderLayout.CENTER);
+        natLabel = new KLabel(Student.getNationality(), V_FONT);
+        natPanel.add(new KPanel(natLabel), BorderLayout.CENTER);
 
         final KPanel schoolPanel = new KPanel(new BorderLayout());
         schoolPanel.add(new KPanel(new KLabel("School:", H_FONT)), BorderLayout.WEST);
@@ -136,7 +144,8 @@ public class SettingsUI implements Activity {
 
         final KPanel addressPanel = new KPanel(new BorderLayout());
         addressPanel.add(new KPanel(new KLabel("Address:", H_FONT)), BorderLayout.WEST);
-        addressPanel.add(new KPanel(new KLabel(Student.getAddress(), V_FONT)), BorderLayout.CENTER);
+        addressLabel = new KLabel(Student.getAddress(), V_FONT);
+        addressPanel.add(new KPanel(addressLabel), BorderLayout.CENTER);
 
         msLabel = new KLabel(Student.getMaritalStatue(), V_FONT){
             @Override
@@ -228,8 +237,13 @@ public class SettingsUI implements Activity {
         aboutComponent.setLayout(new BoxLayout(aboutComponent, BoxLayout.Y_AXIS));
         aboutComponent.addAll(imagePanel, fNamePanel, lNamePanel, natPanel, schoolPanel, depPanel, progPanel, minPanel,
                 yoaPanel, moaPanel, eygPanel, levelPanel, bdPanel, pobPanel, addressPanel, msPanel, telPanel,
-                new KPanel(new KSeparator(new Dimension(800, 1), Color.BLACK)));
+                new KPanel(new KSeparator(new Dimension(750, 1))));
 //        notice the last child... the custom details are added by index and over this
+//        now
+        if (Student.isTrial()) {
+            aboutComponent.removeAll(schoolPanel, depPanel, progPanel, minPanel, yoaPanel, moaPanel, eygPanel,
+                    levelPanel);
+        }
         aboutComponent.add(MComponent.contentBottomGap());
         return new KScrollPane(aboutComponent);
     }
@@ -277,183 +291,274 @@ public class SettingsUI implements Activity {
     }
 
     private static JComponent profileComponent(){
-        final KTextField portalMailField = new KTextField(Student.getVisiblePortalMail());
-        portalMailField.setPreferredSize(new Dimension(325, 30));
-        portalMailField.setEditable(false);
-        final ActionListener portalMailEditorListener = e-> {
-            if (App.showOkCancelDialog("Portal Email","This is the email address Dashboard uses to gain access to your portal.\n" +
-                    "You should only change this provided you've changed your email address.")) {
-                final String newPortalMail = App.requestInput("New Email","Enter your new Portal Email Address:");
-                if (Globals.hasText(newPortalMail)) {
+        final KPanel profileUI = new KPanel();
+        profileUI.setLayout(new BoxLayout(profileUI, BoxLayout.Y_AXIS));
+        if (Student.isTrial()) {
+            final KTextField fNameField = new KTextField(Student.getFirstName());
+            fNameField.setPreferredSize(new Dimension(320, 30));
+            fNameField.setEditable(false);
+            final ActionListener fNameEditorListener = e-> {
+                final String newFName = App.requestInput("First Name", "Enter your first name:");
+                if (newFName != null) {
                     final int vInt = App.verifyUser(changeHint);
                     if (vInt == App.VERIFICATION_TRUE) {
-                        Student.setPortalMail(newPortalMail);
-                        portalMailField.setText(Student.getVisiblePortalMail());
+                        Student.setFirstName(newFName);
+                        fNameField.setText(newFName);
+                        Board.effectNameFormatChanges();
+                        fNameLabel.setText(newFName);
                     } else if (vInt == App.VERIFICATION_FALSE) {
                         App.reportMatError();
                     }
                 }
-            }
-        };
-        final KPanel portalMailPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        portalMailPanel.addAll(new KLabel("Portal Email:", H_FONT),
-                new KPanel(portalMailField, newIconifiedEditButton(portalMailEditorListener)));
+            };
+            final KPanel fNamePanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
+            fNamePanel.addAll(new KLabel("First Name:", H_FONT),
+                    new KPanel(fNameField, newIconifiedEditButton(fNameEditorListener)));
 
-        final JPasswordField portalPsswdField = new JPasswordField(Student.getPortalPassword());
-        portalPsswdField.setPreferredSize(new Dimension(325, 30));
-        portalPsswdField.setHorizontalAlignment(SwingConstants.CENTER);
-        portalPsswdField.setEditable(false);
-        final ActionListener portalPsswdEditorListener = e -> {
-            if (App.showOkCancelDialog("Portal Password","This is the password Dashboard uses, in addition to the email above,\n" +
-                    "to gain access to your portal. It's your responsibility to make sure these information are correct, otherwise\n" +
-                    "Dashboard won't be able to reach your portal, leaving resources un-synced - not even alerts will be updated.")) {
-                final String newPortalPassword = App.requestInput("New Password","Enter your new Portal Password:");
-                if (Globals.hasText(newPortalPassword)) {
+            final KTextField lNameField = new KTextField(Student.getLastName());
+            lNameField.setPreferredSize(new Dimension(320, 30));
+            lNameField.setEditable(false);
+            final ActionListener lNameEditorListener = e-> {
+                final String newLName = App.requestInput("Last Name", "Enter your last name:");
+                if (newLName != null) {
                     final int vInt = App.verifyUser(changeHint);
                     if (vInt == App.VERIFICATION_TRUE) {
-                        Student.setPortalPassword(newPortalPassword);
-                        portalPsswdField.setText(newPortalPassword);
+                        Student.setLastName(newLName);
+                        lNameField.setText(newLName);
+                        Board.effectNameFormatChanges();
+                        lNameLabel.setText(newLName);
                     } else if (vInt == App.VERIFICATION_FALSE) {
                         App.reportMatError();
                     }
                 }
-            }
-        };
-        final KPanel portalPsswdPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        portalPsswdPanel.addAll(new KLabel("Portal Password:", H_FONT),
-                new KPanel(portalPsswdField, newIconifiedEditButton(portalPsswdEditorListener)));
+            };
+            final KPanel lNamePanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
+            lNamePanel.addAll(new KLabel("Last Name:", H_FONT),
+                    new KPanel(lNameField, newIconifiedEditButton(lNameEditorListener)));
 
-        studentMailField.setPreferredSize(new Dimension(325, 30));
-        studentMailField.setEditable(false);
-        final ActionListener studentMailEditorListener = e-> {
-            final String newStudentMail = App.requestInput("New Email","Enter your Student Mail Address:");
-            if (newStudentMail == null) {
-                return;
-            }
-
-            final int vInt = App.verifyUser(changeHint);
-            if (vInt == App.VERIFICATION_TRUE) {
-                Student.setStudentMail(newStudentMail);
-                studentMailField.setText(newStudentMail);
-                if (Globals.isBlank(newStudentMail)) {
-                    Student.setStudentPassword("");
-                    studentPsswdField.setText("");
+            final KTextField natField = new KTextField(Student.getNationality());
+            natField.setPreferredSize(new Dimension(320, 30));
+            natField.setEditable(false);
+            final ActionListener natEditorListener = e-> {
+                final String newNat = App.requestInput("Nationality", "Enter your nationality:");
+                if (newNat != null) {
+                    final int vInt = App.verifyUser(changeHint);
+                    if (vInt == App.VERIFICATION_TRUE) {
+                        Student.setNationality(newNat);
+                        natField.setText(newNat);
+                        natLabel.setText(newNat);
+                    } else if (vInt == App.VERIFICATION_FALSE) {
+                        App.reportMatError();
+                    }
                 }
-            } else if (vInt == App.VERIFICATION_FALSE) {
-                App.reportMatError();
-            }
-        };
-        final KPanel studentMailPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        studentMailPanel.addAll(new KLabel("Student Mail:", H_FONT),
-                new KPanel(studentMailField, newIconifiedEditButton(studentMailEditorListener)));
+            };
+            final KPanel natPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
+            natPanel.addAll(new KLabel("Nationality:", H_FONT),
+                    new KPanel(natField, newIconifiedEditButton(natEditorListener)));
 
-        studentPsswdField.setPreferredSize(new Dimension(325, 30));
-        studentPsswdField.setHorizontalAlignment(SwingConstants.CENTER);
-        studentPsswdField.setEditable(false);
-        final ActionListener studentPsswdEditorListener = e-> {
-            final String newStudentPassword = App.requestInput("New Password","Enter your Student Mail Password:");
-            if (newStudentPassword == null) {
-                return;
-            }
+            final KTextField addressField = new KTextField(Student.getAddress());
+            addressField.setPreferredSize(new Dimension(320, 30));
+            addressField.setEditable(false);
+            final ActionListener addressEditorListener = e-> {
+                final String newAddress = App.requestInput("Address", "Enter your address:");
+                if (newAddress != null) {
+                    final int vInt = App.verifyUser(changeHint);
+                    if (vInt == App.VERIFICATION_TRUE) {
+                        Student.setAddress(newAddress);
+                        addressField.setText(newAddress);
+                        addressLabel.setText(newAddress);
+                    } else if (vInt == App.VERIFICATION_FALSE) {
+                        App.reportMatError();
+                    }
+                }
+            };
+            final KPanel addressPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
+            addressPanel.addAll(new KLabel("Address:", H_FONT),
+                    new KPanel(addressField, newIconifiedEditButton(addressEditorListener)));
 
-            final int vInt = App.verifyUser(changeHint);
-            if (vInt == App.VERIFICATION_TRUE) {
-                Student.setStudentPassword(newStudentPassword);
-                studentPsswdField.setText(newStudentPassword);
-            } else if (vInt == App.VERIFICATION_FALSE) {
-                App.reportMatError();
-            }
-        };
-        final KPanel studentPsswdPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        studentPsswdPanel.addAll(new KLabel("Student Mail Password:", H_FONT),
-                new KPanel(studentPsswdField, newIconifiedEditButton(studentPsswdEditorListener)));
+            profileUI.addAll(fNamePanel, lNamePanel, natPanel, addressPanel);
+        } else {
+            final KTextField portalMailField = new KTextField(Student.getVisiblePortalMail());
+            portalMailField.setPreferredSize(new Dimension(325, 30));
+            portalMailField.setEditable(false);
+            final ActionListener portalMailEditorListener = e-> {
+                if (App.showOkCancelDialog("Portal Email","This is the email address Dashboard uses to gain access to your portal.\n" +
+                        "You should only change this provided you've changed your email address.")) {
+                    final String newPortalMail = App.requestInput("New Email","Enter your new Portal Email Address:");
+                    if (Globals.hasText(newPortalMail)) {
+                        final int vInt = App.verifyUser(changeHint);
+                        if (vInt == App.VERIFICATION_TRUE) {
+                            Student.setPortalMail(newPortalMail);
+                            portalMailField.setText(Student.getVisiblePortalMail());
+                        } else if (vInt == App.VERIFICATION_FALSE) {
+                            App.reportMatError();
+                        }
+                    }
+                }
+            };
+            final KPanel portalMailPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
+            portalMailPanel.addAll(new KLabel("Portal Email:", H_FONT),
+                    new KPanel(portalMailField, newIconifiedEditButton(portalMailEditorListener)));
 
-        majorCodeField.setPreferredSize(new Dimension(150, 30));
-        majorCodeField.setText(Student.getMajorCode());
-        majorCodeField.setEditable(false);
-        final ActionListener majorCodeEditorListener = e-> {
-            final String newMajorCode = App.requestInput("Major Code", "Enter your major-code below.\n" +
-                    "Major-code is the 3-letter prefix to the course-codes of your major courses.\n" +
-                    "Dashboard uses the major-code for auto-indexing of your program courses.\n" +
-                    "For accurate analysis sake, make sure this information is right.\n \n");
-            if (newMajorCode == null) {
-                return;
-            }
-            if (newMajorCode.isEmpty()) {
-                if (!App.showYesNoCancelDialog("Reset", "Do you want to reset your major-code?\n" +
-                        "Dashboard will no longer be able to detect your program courses.")) {
+            final JPasswordField portalPsswdField = new JPasswordField(Student.getPortalPassword());
+            portalPsswdField.setPreferredSize(new Dimension(325, 30));
+            portalPsswdField.setHorizontalAlignment(SwingConstants.CENTER);
+            portalPsswdField.setEditable(false);
+            final ActionListener portalPsswdEditorListener = e -> {
+                if (App.showOkCancelDialog("Portal Password","This is the password Dashboard uses, in addition to the email above,\n" +
+                        "to gain access to your portal. It's your responsibility to make sure these information are correct, otherwise\n" +
+                        "Dashboard won't be able to reach your portal, leaving resources un-synced - not even alerts will be updated.")) {
+                    final String newPortalPassword = App.requestInput("New Password","Enter your new Portal Password:");
+                    if (Globals.hasText(newPortalPassword)) {
+                        final int vInt = App.verifyUser(changeHint);
+                        if (vInt == App.VERIFICATION_TRUE) {
+                            Student.setPortalPassword(newPortalPassword);
+                            portalPsswdField.setText(newPortalPassword);
+                        } else if (vInt == App.VERIFICATION_FALSE) {
+                            App.reportMatError();
+                        }
+                    }
+                }
+            };
+            final KPanel portalPsswdPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
+            portalPsswdPanel.addAll(new KLabel("Portal Password:", H_FONT),
+                    new KPanel(portalPsswdField, newIconifiedEditButton(portalPsswdEditorListener)));
+
+            studentMailField.setPreferredSize(new Dimension(325, 30));
+            studentMailField.setEditable(false);
+            final ActionListener studentMailEditorListener = e-> {
+                final String newStudentMail = App.requestInput("New Email","Enter your Student Mail Address:");
+                if (newStudentMail == null) {
                     return;
                 }
-            } else if (newMajorCode.length() != 3) {
-                App.signalError("Error", "Sorry, that's not a valid program code. Please try again.");
-                return;
-            }
 
-            final int vInt = App.verifyUser(changeHint);
-            if (vInt == App.VERIFICATION_TRUE) {
-                Student.setMajorCode(newMajorCode.toUpperCase());
-            } else if (vInt == App.VERIFICATION_FALSE) {
-                App.reportMatError();
-            }
-        };
-        final KPanel majorCodePanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        majorCodePanel.addAll(new KLabel("Major Code:", H_FONT),
-                new KPanel(majorCodeField, newIconifiedEditButton(majorCodeEditorListener)));
+                final int vInt = App.verifyUser(changeHint);
+                if (vInt == App.VERIFICATION_TRUE) {
+                    Student.setStudentMail(newStudentMail);
+                    studentMailField.setText(newStudentMail);
+                    if (Globals.hasNoText(newStudentMail)) {
+                        Student.setStudentPassword("");
+                        studentPsswdField.setText("");
+                    }
+                } else if (vInt == App.VERIFICATION_FALSE) {
+                    App.reportMatError();
+                }
+            };
+            final KPanel studentMailPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
+            studentMailPanel.addAll(new KLabel("Student Mail:", H_FONT),
+                    new KPanel(studentMailField, newIconifiedEditButton(studentMailEditorListener)));
 
-        minorField.setText(Student.getMinor());
-        minorField.setEditable(false);
-        final ActionListener minorEditorListener = e-> {
-            final String newMinor = App.requestInput("Minor", "Add or change your minor program here provided you're doing a minor.");
-            if (newMinor == null) {
-                return;
-            }
-            final int vInt = App.verifyUser(changeHint);
-            if (vInt == App.VERIFICATION_TRUE) {
-                Student.setMinor(newMinor);
-            } else if (vInt == App.VERIFICATION_FALSE) {
-                App.reportMatError();
-            }
-        };
-        final KPanel minorPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        minorPanel.addAll(new KLabel("Minor:", H_FONT),
-                new KPanel(minorField, newIconifiedEditButton(minorEditorListener)));
-
-        minorCodeField.setPreferredSize(new Dimension(150, 30));
-        minorCodeField.setText(Student.getMinorCode());
-        minorCodeField.setEditable(false);
-        final ActionListener minorCodeEditorListener = e-> {
-            if (!Student.isDoingMinor()) {
-                App.promptPlain("No Minor","To set the minor-code, you first have to set your minor program above.");
-                return;
-            }
-
-            final String newMinorCode = App.requestInput("Minor Code", "Enter your minor-code below.\n" +
-                    "Minor-code is the 3-letter prefix to the course-codes of your minor courses.\n" +
-                    "Dashboard uses the minor-code for auto-indexing of your minor courses.\n" +
-                    "For accurate analysis sake, make sure this information is right.\n \n");
-            if (newMinorCode == null) {
-                return;
-            }
-            if (newMinorCode.isEmpty()) {
-                if (!App.showYesNoCancelDialog("Confirm Reset", "Do you want to reset your minor-code?\n" +
-                        "Dashboard will no longer be able to detect your minor courses.")) {
+            studentPsswdField.setPreferredSize(new Dimension(325, 30));
+            studentPsswdField.setHorizontalAlignment(SwingConstants.CENTER);
+            studentPsswdField.setEditable(false);
+            final ActionListener studentPsswdEditorListener = e-> {
+                final String newStudentPassword = App.requestInput("New Password","Enter your Student Mail Password:");
+                if (newStudentPassword == null) {
                     return;
                 }
-            } else if (newMinorCode.length() != 3) {
-                App.signalError("Error", "Sorry, that's not a valid program code. Please try again.");
-                return;
-            }
 
-            final int vInt = App.verifyUser(changeHint);
-            if (vInt == App.VERIFICATION_TRUE) {
-                Student.setMinorCode(newMinorCode.toUpperCase());
-            } else if (vInt == App.VERIFICATION_FALSE) {
-                App.reportMatError();
-            }
-        };
-        final KPanel minorCodePanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        minorCodePanel.addAll(new KLabel("Minor Code:", H_FONT),
-                new KPanel(minorCodeField, newIconifiedEditButton(minorCodeEditorListener)));
+                final int vInt = App.verifyUser(changeHint);
+                if (vInt == App.VERIFICATION_TRUE) {
+                    Student.setStudentPassword(newStudentPassword);
+                    studentPsswdField.setText(newStudentPassword);
+                } else if (vInt == App.VERIFICATION_FALSE) {
+                    App.reportMatError();
+                }
+            };
+            final KPanel studentPsswdPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
+            studentPsswdPanel.addAll(new KLabel("Student Mail Password:", H_FONT),
+                    new KPanel(studentPsswdField, newIconifiedEditButton(studentPsswdEditorListener)));
+
+            majorCodeField.setPreferredSize(new Dimension(150, 30));
+            majorCodeField.setText(Student.getMajorCode());
+            majorCodeField.setEditable(false);
+            final ActionListener majorCodeEditorListener = e-> {
+                final String newMajorCode = App.requestInput("Major Code", "Enter your major-code below.\n" +
+                        "Major-code is the 3-letter prefix to the course-codes of your major courses.\n" +
+                        "Dashboard uses the major-code for auto-indexing of your program courses.\n" +
+                        "For accurate analysis sake, make sure this information is right.\n \n");
+                if (newMajorCode == null) {
+                    return;
+                }
+                if (newMajorCode.isEmpty()) {
+                    if (!App.showYesNoCancelDialog("Reset", "Do you want to reset your major-code?\n" +
+                            "Dashboard will no longer be able to detect your program courses.")) {
+                        return;
+                    }
+                } else if (newMajorCode.length() != 3) {
+                    App.signalError("Error", "Sorry, that's not a valid program code. Please try again.");
+                    return;
+                }
+
+                final int vInt = App.verifyUser(changeHint);
+                if (vInt == App.VERIFICATION_TRUE) {
+                    Student.setMajorCode(newMajorCode.toUpperCase());
+                } else if (vInt == App.VERIFICATION_FALSE) {
+                    App.reportMatError();
+                }
+            };
+            final KPanel majorCodePanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
+            majorCodePanel.addAll(new KLabel("Major Code:", H_FONT),
+                    new KPanel(majorCodeField, newIconifiedEditButton(majorCodeEditorListener)));
+
+            minorField.setText(Student.getMinor());
+            minorField.setEditable(false);
+            final ActionListener minorEditorListener = e-> {
+                final String newMinor = App.requestInput("Minor", "Add or change your minor program here provided you're doing a minor.");
+                if (newMinor == null) {
+                    return;
+                }
+                final int vInt = App.verifyUser(changeHint);
+                if (vInt == App.VERIFICATION_TRUE) {
+                    Student.setMinor(newMinor);
+                } else if (vInt == App.VERIFICATION_FALSE) {
+                    App.reportMatError();
+                }
+            };
+            final KPanel minorPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
+            minorPanel.addAll(new KLabel("Minor:", H_FONT),
+                    new KPanel(minorField, newIconifiedEditButton(minorEditorListener)));
+
+            minorCodeField.setPreferredSize(new Dimension(150, 30));
+            minorCodeField.setText(Student.getMinorCode());
+            minorCodeField.setEditable(false);
+            final ActionListener minorCodeEditorListener = e-> {
+                if (!Student.isDoingMinor()) {
+                    App.promptPlain("No Minor","To set the minor-code, you first have to set your minor program above.");
+                    return;
+                }
+
+                final String newMinorCode = App.requestInput("Minor Code", "Enter your minor-code below.\n" +
+                        "Minor-code is the 3-letter prefix to the course-codes of your minor courses.\n" +
+                        "Dashboard uses the minor-code for auto-indexing of your minor courses.\n" +
+                        "For accurate analysis sake, make sure this information is right.\n \n");
+                if (newMinorCode == null) {
+                    return;
+                }
+                if (newMinorCode.isEmpty()) {
+                    if (!App.showYesNoCancelDialog("Confirm Reset", "Do you want to reset your minor-code?\n" +
+                            "Dashboard will no longer be able to detect your minor courses.")) {
+                        return;
+                    }
+                } else if (newMinorCode.length() != 3) {
+                    App.signalError("Error", "Sorry, that's not a valid program code. Please try again.");
+                    return;
+                }
+
+                final int vInt = App.verifyUser(changeHint);
+                if (vInt == App.VERIFICATION_TRUE) {
+                    Student.setMinorCode(newMinorCode.toUpperCase());
+                } else if (vInt == App.VERIFICATION_FALSE) {
+                    App.reportMatError();
+                }
+            };
+            final KPanel minorCodePanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
+            minorCodePanel.addAll(new KLabel("Minor Code:", H_FONT),
+                    new KPanel(minorCodeField, newIconifiedEditButton(minorCodeEditorListener)));
+
+            profileUI.addAll(portalMailPanel, portalPsswdPanel, studentMailPanel, studentPsswdPanel, majorCodePanel,
+                    minorPanel, minorCodePanel);
+        }
 
         final KTextField msField = new KTextField(Student.getMaritalStatue());
         msField.setPreferredSize(new Dimension(320, 30));
@@ -499,9 +604,9 @@ public class SettingsUI implements Activity {
         keyField.setPreferredSize(new Dimension(200, 30));
         keyField.setFont(KFontFactory.createBoldFont(15));
         keyField.addActionListener(e -> {
-            if (Globals.isBlank(valueField.getText())) {
+            if (Globals.hasNoText(valueField.getText())) {
                 valueField.requestFocusInWindow();
-            } else if (Globals.isBlank(keyField.getText())) {
+            } else if (Globals.hasNoText(keyField.getText())) {
                 keyField.requestFocusInWindow();
             } else {
                 final String key = keyField.getText();
@@ -527,8 +632,8 @@ public class SettingsUI implements Activity {
         valueField.addActionListener(keyField.getActionListeners()[0]);
         final KPanel craftPanel = new KPanel(new BorderLayout());
         craftPanel.add(new KPanel(new KLabel("Add a Custom Detail:", H_FONT)), BorderLayout.WEST);
-        craftPanel.add(new KPanel(new KLabel("Key", V_FONT), keyField, Box.createRigidArea(new Dimension(30,25)),
-                new KLabel("Value", V_FONT), valueField), BorderLayout.CENTER);
+        craftPanel.add(new KPanel(new KLabel("Key:", V_FONT), keyField, Box.createRigidArea(new Dimension(30,25)),
+                new KLabel("Value:", V_FONT), valueField), BorderLayout.CENTER);
 
         descriptionArea.setText(Student.getAbout());
         descriptionArea.addKeyListener(new KeyAdapter() {
@@ -539,13 +644,9 @@ public class SettingsUI implements Activity {
 
         });
         final KScrollPane descriptionScroll = descriptionArea.outerScrollPane(new Dimension(865,150));
-
         final KPanel aboutPanel = new KPanel(new KLabel("About Me:", V_FONT), descriptionScroll);
 
-        final KPanel profileUI = new KPanel();
-        profileUI.setLayout(new BoxLayout(profileUI, BoxLayout.Y_AXIS));
-        profileUI.addAll(portalMailPanel, portalPsswdPanel, studentMailPanel, studentPsswdPanel, majorCodePanel,
-                minorPanel, minorCodePanel, msPanel, pobPanel, craftPanel, aboutPanel, MComponent.contentBottomGap());
+        profileUI.addAll(msPanel, pobPanel, craftPanel, aboutPanel, MComponent.contentBottomGap());
         return new KScrollPane(profileUI);
     }
 
@@ -557,6 +658,7 @@ public class SettingsUI implements Activity {
         return button;
     }
 
+//    Todo: add re-index resources functionality for students
     private static JComponent settingsComponent() {
         final Cursor handCursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
         final int hereGap = 10;
@@ -584,6 +686,7 @@ public class SettingsUI implements Activity {
                 }
             }
         });
+        userChecking.setEnabled(!Student.isTrial());
 
         exitChecking = new KCheckBox("Confirm on Exit", Settings.confirmExit);
         exitChecking.setIconTextGap(hereGap);
@@ -675,17 +778,11 @@ public class SettingsUI implements Activity {
         final KPanel lafPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
         lafPanel.addAll(new KLabel("Change Look & Feel:", H_FONT), Box.createRigidArea(new Dimension(30,25)), looksBox);
 
-        final KButton outButton = new KButton("Sign out");
-        outButton.setStyle(KFontFactory.createPlainFont(16), Color.BLUE);
-        outButton.undress();
-        outButton.underline(false);
-        outButton.setPreferredSize(new Dimension(110, 30));
-        outButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        outButton.addActionListener(e-> {
-            if (App.showOkCancelDialog("Sign out", "Are are sure you want to sign out?\n" +
+        final KButton logoutButton = newControlButton("Sign out", 110, 30);
+        logoutButton.addActionListener(e-> {
+            if (App.showYesNoCancelDialog("Sign out", "Are are sure you want to sign out?\n" +
                     "By signing out, all your data will be lost.")) {
-                final int vInt = App.verifyUser("Enter your matriculation number to sign out");
-
+                final int vInt = App.verifyUser("Enter your matriculation number to sign out:");
                 if (vInt == App.VERIFICATION_TRUE) {
                     if (Serializer.unMountUserData()) {
                         Runtime.getRuntime().removeShutdownHook(Board.shutDownThread);
@@ -700,8 +797,13 @@ public class SettingsUI implements Activity {
                 }
             }
         });
-        final KPanel outPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        outPanel.addAll(new KLabel("You may wish to:", H_FONT), Box.createRigidArea(new Dimension(30,25)), outButton);
+
+        final KButton loginButton = newControlButton("Sign in", 100, 30);
+        loginButton.addActionListener(Login.loginAction(loginButton));
+
+        final KPanel layoutPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
+        layoutPanel.addAll(new KLabel("You may wish to:", H_FONT), Box.createRigidArea(new Dimension(30,25)),
+                Student.isTrial() ? loginButton : logoutButton);
 
         final KPanel homeOfNice = new KPanel();
         homeOfNice.setLayout(new BoxLayout(homeOfNice, BoxLayout.Y_AXIS));
@@ -710,24 +812,31 @@ public class SettingsUI implements Activity {
                 new KPanel(new FlowLayout(FlowLayout.LEFT), instantToolTip),
                 new KPanel(new FlowLayout(FlowLayout.LEFT), tipDismissible),
                 new KPanel(new FlowLayout(FlowLayout.LEFT), syncChecking),
-                nameFormatPanel, bgPanel, lafPanel, outPanel);
+                nameFormatPanel, bgPanel, lafPanel, layoutPanel);
 
         final KButton resetButton = new KButton("Reset Settings");
         resetButton.setFont(KFontFactory.createPlainFont(15));
         resetButton.setCursor(handCursor);
         resetButton.addActionListener(e-> {
-            if (App.showOkCancelDialog("Reset","This action will restore the default Developer Settings.")) {
+            if (App.showYesNoCancelDialog("Reset","This action will restore the default developer settings. Continue?")) {
                 loadDefaults();
             }
         });
 
-        final KPanel restPanel = new KPanel(new FlowLayout(FlowLayout.RIGHT));
-        restPanel.add(resetButton);
-
         final KPanel dashUI = new KPanel(new BorderLayout());
         dashUI.add(new KScrollPane(homeOfNice), BorderLayout.CENTER);
-        dashUI.add(restPanel, BorderLayout.SOUTH);
+        dashUI.add(new KPanel(new FlowLayout(FlowLayout.RIGHT), resetButton), BorderLayout.SOUTH);
         return dashUI;
+    }
+
+    private static KButton newControlButton(String text, int width, int height){
+        final KButton button = new KButton(text);
+        button.setStyle(KFontFactory.createPlainFont(16), Color.BLUE);
+        button.undress();
+        button.underline(false);
+        button.setPreferredSize(new Dimension(width, height));
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return button;
     }
 
     public static void setLookTo(String lookName) {

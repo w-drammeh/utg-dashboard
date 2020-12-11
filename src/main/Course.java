@@ -240,9 +240,9 @@ public class Course {
     public String getSchedule(){
         if (Globals.hasText(day) && Globals.hasText(time)) {
             return String.join(" ", day, time);
-        } else if (Globals.hasText(day) && Globals.isBlank(time)) {
+        } else if (Globals.hasText(day) && Globals.hasNoText(time)) {
             return String.join(" - ", day, "Unknown time");
-        } else if (Globals.isBlank(day) && Globals.hasText(time)) {
+        } else if (Globals.hasNoText(day) && Globals.hasText(time)) {
             return String.join(" - ", time, "Unknown day");
         } else {
             return "";
@@ -301,7 +301,7 @@ public class Course {
      * A lecturer's name of a module is changeable iff it was not actually found on the Portal
      */
     public boolean canEditTutorName() {
-        return Globals.isBlank(lecturer) || lecturerNameChangeability;
+        return Globals.hasNoText(lecturer) || lecturerNameChangeability;
     }
 
     /**

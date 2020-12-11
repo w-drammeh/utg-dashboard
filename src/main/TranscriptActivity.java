@@ -32,56 +32,63 @@ public class TranscriptActivity implements Activity {
 
 
     public TranscriptActivity(){
-        minorLabel = new KLabel("", KFontFactory.createBoldFont(15));
-        CGPALabel = new KLabel("", KFontFactory.createBoldFont(16));
-        classificationLabel = new KLabel("", KFontFactory.createPlainFont(15));
+        final KPanel activityPanel = new KPanel(new BorderLayout());
+        if (Student.isTrial()) {
+            activityPanel.add(MComponent.createUnavailableActivity("Transcript"), BorderLayout.CENTER);
+        } else {
+            minorLabel = new KLabel("", KFontFactory.createBoldFont(15));
+            CGPALabel = new KLabel("", KFontFactory.createBoldFont(16));
+            classificationLabel = new KLabel("", KFontFactory.createPlainFont(15));
 
-        buildDetailsPanelPlus();
+            buildDetailsPanelPlus();
 
-        TRANSCRIPT_MODEL.setColumnIdentifiers(HEADS);
+            TRANSCRIPT_MODEL.setColumnIdentifiers(HEADS);
 
-        table = new KTable(TRANSCRIPT_MODEL);
-        table.setRowHeight(30);
-        table.setFont(KFontFactory.createBoldFont(15));
-        table.getColumnModel().getColumn(1).setPreferredWidth(350);
-        table.getColumnModel().getColumn(3).setPreferredWidth(40);
-        table.getTableHeader().setFont(KFontFactory.createBoldFont(16));
-        table.getTableHeader().setPreferredSize(new Dimension(table.getPreferredSize().width,35));
-        table.centerAlignColumns(2, 3, 4);
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() >= 2) {
-                    final int selectedRow = table.getSelectedRow();
-                    if (selectedRow >= 0) {
-                        Course.exhibit(ModuleHandler.getModuleByCode(String.valueOf(TRANSCRIPT_MODEL.getValueAt(selectedRow, 0))));
-                        e.consume();
+            table = new KTable(TRANSCRIPT_MODEL);
+            table.setRowHeight(30);
+            table.setFont(KFontFactory.createBoldFont(15));
+            table.getColumnModel().getColumn(1).setPreferredWidth(350);
+            table.getColumnModel().getColumn(3).setPreferredWidth(40);
+            table.getTableHeader().setFont(KFontFactory.createBoldFont(16));
+            table.getTableHeader().setPreferredSize(new Dimension(table.getPreferredSize().width,35));
+            table.centerAlignColumns(2, 3, 4);
+            table.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() >= 2) {
+                        final int selectedRow = table.getSelectedRow();
+                        if (selectedRow >= 0) {
+                            Course.exhibit(ModuleHandler.getModuleByCode(String.valueOf(TRANSCRIPT_MODEL.getValueAt(selectedRow, 0))));
+                            e.consume();
+                        }
                     }
                 }
-            }
-        });
+            });
 
-        final KPanel midLiner = new KPanel();
-        midLiner.setLayout(new BoxLayout(midLiner, BoxLayout.Y_AXIS));
-        midLiner.setBorder(BorderFactory.createEmptyBorder(5,5,15,5));
-        midLiner.addAll(detailPanel, Box.createVerticalStrut(20),
-                table.sizeMatchingScrollPane(), Box.createVerticalStrut(10), getPointPanel(),
-                Box.createVerticalStrut(10), new KPanel(classificationLabel));
+            final KPanel midLiner = new KPanel();
+            midLiner.setLayout(new BoxLayout(midLiner, BoxLayout.Y_AXIS));
+            midLiner.setBorder(BorderFactory.createEmptyBorder(5,5,15,5));
+            midLiner.addAll(detailPanel, Box.createVerticalStrut(20),
+                    table.sizeMatchingScrollPane(), Box.createVerticalStrut(10), getPointPanel(),
+                    Box.createVerticalStrut(10), new KPanel(classificationLabel));
 
-        final KPanel activityPanel = new KPanel(new BorderLayout());
-        activityPanel.add(topLayer(), BorderLayout.NORTH);
-        activityPanel.add(new KScrollPane(midLiner), BorderLayout.CENTER);
+            activityPanel.add(topLayer(), BorderLayout.NORTH);
+            activityPanel.add(new KScrollPane(midLiner), BorderLayout.CENTER);
+        }
+
         Board.addCard(activityPanel, "Transcript");
     }
 
     @Override
     public void answerActivity() {
         Board.showCard("Transcript");
-        minorLabel.setText(Student.isDoingMinor() ? Student.getMinor().toUpperCase() : "NONE");
-        CGPALabel.setText(Double.toString(Student.getCGPA()));
-        classificationLabel.setText(Student.upperClassDivision());
-        if (classificationLabel.getText().equals("None")) {
-            classificationLabel.getParent().setVisible(false);
+        if (!Student.isTrial()) {
+            minorLabel.setText(Student.isDoingMinor() ? Student.getMinor().toUpperCase() : "NONE");
+            CGPALabel.setText(Double.toString(Student.getCGPA()));
+            classificationLabel.setText(Student.upperClassDivision());
+            if (classificationLabel.getText().equals("None")) {
+                classificationLabel.getParent().setVisible(false);
+            }
         }
     }
 
@@ -107,7 +114,7 @@ public class TranscriptActivity implements Activity {
         });
 
         final KPanel topPanel = new KPanel(new BorderLayout());
-        topPanel.add(new KPanel(new KLabel("My Transcript", KFontFactory.bodyHeaderFont())), BorderLayout.WEST);
+        topPanel.add(new KPanel(new KLabel("My Transcript", KFontFactory.BODY_HEAD_FONT)), BorderLayout.WEST);
         topPanel.add(new KPanel(new FlowLayout(), detailsCheck, downloadButton), BorderLayout.EAST);
         return topPanel;
     }
@@ -118,7 +125,7 @@ public class TranscriptActivity implements Activity {
 
         final KPanel l1l2Panel = new KPanel(new Dimension(500, 100), l1, l2);
 
-        final KPanel labelsPanel = new KPanel(KLabel.wantIconLabel("UTGLogo.gif", 125,  125),
+        final KPanel labelsPanel = new KPanel(KLabel.createIcon("UTGLogo.gif", 125,  125),
                 Box.createRigidArea(new Dimension(50, 100)), l1l2Panel);
 
         detailPanel = new KPanel();

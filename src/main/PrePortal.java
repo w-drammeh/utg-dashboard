@@ -19,11 +19,16 @@ public class PrePortal {
     private static String email, password, temporaryName;
     private static FirefoxDriver driver;//may be delivered to Portal after task
     private static WebDriverWait loadWaiter;
+    private static boolean isTerminated;
     public static final ArrayList<String> USER_DATA = new ArrayList<>();
     public static final ActionListener CANCEL_LISTENER = e-> {
         if (App.showYesNoCancelDialog(Login.getRoot(), "Cancel", "Do you really want to terminate the process?")) {
+            isTerminated = true;
             Login.getInstance().dispose();
-            System.exit(0);
+            if (driver != null) {
+                driver.quit();
+                driver = null;
+            }
         }
     };
 
@@ -31,11 +36,14 @@ public class PrePortal {
     public static void launchVerification(String email, String password){
         PrePortal.email = email;
         PrePortal.password = password;
+        isTerminated = false;
         Login.appendToStatus("Setting up the web driver....... Please wait");
         startFixingDriver();
         if (driver == null) {
-            App.reportMissingDriver(Login.getRoot());
-            Login.setInputState(true);
+            if (!isTerminated) {
+                App.reportMissingDriver(Login.getRoot());
+                Login.setInputState(true);
+            }
             return;
         }
         Login.replaceLastUpdate("Setting up the driver....... Successful");
@@ -45,14 +53,19 @@ public class PrePortal {
         if (MDriver.isIn(driver)) {
             final int logoutAttempt = MDriver.attemptLogout(driver);
             if (logoutAttempt != MDriver.ATTEMPT_SUCCEEDED) {
-                Login.replaceLastUpdate("Now contacting utg....... Failed");
-                App.reportConnectionLost(Login.getRoot());
-                Login.setInputState(true);
+                if (!isTerminated) {
+                    Login.replaceLastUpdate("Now contacting utg....... Failed");
+                    App.reportConnectionLost(Login.getRoot());
+                    Login.setInputState(true);
+                }
                 return;
             }
         }
 //        then proceed
         final int loginAttempt = MDriver.attemptLogin(driver, email, password);
+        if (isTerminated) {
+            return;
+        }
         if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
             Login.replaceLastUpdate("Now contacting utg....... Ok");
             temporaryName = driver.findElement(By.className("media-heading")).getText();
@@ -72,22 +85,25 @@ public class PrePortal {
         }
     }
 
-    public static synchronized void startFixingDriver(){
+    private static void startFixingDriver(){
         if (driver == null) {
             driver = MDriver.forgeNew(true);
         }
     }
 
     private static void onPortal(){
+        Board.setReady(false);
         String firstName = "", lastName = "", matNumber = "", program = "", major = "",
                 school = "", division = "", nationality = "", MOA = "", YOA = "",
                 address = "", mStatus = "", DOB = "", tel = "", ongoingSemester, level, status;
 
 //        checking for busyness of the portal, i.e is Course Evaluation required
         if (Portal.isPortalBusy(driver)) {
-            Login.appendToStatus("Busy portal: Course Evaluation needed");
-            App.reportBusyPortal(Login.getRoot());
-            Login.setInputState(true);
+            if (!isTerminated) {
+                Login.appendToStatus("Busy portal: Course Evaluation needed");
+                App.reportBusyPortal(Login.getRoot());
+                Login.setInputState(true);
+            }
             return;
         }
 //        extract the admission notice herein the home-page
@@ -104,8 +120,10 @@ public class PrePortal {
         try {
             driver.navigate().to(Portal.CONTENTS_PAGE);
         } catch (Exception e1) {
-            App.reportConnectionLost(Login.getRoot());
-            Login.setInputState(true);
+            if (!isTerminated) {
+                App.reportConnectionLost(Login.getRoot());
+                Login.setInputState(true);
+            }
             return;
         }
         try {//extracting the Registration Notice...
@@ -115,15 +133,16 @@ public class PrePortal {
             App.silenceException("Registration Notice not found");
         }
         try {
-            final String[] allNames = temporaryName.split(" ");
-            firstName = allNames[allNames.length - 1];
-            final StringBuilder lastNameBuilder = new StringBuilder(lastName = allNames[0]);
-            for (int i = 1; i < allNames.length - 1; i++) {
-                lastNameBuilder.append(" ").append(allNames[i]);
+            final String[] fullName = temporaryName.split(" ");
+            firstName = fullName[fullName.length - 1];
+            lastName = fullName[0];
+            final StringBuilder lastNameBuilder = new StringBuilder(lastName);
+            for (int i = 1; i < fullName.length - 1; i++) {
+                lastNameBuilder.append(" ").append(fullName[i]);
             }
             lastName = lastNameBuilder.toString();
-        } catch (Exception e){
-            App.silenceException("Error occurred assigning name parts");
+        } catch (Exception e){//though this must be avaided at all costs
+            Login.appendToStatus("Error occurred assigning name parts");
         }
         try {
             program = driver.findElementByXPath("/html/body/section/div[2]/div/div[1]/div/div[2]/div[2]/div[1]/div/h4").getText();
@@ -150,61 +169,59 @@ public class PrePortal {
         ongoingSemester = String.join(" ", findingSemester[0], findingSemester[1], findingSemester[2]);
 
 //        going to the profile page
+        if (isTerminated) {
+            return;
+        }
+
         try {
             driver.navigate().to(Portal.PROFILE_PAGE);
         } catch (Exception e1) {
-            App.reportConnectionLost(Login.getRoot());
-            Login.setInputState(true);
+            if (!isTerminated) {
+                App.reportConnectionLost(Login.getRoot());
+                Login.setInputState(true);
+            }
             return;
         }
         try {
             matNumber = driver.findElementByCssSelector("initialModules, strong").getText().split(" ")[1];
-        } catch (Exception e) {
-            App.silenceException("Matriculation Number not found");
+        } catch (Exception ignored) {
         }
         final List<WebElement> detail = driver.findElementsByClassName("info-group");
         try {
             address = detail.get(0).getText().split("\n")[1];
-        } catch (Exception e) {
-            App.silenceException("Address not found");
+        } catch (Exception ignored) {
         }
         try {
             tel = detail.get(2).getText().split("\n")[1];
-        } catch (Exception e) {
-            App.silenceException("Telephone not found");
+        } catch (Exception ignored) {
         }
         try {
             mStatus = detail.get(3).getText().split("\n")[1];
-        } catch (Exception e) {
-            App.silenceException("Marital status not found");
+        } catch (Exception ignored) {
         }
         try {
             final String[] DOBParts = detail.get(4).getText().split("\n")[1].split(" ");
             DOB = DOBParts[0]+" "+DOBParts[1]+" "+DOBParts[2];
-        } catch (Exception e) {
-            App.silenceException("Date of birth not found");
+        } catch (Exception ignored) {
         }
         try {
             nationality = detail.get(5).getText().split("\n")[1];
-        } catch (Exception e) {
-            App.silenceException("Nationality not found");
+        } catch (Exception ignored) {
         }
         final String[] admissionDate = detail.get(6).getText().split("\n");
         try {
             YOA = admissionDate[1].split("-")[0];
-        } catch (Exception e) {
-            App.silenceException("Year of admission not found");
+        } catch (Exception ignored) {
         }
         try {
             MOA = admissionDate[1].split("-")[1];
-        } catch (Exception e) {
-            App.silenceException("Month of admission not found");
+        } catch (Exception ignored) {
         }
 //        adding in predefined order... CGPA will be added with transcript later on
         enlistDetail("First Name", firstName);
         enlistDetail("Last Name", lastName);
         enlistDetail("Program", program);
-        enlistDetail("Mat#", matNumber);
+        enlistDetail("Mat#", matNumber);//silenced
         enlistDetail("Major", major);
         enlistDetail("School", school);
         enlistDetail("Division", division);
@@ -216,23 +233,33 @@ public class PrePortal {
         enlistDetail("Birth Day", DOB);
         enlistDetail("Telephone", tel);
         enlistDetail("Email", email);
-        enlistDetail("password", password);
-        enlistDetail("On-going Semester", ongoingSemester);
+        enlistDetail("psswd", password);//silenced
+        enlistDetail("Current Semester", ongoingSemester);
         enlistDetail("Level", level);
         enlistDetail("Status", status);
 
         Login.appendToStatus("#####");
-
         Login.appendToStatus("Collecting up all your courses....... This may take a while");
-//        going back to the contents to generate modules
+//        back to the contents to generate modules
+        if (isTerminated) {
+            return;
+        }
+
         try {
             driver.navigate().to(Portal.CONTENTS_PAGE);
             loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("table")));
         } catch (Exception e) {
-            App.reportConnectionLost(Login.getRoot());
-            Login.setInputState(true);
+            if (!isTerminated) {
+                App.reportConnectionLost(Login.getRoot());
+                Login.setInputState(true);
+            }
             return;
         }
+
+        if (isTerminated) {
+            return;
+        }
+
         final List<WebElement> tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(".nav-tabs > li")));
 //        Firstly, code, name, year, semester, and credit hour at transcript tab
 //        Addition to startupCourses is only here; all the following loops only updates the details. this eradicates the possibility of adding running courses at tab-4
@@ -320,11 +347,12 @@ public class PrePortal {
     }
 
     private static void enlistDetail(String key, String value){
-        if (Globals.isBlank(value) || value.contains("Unknown")) {
+        if (Globals.hasNoText(value) || value.contains("Unknown")) {
             Login.appendToStatus("**Warning: " + key + " not found");
-        } else if(!(key.equalsIgnoreCase("password") || key.equalsIgnoreCase("cgpa"))) {
+        } else if(!(key.equals("Mat#") || key.equals("psswd") || key.equals("cgpa"))) {
             Login.appendToStatus(key+": "+value);
         }
+
         USER_DATA.add(value);
     }
 

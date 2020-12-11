@@ -42,7 +42,7 @@ public class FirstLaunch extends KDialog {
                 "<p><b>If you are not sure, do not write anything in the field below!</b> Changes can always be made in Settings.</p>" +
                 "<p>For example, the known major-code for Mathematics program is <b>MTH</b>; Computer, <b>CPS</b>; Economics, <b>ECO</b>; " +
                 "Chemistry, <b>CHM</b>; Biology, <b>BIO</b>, etc.</p>";
-        final KTextPane textPane = KTextPane.wantHtmlFormattedPane(majorCodeText);
+        final KTextPane textPane = KTextPane.htmlFormattedPane(majorCodeText);
         textPane.setBackground(Color.WHITE);
 
         final KButton nextButton = new KButton("Next");
@@ -72,7 +72,7 @@ public class FirstLaunch extends KDialog {
                 "<p>Write, in the fields below, the <b>name</b> and <b>course-code</b> of the program you are minoring.<br>" +
                 "<i>Remember, the minor-code must also match the minor program in a way as specified earlier for the major-code.</i></p>" +
                 "<p>If you are not minoring a program, select the corresponding button below and continue.</p>";
-        final KTextPane textPane = KTextPane.wantHtmlFormattedPane(minorText);
+        final KTextPane textPane = KTextPane.htmlFormattedPane(minorText);
         textPane.setBackground(Color.WHITE);
 
         final KTextField minorCodeField = KTextField.rangeControlField(3);
@@ -124,10 +124,10 @@ public class FirstLaunch extends KDialog {
             if (iDoButton.isSelected()) {
                 final String minorName = minorNameField.getText();
                 final String minorCode = minorCodeField.getText().toUpperCase();
-                if (Globals.isBlank(minorName)) {
+                if (Globals.hasNoText(minorName)) {
                     App.signalError("Error", "Sorry, the name of the minor program cannot be blank.");
                     return;
-                } else if (Globals.isBlank(minorCode)) {
+                } else if (Globals.hasNoText(minorCode)) {
                     App.promptWarning("Warning", "You have not set the code for your minor program - "+minorName+".\n" +
                             "Set this later in the Settings for Dashboard to detect your minor courses.");
                 }
@@ -154,7 +154,7 @@ public class FirstLaunch extends KDialog {
                 "<p>If you've already being using your Student mail, and made changes to either the Email or Password, " +
                 "then make the changes to the fields below, and click <b>Set</b>.</p>" +
                 "<p>If you don't want Dashboard to keep track of your Student mail, <b>skip</b> this dialog.</p>";
-        final KTextPane textPane = KTextPane.wantHtmlFormattedPane(mailText);
+        final KTextPane textPane = KTextPane.htmlFormattedPane(mailText);
         textPane.setBackground(Color.WHITE);
 
         final KTextField emailField = new KTextField(new Dimension(325, 30));
@@ -210,7 +210,7 @@ public class FirstLaunch extends KDialog {
         final String imgText = "With such a nice look, you cannot wait to behold your glittering face right at the top-left " +
                 "of your dashboard. Set an optional image icon now to get started with your <b>Personal Dashboard</b>, or anytime later " +
                 "under Settings.<br>You can also change your image by simply right-clicking the blue-bordered box at the top-left.";
-        final KTextPane textPane = KTextPane.wantHtmlFormattedPane(imgText);
+        final KTextPane textPane = KTextPane.htmlFormattedPane(imgText);
         textPane.setBackground(Color.WHITE);
 
         final KPanel iPanel = new KPanel();
@@ -261,7 +261,7 @@ public class FirstLaunch extends KDialog {
                 "<p>Finally, by seeing this dialog, it means Dashboard has already mounted a root folder in your home directory: " +
                 Serializer.ROOT_DIR +". You may want to check out for this folder and the <b>README.txt</b> file therein.</p>" +
                 "<p style='text-align: center;'>Thank you for using <b>Dashboard</b></p>";
-        final KTextPane textPane = KTextPane.wantHtmlFormattedPane(mailText);
+        final KTextPane textPane = KTextPane.htmlFormattedPane(mailText);
         textPane.setBackground(Color.WHITE);
 
         final KButton startButton = new KButton("Start using Dashboard");
