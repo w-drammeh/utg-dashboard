@@ -40,49 +40,55 @@ public class Analysis implements Activity {
 
 
     public Analysis(){
-        cardLayout = new CardLayout();
-        final KPanel analysisContents = new KPanel(cardLayout);
-        cardLayout.addLayoutComponent(analysisContents.add(getModulesBasement()), "courses");
-        cardLayout.addLayoutComponent(analysisContents.add(getSemestersBasement()), "semesters");
-        cardLayout.addLayoutComponent(analysisContents.add(getYearsBasement()),"years");
+        final KPanel analysisActivity = new KPanel(new BorderLayout());
+        if (Student.isTrial()) {
+            analysisActivity.add(MComponent.createUnavailableActivity("Analysis"), BorderLayout.CENTER);
+        } else {
+            cardLayout = new CardLayout();
+            final KPanel analysisContents = new KPanel(cardLayout);
+            cardLayout.addLayoutComponent(analysisContents.add(getModulesBasement()), "courses");
+            cardLayout.addLayoutComponent(analysisContents.add(getSemestersBasement()), "semesters");
+            cardLayout.addLayoutComponent(analysisContents.add(getYearsBasement()),"years");
 
-        final KComboBox<String> optionsCombo = new KComboBox<>(new String[]{"My Courses", "Semesters", "Academic Years"});
-        optionsCombo.setToolTipText("Shift Analysis");
-        optionsCombo.addActionListener(e-> {
-            if (optionsCombo.getSelectedIndex() == 0) {
-                cardLayout.show(analysisContents, "courses");
-            } else if (optionsCombo.getSelectedIndex() == 1) {
-                cardLayout.show(analysisContents, "semesters");
-            } else if (optionsCombo.getSelectedIndex() == 2) {
-                cardLayout.show(analysisContents, "years");
-            }
-        });
+            final KComboBox<String> optionsCombo = new KComboBox<>(new String[]{"My Courses", "Semesters", "Academic Years"});
+            optionsCombo.setToolTipText("Change Analysis");
+            optionsCombo.addActionListener(e-> {
+                if (optionsCombo.getSelectedIndex() == 0) {
+                    cardLayout.show(analysisContents, "courses");
+                } else if (optionsCombo.getSelectedIndex() == 1) {
+                    cardLayout.show(analysisContents, "semesters");
+                } else if (optionsCombo.getSelectedIndex() == 2) {
+                    cardLayout.show(analysisContents, "years");
+                }
+            });
 
-        final KPanel sensitivePanel = new KPanel(new FlowLayout(FlowLayout.RIGHT));
-        sensitivePanel.addAll(new KLabel("Showing analysis based on:", KFontFactory.createPlainFont(15)), optionsCombo);
+            final KPanel sensitivePanel = new KPanel(new FlowLayout(FlowLayout.RIGHT));
+            sensitivePanel.addAll(new KLabel("Showing analysis based on:", KFontFactory.createPlainFont(15)), optionsCombo);
 
-        final KPanel northPanel = new KPanel(new BorderLayout());
-        northPanel.add(new KPanel(new KLabel("Analysis Center", KFontFactory.bodyHeaderFont())), BorderLayout.WEST);
-        northPanel.add(sensitivePanel, BorderLayout.EAST);
+            final KPanel northPanel = new KPanel(new BorderLayout());
+            northPanel.add(new KPanel(new KLabel("Analysis Center", KFontFactory.BODY_HEAD_FONT)), BorderLayout.WEST);
+            northPanel.add(sensitivePanel, BorderLayout.EAST);
 
-        final KPanel analysisUI = new KPanel(new BorderLayout());
-        analysisUI.add(northPanel, BorderLayout.NORTH);
-        analysisUI.add(analysisContents, BorderLayout.CENTER);
+            analysisActivity.add(northPanel, BorderLayout.NORTH);
+            analysisActivity.add(analysisContents, BorderLayout.CENTER);
+        }
 
-        Board.addCard(analysisUI, "Analysis");
+        Board.addCard(analysisActivity, "Analysis");
     }
 
     @Override
     public void answerActivity() {
-        SwingUtilities.invokeLater(()-> {
-            resetLists();
-            completeModulesBasement();
-            completeSemestersBasement();
-            completeYearsBasement();
-            resetCourses();
-            resetLabels();
-        });
         Board.showCard("Analysis");
+        if (!Student.isTrial()) {
+            SwingUtilities.invokeLater(()-> {
+                resetLists();
+                completeModulesBasement();
+                completeSemestersBasement();
+                completeYearsBasement();
+                resetCourses();
+                resetLabels();
+            });
+        }
     }
 
     private JComponent getModulesBasement(){
@@ -713,12 +719,19 @@ public class Analysis implements Activity {
      * This can include an icon in a future release.
      */
     private KPanel createNoAnalysisPanel() {
-        final KPanel panel = new KPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.addAll(new KPanel(new KLabel("Analysis is not available", KFontFactory.createPlainFont(20))),
-                new KPanel(new KLabel("No Verified Course detected", KFontFactory.createPlainFont(15), Color.GRAY)));
-        panel.setMaximumSize(panel.getPreferredSize());
-        return panel;
+        final KLabel label1 = new KLabel("Analysis not available", KFontFactory.createBoldFont(30));
+        final KLabel label2 = new KLabel("No verified courses detected",
+                KFontFactory.createPlainFont(20), Color.DARK_GRAY);
+
+        final KPanel innerPanel = new KPanel();
+        innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
+        innerPanel.addAll(new KPanel(label1), new KPanel(label2));
+
+        final KPanel outerPanel = new KPanel(new BorderLayout());
+        outerPanel.add(Box.createVerticalStrut(100), BorderLayout.NORTH);
+        outerPanel.add(innerPanel, BorderLayout.CENTER);
+        outerPanel.add(Box.createVerticalStrut(150), BorderLayout.SOUTH);
+        return outerPanel;
     }
 
 

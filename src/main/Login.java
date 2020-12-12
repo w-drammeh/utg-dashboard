@@ -1,18 +1,15 @@
 package main;
 
 import proto.*;
+import utg.Dashboard;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-/**
- * The Login type provides the UI for the user to provide details of email & password
- * which it'll parse to a static function in PrePortal, launchVerification(String, String),
- * purposely for verification.
- */
-public class Login extends KDialog {
-    private Welcome welcome;
+//Todo: user having difficulty logging in? suggest 'Try Dashboard'
+public class Login extends JDialog {
+    private Component parent;
     private static KTextField emailField;
     private static JPasswordField passwordField;
     private static KButton loginButton;
@@ -22,41 +19,38 @@ public class Login extends KDialog {
     private static JRootPane rootPane;
     private static KScrollPane statusHolder;
     private static Login instance;
-    private static final ActionListener CLOSE_LISTENER = e-> {
-        instance.dispose();
-        instance.welcome.setVisible(true);
-    };
+    private static final ActionListener CLOSE_LISTENER = e-> instance.dispose();
 
 
-    public Login(Welcome welcome){
+    public Login(Component parent){
         instance = Login.this;
-        instance.welcome = welcome;
-        rootPane = this.getRootPane();
-        this.setUndecorated(true);
-        this.setSize(720, 425);
-        this.setDefaultCloseOperation(Login.DO_NOTHING_ON_CLOSE);
+        this.parent = parent;
+        rootPane = getRootPane();
+        setSize(720, 425);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        setUndecorated(true);
 
         final KLabel bigText = new KLabel("LOGIN TO GET THE MOST OUT OF YOUR STUDENTHOOD",
                 KFontFactory.createPlainFont(18), Color.WHITE);
         bigText.setBounds(15, 10, 625, 30);
         bigText.setOpaque(false);
 
-        final KLabel utgLogo = KLabel.wantIconLabel("UTGLogo.gif", 50, 50);
+        final KLabel utgLogo = KLabel.createIcon("UTGLogo.gif", 50, 50);
         utgLogo.setBounds(645, 0, 100, 50);
         utgLogo.setOpaque(false);
 
         final KLabel loginHint = new KLabel("LOGIN", KFontFactory.createBoldFont(20), Color.BLACK);
         loginHint.setBounds(205, 5, 100, 30);
 
-        final KLabel studentLogo = KLabel.wantIconLabel("student.png",30,30);
+        final KLabel studentLogo = KLabel.createIcon("student.png",30,30);
         studentLogo.setBounds(50, 45, 40, 30);
 
-        final KLabel passwordLogo = KLabel.wantIconLabel("padlock.png",40,40);
+        final KLabel passwordLogo = KLabel.createIcon("padlock.png",40,40);
         passwordLogo.setBounds(50, 100, 40, 30);
 
         emailField = new KTextField();
         emailField.setBounds(105, 45, 315, 30);
-        emailField.setToolTipText("Enter email here");
+        emailField.setToolTipText("Enter Email here");
         emailField.addActionListener(e-> passwordField.requestFocusInWindow());
 
         passwordField = new JPasswordField(){
@@ -68,7 +62,7 @@ public class Login extends KDialog {
         passwordField.setHorizontalAlignment(emailField.getHorizontalAlignment());
         passwordField.setFont(emailField.getFont());
         passwordField.setBounds(105, 100, 315, 30);
-        passwordField.setToolTipText("Enter password here");
+        passwordField.setToolTipText("Enter Password here");
         passwordField.addActionListener(e-> loginTriggered());
 
         loginButton = new KButton("LOGIN");
@@ -85,7 +79,7 @@ public class Login extends KDialog {
         final KPanel smallPanel = new KPanel();
         smallPanel.setBackground(new Color(240, 240, 240));
         smallPanel.setBorder(BorderFactory.createLineBorder(smallPanel.getBackground(),5,true));
-        smallPanel.setBounds(120, 50, 500, 210);
+        smallPanel.setBounds(120, 50, 500, 190);
         smallPanel.setLayout(null);
         smallPanel.addAll(loginHint, studentLogo, passwordLogo, emailField, passwordField, loginButton, closeButton);
 
@@ -94,39 +88,24 @@ public class Login extends KDialog {
         statusPanel.setBackground(new Color(40, 40, 40));
 
         statusHolder = KScrollPane.getAutoScroller(statusPanel);
-        statusHolder.setBounds(1, 265, 718, 160);
+        statusHolder.setBounds(1, 245, 718, 180);
 
-        final KPanel contentsPanel = new KPanel();
-        contentsPanel.setBackground(new Color(40, 40, 40));
-        contentsPanel.setLayout(null);
-        contentsPanel.addAll(bigText, utgLogo, smallPanel, statusHolder);
-        this.setContentPane(contentsPanel);
-        this.setLocationRelativeTo(null);
+        initialHint = "Enter your Email and Password in the fields provided above, respectively.";
+        appendToStatus(initialHint);
 
-        appendToStatus(initialHint = "Enter your Email and Password in the fields provided above, respectively.");
+        final KPanel contentPanel = new KPanel();
+        contentPanel.setBackground(new Color(40, 40, 40));
+        contentPanel.setLayout(null);
+        contentPanel.addAll(bigText, utgLogo, smallPanel, statusHolder);
+        setContentPane(contentPanel);
+        setLocationRelativeTo(null);
     }
 
-    private void loginTriggered(){
-        if (Globals.isBlank(emailField.getText())) {
-            App.signalError(rootPane, "No Email", "Email Field cannot be blank. Please insert an email address.");
-            emailField.requestFocusInWindow();
-        } else if (Globals.isBlank(String.valueOf(passwordField.getPassword()))) {
-            App.signalError(rootPane,"No Password", "Password Field cannot be blank. Please insert a password.");
-            passwordField.requestFocusInWindow();
-        } else {
-            new Thread(()-> {
-                setInputState(false);
-                appendToStatus("Checking network status.......");
-                if (Internet.isInternetAvailable()) {
-                    replaceLastUpdate("Checking network status....... Available");
-                    PrePortal.launchVerification(emailField.getText(), String.valueOf(passwordField.getPassword()));
-                } else {
-                    replaceLastUpdate("Checking network status....... Unavailable");
-                    App.signalError(rootPane, "Internet Error", "Internet connection is required to set up Dashboard.\n" +
-                            "Please connect to the internet and try again.");
-                    setInputState(true);
-                }
-            }).start();
+    @Override
+    public void dispose() {
+        super.dispose();
+        if (parent != null) {
+            SwingUtilities.invokeLater(()-> parent.setVisible(true));
         }
     }
 
@@ -167,6 +146,50 @@ public class Login extends KDialog {
         }
     }
 
+    private void loginTriggered(){
+        if (Globals.hasNoText(emailField.getText())) {
+            App.signalError(rootPane, "No Email", "Email Field cannot be blank. Please insert an email address.");
+            emailField.requestFocusInWindow();
+        } else if (Globals.hasNoText(String.valueOf(passwordField.getPassword()))) {
+            App.signalError(rootPane,"No Password", "Password Field cannot be blank. Please insert a password.");
+            passwordField.requestFocusInWindow();
+        } else {
+            new Thread(()-> {
+                setInputState(false);
+                appendToStatus("Checking network status.......");
+                if (Internet.isInternetAvailable()) {
+                    replaceLastUpdate("Checking network status....... Available");
+                    PrePortal.launchVerification(emailField.getText(), String.valueOf(passwordField.getPassword()));
+                } else {
+                    replaceLastUpdate("Checking network status....... Unavailable");
+                    signalInternetError();
+                    setInputState(true);
+                }
+            }).start();
+        }
+    }
+
+    private static void signalInternetError(){
+        App.signalError(rootPane, "Connection Error", "Internet connection is required to set up Dashboard.\n" +
+                "Please connect to the internet and try again.");
+    }
+
+    public static ActionListener loginAction(KButton button){
+        return e-> new Thread(()-> {
+            button.setEnabled(false);
+            if (Internet.isInternetAvailable()) {
+                final Board boardInstance = Board.getInstance();
+                final Login login = new Login(null);
+                login.setLocationRelativeTo(boardInstance);
+                login.setModalityType(DEFAULT_MODALITY_TYPE);
+                SwingUtilities.invokeLater(()-> login.setVisible(true));
+            } else {
+                signalInternetError();
+            }
+            button.setEnabled(true);
+        }).start();
+    }
+
     public static JRootPane getRoot(){
         return rootPane;
     }
@@ -181,11 +204,16 @@ public class Login extends KDialog {
     public static void notifyCompletion(){
         appendToStatus("Now running Pre-Dashboard builds....... Please wait");
         closeButton.setEnabled(false);
+        Dashboard.setFirst(true);
         Student.initialize();
         final KButton enter = new KButton();
         enter.setFocusable(true);
         enter.addActionListener(e-> {
-            instance.dispose();
+            instance.setVisible(false);
+            if (Board.getInstance() != null) {
+                Runtime.getRuntime().removeShutdownHook(Board.shutDownThread);
+                Board.getInstance().dispose();
+            }
             new Board().setVisible(true);
         });
         rootPane.add(enter);

@@ -6,6 +6,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import proto.*;
+import utg.Dashboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -56,43 +57,47 @@ public class RunningCourseActivity implements Activity {
 
 
     public RunningCourseActivity() {
-        semesterBigLabel = new KLabel(Student.getSemester(), KFontFactory.bodyHeaderFont());
-        semesterBigLabel.setPreferredSize(new Dimension(925, 35));
-        semesterBigLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        semesterBigLabel.underline(Color.BLACK, true);
-
-        noticeLabel = new KLabel(Portal.getRegistrationNotice(), KFontFactory.createBoldFont(15), Color.RED);
-
-        matchItem = new KMenuItem("Match Portal", e-> startMatching(true));
-
-        final KMenuItem updateItem = new KMenuItem("Update Registration Notice",
-                e-> App.promptPlain("Tip", "To renew the registration notice, go to 'Notifications | Portal Alerts | Update Alerts'"));
-
-        final KMenuItem visitItem = new KMenuItem("Visit Portal instead");
-        visitItem.addActionListener(e-> Portal.openPortal(visitItem));
-
-        final JPopupMenu popupMenu = new JPopupMenu();
-        popupMenu.add(matchItem);
-        popupMenu.add(updateItem);
-        popupMenu.add(visitItem);
-
-        optionsButton = KButton.getIconifiedButton("options.png",25,25);
-        optionsButton.setCursor(MComponent.HAND_CURSOR);
-        optionsButton.setToolTipText("More options");
-        final int preferredHeight = optionsButton.getPreferredSize().height;
-        optionsButton.addActionListener(e-> popupMenu.show(optionsButton, optionsButton.getX(),
-                optionsButton.getY() + preferredHeight));
-
-        final KPanel upperPanel = new KPanel(new BorderLayout());
-        upperPanel.add(optionsButton, BorderLayout.WEST);
-        upperPanel.add(new KPanel(semesterBigLabel), BorderLayout.CENTER);
-        upperPanel.add(Box.createRigidArea(new Dimension(975, 10)), BorderLayout.SOUTH);
-
         final KPanel runningActivity = new KPanel(new BorderLayout());
-        runningActivity.add(upperPanel, BorderLayout.NORTH);
-        runningActivity.add(runningSubstances(), BorderLayout.CENTER);
-        runningActivity.add(new KPanel(new FlowLayout(FlowLayout.LEFT), noticeLabel), BorderLayout.SOUTH);
+        if (Student.isTrial()) {
+            runningActivity.add(MComponent.createUnavailableActivity("Semester"), BorderLayout.CENTER);
+        } else {
+            semesterBigLabel = new KLabel(Student.getSemester(), KFontFactory.BODY_HEAD_FONT);
+            semesterBigLabel.setPreferredSize(new Dimension(925, 35));
+            semesterBigLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            semesterBigLabel.underline(Color.BLACK, true);
 
+            noticeLabel = new KLabel(Portal.getRegistrationNotice(), KFontFactory.createPlainFont(16), Color.RED);
+
+            matchItem = new KMenuItem("Match Portal", e-> startMatching(true));
+
+            final KMenuItem updateItem = new KMenuItem("Update Registration Notice",
+                    e-> App.promptPlain("Tip", "To renew the registration notice, go to 'Notifications | Portal Alerts | Update Alerts'"));
+
+            final KMenuItem visitItem = new KMenuItem("Visit Portal instead");
+            visitItem.addActionListener(e-> new Thread(()-> Portal.openPortal(visitItem)).start());
+
+            final JPopupMenu popupMenu = new JPopupMenu();
+            popupMenu.add(matchItem);
+            popupMenu.add(updateItem);
+            popupMenu.add(visitItem);
+
+            optionsButton = KButton.getIconifiedButton("options.png",25,25);
+            optionsButton.setCursor(MComponent.HAND_CURSOR);
+            optionsButton.setToolTipText("More options");
+            final int preferredHeight = optionsButton.getPreferredSize().height;
+            optionsButton.addActionListener(e-> popupMenu.show(optionsButton, optionsButton.getX(),
+                    optionsButton.getY() + preferredHeight));
+
+            final KPanel upperPanel = new KPanel(new BorderLayout());
+            upperPanel.add(optionsButton, BorderLayout.WEST);
+            upperPanel.add(new KPanel(semesterBigLabel), BorderLayout.CENTER);
+            upperPanel.add(Box.createRigidArea(new Dimension(975, 10)), BorderLayout.SOUTH);
+
+            runningActivity.add(upperPanel, BorderLayout.NORTH);
+            runningActivity.add(runningSubstances(), BorderLayout.CENTER);
+            runningActivity.add(new KPanel(new FlowLayout(FlowLayout.LEFT), noticeLabel), BorderLayout.SOUTH);
+            uploadModules();
+        }
         Board.addCard(runningActivity, "Running Courses");
     }
 
@@ -101,9 +106,13 @@ public class RunningCourseActivity implements Activity {
         Board.showCard("Running Courses");
     }
 
-    public static void uploadInitials(){
-        for (RunningCourse c : STARTUP_REGISTRATIONS) {
-            ACTIVE_COURSES.add(c);
+    private static void uploadModules(){
+        if (Dashboard.isFirst()) {
+            for (RunningCourse c : STARTUP_REGISTRATIONS) {
+                ACTIVE_COURSES.add(c);
+            }
+        } else {
+            deserializeModules();
         }
     }
 
@@ -534,12 +543,12 @@ public class RunningCourseActivity implements Activity {
             }
         });
 
-        hintLabel = new KLabel("For more actions, right-click on a course (at any row).", KFontFactory.createPlainFont(16),
-                Color.BLUE);
+        hintLabel = new KLabel("For more actions, right-click a row on the table.", KFontFactory.createPlainFont(16),
+                Color.DARK_GRAY);
         hintLabel.setVisible(activeModel.getRowCount() > 0);
 
         final KPanel bottomPanel = new KPanel(new BorderLayout());
-        bottomPanel.add(new KPanel(hintLabel), BorderLayout.CENTER);
+        bottomPanel.add(new KPanel(new FlowLayout(FlowLayout.LEFT), hintLabel), BorderLayout.CENTER);
         bottomPanel.add(new KPanel(addButton), BorderLayout.EAST);
 
         final KPanel substancePanel = new KPanel();
@@ -549,7 +558,6 @@ public class RunningCourseActivity implements Activity {
     }
 
 
-//    Todo: an option to checkout now
     private static class RunningCourseAdder extends KDialog {
         KTextField codeField, nameField, lecturerField, venueField, roomField;
         JComboBox<String> daysBox, hoursBox;
@@ -709,7 +717,7 @@ public class RunningCourseActivity implements Activity {
     }
 
 
-    public static void serializeModules(){
+    public static void serialize(){
         final String[] runningCourses = new String[ACTIVE_COURSES.size()];
         for (int i = 0; i < runningCourses.length; i++) {
             runningCourses[i] = ACTIVE_COURSES.get(i).exportContent();

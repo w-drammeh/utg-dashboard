@@ -36,7 +36,7 @@ public class KButton extends JButton implements Preference {
     }
 
     public static KButton getIconifiedButton(String name, int width, int height){
-        final KButton iconButton = new KButton(MComponent.scale(App.getIconURL(name), width, height));
+        final KButton iconButton = new KButton(MComponent.scaleIcon(App.getIconURL(name), width, height));
         iconButton.undress();
         return iconButton;
     }

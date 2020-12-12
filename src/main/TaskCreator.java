@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 /**
  * Extends KDialog to provide addition frames for tasks.
  * This class is supported by series of inner classes for each of the addition types.
@@ -156,20 +157,13 @@ public class TaskCreator {
 
             final KPanel importPanel = new KPanel();
             final String[] activeNames = RunningCourseActivity.names();
-            if (activeNames.length == 0) {
-                importPanel.add(new KLabel("No registration found to import",KFontFactory.createPlainFont(16)));
-            } else {
-                final JComboBox<String> importBox = new JComboBox<String>(activeNames){
-                    @Override
-                    public JToolTip createToolTip() {
-                        return MComponent.preferredTip();
-                    }
-                };
+            if (activeNames.length >= 1) {
+                final KComboBox<String> importBox = new KComboBox<>(activeNames);
                 importBox.setFont(KFontFactory.createPlainFont(15));
                 importBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 importBox.setFocusable(false);
-                importBox.setToolTipText("Import from Registered Courses");
-                importBox.addActionListener(e -> {
+                importBox.setToolTipText("Import");
+                importBox.addActionListener(e-> {
                     nameField.setText(String.valueOf(importBox.getSelectedItem()));
                     dField.requestFocusInWindow();
                 });
@@ -266,7 +260,7 @@ public class TaskCreator {
             final String mailAddress = App.requestInput(this.getRootPane(), "Email Address","This assignment will be sent to the email: ");
             if (mailAddress == null) {
                 throw new NullPointerException();
-            } else if (Globals.isBlank(mailAddress)) {
+            } else if (Globals.hasNoText(mailAddress)) {
                 App.signalError(this.getRootPane(), "No Email", "Please provide an appropriate email address.");
                 return keepAskingEmailAddress();
             } else {
@@ -278,7 +272,7 @@ public class TaskCreator {
             final String webAddress = App.requestInput(this.getRootPane(),"Web Address","This assignment will be posted on the site: ");
             if (webAddress == null) {
                 throw new NullPointerException();
-            } else if (Globals.isBlank(webAddress)) {
+            } else if (Globals.hasNoText(webAddress)) {
                 App.signalError(this.getRootPane(), "No Web Site", "Please provide an appropriate web site name.");
                 return keepAskingWebAddress();
             } else {
@@ -307,7 +301,7 @@ public class TaskCreator {
         }
 
         public String getProvidedDeadLine() {
-        	if (Globals.isBlank(dField.getText()) || Globals.isBlank(mField.getText()) || Globals.isBlank(yField.getText())) {
+        	if (Globals.hasNoText(dField.getText()) || Globals.hasNoText(mField.getText()) || Globals.hasNoText(yField.getText())) {
         		return "";
         	}
         	final String sep = MDate.SEPARATOR;
@@ -336,19 +330,12 @@ public class TaskCreator {
 
             final KPanel importPanel = new KPanel();
             final String[] activeNames = RunningCourseActivity.names();
-            if (activeNames.length == 0) {
-                importPanel.add(new KLabel("No registration found to import",KFontFactory.createPlainFont(16)));
-            } else {
-                final JComboBox<String> importBox = new JComboBox<String>(activeNames){
-                    @Override
-                    public JToolTip createToolTip() {
-                        return MComponent.preferredTip();
-                    }
-                };
+            if (activeNames.length >= 1) {
+                final KComboBox<String> importBox = new KComboBox<>(activeNames);
                 importBox.setFont(KFontFactory.createPlainFont(15));
                 importBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 importBox.setFocusable(false);
-                importBox.setToolTipText("Import from Registered Courses");
+                importBox.setToolTipText("Import");
                 importBox.addActionListener(e -> {
                     descriptionField.setText(String.valueOf(importBox.getSelectedItem()));
                     dayField.requestFocusInWindow();
@@ -415,7 +402,7 @@ public class TaskCreator {
         }
 
         public String getProvidedDate() {
-            if(Globals.isBlank(dayField.getText()) || Globals.isBlank(monthField.getText()) || Globals.isBlank(yearField.getText())) {
+            if(Globals.hasNoText(dayField.getText()) || Globals.hasNoText(monthField.getText()) || Globals.hasNoText(yearField.getText())) {
                 return "";
             }
             final String sep = MDate.SEPARATOR;

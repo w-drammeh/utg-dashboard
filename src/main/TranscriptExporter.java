@@ -43,7 +43,7 @@ public class TranscriptExporter {
     public void exportNow() throws IOException, DocumentException {
         String savePath;
         final String homeDir = System.getProperty("user.home");
-        final String documentsDir = homeDir+Serializer.FILE_SEPARATOR+"Documents";
+        final String documentsDir = homeDir+File.separator+"Documents";
         final JFileChooser fileChooser = new JFileChooser(new File(documentsDir).exists() ? documentsDir : homeDir);
         fileChooser.setDialogTitle("Select Destination");
         fileChooser.setMultiSelectionEnabled(false);
@@ -54,7 +54,7 @@ public class TranscriptExporter {
             return;
         }
 
-        final File outputFile = new File(savePath+Serializer.FILE_SEPARATOR+"transcript-"+Student.getNameAcronym()+".pdf");
+        final File outputFile = new File(savePath+File.separator+"transcript-"+Student.getAcronym()+".pdf");
         final FileOutputStream outputStream = new FileOutputStream(outputFile);
         final PdfWriter pdfWriter = PdfWriter.getInstance(document, outputStream);
         pdfWriter.setPageEvent(new WatermarkEvent());
@@ -125,7 +125,8 @@ public class TranscriptExporter {
         rightTable.setLockedWidth(true);
         rightTable.setWidths(new int[] {30, 50});
         rightTable.addCell(newDataCell("YEAR GRADUATED", hintFont, longCellHeight));
-        rightTable.addCell(newDataCell(String.valueOf(Student.getExpectedYearOfGraduation()), valueFont, longCellHeight));
+        final String graduateYear = Student.isGraduated() ? String.valueOf(Student.getExpectedYearOfGraduation()) : "N/A";
+        rightTable.addCell(newDataCell(graduateYear, valueFont, longCellHeight));
         rightTable.addCell(newDataCell("MAJOR", hintFont, longCellHeight));
         rightTable.addCell(newDataCell(Student.getProgram(), valueFont, longCellHeight));
         rightTable.addCell(newDataCell("MINOR", hintFont, shortCellHeight));
@@ -251,11 +252,11 @@ public class TranscriptExporter {
             final String date = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
             final Phrase dateText = new Phrase(date, textFont);
             ColumnText.showTextAligned(contentByte, Element.ALIGN_LEFT, dateText,
-                        15, pageSize.getHeight() - 15, 0F);
+                        15, pageSize.getHeight() - 10, 0F);
 
             final Phrase utlText = new Phrase("UTG Transcript", textFont);
             ColumnText.showTextAligned(contentByte, Element.ALIGN_CENTER, utlText,
-                        pageSize.getWidth()/2, pageSize.getHeight() - 15, 0F);
+                        pageSize.getWidth()/2, pageSize.getHeight() - 10, 0F);
 
             final Phrase linkText = new Phrase("https://utg.gm/records/transcript/print/"+k, textFont);
             ColumnText.showTextAligned(contentByte, Element.ALIGN_LEFT, linkText, 15, 20, 0F);

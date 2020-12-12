@@ -12,7 +12,7 @@
             iText-2.1.7
             Selenium-Server-Standalone-3.141.59 + Web-Driver-Manager-3.6.2
             Java Mail API
-    Frameworks: No framework is used in this project
+    Frameworks: None
 
 >>Notes to Overview
     Source Packages (4 packages):
@@ -26,8 +26,7 @@
             to make Dashboard what it is.
         utg:
             Contains classes for testing and running the project from every aspects with the real runner
-            class - utg.Dashboard. The other two types - utg.GeneralTester and utg.SpecificTester are
-            to be used for by-passed user detail testing and specific-functionality testing, respectively.
+            class - utg.Dashboard.
 
     External Libs:
         To get Dashboard fully-setup for development, the following external libraries must be recognized as
@@ -47,3 +46,4 @@
             user-experience without the sacrifice of speed, or time.
             For instance, synchronization of courses should not be waited by reading of notices, or vice-versa.
         4) The Java Mail API
+            Provides mechanism for reporting issues, and sending feedback

@@ -17,20 +17,21 @@ import java.util.List;
  * Never forget to use it on a different thread!
  */
 public class Portal {
-    public static final String LOGIN_PAGE = "https://www.utg.gm/login";
-    public static final String LOGOUT_PAGE = "https://www.utg.gm/logout";
+    public static final String LOGIN_PAGE = "https://utg.gm/login";
+    public static final String LOGOUT_PAGE = "https://utg.gm/logout";
     //do not call the contentsPage or profilePage on a driver that has not yet entered....!
-    public static final String CONTENTS_PAGE = "https://www.utg.gm/course-registrations";
-    public static final String PROFILE_PAGE = "https://www.utg.gm/profile";
+    public static final String CONTENTS_PAGE = "https://utg.gm/course-registrations";
+    public static final String PROFILE_PAGE = "https://utg.gm/profile";
     public static final int MAXIMUM_WAIT_TIME = 30;//intended in seconds
     public static final int MINIMUM_WAIT_TIME = 5;
     /**
-     * It's where the admission notice is.
-     * Notice: The same class reference of the admission-notice will change to registrationNotice on the contentsPage.
+     * Notice: the HOME_PAGE seems to be pointing
+     * to the LOGIN_PAGE when there's no session.
      */
-    public static final String HOME_PAGE = "https://www.utg.gm/home";
-    private static String registrationNotice = "Waiting for a successful sync...";
-    private static String admissionNotice = registrationNotice;
+    public static final String HOME_PAGE = "https://utg.gm/home";
+    public static final String ADMISSION_PAGE = "https://utg.gm";
+    private static String admissionNotice;
+    private static String registrationNotice;
     private static Date lastAdmissionNoticeUpdate, lastRegistrationNoticeUpdate;
     private static boolean autoSync = false;
     private static Date lastLogin;//currently not readable, as its get function is not used
@@ -38,23 +39,26 @@ public class Portal {
 
 
     public static void openPortal(Component clickable){
-        new Thread(() -> {
-            clickable.setEnabled(false);
+        clickable.setEnabled(false);
+        if (Student.isTrial()) {
+            try {
+                Internet.visit(LOGIN_PAGE);
+            } catch (Exception e) {
+                App.signalError(e);
+            }
+        } else {
             if (Internet.isInternetAvailable()) {
                 final int vInt = App.verifyUser("To access your portal, kindly enter your Matriculation Number below:");
                 if (vInt == App.VERIFICATION_TRUE) {
-                    launchPortal(clickable);
+                    launchPortal();
                 } else if (vInt == App.VERIFICATION_FALSE) {
                     App.reportMatError();
-                    clickable.setEnabled(true);
-                } else {
-                    clickable.setEnabled(true);
                 }
             } else {
                 App.reportNoInternet();
-                clickable.setEnabled(true);
             }
-        }).start();
+        }
+        clickable.setEnabled(true);
     }
 
     /**
@@ -63,24 +67,18 @@ public class Portal {
      * will enable it after completing the pending charges.
      *
      */
-    private static void launchPortal(Component clickable){
-        try {
+    private static void launchPortal(){
+        if (portalDriver == null) {
+            portalDriver = MDriver.forgeNew(false);
             if (portalDriver == null) {
-                portalDriver = MDriver.forgeNew(false);
-                if (portalDriver == null) {
-                    App.reportMissingDriver();
-                    return;
-                }
+                App.reportMissingDriver();
+                return;
             }
+        }
 
-            final int loginAttempt = MDriver.attemptLogin(portalDriver);
-            if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
-                portalDriver.navigate().to(Portal.CONTENTS_PAGE);
-            }
-        } finally {
-            if (!(clickable == null)) {
-                clickable.setEnabled(true);
-            }
+        final int loginAttempt = MDriver.attemptLogin(portalDriver);
+        if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
+            portalDriver.navigate().to(Portal.CONTENTS_PAGE);
         }
     }
 
@@ -152,7 +150,7 @@ public class Portal {
     public static void setRegistrationNotice(String registrationNotice){
         Portal.registrationNotice = registrationNotice;
         lastRegistrationNoticeUpdate = new Date();
-        if (Board.isAppReady()) {
+        if (Board.isReady()) {
             RunningCourseActivity.effectNoticeUpdate();
         } else {
             Board.postProcesses.add(RunningCourseActivity::effectNoticeUpdate);

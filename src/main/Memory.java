@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 /**
  * It's the root-center of student analysis.
- * Among the things it does is to keep track of verified courses to be supplied in the Transcript
- * and Analysis.
+ * Among the things it does is to keep track of verified courses
+ * to be supplied in the Transcript and Analysis types.
  */
 public class Memory {
     /**
@@ -14,7 +14,7 @@ public class Memory {
      * prior to any activity-answer.
      * This list must remain updated by the monitor in ModuleHandler.
      * Never directly add or withdraw from this list - all such must be directed
-     * by the monitor at main.ModuleHandler
+     * by the monitor.
      */
     private static final ArrayList<Course> VERIFIED_LIST = new ArrayList<Course>() {
         @Override
@@ -23,9 +23,6 @@ public class Memory {
         }
     };
 
-    /**
-     * May be called only by the modulesMonitor at ModuleHandler
-     */
     public static void mayRemember(Course course){
         if (VERIFIED_LIST.add(course)) {
             TranscriptActivity.TRANSCRIPT_MODEL.addRow(new String[] {course.getCode(), course.getName(),
@@ -33,18 +30,12 @@ public class Memory {
         }
     }
 
-    /**
-     * May be called only by the modulesMonitor at ModuleHandler
-     */
     public static void mayForget(Course course){
         if (VERIFIED_LIST.remove(course)) {
             TranscriptActivity.TRANSCRIPT_MODEL.removeRow(TranscriptActivity.TRANSCRIPT_MODEL.getRowOf(course.getCode()));
         }
     }
 
-    /**
-     * May be called only by the modulesMonitor at ModuleHandler
-     */
     public static void mayReplace(Course outgoing, Course incoming){
         final int t = indexOf(outgoing.getCode());
         if (t >= 0) {
@@ -65,11 +56,15 @@ public class Memory {
         return VERIFIED_LIST;
     }
 
+    public static boolean isAnalysisAvailable(){
+        return !VERIFIED_LIST.isEmpty();
+    }
+
     /**
      * Returns a course which can be used for experimentation by this class of experimentation.
      */
-    private static Course newDefaultCourse(){
-        return new Course("", "", "", "", "", "", "", "", 0.0, 0, "", true);
+    private static Course newBlankModule(){
+        return new Course("", "", "", "", "", "", "", "", 0D, 0, "", true);
     }
 
 //    Filterers -
@@ -111,7 +106,7 @@ public class Memory {
     public static ArrayList<String> filterLecturers(){
         final ArrayList<String> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
-            if (!(requiredList.contains(c.getLecturer()) || Globals.isBlank(c.getLecturer()))) {
+            if (!(requiredList.contains(c.getLecturer()) || Globals.hasNoText(c.getLecturer()))) {
                 requiredList.add(c.getLecturer());
             }
         }
@@ -283,7 +278,7 @@ public class Memory {
     public static ArrayList<String> getLecturersByYear(String yearName){
         final ArrayList<String> requiredList = new ArrayList<>();
         for (Course c : getFractionByYear(yearName)) {
-            if (!(requiredList.contains(c.getLecturer()) || Globals.isBlank(c.getLecturer()))) {
+            if (!(requiredList.contains(c.getLecturer()) || Globals.hasNoText(c.getLecturer()))) {
                 requiredList.add(c.getLecturer());
             }
         }
@@ -293,7 +288,7 @@ public class Memory {
     public static ArrayList<Course> getFractionByLecturer(String lName){
         final ArrayList<Course> requiredList = new ArrayList<>();
         for (Course c : VERIFIED_LIST) {
-            if (!Globals.isBlank(c.getLecturer()) && c.getLecturer().equals(lName)) {
+            if (!Globals.hasNoText(c.getLecturer()) && c.getLecturer().equals(lName)) {
                 requiredList.add(c);
             }
         }
@@ -337,7 +332,7 @@ public class Memory {
         if (VERIFIED_LIST.isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = newDefaultCourse();
+            Course requiredCourse = newBlankModule();
             for (Course someCourse : VERIFIED_LIST) {
                 if (someCourse.getScore() > requiredCourse.getScore()) {
                     requiredCourse = someCourse;
@@ -351,7 +346,7 @@ public class Memory {
         if (VERIFIED_LIST.isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = newDefaultCourse();
+            Course requiredCourse = newBlankModule();
             requiredCourse.setScore(100D);
             for (Course instantCourse : VERIFIED_LIST) {
                 if (instantCourse.getScore() < requiredCourse.getScore()) {
@@ -366,7 +361,7 @@ public class Memory {
         if (getMajors().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = newDefaultCourse();
+            Course requiredCourse = newBlankModule();
             for (Course someCourse : getMajors()) {
                 if (someCourse.getScore() > requiredCourse.getScore()) {
                     requiredCourse = someCourse;
@@ -380,7 +375,7 @@ public class Memory {
         if (getMajors().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = newDefaultCourse();
+            Course requiredCourse = newBlankModule();
             requiredCourse.setScore(100D);
             for (Course someCourse : getMajors()) {
                 if (someCourse.getScore() < requiredCourse.getScore()) {
@@ -395,7 +390,7 @@ public class Memory {
         if (getMinors().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = newDefaultCourse();
+            Course requiredCourse = newBlankModule();
             for (Course someCourse : getMinors()) {
                 if (someCourse.getScore() > requiredCourse.getScore()) {
                     requiredCourse = someCourse;
@@ -409,7 +404,7 @@ public class Memory {
         if (getMinors().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = newDefaultCourse();
+            Course requiredCourse = newBlankModule();
             requiredCourse.setScore(100D);
             for (Course someCourse : getMinors()) {
                 if (someCourse.getScore() < requiredCourse.getScore()) {
@@ -424,7 +419,7 @@ public class Memory {
         if (getDERs().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = newDefaultCourse();
+            Course requiredCourse = newBlankModule();
             for (Course someCourse : getDERs()) {
                 if (someCourse.getScore() > requiredCourse.getScore()) {
                     requiredCourse = someCourse;
@@ -438,7 +433,7 @@ public class Memory {
         if (getDERs().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = newDefaultCourse();
+            Course requiredCourse = newBlankModule();
             requiredCourse.setScore(100D);
             for (Course someCourse : getDERs()) {
                 if (someCourse.getScore() < requiredCourse.getScore()) {
@@ -453,7 +448,7 @@ public class Memory {
         if (getGERs().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = newDefaultCourse();
+            Course requiredCourse = newBlankModule();
             for (Course someCourse : getGERs()) {
                 if (someCourse.getScore() > requiredCourse.getScore()) {
                     requiredCourse = someCourse;
@@ -467,7 +462,7 @@ public class Memory {
         if (getGERs().isEmpty()) {
             return null;
         } else {
-            Course requiredCourse = newDefaultCourse();
+            Course requiredCourse = newBlankModule();
             requiredCourse.setScore(100D);
             for (Course someCourse : getGERs()) {
                 if (someCourse.getScore() < requiredCourse.getScore()) {

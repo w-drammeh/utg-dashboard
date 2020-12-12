@@ -10,6 +10,14 @@ public class KTableModel extends DefaultTableModel implements Preference {
     private KTable table;
 
 
+    public KTableModel(){
+        super();
+    }
+
+    public KTableModel(Object[] columns){
+        super(columns, 0);
+    }
+
     public KTable getTable(){
         return table;
     }

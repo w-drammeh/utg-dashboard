@@ -101,7 +101,7 @@ public class KTextField extends JTextField implements Preference {
     }
 
     public boolean isBlank() {
-        return Globals.isBlank(getText());
+        return Globals.hasNoText(getText());
     }
 
     public void setText(int n) {

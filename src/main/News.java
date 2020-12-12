@@ -11,7 +11,6 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +18,8 @@ public class News implements Activity {
     private KPanel present;
     private KScrollPane scrollPane;
     private KButton refreshButton;
-    private KLabel accessLabel;
     private static String accessTime;
+    private KLabel accessLabel;
     private boolean isFirstView;
     private static final ArrayList<NewsSavior> NEWS_DATA = new ArrayList<NewsSavior>() {
         @Override
@@ -38,19 +37,16 @@ public class News implements Activity {
 
 
     public News() {
-        accessLabel = KLabel.getPredefinedLabel("Last accessed: ", SwingConstants.LEFT);
-        accessLabel.setStyle(KFontFactory.createPlainFont(15), Color.RED);
-        accessTime = "Unknown";
-        accessLabel.setText(accessTime);
+        accessTime = "News Feeds will be shown here... Refresh now to get updates";
+        accessLabel = new KLabel(accessTime, KFontFactory.createPlainFont(16), Color.DARK_GRAY);
 
         refreshButton = new KButton("Refresh");
         refreshButton.setFont(KFontFactory.createPlainFont(15));
         refreshButton.setCursor(MComponent.HAND_CURSOR);
-        refreshButton.setMnemonic(KeyEvent.VK_F);
         refreshButton.addActionListener(e-> new Thread(()-> packAll(true)).start());
 
         final KPanel northPanel = new KPanel(new BorderLayout());
-        northPanel.add(new KPanel(new KLabel("News Feeds", KFontFactory.bodyHeaderFont())), BorderLayout.WEST);
+        northPanel.add(new KPanel(new KLabel("News Feeds", KFontFactory.BODY_HEAD_FONT)), BorderLayout.WEST);
         northPanel.add(new KPanel(refreshButton), BorderLayout.EAST);
 
         present = new KPanel();
@@ -82,10 +78,7 @@ public class News implements Activity {
         }
     }
 
-    /**
-     * Places all the separately organized newsPackages in the present.
-     */
-    public void packAll(boolean userClicked) {
+    public void packAll(boolean userRequest) {
         refreshButton.setEnabled(false);
         try {
             final Document doc = Jsoup.connect(NEWS_SITE).get();
@@ -111,14 +104,14 @@ public class News implements Activity {
                     }
                 }
             }
-            accessTime = MDate.now();
+            accessTime = "Last accessed: "+MDate.now();
             accessLabel.setText(accessTime);
-            if (userClicked) {
+            if (userRequest) {
                 App.promptPlain("News", "News refreshed successfully from " + NEWS_SITE);
             }
         } catch (IOException e) {
-            if (userClicked) {
-                App.signalError("Internet Error", "Feeds will be available when you're connected to the internet.");
+            if (userRequest) {
+                App.reportNoInternet();
             }
         } finally {
             refreshButton.setEnabled(true);
@@ -130,8 +123,11 @@ public class News implements Activity {
      */
     private KPanel packNews(String header, String body, String link, String allContent) {
         final KLabel hLabel = new KLabel(header, KFontFactory.createBoldFont(18), Color.BLUE);
-        hLabel.setOpaque(false);
-        final KTextPane textPane = KTextPane.wantHtmlFormattedPane(body.substring(0, body.length() - (header.length() + 13)));
+        final KPanel headerWrap = new KPanel(new FlowLayout(FlowLayout.LEFT), hLabel);
+        headerWrap.setReflectTheme(false);
+        headerWrap.setBackground(Color.WHITE);
+
+        final KTextPane textPane = KTextPane.htmlFormattedPane(body.substring(0, body.length() - (header.length() + 13)));
 
         final NewsDialog newsDialog = new NewsDialog(header, body, link, allContent);
 
@@ -148,19 +144,20 @@ public class News implements Activity {
         }
 
         final KPanel readerWrap = new KPanel(new FlowLayout(FlowLayout.RIGHT), extendedReader);
+        readerWrap.setReflectTheme(false);
         readerWrap.setBackground(Color.WHITE);
 
         final KPanel niceBox = new KPanel(new BorderLayout());
         niceBox.setBackground(Color.WHITE);
-        niceBox.setPreferredSize(new Dimension(975, 150));
+        niceBox.setPreferredSize(new Dimension(975, 160));
         niceBox.setBorder(BorderFactory.createLineBorder(Color.BLUE));
-        niceBox.add(hLabel, BorderLayout.NORTH);
+        niceBox.add(headerWrap, BorderLayout.NORTH);
         niceBox.add(textPane, BorderLayout.CENTER);
         niceBox.add(readerWrap, BorderLayout.SOUTH);
         return new KPanel(new FlowLayout(FlowLayout.CENTER, 0, 5), niceBox);
     }
 
-//    push if any
+//    push, but if any
     public void pushNews() {
         final ArrayList<NewsSavior> savedNews = (ArrayList<NewsSavior>) Serializer.fromDisk("news.ser");
         if (savedNews == null) {
@@ -200,7 +197,7 @@ public class News implements Activity {
             bodyContent = body;
             associateLink = link;
             allContent = allNews;
-            textPane = KTextPane.wantHtmlFormattedPane(allContent);
+            textPane = KTextPane.htmlFormattedPane(allContent);
             textPane.setPreferredSize(new Dimension(665, 465));
             KScrollPane newsScrollPane = new KScrollPane(textPane);
             newsScrollPane.setBorder(BorderFactory.createLineBorder(Color.BLUE));
@@ -211,9 +208,9 @@ public class News implements Activity {
                 visitButton.setEnabled(false);
                 dispose();
                 try {
-                    Desktop.getDesktop().browse(URI.create(NEWS_SITE));
-                } catch (Exception e1) {
-                    App.signalError(e1);
+                    Internet.visit(NEWS_SITE);
+                } catch (Exception ex) {
+                    App.signalError(ex);
                 }
                 visitButton.setEnabled(true);
             }).start());
@@ -282,7 +279,7 @@ public class News implements Activity {
     }
 
 
-    public static void serializeData() {
+    public static void serialize() {
         Serializer.toDisk(NEWS_DATA, "news.ser");
         Serializer.toDisk(accessTime, "news-time.ser");
     }

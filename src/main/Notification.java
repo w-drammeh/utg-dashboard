@@ -81,7 +81,7 @@ public class Notification implements Serializable {
             setResizable(true);
 
             final String decidedText = notification.getInformation() == null ? notification.getText() : notification.getInformation();
-            final KTextPane noticePane = KTextPane.wantHtmlFormattedPane(decidedText);
+            final KTextPane noticePane = KTextPane.htmlFormattedPane(decidedText);
 
             final KScrollPane textScroll = new KScrollPane(noticePane);
             textScroll.setPreferredSize(new Dimension(550,235));
@@ -120,7 +120,7 @@ public class Notification implements Serializable {
 
         private NotificationLayer(Notification alert) {
             this.notification = alert;
-            setPreferredSize(new Dimension(1_000, 35));
+            setPreferredSize(new Dimension(975, 35));
             setCursor(MComponent.HAND_CURSOR);
             addMouseListener(forgeListener(this));
             setLayout(new BorderLayout());
@@ -157,7 +157,7 @@ public class Notification implements Serializable {
     }
 
 
-    public static void serializeAll() {
+    public static void serialize() {
         Serializer.toDisk(NOTIFICATIONS, "alerts.ser");
     }
 

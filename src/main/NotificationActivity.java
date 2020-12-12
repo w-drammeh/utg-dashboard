@@ -2,6 +2,7 @@ package main;
 
 import org.openqa.selenium.firefox.FirefoxDriver;
 import proto.*;
+import utg.Dashboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,14 +10,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class NotificationActivity {
+public class NotificationActivity implements Activity {
     private CardLayout cardLayout;
     private static KPanel dashboardPanel;
     private static KPanel portalPanel;
     private static KButton refreshButton;
     private static FirefoxDriver noticeDriver;
-    private static KLabel registrationLabel;
     private static KLabel admissionLabel;
+    private static KLabel registrationLabel;
     /**
      * How may it be needed outside? As for the big-button, it's
      * only the toolTip needed which is taken cared by renewCount(), herein this class.
@@ -31,7 +32,7 @@ public class NotificationActivity {
         cardLayout.addLayoutComponent(centerPanel.add(portalComponent()), "portal");
 
         final KLabel hint = KLabel.getPredefinedLabel("Notifications ", SwingConstants.LEFT);
-        hint.setFont(KFontFactory.bodyHeaderFont());
+        hint.setFont(KFontFactory.BODY_HEAD_FONT);
         hint.setText("[Showing Local Dashboard Alerts]");
 
         final KComboBox<String> alertOptions = new KComboBox<>(new String[] {"Dashboard", "Portal"});
@@ -52,12 +53,19 @@ public class NotificationActivity {
         final KPanel activityPanel = new KPanel(new BorderLayout());
         activityPanel.add(northPanel, BorderLayout.NORTH);
         activityPanel.add(centerPanel, BorderLayout.CENTER);
-
+        if (!Dashboard.isFirst()) {
+            Notification.deSerializeAll();
+        }
         Board.addCard(activityPanel, "Notifications");
     }
 
+    @Override
+    public void answerActivity() {
+        Board.showCard("Notifications");
+    }
+
     private Component dashboardComponent() {
-        final KButton clearButton = new KButton("Remove all");
+        final KButton clearButton = new KButton("Remove All");
         clearButton.setFont(KFontFactory.createPlainFont(15));
         clearButton.addActionListener(clearAction());
         clearButton.setToolTipText("Clear Notifications");
@@ -70,33 +78,8 @@ public class NotificationActivity {
     }
 
     private Component portalComponent() {
-        registrationLabel = new KLabel(Portal.getRegistrationNotice(), KFontFactory.createPlainFont(16));
-
-        final KPanel registrationPanel = new KPanel(new BorderLayout());
-        registrationPanel.setPreferredSize(new Dimension(1_000, 35));
-        registrationPanel.setCursor(MComponent.HAND_CURSOR);
-        registrationPanel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                registrationLabel.setFont(KFontFactory.createBoldFont(16));
-            }
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                SwingUtilities.invokeLater(()-> new NoticeExhibition(NoticeExhibition.REGISTRATION_NOTICE).setVisible(true));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                registrationLabel.setFont(KFontFactory.createPlainFont(16));
-            }
-        });
-        registrationPanel.add(new KPanel(new KLabel("REGISTRATION ALERT:", KFontFactory.createBoldFont(16),
-                Color.BLUE)), BorderLayout.WEST);
-        registrationPanel.add(new KPanel(registrationLabel), BorderLayout.CENTER);
-
-        admissionLabel = new KLabel(Portal.getAdmissionNotice(), KFontFactory.createPlainFont(16));
-
+        admissionLabel = new KLabel(Student.isTrial() ? "Not available" : Portal.getAdmissionNotice(),
+                KFontFactory.createPlainFont(16));
         final KPanel admissionPanel = new KPanel(new BorderLayout());
         admissionPanel.setPreferredSize(new Dimension(1_000, 35));
         admissionPanel.setCursor(MComponent.HAND_CURSOR);
@@ -120,9 +103,41 @@ public class NotificationActivity {
                 Color.BLUE)), BorderLayout.WEST);
         admissionPanel.add(new KPanel(admissionLabel), BorderLayout.CENTER);
 
+        registrationLabel = new KLabel(Student.isTrial() ? "Not available" : Portal.getRegistrationNotice(),
+                KFontFactory.createPlainFont(16));
+        final KPanel registrationPanel = new KPanel(new BorderLayout());
+        registrationPanel.setPreferredSize(new Dimension(1_000, 35));
+        registrationPanel.setCursor(MComponent.HAND_CURSOR);
+        registrationPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                registrationLabel.setFont(KFontFactory.createBoldFont(16));
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                final NoticeExhibition exhibitor = new NoticeExhibition(NoticeExhibition.REGISTRATION_NOTICE);
+                SwingUtilities.invokeLater(()-> exhibitor.setVisible(true));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                registrationLabel.setFont(KFontFactory.createPlainFont(16));
+            }
+        });
+        registrationPanel.add(new KPanel(new KLabel("REGISTRATION ALERT:", KFontFactory.createBoldFont(16),
+                Color.BLUE)), BorderLayout.WEST);
+        registrationPanel.add(new KPanel(registrationLabel), BorderLayout.CENTER);
+
         refreshButton = new KButton("Update Alerts");
         refreshButton.setFont(KFontFactory.createPlainFont(15));
-        refreshButton.addActionListener(e-> updateNotices(true));
+        refreshButton.addActionListener(e-> {
+            if (Student.isTrial()) {
+                App.promptWarning("Unavailable", "Sorry, we cannot access the Portal for notices, because you're not logged in.");
+            } else {
+                updateNotices(true);
+            }
+        });
 
         portalPanel = new KPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));
         portalPanel.addAll(refreshButton, new KPanel(new KSeparator(new Dimension(975, 1))),
@@ -254,17 +269,30 @@ public class NotificationActivity {
 
 
     private static class NoticeExhibition extends KDialog {
-        private static final String REGISTRATION_NOTICE = "Registration Notice";
         private static final String ADMISSION_NOTICE = "Admission Notice";
+        private static final String REGISTRATION_NOTICE = "Registration Notice";
 
-        private NoticeExhibition(String noticeTitle){
-            super(noticeTitle);
+        private NoticeExhibition(String type){
+            super(type);
             setModalityType(Dialog.DEFAULT_MODALITY_TYPE);
             setResizable(true);
 
-            final String noticeText = noticeTitle.equals(REGISTRATION_NOTICE) ? Portal.getRegistrationNotice() :
-                    Portal.getAdmissionNotice();
-            final KTextPane noticePane = KTextPane.wantHtmlFormattedPane(noticeText);
+            String noticeText = "";
+            if (type.equals(ADMISSION_NOTICE)) {
+                noticeText = Portal.getAdmissionNotice();
+                if (Student.isTrial()) {
+                    noticeText = "<b>Admission Notice</b> is not available for the current user type." +
+                            "<p>However, you can checkout the <a href="+Portal.ADMISSION_PAGE+">UTG Admissions</a> Page for updates.</p>";
+                }
+            } else if (type.equals(REGISTRATION_NOTICE)) {
+                noticeText = Portal.getRegistrationNotice();
+                if (Student.isTrial()) {
+                    noticeText = "<b>Registration Notice</b> is not available for the current user type. " +
+                            "If you are a UTG student, then Login to track registration.";
+                }
+            }
+
+            final KTextPane noticePane = KTextPane.htmlFormattedPane(noticeText);
             noticePane.setPreferredSize(new Dimension(500, 125));
 
             final KButton disposeButton = new KButton("Ok");
@@ -272,9 +300,11 @@ public class NotificationActivity {
 
             final KPanel lowerPart = new KPanel();
             lowerPart.setLayout(new BoxLayout(lowerPart, BoxLayout.Y_AXIS));
-            lowerPart.add(new KPanel(new KLabel("Last updated: ", KFontFactory.createBoldFont(16)),
-                    new KLabel(noticeTitle.equals(REGISTRATION_NOTICE) ? Portal.getLastRegistrationNoticeUpdate() :
-                            Portal.getLastAdmissionNoticeUpdate(), KFontFactory.createPlainFont(16))));
+            if (!Student.isTrial()) {
+                lowerPart.add(new KPanel(new KLabel("Last updated: ", KFontFactory.createBoldFont(16)),
+                        new KLabel(type.equals(ADMISSION_NOTICE) ? Portal.getLastAdmissionNoticeUpdate() :
+                                Portal.getLastRegistrationNoticeUpdate(), KFontFactory.createPlainFont(16))));
+            }
             lowerPart.add(new KPanel(disposeButton));
 
             final KPanel contentPanel = new KPanel();

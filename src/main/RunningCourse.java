@@ -103,9 +103,9 @@ public class RunningCourse implements Serializable {
     public String getSchedule(){
         if (Globals.hasText(day) && Globals.hasText(time)) {
             return String.join(" ", day, time);
-        } else if (Globals.hasText(day) && Globals.isBlank(time)) {
+        } else if (Globals.hasText(day) && Globals.hasNoText(time)) {
             return String.join(" - ", day, "Unknown time");
-        } else if (Globals.isBlank(day) && Globals.hasText(time)) {
+        } else if (Globals.hasNoText(day) && Globals.hasText(time)) {
             return String.join(" - ", time, "Unknown day");
         } else {
             return "";

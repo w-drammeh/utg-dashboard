@@ -41,8 +41,8 @@ public class KLabel extends JLabel implements Preference {
         setPreferences();
     }
 
-    public static KLabel wantIconLabel(String name, int width, int height){
-        return new KLabel(MComponent.scale(App.getIconURL(name), width, height));
+    public static KLabel createIcon(String name, int width, int height){
+        return new KLabel(MComponent.scaleIcon(App.getIconURL(name), width, height));
     }
 
     /**
@@ -62,6 +62,21 @@ public class KLabel extends JLabel implements Preference {
     public void setStyle(Font f, Color fg){
         setFont(f);
         setForeground(fg);
+    }
+
+    public void setFocusFont(Font focusFont){
+        final Font actualFont = getFont();
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                setFont(focusFont);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                setFont(actualFont);
+            }
+        });
     }
 
     /**

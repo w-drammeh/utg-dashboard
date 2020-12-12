@@ -6,9 +6,7 @@ import utg.Dashboard;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * @author Muhammed W. Drammeh <wakadrammeh@gmail.com>
@@ -49,11 +47,12 @@ public final class Board extends KFrame {
     private static KButton toPortalButton;
     private static KButton notificationButton;
     private static Board appInstance;
+    private static boolean isReady;
     public static final ArrayList<Runnable> postProcesses = new ArrayList<Runnable>() {
         @Override
         public boolean add(Runnable runnable) {
-            if (isAppReady()) {
-                App.silenceException("Dashboard is done building; this task may never execute.");
+            if (isReady()) {
+                App.silenceException("Dashboard is done building; task may never execute.");
             }
             return super.add(runnable);
         }
@@ -68,14 +67,16 @@ public final class Board extends KFrame {
     private Analysis analysisGenerator;
     private Tips faqsGenerator;
     private About myDashboard;
+    private TaskActivity taskActivity;
     private News newsPresent;
+    private NotificationActivity alertActivity;
 
 
     public Board() {
         super("UTG-Student Dashboard");
         appInstance = Board.this;
         boardRoot = getRootPane();
-        setDefaultCloseOperation(KDialog.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -87,13 +88,16 @@ public final class Board extends KFrame {
         });
 
         Settings.allLooksInfo = UIManager.getInstalledLookAndFeels();
-        if (!Dashboard.isFirst()) {
+        if (Dashboard.isFirst()) {
+            Serializer.unMountUserData();
+        } else {
+            Settings.deSerialize();
             for (UIManager.LookAndFeelInfo lookAndFeelInfo : Settings.allLooksInfo) {
                 if (lookAndFeelInfo.getName().equals(Settings.lookName)) {
                     try {
                         UIManager.setLookAndFeel(lookAndFeelInfo.getClassName());
                     } catch (Exception e) {
-                        App.silenceException(e);
+                        postProcesses.add(()-> App.signalError(e));
                     }
                     break;
                 }
@@ -102,10 +106,13 @@ public final class Board extends KFrame {
 
         boardContent = new KPanel();
         boardContent.setLayout(new BoxLayout(boardContent, BoxLayout.Y_AXIS));
+        setContentPane(boardContent);
         setUpThorax();
         setUpBody();
-        setContentPane(boardContent);
 
+        if (!(Dashboard.isFirst() || Student.isTrial())) {
+            Portal.deSerialize();
+        }
         runningCourseActivity = new RunningCourseActivity();
         moduleActivity = new ModuleActivity();
         settingsUI = new SettingsUI();
@@ -114,13 +121,9 @@ public final class Board extends KFrame {
         faqsGenerator = new Tips();
         myDashboard = new About();
 //        outlined / big buttons
-        new TaskActivity();
-        new NotificationActivity();
+        taskActivity = new TaskActivity();
         newsPresent = new News();
-
-
-        final Timer dayTimer = new Timer(Globals.DAY, e-> anotherDay());
-        dayTimer.setInitialDelay(Globals.DAY - MDate.getTimeValue(new Date()));
+        alertActivity = new NotificationActivity();
 
         pack();
         setMinimumSize(getPreferredSize());
@@ -164,22 +167,28 @@ public final class Board extends KFrame {
             }
         });
 
-        levelIndicator = new KLabel(Student.getLevel(), KFontFactory.createPlainFont(15), Color.BLUE);
+        levelIndicator = new KLabel(Student.isTrial() ? "" : Student.getLevel(), KFontFactory.createPlainFont(15), Color.BLUE);
         final KPanel levelPanel = new KPanel(new FlowLayout(FlowLayout.LEFT), new Dimension(325,25));
-        levelPanel.addAll(new KLabel("Level:", KFontFactory.createPlainFont(15)), levelIndicator);
+        if (!Student.isTrial()) {
+            levelPanel.addAll(new KLabel("Level:", KFontFactory.createPlainFont(15)), levelIndicator);
+        }
 
-        nameLabel = new KLabel(Student.requiredNameForFormat(), KFontFactory.createBoldFont(20));
-        nameLabel.setToolTipText(Student.getLevelNumber()+" Level "+Student.getMajor()+" Major");
+        nameLabel = new KLabel(Student.requiredNameForFormat().toUpperCase(), KFontFactory.createBoldFont(20));
+        if (!Student.isTrial()) {
+            final String nameTip = Student.getLevelNumber()+" Level "+Student.getMajor()+" Major";
+            nameLabel.setToolTipText(nameTip);
+        }
 
-        final KLabel programLabel = new KLabel(Student.getProgram(), KFontFactory.createPlainFont(17));
+        final KLabel programLabel = new KLabel(Student.isTrial() ? "" : Student.getProgram(),
+                KFontFactory.createPlainFont(17));
 
         toPortalButton = KButton.getIconifiedButton("go-arrow.png",25,25);
         toPortalButton.setText("Go Portal");
         toPortalButton.setMaximumSize(new Dimension(145, 35));
         toPortalButton.setFont(KFontFactory.createBoldItalic(15));
         toPortalButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        toPortalButton.setToolTipText("Visit your Portal");
-        toPortalButton.addActionListener(actionEvent-> Portal.openPortal(toPortalButton));
+        toPortalButton.setToolTipText(String.format("Visit %s Portal", Student.isTrial() ? "UTG" : "your"));
+        toPortalButton.addActionListener(actionEvent-> new Thread(()-> Portal.openPortal(toPortalButton)).start());
 
         final KPanel midPart = new KPanel(300, 200);
         midPart.setLayout(new GridLayout(7, 1, 5, 0));
@@ -192,44 +201,42 @@ public final class Board extends KFrame {
         midPart.add(horizontalWrapper);//notice how the last space is automatically left blank.
         //besides, the height and the spaces do not seem to count
 
-        final KButton aUtgButton = new KButton("About UTG");
-        aUtgButton.undress();
-        aUtgButton.setStyle(KFontFactory.createBoldFont(14), Color.BLUE);
-        aUtgButton.setToolTipText("Learn more about UTG");
-        aUtgButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        aUtgButton.addActionListener(e -> new Thread(()-> {
-            aUtgButton.setEnabled(false);
+        final KButton aboutUTGButton = new KButton("About UTG");
+        aboutUTGButton.setStyle(KFontFactory.createBoldFont(15), Color.BLUE);
+        aboutUTGButton.undress();
+        aboutUTGButton.underline(false);
+        aboutUTGButton.setPreferredSize(new Dimension(125, 30));
+        aboutUTGButton.setToolTipText("Learn more about UTG");
+        aboutUTGButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        aboutUTGButton.addActionListener(e-> new Thread(()-> {
+            aboutUTGButton.setEnabled(false);
             try {
-                Desktop.getDesktop().browse(URI.create(News.HOME_SITE));
-            } catch (Exception e1) {
-                App.signalError(e1);
+                Internet.visit(News.HOME_SITE);
+            } catch (Exception ex) {
+                App.signalError(ex);
             } finally {
-                aUtgButton.setEnabled(true);
+                aboutUTGButton.setEnabled(true);
             }
         }).start());
 
-        stateIndicator = new KLabel(Student.getStatus(), KFontFactory.createBoldFont(15));
+        stateIndicator = new KLabel(Student.isTrial() ? "" : Student.getStatus(), KFontFactory.createBoldFont(15));
         stateIndicator.setForeground(Color.GRAY);
 
         final KPanel statePanel = new KPanel();
-        statePanel.addAll(new KLabel("Status:", KFontFactory.createPlainFont(15)), stateIndicator);
+        if (!Student.isTrial()) {
+            statePanel.addAll(new KLabel("Status:", KFontFactory.createPlainFont(15)), stateIndicator);
+        }
 
         final KPanel upperDetails = new KPanel(new BorderLayout());
         upperDetails.add(statePanel, BorderLayout.WEST);
-        upperDetails.add(aUtgButton, BorderLayout.EAST);
+        upperDetails.add(aboutUTGButton, BorderLayout.EAST);
 
-        final KLabel labelIcon = KLabel.wantIconLabel("UTGLogo.gif", 125, 85);
+        final KLabel utgIcon = KLabel.createIcon("UTGLogo.gif", 125, 85);
 
-        final KLabel schoolLabel = new KLabel("School of "+Student.getSchool(), KFontFactory.createBoldFont(17));
-        if (Student.getSchool().contains("Unknown")) {
-            schoolLabel.setText("Unknown School");
-        }
-        final KLabel divLabel = new KLabel("Division of "+Student.getDivision(), KFontFactory.createBoldFont(17));
-        if (Student.getDivision().contains("Unknown")) {
-            divLabel.setText("Unknown Division");
-        }
-
-        semesterIndicator = new KLabel(Student.getSemester(), KFontFactory.createBoldFont(17));
+        final KLabel schoolLabel = createLabelFor("School of", Student.getSchool());
+        final KLabel divLabel = createLabelFor("Department of", Student.getDivision());
+        semesterIndicator = new KLabel(Student.isTrial() ? "" : Student.getSemester(),
+                KFontFactory.createBoldFont(17));
 
         final KPanel moreDetails = new KPanel();
         moreDetails.setLayout(new BoxLayout(moreDetails, BoxLayout.Y_AXIS));
@@ -238,7 +245,7 @@ public final class Board extends KFrame {
         final KPanel detailsPart = new KPanel(375, 200);
         detailsPart.setLayout(new BorderLayout());
         detailsPart.add(upperDetails, BorderLayout.NORTH);
-        detailsPart.add(labelIcon, BorderLayout.CENTER);
+        detailsPart.add(utgIcon, BorderLayout.CENTER);
         detailsPart.add(moreDetails, BorderLayout.SOUTH);
 
         final int outlinesWidth = 215;
@@ -246,17 +253,17 @@ public final class Board extends KFrame {
 
         final KButton toHome = new KButton("HOME");
         toHome.setFont(outlinesFont);
-        toHome.addActionListener(e-> showCard("Home"));
         toHome.setPreferredSize(new Dimension(outlinesWidth, toHome.getPreferredSize().height));
+        toHome.addActionListener(e-> showCard("Home"));
 
         final KButton toTasks = new KButton("MY TASKS+");
-        toTasks.setPreferredSize(new Dimension(outlinesWidth, toTasks.getPreferredSize().height));
         toTasks.setFont(outlinesFont);
-        toTasks.addActionListener(e-> showCard("Tasks"));
+        toTasks.setPreferredSize(new Dimension(outlinesWidth, toTasks.getPreferredSize().height));
+        toTasks.addActionListener(e-> taskActivity.answerActivity());
 
         final KButton toNews = new KButton("NEWS");
-        toNews.setPreferredSize(new Dimension(outlinesWidth, toNews.getPreferredSize().height));
         toNews.setFont(outlinesFont);
+        toNews.setPreferredSize(new Dimension(outlinesWidth, toNews.getPreferredSize().height));
         toNews.addActionListener(e-> newsPresent.answerActivity());
 
         notificationButton = new KButton("NOTIFICATIONS"){
@@ -269,13 +276,13 @@ public final class Board extends KFrame {
                 } else {
                     super.setForeground(Color.RED);
                     super.setCursor(MComponent.HAND_CURSOR);
-                    //Todo: programmatically display the tooltip
+                    //Todo: signal a desktop notification
                 }
             }
         };
-        notificationButton.setPreferredSize(new Dimension(outlinesWidth, notificationButton.getPreferredSize().height));
         notificationButton.setFont(outlinesFont);
-        notificationButton.addActionListener(e-> showCard("Notifications"));
+        notificationButton.setPreferredSize(new Dimension(outlinesWidth, notificationButton.getPreferredSize().height));
+        notificationButton.addActionListener(e-> alertActivity.answerActivity());
 
         final KPanel bigButtonsPanel = new KPanel(new FlowLayout(FlowLayout.CENTER, 10, 5), new Dimension(1_000, 30));
         bigButtonsPanel.addAll(toHome, toTasks, toNews, notificationButton);
@@ -286,8 +293,12 @@ public final class Board extends KFrame {
         thoraxPanel.add(midPart, BorderLayout.CENTER);
         thoraxPanel.add(detailsPart, BorderLayout.EAST);
         thoraxPanel.add(bigButtonsPanel, BorderLayout.SOUTH);
-
         boardContent.add(thoraxPanel, BorderLayout.NORTH);
+    }
+
+    private KLabel createLabelFor(String h, String t){
+        final String text = Globals.hasNoText(t) ? "" : t.contains("Unknown") ? t : h+" "+t;
+        return new KLabel(text, KFontFactory.createBoldFont(17));
     }
 
     private void setUpBody() {
@@ -299,9 +310,9 @@ public final class Board extends KFrame {
     }
 
     private void attachUniversalKeys(){
-        final KButton comeHomeButton = new KButton();
+        final KButton comeHomeButton = new KButton("Home Page");
         comeHomeButton.setFocusable(true);
-        comeHomeButton.addActionListener(e-> cardBoard.show(bodyLayer,"Home"));
+        comeHomeButton.addActionListener(e-> cardBoard.show(bodyLayer, "Home"));
         comeHomeButton.setMnemonic(KeyEvent.VK_H);
         boardRoot.add(comeHomeButton);
         boardRoot.setDefaultButton(comeHomeButton);
@@ -311,36 +322,27 @@ public final class Board extends KFrame {
     public void setVisible(boolean b) {
         if (b) {
             super.setVisible(true);
-            if (Dashboard.isFirst()) {
-                new FirstLaunch().setVisible(true);
-            }
-            for (Runnable runnable : postProcesses) {
-                runnable.run();
+            if (Dashboard.isFirst() && !Student.isTrial()) {
+                SwingUtilities.invokeLater(()-> new FirstLaunch().setVisible(true));
             }
         } else {
             collapse();
         }
     }
 
-    /**
-     * Calling collapse() means shutdown is requested by the user and this is normal.
-     */
     private void collapse(){
-        dispose();
         System.exit(0);
     }
 
     private void completeBuild() {
-        if (Dashboard.isFirst()) {//is there anything to remember?
-            postProcesses.add(SettingsUI::loadDefaults);
-            postProcesses.add(()-> Runtime.getRuntime().addShutdownHook(shutDownThread));
-        } else {
-            Runtime.getRuntime().addShutdownHook(shutDownThread);
+        isReady = true;
+        Runtime.getRuntime().addShutdownHook(shutDownThread);
+        if (Dashboard.isFirst()) {
+            SettingsUI.loadDefaults();
         }
-        postProcesses.add(()-> {
-            RunningCourseActivity.uploadInitials();
-            ModuleHandler.uploadModules();
-        });
+        for (Runnable r : postProcesses) {
+            r.run();
+        }
     }
 
     private JComponent generateHomePage(){
@@ -411,8 +413,8 @@ public final class Board extends KFrame {
 
         final KPanel jumperPanel = new KPanel(new BorderLayout());
         jumperPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        jumperPanel.add(KPanel.wantDirectAddition(null, new Dimension(225,30), jumpLabel), BorderLayout.NORTH);
-        jumperPanel.add(KLabel.wantIconLabel(iconName, iWidth, iHeight), BorderLayout.CENTER);
+        jumperPanel.add(new KPanel(new Dimension(225,30), jumpLabel), BorderLayout.NORTH);
+        jumperPanel.add(KLabel.createIcon(iconName, iWidth, iHeight), BorderLayout.CENTER);
         jumperPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -447,8 +449,12 @@ public final class Board extends KFrame {
         return appInstance;
     }
 
-    public static boolean isAppReady(){
-        return appInstance != null && appInstance.isShowing();
+    public static boolean isReady(){
+        return isReady;
+    }
+
+    public static void setReady(boolean ready){
+        isReady = ready;
     }
 
 //    As used by NotificationActivity to adjust the toolTip
@@ -462,7 +468,7 @@ public final class Board extends KFrame {
 
     public static void effectSemesterUpgrade() {
         final String semester = Student.getSemester();
-        if (isAppReady()) {
+        if (isReady()) {
             semesterIndicator.setText(semester);
             RunningCourseActivity.semesterBigLabel.setText(semester);
         } else {
@@ -474,7 +480,7 @@ public final class Board extends KFrame {
     }
 
     public static void effectLevelUpgrade() {
-        if (isAppReady()) {
+        if (isReady()) {
             levelIndicator.setText(Student.getLevel());
         } else {
             postProcesses.add(()-> levelIndicator.setText(Student.getLevel()));
@@ -482,35 +488,29 @@ public final class Board extends KFrame {
     }
 
     public static void effectNameFormatChanges(){
-        if (isAppReady()) {
-            nameLabel.setText(Student.requiredNameForFormat());
+        final String requiredName = Student.requiredNameForFormat().toUpperCase();
+        if (isReady()) {
+            nameLabel.setText(requiredName);
         } else {
-            postProcesses.add(()-> nameLabel.setText(Student.requiredNameForFormat()));
+            postProcesses.add(()-> nameLabel.setText(requiredName));
         }
     }
 
     public static void effectStatusUpgrade(){
-        if (isAppReady()) {
+        if (isReady()) {
             stateIndicator.setText(Student.getStatus());
         } else {
             postProcesses.add(()-> stateIndicator.setText(Student.getStatus()));
         }
     }
 
-    /**
-     * To do things to be done daily.
-     */
-    private void anotherDay(){
-        if (Portal.isAutoSynced()) {
+//    already forged on a thread
+    public static void online() {
+        if (Portal.isAutoSynced() && !Student.isTrial()) {
             RunningCourseActivity.startMatching(false);
             ModuleHandler.startThoroughSync(false, null);
             NotificationActivity.updateNotices(false);
         }
-    }
-
-//    already forged on a thread
-    public static void online() {
-
     }
 
 }

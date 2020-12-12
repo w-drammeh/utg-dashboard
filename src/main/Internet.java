@@ -1,29 +1,30 @@
 package main;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.URI;
 import java.net.UnknownHostException;
 
-/**
- * A class which is lucky its functionality is not integrated in other types.
- * It is purposely meant for checking the availability of the internet.
- * This algorithm is "rough"!
- */
 public class Internet {
 
+
+    public static void visit(String site) throws Exception {
+        Desktop.getDesktop().browse(URI.create(site));
+    }
 
     /**
      * Calling this on the main thread can put Dashboard in a serious waiting state!
      */
     public static boolean isInternetAvailable(){
         try {
-            final boolean isAvailable = isHostAvailable("google.com") || isHostAvailable("github.com") ||
+            final boolean available = isHostAvailable("google.com") || isHostAvailable("github.com") ||
                     isHostAvailable("facebook.com");
-            if (isAvailable && Board.isAppReady()) {
-                new Thread(Board::online).start();//should not delay the return
+            if (available && Board.isReady()) {
+                new Thread(Board::online).start();//as it should not delay the return
             }
-            return isAvailable;
+            return available;
         } catch (IOException e) {
             return false;
         }

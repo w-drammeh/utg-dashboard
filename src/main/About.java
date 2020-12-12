@@ -58,7 +58,7 @@ public class About extends KDialog {
 
     private KPanel getAboutCard(){
         final KPanel dashboardLayer = new KPanel(new BorderLayout());
-        dashboardLayer.add(KLabel.wantIconLabel("dashboard.png", 150, 135), BorderLayout.CENTER);
+        dashboardLayer.add(KLabel.createIcon("dashboard.png", 150, 135), BorderLayout.CENTER);
         dashboardLayer.add(new KPanel(new KLabel("A flexible and elegant student management system of the UTG",
                 KFontFactory.createPlainFont(16))), BorderLayout.SOUTH);
 
@@ -86,7 +86,7 @@ public class About extends KDialog {
     }
 
     private KPanel getCreditsCard(){
-        final KLabel iconLabel = KLabel.wantIconLabel("muhammed.jpg", 140, 150);
+        final KLabel iconLabel = KLabel.createIcon("author.jpg", 160, 150);
         final ActionListener exhibitAction = e-> new SpecificExhibitor().setVisible(true);
 
         final Font specialFont = KFontFactory.createPlainFont(15);
@@ -171,7 +171,7 @@ public class About extends KDialog {
 
         final KButton reviewSender = newReviewSender();
         reviewSender.addActionListener(e-> new Thread(()-> {
-            if (Globals.isBlank(reviewTextArea.getText())) {
+            if (Globals.hasNoText(reviewTextArea.getText())) {
                 reportBlankReview(reviewTextArea);
             } else {
                 MComponent.toggle(reviewTextArea, reviewSender);
@@ -206,7 +206,7 @@ public class About extends KDialog {
 
         final KButton suggestionSender = newReviewSender();
         suggestionSender.addActionListener(e-> new Thread(()-> {
-            if (Globals.isBlank(suggestionTextArea.getText())) {
+            if (Globals.hasNoText(suggestionTextArea.getText())) {
                 reportBlankReview(suggestionTextArea);
             } else {
                 MComponent.toggle(suggestionTextArea,suggestionSender);
@@ -243,13 +243,13 @@ public class About extends KDialog {
 
         final KButton answerSender = newReviewSender();
         answerSender.addActionListener(e-> {
-            if (Globals.isBlank(answerTitleField.getText())) {
+            if (Globals.hasNoText(answerTitleField.getText())) {
                 App.signalError(getRootPane(),"No Question", "Please provide the question by filling out the Text Field.");
                 answerTitleField.requestFocusInWindow();
                 return;
             }
 
-            if (Globals.isBlank(answerTextArea.getText())) {
+            if (Globals.hasNoText(answerTextArea.getText())) {
                 reportBlankReview(answerTextArea);
                 return;
             }
@@ -298,7 +298,7 @@ public class About extends KDialog {
 
         final KButton bugSender = newReviewSender();
         bugSender.addActionListener(e-> new Thread(()-> {
-            if (Globals.isBlank(bugTextArea.getText())) {
+            if (Globals.hasNoText(bugTextArea.getText())) {
                 reportBlankReview(bugTextArea);
             } else {
                 MComponent.toggle(bugTextArea,bugSender);
@@ -380,13 +380,13 @@ public class About extends KDialog {
     }
 
     private KTextPane newNotePane(String text, int height){
-        final KTextPane notesPane = KTextPane.wantHtmlFormattedPane(text);
+        final KTextPane notesPane = KTextPane.htmlFormattedPane(text);
         notesPane.setPreferredSize(new Dimension(getPreferredSize().width, height));
         return notesPane;
     }
 
 
-    private class SpecificExhibitor extends KDialog {
+    private static class SpecificExhibitor extends KDialog {
 
         private SpecificExhibitor(){
             super("Dashboard Author");
@@ -428,7 +428,7 @@ public class About extends KDialog {
             nationalityPanel.add(new KPanel(new KLabel("Nationality:", hintFont)), BorderLayout.WEST);
             nationalityPanel.add(new KPanel(new KLabel("The Gambia", valueFont)), BorderLayout.CENTER);
 
-            final KButton closeButton = new KButton("Ok");
+            final KButton closeButton = new KButton("Close");
             closeButton.addActionListener(e-> dispose());
 
             final KPanel contentPanel = new KPanel();
@@ -442,7 +442,6 @@ public class About extends KDialog {
             pack();
             setLocationRelativeTo(getRootPane());
         }
-
     }
 
 }

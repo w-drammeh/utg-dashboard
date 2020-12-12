@@ -1,6 +1,7 @@
 package main;
 
 import proto.KLabel;
+import utg.Dashboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +9,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-// Customizable, but some details of the user cannot be directly modified
 public class Student {
     private static String firstName;
     private static String lastName;
@@ -60,20 +60,21 @@ public class Student {
     private static int levelNumber;
     private static double CGPA;
     private static ImageIcon userIcon;
+    private static LinkedHashMap<String, String> additionalData;
+    private static boolean isTrial;
     public static final String FIRST_SEMESTER = "First Semester";
     public static final String SECOND_SEMESTER = "Second Semester";
     public static final String SUMMER_SEMESTER = "Summer Semester";
     private static final int ICON_WIDTH = 275;
     private static final int ICON_HEIGHT = 200;
-    private static final ImageIcon DEFAULT_ICON = MComponent.scale(App.getIconURL("default-icon.png"),
+    private static final ImageIcon DEFAULT_ICON = MComponent.scaleIcon(App.getIconURL("default-icon.png"),
             ICON_WIDTH, ICON_HEIGHT);
-    private static final ImageIcon SHOOTER_ICON = MComponent.scale(App.getIconURL("shooter.png"),
+    private static final ImageIcon SHOOTER_ICON = MComponent.scaleIcon(App.getIconURL("shooter.png"),
             ICON_WIDTH, ICON_HEIGHT);
     public static final String UNCLASSIFIED = "None";
-    public static final String THIRD_CLASS = "\"Cum laude\" - With Praise!";
-    public static final String SECOND_CLASS = "\"Magna Cum laude\" - With Great Honor!";
-    public static final String FIRST_CLASS = "\"Summa Cum laude\" - With Greatest Honor!";
-    private static LinkedHashMap<String, String> ADDITIONAL_DATA = new LinkedHashMap<>();
+    public static final String THIRD_CLASS = "\"Cum Laude\" - With Praise!";
+    public static final String SECOND_CLASS = "\"Magna Cum Laude\" - With Great Honor!";
+    public static final String FIRST_CLASS = "\"Summa Cum Laude\" - With Greatest Honor!";
     private static String nameFormat = "First Name first";
 
 
@@ -117,7 +118,7 @@ public class Student {
         Student.minor = minor;
         SettingsUI.minorLabel.setText(minor);
         SettingsUI.minorField.setText(minor);
-        if (Globals.isBlank(minor)) {
+        if (Globals.hasNoText(minor)) {
             setMinorCode("");
         }
     }
@@ -265,7 +266,7 @@ public class Student {
     }
 
     public static void addTelephone(String tel) {
-        Student.telephones = Globals.isBlank(telephones) ? tel : telephones.contains(tel) ?
+        Student.telephones = Globals.hasNoText(telephones) ? tel : telephones.contains(tel) ?
                 telephones : telephones + "/" + tel;
     }
 
@@ -376,7 +377,7 @@ public class Student {
     }
 
     public static LinkedHashMap<String, String> getAdditional(){
-        return ADDITIONAL_DATA;
+        return additionalData;
     }
 
     public static String currentNameFormat(){
@@ -392,50 +393,66 @@ public class Student {
         return nameFormat.startsWith("First") ? getFullName() : getFullNamePostOrder();
     }
 
-    /**
-     * Called during fresh-start to initialize user data just from the Portal,
-     * as given by PrePortal.
-     */
     public static void initialize() {
-        final Object[] initials = PrePortal.USER_DATA.toArray();
-        firstName = (String) initials[0];
-        lastName = (String) initials[1];
-        program = (String) initials[2];
-        try {
-            matNumber = (String) initials[3];
-        } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(), "Mat Number");
+        if (Dashboard.isFirst()) {
+            final Object[] initials = PrePortal.USER_DATA.toArray();
+            firstName = (String) initials[0];
+            lastName = (String) initials[1];
+            program = (String) initials[2];
+            try {
+                matNumber = (String) initials[3];
+            } catch (Exception e){
+                reportCriticalInfoMissing(Login.getRoot(), "Mat Number");
+            }
+            major = (String) initials[4];
+            school = (String) initials[5];
+            division = (String) initials[6];
+            nationality = (String) initials[7];
+            try {
+                monthOfAdmission = Integer.parseInt((String) initials[8]);
+            } catch (Exception e){
+                reportCriticalInfoMissing(Login.getRoot(), "Month of Admission");
+            }
+            try {
+                yearOfAdmission = Integer.parseInt((String) initials[9]);
+            } catch (Exception e){
+                reportCriticalInfoMissing(Login.getRoot(),"Year of Admission");
+            }
+            address = (String) initials[10];
+            maritalStatue = (String) initials[11];
+            dateOfBirth = (String) initials[12];
+            telephones = (String) initials[13];
+            portalMail = (String) initials[14];
+            portalPassword = (String) initials[15];
+            try {
+                CGPA = Double.parseDouble((String) initials[19]);
+            } catch (Exception e){
+                reportCriticalInfoMissing(Login.getRoot(), "CGPA");
+            }
+            setLevel((String)(initials[17]));
+            setSemester((String)(initials[16]));
+            setStatus((String)(initials[18]));
+
+            minor = majorCode = minorCode = "";
+            additionalData = new LinkedHashMap<>();
+            isTrial = false;
+        } else {
+            deserializeData();
         }
-        major = (String) initials[4];
-        school = (String) initials[5];
-        division = (String) initials[6];
-        nationality = (String) initials[7];
-        try {
-            monthOfAdmission = Integer.parseInt((String) initials[8]);
-        } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(), "Month of Admission");
-        }
-        try {
-            yearOfAdmission = Integer.parseInt((String) initials[9]);
-        } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(),"Year of Admission");
-        }
-        address = (String) initials[10];
-        maritalStatue = (String) initials[11];
-        dateOfBirth = (String) initials[12];
-        telephones = (String) initials[13];
-        portalMail = (String) initials[14];
-        portalPassword = (String) initials[15];
-        try {
-            CGPA = Double.parseDouble((String) initials[19]);
-        } catch (Exception e){
-            reportCriticalInfoMissing(Login.getRoot(), "CGPA");
-        }
-        setLevel((String)(initials[17]));
-        setSemester((String)(initials[16]));
-        setStatus((String)(initials[18]));
-//
-        minor = majorCode = minorCode = "";
+    }
+
+    public static void setupTrial(String[] data){
+        firstName = data[0];
+        lastName = data[1];
+        nationality = data[2];
+        address = data[3];
+        maritalStatue = dateOfBirth = placeOfBirth = about = telephones = "";
+        additionalData = new LinkedHashMap<>();
+        isTrial = true;
+    }
+
+    public static boolean isTrial(){
+        return isTrial;
     }
 
     public static String getFullName() {
@@ -555,12 +572,12 @@ public class Student {
         return Globals.hasText(Student.minor);
     }
 
-    public static String getNameAcronym(){
+    public static String getAcronym(){
         return (lastName.charAt(0)+""+firstName.charAt(0)).toLowerCase();
     }
 
     public static String predictedStudentMailAddress(){
-        return getNameAcronym()+matNumber+"@utg.edu.gm";
+        return getAcronym()+matNumber+"@utg.edu.gm";
     }
 
     public static String predictedStudentPassword(){
@@ -597,7 +614,7 @@ public class Student {
     private static void fireIconChange(File imageFile, Component c){
         if (imageFile != null) {
             try {
-                final ImageIcon newIcon = MComponent.scale(imageFile.toURI().toURL(), ICON_WIDTH, ICON_HEIGHT);
+                final ImageIcon newIcon = MComponent.scaleIcon(imageFile.toURI().toURL(), ICON_WIDTH, ICON_HEIGHT);
                 if (newIcon == null) {
                     App.signalError(c, "Error", "Could not set the image icon to "+imageFile.getAbsolutePath()+".\n" +
                             "Is that an image file? If it's not, try again with a valid image file, otherwise it is of an unsupported type.");
@@ -622,7 +639,7 @@ public class Student {
     }
 
     public static void fireIconReset(){
-        if (App.showYesNoCancelDialog("Confirm reset","This action will remove your image icon. Continue?")) {
+        if (App.showYesNoCancelDialog("Confirm Reset","This action will remove your image icon. Continue?")) {
             userIcon = DEFAULT_ICON;
             effectIconChanges();
         }
@@ -635,7 +652,7 @@ public class Student {
 
     /**
      * Algorithm generates true even if no icon is manually set.
-     * See getIcon()
+     * @see #getIcon
      */
     public static boolean isDefaultIconSet(){
         return getIcon() == DEFAULT_ICON;
@@ -646,37 +663,20 @@ public class Student {
     }
 
 
-    public static void serializeData() {
+    public static void serialize() {
         final HashMap<String, Object> dataMap = new HashMap<>();
-        dataMap.put("moa", monthOfAdmission);
-        dataMap.put("yoa", yearOfAdmission);
-        dataMap.put("semester", semester.toUpperCase());
         dataMap.put("fName", firstName);
         dataMap.put("lName", lastName);
-        dataMap.put("mat", matNumber);
-        dataMap.put("major", major);
-        dataMap.put("majCode", majorCode);
-        dataMap.put("minor", minor);
-        dataMap.put("minCode", minorCode);
-        dataMap.put("program", program);
-        dataMap.put("school", school);
-        dataMap.put("div", division);
+        dataMap.put("nationality", nationality);
         dataMap.put("address", address);
         dataMap.put("tels", telephones);
-        dataMap.put("nationality", nationality);
-        dataMap.put("dob", dateOfBirth);
-        dataMap.put("portalMail", portalMail);
-        dataMap.put("portalPsswd", portalPassword);
-        dataMap.put("studentMail", studentMail);
-        dataMap.put("studentPsswd", studentPassword);
         dataMap.put("marital", maritalStatue);
+        dataMap.put("dob", dateOfBirth);
         dataMap.put("pob", placeOfBirth);
-        dataMap.put("level", level.toUpperCase());
-        dataMap.put("status", status.toUpperCase());
-        dataMap.put("cg", CGPA);
         dataMap.put("aboutMe", about);
         dataMap.put("nameFormat", nameFormat);
-        dataMap.put("extra", ADDITIONAL_DATA);
+        dataMap.put("extra", additionalData);
+        dataMap.put("trial", isTrial);
         if (!isDefaultIconSet()) {
             if (isShooterIconSet()) {
                 dataMap.put("shooterIcon", "Shooter");
@@ -685,28 +685,61 @@ public class Student {
                 dataMap.put("iconSelf", getIcon());
             }
         }
+        if (!isTrial) {
+            dataMap.put("moa", monthOfAdmission);
+            dataMap.put("yoa", yearOfAdmission);
+            dataMap.put("semester", semester.toUpperCase());
+            dataMap.put("mat", matNumber);
+            dataMap.put("major", major);
+            dataMap.put("majCode", majorCode);
+            dataMap.put("minor", minor);
+            dataMap.put("minCode", minorCode);
+            dataMap.put("program", program);
+            dataMap.put("school", school);
+            dataMap.put("div", division);
+            dataMap.put("portalMail", portalMail);
+            dataMap.put("portalPsswd", portalPassword);
+            dataMap.put("studentMail", studentMail);
+            dataMap.put("studentPsswd", studentPassword);
+            dataMap.put("level", level.toUpperCase());
+            dataMap.put("status", status.toUpperCase());
+            dataMap.put("cg", CGPA);
+        }
         Serializer.toDisk(dataMap, "core.ser");
     }
 
-    public static void deserializeData() throws NullPointerException {
+    private static void deserializeData() throws NullPointerException {
         final HashMap<String, Object> dataMap = (HashMap) Serializer.fromDisk("core.ser");
         if (dataMap == null) {
             throw new NullPointerException();
         }
         firstName = (String) (dataMap.get("fName"));
         lastName = (String) (dataMap.get("lName"));
+        nationality = (String) (dataMap.get("nationality"));
+        address = (String) (dataMap.get("address"));
+        telephones = (String) (dataMap.get("tels"));
+        maritalStatue = (String) (dataMap.get("marital"));
+        dateOfBirth = (String) (dataMap.get("dob"));
+        placeOfBirth = (String) dataMap.get("pob");
+        about = (String) dataMap.get("aboutMe");
+        setNameFormat((String) dataMap.get("nameFormat"));
+        additionalData = (LinkedHashMap<String, String>) dataMap.get("extra");
+        if (dataMap.containsKey("shooterIcon")) {
+            Board.postProcesses.add(Student::fireIconDefaultSet);
+        } else if (dataMap.containsKey("userIcon")) {
+            userIcon = (ImageIcon) dataMap.get("iconSelf");
+        }
+        isTrial = (boolean) (dataMap.get("trial"));
+        if (isTrial) {
+            return;
+        }
         program = (String) (dataMap.get("program"));
         matNumber = (String) dataMap.get("mat");
         major = (String) (dataMap.get("major"));
         school = (String) (dataMap.get("school"));
         division = (String) (dataMap.get("div"));
-        nationality = (String) (dataMap.get("nationality"));
         monthOfAdmission = (int) (dataMap.get("moa"));
         yearOfAdmission = (int) (dataMap.get("yoa"));
-        address = (String) (dataMap.get("address"));
-        maritalStatue = (String) (dataMap.get("marital"));
-        dateOfBirth = (String) (dataMap.get("dob"));
-        telephones = (String) (dataMap.get("tels"));
         portalMail = (String) dataMap.get("portalMail");
         portalPassword = (String) dataMap.get("portalPsswd");
         studentMail = (String) dataMap.get("studentMail");
@@ -718,15 +751,6 @@ public class Student {
         majorCode = (String) dataMap.get("majCode");
         minor = (String) dataMap.get("minor");
         minorCode = (String) dataMap.get("minCode");
-        placeOfBirth = (String) dataMap.get("pob");
-        about = (String) dataMap.get("aboutMe");
-        setNameFormat((String) dataMap.get("nameFormat"));
-        ADDITIONAL_DATA = (LinkedHashMap<String, String>) dataMap.get("extra");
-        if (dataMap.containsKey("shooterIcon")) {
-            Board.postProcesses.add(Student::fireIconDefaultSet);
-        } else if (dataMap.containsKey("userIcon")) {
-            userIcon = (ImageIcon) dataMap.get("iconSelf");
-        }
     }
 
 }
