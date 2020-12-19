@@ -3,8 +3,8 @@ package proto;
 import javax.swing.table.DefaultTableModel;
 
 /**
- * This is an implementation of javax.swing.table.DefaultTableModel.
- * These are course oriented, since all the tables deal with courses?
+ * This is an extension of javax.swing.table.DefaultTableModel.
+ * These are course oriented, since, virtually, all the tables deal with courses.
  */
 public class KTableModel extends DefaultTableModel implements Preference {
     private KTable table;
@@ -37,8 +37,8 @@ public class KTableModel extends DefaultTableModel implements Preference {
      * This call is case-insensitive.
      */
     public int getRowOf(String key) {
-        for (int i = 0; i < this.getRowCount(); i++) {
-            if (key.equalsIgnoreCase(String.valueOf(this.getValueAt(i,0)))) {
+        for (int i = 0; i < getRowCount(); i++) {
+            if (key.equalsIgnoreCase(String.valueOf(getValueAt(i, 0)))) {
                 return i;
             }
         }

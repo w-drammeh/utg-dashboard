@@ -65,7 +65,7 @@ public class News implements Activity {
         if (Dashboard.isFirst()) {
             new Thread(()-> packAll(false)).start();
         } else {
-            Board.postProcesses.add(this::pushNews);
+            Board.POST_PROCESSES.add(this::deserialize);
         }
     }
 
@@ -107,7 +107,7 @@ public class News implements Activity {
             accessTime = "Last accessed: "+MDate.now();
             accessLabel.setText(accessTime);
             if (userRequest) {
-                App.promptPlain("News", "News refreshed successfully from " + NEWS_SITE);
+                App.reportInfo("News", "News refreshed successfully.");
             }
         } catch (IOException e) {
             if (userRequest) {
@@ -157,27 +157,6 @@ public class News implements Activity {
         return new KPanel(new FlowLayout(FlowLayout.CENTER, 0, 5), niceBox);
     }
 
-//    push, but if any
-    public void pushNews() {
-        final ArrayList<NewsSavior> savedNews = (ArrayList<NewsSavior>) Serializer.fromDisk("news.ser");
-        if (savedNews == null) {
-            return;
-        }
-        NEWS_DATA.addAll(savedNews);
-        if (!NEWS_DATA.isEmpty()) {
-            for (NewsSavior news : NEWS_DATA) {
-                present.addPenultimate(packNews(news.heading, news.body, news.link, news.content));
-            }
-            MComponent.ready(present);
-        }
-
-        final Object accessObj = Serializer.fromDisk("news-time.ser");
-        if (accessObj != null) {
-            accessTime = (String) accessObj;
-            accessLabel.setText(accessTime);
-        }
-    }
-
 
     /**
      * Todo: push scrollBar to the top for a first-sight
@@ -210,7 +189,7 @@ public class News implements Activity {
                 try {
                     Internet.visit(NEWS_SITE);
                 } catch (Exception ex) {
-                    App.signalError(ex);
+                    App.reportError(ex);
                 }
                 visitButton.setEnabled(true);
             }).start());
@@ -248,7 +227,8 @@ public class News implements Activity {
                     NEWS_DATA.set(i, updatedNews);
                     setVisible(true);
                 } catch (IOException ioe) {
-                    App.signalError("Error", "We are facing troubles getting the contents of the news '" + keyContent + "'\n" +
+                    App.reportError("Error",
+                            "Error occurred while getting the contents of the news \"" + keyContent + "\"\n" +
                             "Please check back later.");
                 } catch (Exception e) {
                     App.silenceException(e);
@@ -282,6 +262,26 @@ public class News implements Activity {
     public static void serialize() {
         Serializer.toDisk(NEWS_DATA, "news.ser");
         Serializer.toDisk(accessTime, "news-time.ser");
+    }
+
+    private void deserialize() {
+        final ArrayList<NewsSavior> savedNews = (ArrayList<NewsSavior>) Serializer.fromDisk("news.ser");
+        if (savedNews == null) {
+            return;
+        }
+        NEWS_DATA.addAll(savedNews);
+        if (!NEWS_DATA.isEmpty()) {
+            for (NewsSavior news : NEWS_DATA) {
+                present.addPenultimate(packNews(news.heading, news.body, news.link, news.content));
+            }
+            MComponent.ready(present);
+        }
+
+        final Object accessObj = Serializer.fromDisk("news-time.ser");
+        if (accessObj != null) {
+            accessTime = (String) accessObj;
+            accessLabel.setText(accessTime);
+        }
     }
 
 }

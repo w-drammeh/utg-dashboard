@@ -64,14 +64,6 @@ public class Tips implements Activity {
         }
     }
 
-    /**
-     * Can quickly provide a reference to a tip. The parsed string should, for instance
-     * to reference syncing from 'Modules Collection' be "Module Collection : Syncing".
-     */
-    public static String reference(String ref){
-        return "'Home | FAQs & Help | Dashboard Tips | "+ref+"'";
-    }
-
 //    Dashboard tips
     private void generateTips(){
         final String runningTip = "Dashboard provides a mechanism for you to effectively keep track of the courses you " +

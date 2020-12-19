@@ -1,6 +1,5 @@
 package main;
 
-import proto.KLabel;
 import utg.Dashboard;
 
 import javax.swing.*;
@@ -9,10 +8,13 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+/**
+ * Todo: reconsider the {@link #isGraduated()} call
+ */
 public class Student {
     private static String firstName;
     private static String lastName;
-    private static String matNumber;//has no arithmetic use since;
+    private static String matNumber;
     private static String program;
     private static String major;
     private static String minor;
@@ -29,7 +31,8 @@ public class Student {
      */
     private static String status;
     /**
-     * The level, i.e "Undergraduate", "Post-graduate", etc. Also auto-renewed.
+     * The level, i.e "Undergraduate", "Post-graduate", etc.
+     * Also auto-renewed.
      */
     private static String level;
     private static String address;
@@ -62,15 +65,15 @@ public class Student {
     private static ImageIcon userIcon;
     private static LinkedHashMap<String, String> additionalData;
     private static boolean isTrial;
-    public static final String FIRST_SEMESTER = "First Semester";
-    public static final String SECOND_SEMESTER = "Second Semester";
-    public static final String SUMMER_SEMESTER = "Summer Semester";
     private static final int ICON_WIDTH = 275;
     private static final int ICON_HEIGHT = 200;
     private static final ImageIcon DEFAULT_ICON = MComponent.scaleIcon(App.getIconURL("default-icon.png"),
             ICON_WIDTH, ICON_HEIGHT);
     private static final ImageIcon SHOOTER_ICON = MComponent.scaleIcon(App.getIconURL("shooter.png"),
             ICON_WIDTH, ICON_HEIGHT);
+    public static final String FIRST_SEMESTER = "First Semester";
+    public static final String SECOND_SEMESTER = "Second Semester";
+    public static final String SUMMER_SEMESTER = "Summer Semester";
     public static final String UNCLASSIFIED = "None";
     public static final String THIRD_CLASS = "\"Cum Laude\" - With Praise!";
     public static final String SECOND_CLASS = "\"Magna Cum Laude\" - With Great Honor!";
@@ -114,6 +117,13 @@ public class Student {
         return minor;
     }
 
+    /**
+     * Sets the minor of the student to the given minor.
+     * This has runtime component modification consequences.
+     * Also, if the minor has no text as specified by {@link Globals#hasNoText(String)},
+     * the minor-code will reset.
+     * @see #setMinorCode(String)
+     */
     public static void setMinor(String minor){
         Student.minor = minor;
         SettingsUI.minorLabel.setText(minor);
@@ -246,8 +256,8 @@ public class Student {
 
     /**
      * Returns just the first contact in the current telephones list
-     * This may give 'Unknown' (when given by PrePortal),
-     * or the empty-string (when all are removed)
+     * This may give 'Unknown' (when given by PrePortal / Portal),
+     * or the empty-string (when all are removed) by the user.
      */
     public static String getTelephone() {
         return telephones.split("/")[0];
@@ -283,7 +293,11 @@ public class Student {
         return telephones.split("/").length;
     }
 
-//    Never surround this by Globals.toFourth()
+    /**
+     * Returns the CGPA of the student.
+     * Dashboard does not compute the stuednt's gpa,
+     * so never surround this by Globals.toFourth()
+     */
     public static double getCGPA() {
         return CGPA;
     }
@@ -292,11 +306,7 @@ public class Student {
         Student.CGPA = CGPA;
     }
 
-    /**
-     * Blank param may be given to signify reset.
-     */
     public static void setMajorCode(String majorCode) {
-        majorCode = majorCode.toUpperCase();
         SettingsUI.majorCodeField.setText(majorCode);
         ModuleHandler.effectMajorCodeChanges(Student.majorCode, majorCode);
         Student.majorCode = majorCode;
@@ -307,7 +317,6 @@ public class Student {
     }
 
     public static void setMinorCode(String minorCode){
-        minorCode = minorCode.toUpperCase();
         SettingsUI.minorCodeField.setText(minorCode);
         ModuleHandler.effectMinorCodeChanges(Student.minorCode, minorCode);
         Student.minorCode = minorCode;
@@ -322,16 +331,21 @@ public class Student {
     }
 
     /**
-     * Must not be called before setting the yearOfAdmission!
-     * At every login, level is set first, then state, followed by this.
+     * Sets the semester to the given academic-semester.
+     * The semester says a lot about the student,
+     * including his/her level.
+     * Never call this before setting the yearOfAdmission.
+     * At every login, level is set first, state, then semester.
      */
     public static void setSemester(String semester) {
+        semester = semester.toUpperCase();
+        final String academicYear = semester.split(" ")[0];
         if (semester.contains("FIRST")) {
-            Student.semester = String.join(" ", semester.split(" ")[0], FIRST_SEMESTER);
+            Student.semester = String.join(" ", academicYear, FIRST_SEMESTER);
         } else if (semester.contains("SECOND")) {
-            Student.semester = String.join(" ", semester.split(" ")[0], SECOND_SEMESTER);
+            Student.semester = String.join(" ", academicYear, SECOND_SEMESTER);
         } else if (semester.contains("SUMMER")) {
-            Student.semester = String.join(" ", semester.split(" ")[0], SUMMER_SEMESTER);
+            Student.semester = String.join(" ", academicYear, SUMMER_SEMESTER);
         }
         Board.effectSemesterUpgrade();
         final int current = Integer.parseInt(semester.split("/")[0]) + 1;
@@ -429,9 +443,10 @@ public class Student {
             } catch (Exception e){
                 reportCriticalInfoMissing(Login.getRoot(), "CGPA");
             }
+            Board.effectNameFormatChanges();
             setLevel((String)(initials[17]));
-            setSemester((String)(initials[16]));
             setStatus((String)(initials[18]));
+            setSemester((String)(initials[16]));
 
             minor = majorCode = minorCode = "";
             additionalData = new LinkedHashMap<>();
@@ -459,11 +474,20 @@ public class Student {
         return String.join(" ", firstName, lastName);
     }
 
-    /**
-     * Returns the full name, starting with the name first.
-     */
     public static String getFullNamePostOrder() {
         return String.join(" ", lastName, firstName);
+    }
+
+    public static String getAcronym(){
+        return (""+lastName.charAt(0)+firstName.charAt(0)).toLowerCase();
+    }
+
+    public static String predictedStudentMailAddress(){
+        return getAcronym()+matNumber+"@utg.edu.gm";
+    }
+
+    public static String predictedStudentPassword(){
+        return matNumber;// "student@utg"?
     }
 
     public static String upperClassDivision() {
@@ -479,18 +503,23 @@ public class Student {
     }
 
     /**
-     * Should return the currently running academic year in yyyy/yyyy format.
+     * Returns the current academic year in yyyy/yyyy format.
      */
-    public static String thisAcademicYear() {
+    public static String getAcademicYear() {
         return semester.split(" ")[0];
     }
 
-    public static boolean isValidAcademicYear(String extendedYear) {
-        if (extendedYear.contains("/")) {
+    /**
+     * Returns true if the given year is a valid academic year;
+     * false otherwise.
+     * A Dashboard's valid academic year is in the format yyyy/zzzz
+     */
+    public static boolean isValidAcademicYear(String year) {
+        if (year.contains("/")) {
             try {
-                final int part1 = Integer.parseInt(extendedYear.split("/")[0]);
-                final int part2 = Integer.parseInt(extendedYear.split("/")[1]);
-                return Integer.toString(part1).length() == 4 && Integer.toString(part2).length() == 4;
+                final String[] parts = year.split("/");
+                return String.valueOf(Integer.parseInt(parts[0])).length() == 4 &&
+                        String.valueOf(Integer.parseInt(parts[1])).length() == 4;
             } catch (Exception e){
                 return false;
             }
@@ -561,32 +590,21 @@ public class Student {
     }
 
     public static boolean isUndergraduate(){
-        return level.equals("Undergraduate");
+        return level.equalsIgnoreCase("Undergraduate");
     }
 
     public static boolean isPostgraduate(){
-        return level.equals("Postgraduate");
+        return level.equalsIgnoreCase("Postgraduate");
     }
 
     public static boolean isDoingMinor(){
         return Globals.hasText(Student.minor);
     }
 
-    public static String getAcronym(){
-        return (lastName.charAt(0)+""+firstName.charAt(0)).toLowerCase();
-    }
-
-    public static String predictedStudentMailAddress(){
-        return getAcronym()+matNumber+"@utg.edu.gm";
-    }
-
-    public static String predictedStudentPassword(){
-        return matNumber;//"student@utg"?
-    }
-
     private static void reportCriticalInfoMissing(Component parent, String info) {
-        App.promptWarning(parent, info+" Missing","It turns out that your \""+info+"\" was not found.\n" +
-                "This can lead to inaccurate analysis and prediction.\nPlease refer your department for this problem.");
+        App.reportWarning(parent, info+" Missing","It turns out that your \""+info+"\" was not found.\n" +
+                "This can lead to inaccurate analysis and prediction.\n" +
+                "Please refer your department for this problem.");
     }
 
     public static void startSettingImage(Component parent){
@@ -616,14 +634,14 @@ public class Student {
             try {
                 final ImageIcon newIcon = MComponent.scaleIcon(imageFile.toURI().toURL(), ICON_WIDTH, ICON_HEIGHT);
                 if (newIcon == null) {
-                    App.signalError(c, "Error", "Could not set the image icon to "+imageFile.getAbsolutePath()+".\n" +
+                    App.reportError(c, "Error", "Could not set the image icon to "+imageFile.getAbsolutePath()+".\n" +
                             "Is that an image file? If it's not, try again with a valid image file, otherwise it is of an unsupported type.");
                     return;
                 }
                 userIcon = newIcon;
                 effectIconChanges();
             } catch (Exception e) {
-                App.signalError(c, "Error","An error occurred while attempting to change the image icon.\n" +
+                App.reportError(c, "Error","An error occurred while attempting to change the image icon.\n" +
                         "Please try again, preferably, with a different choice.");
             }
         }
@@ -633,9 +651,7 @@ public class Student {
      * Effects visual changes on the containers holding the icon.
      */
     private static void effectIconChanges() {
-        MComponent.empty(Board.getImagePanel());
-        Board.getImagePanel().add(new KLabel(userIcon));
-        MComponent.ready(Board.getImagePanel());
+        Board.effectIconChanges();
     }
 
     public static void fireIconReset(){
@@ -688,7 +704,7 @@ public class Student {
         if (!isTrial) {
             dataMap.put("moa", monthOfAdmission);
             dataMap.put("yoa", yearOfAdmission);
-            dataMap.put("semester", semester.toUpperCase());
+            dataMap.put("semester", semester);
             dataMap.put("mat", matNumber);
             dataMap.put("major", major);
             dataMap.put("majCode", majorCode);
@@ -701,8 +717,8 @@ public class Student {
             dataMap.put("portalPsswd", portalPassword);
             dataMap.put("studentMail", studentMail);
             dataMap.put("studentPsswd", studentPassword);
-            dataMap.put("level", level.toUpperCase());
-            dataMap.put("status", status.toUpperCase());
+            dataMap.put("level", level);
+            dataMap.put("status", status);
             dataMap.put("cg", CGPA);
         }
         Serializer.toDisk(dataMap, "core.ser");
@@ -725,7 +741,7 @@ public class Student {
         setNameFormat((String) dataMap.get("nameFormat"));
         additionalData = (LinkedHashMap<String, String>) dataMap.get("extra");
         if (dataMap.containsKey("shooterIcon")) {
-            Board.postProcesses.add(Student::fireIconDefaultSet);
+            Board.POST_PROCESSES.add(Student::fireIconDefaultSet);
         } else if (dataMap.containsKey("userIcon")) {
             userIcon = (ImageIcon) dataMap.get("iconSelf");
         }
@@ -747,7 +763,7 @@ public class Student {
         CGPA = (double) dataMap.get("cg");
         setLevel((String) dataMap.get("level"));
         setSemester((String) dataMap.get("semester"));
-        status = (String) dataMap.get("status");
+        setStatus((String) dataMap.get("status"));
         majorCode = (String) dataMap.get("majCode");
         minor = (String) dataMap.get("minor");
         minorCode = (String) dataMap.get("minCode");

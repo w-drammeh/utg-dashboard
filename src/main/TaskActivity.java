@@ -15,7 +15,8 @@ import java.util.Objects;
 /**
  * This class packages all its data onto a panel, which is also added to the cardBoard Layout
  * in Board to make it come to sight at the corresponding big-button click.
- * It serves as the intermediary between all the so-called TaskSelf, Helpers, etc. and the Board.
+ * It serves as the intermediary between all the so-called task helpers, like self, creator,
+ * exhibitor, etc. and the Board.
  */
 public class TaskActivity implements Activity {
     private CardLayout cardLayout;
@@ -202,11 +203,11 @@ public class TaskActivity implements Activity {
                 final String name = todoCreator.getDescriptionField().getText();
                 int givenDays = 0;
                 if (Globals.hasNoText(name)) {
-                    App.signalError(todoCreator.getRootPane(), "Blank Name", "Please specify a name for the task");
+                    App.reportError(todoCreator.getRootPane(), "No Name", "Please specify a name for the task");
                     todoCreator.getDescriptionField().requestFocusInWindow();
                 } else if (name.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
-                    App.signalError("Error", "Sorry, description of a task must be at most "+
-                            TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters only.");
+                    App.reportError("Error", "Sorry, description of a task must be at most "+
+                            TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters.");
                 } else {
                     final String span = todoCreator.getDuration();
                     if (Objects.equals(span, "Five Days")) {
@@ -221,7 +222,8 @@ public class TaskActivity implements Activity {
                         givenDays = 30;
                     }
 
-                    if (App.showYesNoCancelDialog(todoCreator.getRootPane(), "Confirm", "Do you wish to add the following task?\n-\n" +
+                    if (App.showYesNoCancelDialog(todoCreator.getRootPane(), "Confirm",
+                            "Do you wish to add the following task?\n-\n" +
                             "Name:  " + name + "\n" +
                             "To be completed in:  " + span)) {
                         final TaskSelf.TodoSelf incomingTodo = new TaskSelf.TodoSelf(name, givenDays);
@@ -240,7 +242,7 @@ public class TaskActivity implements Activity {
             	finalizeTransfer(oldSelf);
             } else {
                 if (App.showYesNoCancelDialog(dialog.getRootPane(), "Confirm",
-                        "Are you sure you've completed this task? It will be marked complete.")) {
+                        "Are you sure you've completed this task? It will be marked as completed.")) {
                     oldSelf.setTotalTimeConsumed(oldSelf.getDaysTaken());
                 	finalizeTransfer(oldSelf);
                     dialog.dispose();
@@ -262,7 +264,8 @@ public class TaskActivity implements Activity {
 
         public static ActionListener removalWaiter(TaskSelf.TodoSelf task, KDialog dialog){
             return e -> {
-                if (App.showYesNoCancelDialog(dialog.getRootPane(),"Confirm", "Do you really want to remove this task?")) {
+                if (App.showYesNoCancelDialog(dialog.getRootPane(),"Confirm",
+                        "Do you really want to remove this task?")) {
                     final KPanel outgoingPanel = task.getLayer();
                     if (task.isActive()) {
                         activeContainer.remove(outgoingPanel);
@@ -303,7 +306,7 @@ public class TaskActivity implements Activity {
             addButton.setFont(TASK_BUTTONS_FONT);
             addButton.setMnemonic(KeyEvent.VK_T);
             addButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            addButton.setToolTipText("Create Task (Alt + T)");
+            addButton.setToolTipText("Create Task (Alt+T)");
             addButton.addActionListener(e-> {
                 todoCreator = new TaskCreator.TodoCreator();
                 todoCreator.setVisible(true);
@@ -322,12 +325,12 @@ public class TaskActivity implements Activity {
         private JComponent completedTasks(){
             final KButton clearButton = new KButton("Clear List");
             clearButton.setFont(TASK_BUTTONS_FONT);
-            clearButton.setToolTipText("(Alt + C)");
+            clearButton.setToolTipText("Remove All (Alt+C)");
             clearButton.setMnemonic(KeyEvent.VK_C);
             clearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             clearButton.addActionListener(e-> {
                 if (dormantContainer.getComponentCount() > 0) {
-                    if (App.showOkCancelDialog("Confirm", "This action will remove all the completed tasks.")) {
+                    if (App.showYesNoCancelDialog("Confirm", "Do you want to remove all the completed tasks.")) {
                         for (Component c : dormantContainer.getComponents()) {
                             dormantContainer.remove(c);
                         }
@@ -382,11 +385,11 @@ public class TaskActivity implements Activity {
                 final String name = projectCreator.getNameField().getText();
                 int givenDays = 0;
                 if (Globals.hasNoText(name)) {
-                    App.signalError("Blank Name","Please specify a name for the project");
+                    App.reportError("No Name","Please specify a name for the project");
                     projectCreator.getNameField().requestFocusInWindow();
                 } else if (name.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
-                    App.signalError("Error", "Sorry, name of a project must be at most "+
-                            TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters only.");
+                    App.reportError("Error", "Sorry, name of a project must be at most "+
+                            TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters.");
                 } else {
                     final String dDuration = projectCreator.getTheDuration();
                     if (Objects.equals(dDuration, "Five Days")) {
@@ -407,11 +410,13 @@ public class TaskActivity implements Activity {
                         givenDays = 180;
                     }
 
-                    if (App.showYesNoCancelDialog(projectCreator.getRootPane(), "Confirm", "Do you wish to add the following project?\n-\n" +
+                    if (App.showYesNoCancelDialog(projectCreator.getRootPane(), "Confirm",
+                            "Do you wish to add the following project?\n-\n" +
                             "Name:  " + name + "\n" +
                             "Type:  " + projectCreator.getTheType() + " Project" + "\n" +
                             "Duration:  " + dDuration)) {
-                        final TaskSelf.ProjectSelf incomingProject = new TaskSelf.ProjectSelf(name, projectCreator.getTheType(), givenDays);
+                        final TaskSelf.ProjectSelf incomingProject = new TaskSelf.ProjectSelf(name,
+                                projectCreator.getTheType(), givenDays);
                         PROJECTS.add(incomingProject);
                         projectsReside.add(incomingProject.getLayer());
                         projectCreator.dispose();
@@ -429,7 +434,8 @@ public class TaskActivity implements Activity {
                 renewCount(-1);
                 completeCount++;
         	} else {
-        		if (App.showYesNoCancelDialog("Confirm", "Are you sure you've completed this project before the specified time?")) {
+        		if (App.showYesNoCancelDialog("Confirm",
+                        "Are you sure you've completed this project before the specified time?")) {
                     project.setTotalTimeConsumed(project.getDaysTaken());
         			finalizeCompletion(project);
                     renewCount(-1);
@@ -451,7 +457,7 @@ public class TaskActivity implements Activity {
 
         public static ActionListener removalListener(TaskSelf.ProjectSelf project){
             return e -> {
-                if (App.showOkCancelDialog("Confirm","This Project will be cleared from your list.")) {
+                if (App.showYesNoCancelDialog("Confirm","Are you sure you want to remove this project?.")) {
                     if (project.isLive()) {
                         renewCount(-1);
                     } else {
@@ -485,7 +491,7 @@ public class TaskActivity implements Activity {
             addButton.setFont(TASK_BUTTONS_FONT);
             addButton.setMnemonic(KeyEvent.VK_P);
             addButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            addButton.setToolTipText("Create Project (Alt + P)");
+            addButton.setToolTipText("Create Project (Alt+P)");
             addButton.addActionListener(e-> {
                 projectCreator = new TaskCreator.ProjectCreator();
                 projectCreator.setVisible(true);
@@ -546,7 +552,8 @@ public class TaskActivity implements Activity {
                 public void remove(Component comp) {
                     super.remove(comp);
                     doneCount--;
-                    doneReside.setPreferredSize(new Dimension(doneReside.getPreferredSize().width, doneReside.getPreferredSize().height-40));
+                    doneReside.setPreferredSize(new Dimension(doneReside.getPreferredSize().width,
+                            doneReside.getPreferredSize().height-40));
                 }
             };
             doneReside.setLayout(new FlowLayout(CONTENTS_POSITION));
@@ -556,20 +563,24 @@ public class TaskActivity implements Activity {
             return e -> {
                 final String name = assignmentCreator.getNameField().getText();
                 if (Globals.hasNoText(name)) {
-                    App.signalError(assignmentCreator.getRootPane(), "Blank Name", "Please provide the name of the course");
+                    App.reportError(assignmentCreator.getRootPane(), "No Name",
+                            "Please provide the name of the course");
                     assignmentCreator.getNameField().requestFocusInWindow();
                 } else if (name.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
-                    App.signalError(assignmentCreator.getRootPane(), "Error", "Sorry, the subject name cannot exceed "+
+                    App.reportError(assignmentCreator.getRootPane(), "Error",
+                            "Sorry, the subject name cannot exceed "+
                             TaskCreator.TASKS_DESCRIPTION_LIMIT +" characters.");
                     assignmentCreator.getNameField().requestFocusInWindow();
                 } else if (Globals.hasNoText(assignmentCreator.getProvidedDeadLine())) {
-                    App.signalError(assignmentCreator.getRootPane(), "Deadline Error", "Please fill out all the fields for the deadline. You can change them later.");
+                    App.reportError(assignmentCreator.getRootPane(), "Deadline Error",
+                            "Please fill out all the fields for the deadline. You can change them later.");
                 } else {
                     final String type = assignmentCreator.isGroup() ? "Group Assignment" : "Individual Assignment";
                     final String question = assignmentCreator.getQuestion();
                     final Date givenDate = Objects.requireNonNull(MDate.parse(assignmentCreator.getProvidedDeadLine()+" 0:0:0"));
                     if (givenDate.before(new Date())) {
-                        App.signalError(assignmentCreator.getRootPane(), "Invalid Deadline", "Sorry, the deadline cannot be at most today.");
+                        App.reportError(assignmentCreator.getRootPane(), "Invalid Deadline",
+                                "That deadline is already past. Enter a valid deadline.");
                         return;
                     }
                     final String deadline = MDate.formatDateOnly(givenDate);
@@ -586,10 +597,11 @@ public class TaskActivity implements Activity {
                     } else {
                         mean = "Other Means";
                     }
-                    if (App.showYesNoCancelDialog(assignmentCreator.getRootPane(), "Confirm", "Do you wish to add the following assignment?\n-\n" +
+                    if (App.showYesNoCancelDialog(assignmentCreator.getRootPane(), "Confirm",
+                            "Do you wish to add the following assignment?\n-\n" +
                             "Subject:  " + name + "\n" +
                             "Type:  " + type + "\n" +
-                            "Submittion:  "+deadline+ "\n" +
+                            "Submission:  "+deadline+ "\n" +
                             "Through:  "+mean)) {
                         final TaskSelf.AssignmentSelf incomingAssignment = new TaskSelf.AssignmentSelf(name, deadline,
                                 question, assignmentCreator.isGroup(), mean);
@@ -602,12 +614,14 @@ public class TaskActivity implements Activity {
             };
         }
 
-        public static void transferAssignment(TaskSelf.AssignmentSelf assignmentSelf, TaskExhibition.AssignmentExhibition assignmentExhibition, boolean isTime) {
+        public static void transferAssignment(TaskSelf.AssignmentSelf assignmentSelf,
+                                              TaskExhibition.AssignmentExhibition assignmentExhibition, boolean isTime) {
             if (isTime) {
                 assignmentSelf.setSubmissionDate(assignmentSelf.getDeadLine());
                 completeTransfer(assignmentSelf);
             } else {
-                if (App.showYesNoCancelDialog(assignmentExhibition.getRootPane(),"Confirm", "Are you sure you have submitted this assignment?")) {
+                if (App.showYesNoCancelDialog(assignmentExhibition.getRootPane(),"Confirm",
+                        "Are you sure you have submitted this assignment?")) {
                     assignmentSelf.setSubmissionDate(MDate.formatDateOnly(new Date()));
                     completeTransfer(assignmentSelf);
                     assignmentExhibition.dispose();
@@ -628,9 +642,11 @@ public class TaskActivity implements Activity {
             MComponent.ready(activeReside,doneReside);
         }
         
-        public static ActionListener removalListener(TaskSelf.AssignmentSelf assignmentSelf, TaskExhibition.AssignmentExhibition eDialog){
+        public static ActionListener removalListener(TaskSelf.AssignmentSelf assignmentSelf,
+                                                     TaskExhibition.AssignmentExhibition eDialog){
             return e -> {
-                if (App.showYesNoCancelDialog(eDialog.getRootPane(), "Confirm","Are you sure you want to remove this assignment?")) {
+                if (App.showYesNoCancelDialog(eDialog.getRootPane(), "Confirm",
+                        "Are you sure you want to remove this assignment?")) {
                     if (assignmentSelf.isOn()) {
                         activeReside.remove(assignmentSelf.getLayer());
                     } else {
@@ -674,7 +690,7 @@ public class TaskActivity implements Activity {
             createButton.setFont(TASK_BUTTONS_FONT);
             createButton.setMnemonic(KeyEvent.VK_A);
             createButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            createButton.setToolTipText("Add Assignment (Alt + A)");
+            createButton.setToolTipText("Add Assignment (Alt+A)");
             createButton.addActionListener(e-> {
                 assignmentCreator = new TaskCreator.AssignmentCreator();
                 assignmentCreator.setVisible(true);
@@ -693,12 +709,13 @@ public class TaskActivity implements Activity {
         private JComponent doneAssignments() {
         	final KButton clearButton = new KButton("Remove all");
             clearButton.setFont(TASK_BUTTONS_FONT);
-            clearButton.setToolTipText("(Alt + R)");
+            clearButton.setToolTipText("Remove All (Alt + R)");
             clearButton.setMnemonic(KeyEvent.VK_R);
             clearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             clearButton.addActionListener(e -> {
                 if (doneReside.getComponentCount() > 0) {
-                    if (App.showYesNoCancelDialog("Confirm", "This action will remove all the assignments you're done with. Continue?")) {
+                    if (App.showYesNoCancelDialog("Confirm",
+                            "Are you sure you want to remove all the submitted assignments?")) {
                         for (Component c : doneReside.getComponents()) {
                             doneReside.remove(c);
                         }
@@ -710,7 +727,8 @@ public class TaskActivity implements Activity {
 
             final KPanel labelPanelPlus = new KPanel(new BorderLayout());
             labelPanelPlus.add(clearButton, BorderLayout.WEST);
-            labelPanelPlus.add(new KPanel(new KLabel("Submitted Assignments", TASK_HEADERS_FONT)), BorderLayout.CENTER);
+            labelPanelPlus.add(new KPanel(new KLabel("Submitted Assignments", TASK_HEADERS_FONT)),
+                    BorderLayout.CENTER);
 
             final KPanel lowerReside = new KPanel(new BorderLayout());
             lowerReside.add(labelPanelPlus, BorderLayout.NORTH);
@@ -753,14 +771,17 @@ public class TaskActivity implements Activity {
                 }
                 String tName = requiredCreator.getDescriptionField().getText();
                 if (Globals.hasNoText(tName)) {
-                    App.signalError(requiredCreator.getRootPane(), "No Name", "Please specify a name for the event.");
+                    App.reportError(requiredCreator.getRootPane(), "No Name",
+                            "Please specify a name for the event.");
                     requiredCreator.getDescriptionField().requestFocusInWindow();
                 } else if (tName.length() > TaskCreator.TASKS_DESCRIPTION_LIMIT) {
-                    App.signalError(requiredCreator.getRootPane(), "Error", "Sorry, the event's name should be at most "+
+                    App.reportError(requiredCreator.getRootPane(), "Error",
+                            "Sorry, the event's name should be at most "+
                             TaskCreator.TASKS_DESCRIPTION_LIMIT+" characters.");
                     requiredCreator.getDescriptionField().requestFocusInWindow();
                 } else if (Globals.hasNoText(requiredCreator.getProvidedDate())) {
-                    App.signalError(requiredCreator.getRootPane(), "Error", "Please provide all the fields for the date of the "+
+                    App.reportError(requiredCreator.getRootPane(), "Error",
+                            "Please provide all the fields for the date of the "+
                             (requiredCreator.type()));
                 } else {
                     final Date date = MDate.parse(requiredCreator.getProvidedDate() + " 0:0:0");
@@ -768,7 +789,8 @@ public class TaskActivity implements Activity {
                         return;
                     }
                     if (date.before(new Date())) {
-                        App.signalError(requiredCreator.getRootPane(),"Invalid Date", "Please consider the date - it cannot be at most today.");
+                        App.reportError(requiredCreator.getRootPane(),"Invalid Deadline",
+                                "Please consider the deadline. It's already past.");
                         return;
                     }
                     if (requiredCreator.getTitle().contains("Test")) {
@@ -777,7 +799,8 @@ public class TaskActivity implements Activity {
                         tName = tName + " Examination";
                     }
                     final String dateString = MDate.formatDateOnly(date);
-                    if (App.showYesNoCancelDialog(requiredCreator.getRootPane(),"Confirm", "Do you wish to add the following event?\n-\n" +
+                    if (App.showYesNoCancelDialog(requiredCreator.getRootPane(),"Confirm",
+                            "Do you wish to add the following event?\n-\n" +
                             "Title:  "+tName+"\n" +
                             "Date:  "+dateString)) {
                         final TaskSelf.EventSelf incomingEvent = new TaskSelf.EventSelf(tName, dateString);
@@ -847,9 +870,12 @@ public class TaskActivity implements Activity {
             jPopup.add(otherItem);
 
             final KButton popUpButton = new KButton("New Event");
+            popUpButton.setToolTipText("Create Event (Alt+V)");
+            popUpButton.setMnemonic(KeyEvent.VK_V);
             popUpButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             popUpButton.setFont(TASK_BUTTONS_FONT);
-            popUpButton.addActionListener(e-> jPopup.show(popUpButton, popUpButton.getX(), popUpButton.getY() + (popUpButton.getPreferredSize().height)));
+            popUpButton.addActionListener(e-> jPopup.show(popUpButton, popUpButton.getX(), popUpButton.getY() +
+                    (popUpButton.getPreferredSize().height)));
 
             final KPanel labelPanelPlus = new KPanel(new BorderLayout());
             labelPanelPlus.add(popUpButton, BorderLayout.WEST);

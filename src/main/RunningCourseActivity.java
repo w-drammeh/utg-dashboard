@@ -30,8 +30,8 @@ public class RunningCourseActivity implements Activity {
     private static final ArrayList<RunningCourse> ACTIVE_COURSES = new ArrayList<RunningCourse>() {
         @Override
         public boolean add(RunningCourse course) {
-            activeModel.addRow(new String[] {course.getCode(), course.getName(), course.getLecturer(), course.getSchedule(),
-                    course.isConfirmed() ? "Confirmed" : "Unknown"});
+            activeModel.addRow(new String[] {course.getCode(), course.getName(), course.getLecturer(),
+                    course.getSchedule(), course.isConfirmed() ? "Confirmed" : "Unknown"});
             hintLabel.setVisible(true);
             return super.add(course);
         }
@@ -64,14 +64,16 @@ public class RunningCourseActivity implements Activity {
             semesterBigLabel = new KLabel(Student.getSemester(), KFontFactory.BODY_HEAD_FONT);
             semesterBigLabel.setPreferredSize(new Dimension(925, 35));
             semesterBigLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            semesterBigLabel.underline(Color.BLACK, true);
+            semesterBigLabel.underline(Color.GRAY, true);
 
             noticeLabel = new KLabel(Portal.getRegistrationNotice(), KFontFactory.createPlainFont(16), Color.RED);
+            noticeLabel.setToolTipText("Registration Notice");
 
             matchItem = new KMenuItem("Match Portal", e-> startMatching(true));
 
             final KMenuItem updateItem = new KMenuItem("Update Registration Notice",
-                    e-> App.promptPlain("Tip", "To renew the registration notice, go to 'Notifications | Portal Alerts | Update Alerts'"));
+                    e-> App.reportInfo("Tip",
+                            "To update the registration notice, go to 'Notifications / Portal Alerts / Update Alerts'"));
 
             final KMenuItem visitItem = new KMenuItem("Visit Portal instead");
             visitItem.addActionListener(e-> new Thread(()-> Portal.openPortal(visitItem)).start());
@@ -81,7 +83,7 @@ public class RunningCourseActivity implements Activity {
             popupMenu.add(updateItem);
             popupMenu.add(visitItem);
 
-            optionsButton = KButton.getIconifiedButton("options.png",25,25);
+            optionsButton = KButton.createIconifiedButton("options.png",25,25);
             optionsButton.setCursor(MComponent.HAND_CURSOR);
             optionsButton.setToolTipText("More options");
             final int preferredHeight = optionsButton.getPreferredSize().height;
@@ -117,10 +119,10 @@ public class RunningCourseActivity implements Activity {
     }
 
     public static void effectNoticeUpdate(){
-        noticeLabel.setText(Portal.getRegistrationNotice());
+        Board.POST_PROCESSES.add(()-> noticeLabel.setText(Portal.getRegistrationNotice()));
     }
 
-    public static synchronized void fixRunningDriver(){
+    private static synchronized void fixRunningDriver(){
         if (activeDriver == null) {
             activeDriver = MDriver.forgeNew(true);
         }
@@ -128,13 +130,15 @@ public class RunningCourseActivity implements Activity {
 
     /**
      * Checks-out this course for the currently running semester using its code.
-     * If it's found, it shall be replaced; otherwise, an attempt will be made to register it.
+     * If it's found, it shall be replaced; otherwise, unsuccessful.
+     * Todo: if not found, an attempt will be made to register it.
      */
     private static void startCheckout(RunningCourse targetCourse) {
         final String targetCode = targetCourse.getCode();
         final String initialValue = String.valueOf(activeModel.getValueAt(activeModel.getRowOf(targetCode),
                 activeModel.getColumnCount() - 1));
-        activeModel.setValueAt("Verifying...", activeModel.getRowOf(targetCode), activeModel.getColumnCount() - 1);
+        activeModel.setValueAt("Verifying...", activeModel.getRowOf(targetCode),
+                activeModel.getColumnCount() - 1);
         fixRunningDriver();
         if (activeDriver == null) {
             App.reportMissingDriver();
@@ -157,8 +161,8 @@ public class RunningCourseActivity implements Activity {
             final WebDriverWait loadWaiter = new WebDriverWait(activeDriver, Portal.MAXIMUM_WAIT_TIME);
             final int loginAttempt = MDriver.attemptLogin(activeDriver);
             if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
-                if (Portal.isPortalBusy(activeDriver)) {
-                    App.reportBusyPortal();
+                if (Portal.isEvaluationNeeded(activeDriver)) {
+                    Portal.reportEvaluationNeeded();
                     final int targetRow = activeModel.getRowOf(targetCode);
                     if (targetRow >= 0) {
                         activeModel.setValueAt(initialValue, targetRow, activeModel.getColumnCount() - 1);
@@ -184,8 +188,9 @@ public class RunningCourseActivity implements Activity {
             final List<WebElement> tabs;
             try {
                 activeDriver.navigate().to(Portal.CONTENTS_PAGE);
-                Portal.nowOnPortal(activeDriver);
-                tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(".nav-tabs > li")));
+                Portal.onPortal(activeDriver);
+                tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
+                        By.cssSelector(".nav-tabs > li")));
             } catch (Exception e) {
                 App.reportConnectionLost();
                 final int targetRow = activeModel.getRowOf(targetCode);
@@ -201,7 +206,8 @@ public class RunningCourseActivity implements Activity {
             final List<WebElement> captions = tableBody.findElements(By.cssSelector("b, strong"));
             final boolean registered = captions.get(captions.size() - 1).getText().equals(Student.getSemester());
             if (!registered) {
-                App.promptWarning("Checkout Failed","The attempt to checkout '"+targetCourse.getName()+"' was unsuccessful.\n" +
+                App.reportWarning("Checkout Failed",
+                        "The attempt to checkout '"+targetCourse.getName()+"' was unsuccessful.\n" +
                         "It seems like you haven't registered any for this semester yet.");
                 final int targetRow = activeModel.getRowOf(targetCode);
                 if (targetRow >= 0) {
@@ -228,8 +234,9 @@ public class RunningCourseActivity implements Activity {
                     } else {//deleted?
                         ACTIVE_COURSES.add(foundCourse);
                     }
-                    App.promptPlain("Checkout Successful","Registered course '"+targetCourse.getName()+"' checked out successful.\n" +
-                            "It is now confirmed set. You can click on 'Details' to view the its details.");
+                    App.reportInfo("Checkout Successful",
+                            "Registered course '"+targetCourse.getName()+"' checked out successful.\n" +
+                            "It is found on your Portal as a registered course for this semester.");
                     found = true;
                     break;
                 }
@@ -237,30 +244,31 @@ public class RunningCourseActivity implements Activity {
             }
 
             if (!found) {
-                App.signalError("Checkout Unsuccessful","The attempt to checkout '"+targetCourse.getName()+"' was unsuccessful.\n" +
-                        "It was not found as a registered course this semester.\n" +
-                        "Please refer to the "+ Tips.reference("Running Courses | Verification")+"\n"+
-                        "for more information about this action, or simply use 'Matching' instead.");
-                activeModel.setValueAt(initialValue, activeModel.getRowOf(targetCode), activeModel.getColumnCount() - 1);
+                App.reportError("Checkout Unsuccessful",
+                        "The attempt to checkout '"+targetCourse.getName()+"' was unsuccessful.\n" +
+                        "It seems like you haven't registered that course for this semester.");
+                activeModel.setValueAt(initialValue, activeModel.getRowOf(targetCode),
+                        activeModel.getColumnCount() - 1);
             }
         }
     }
 
     /**
+     * Attempts to bring all the registered courses (if there is any) for the current semester.
      * Sync will only be allowed to commence if one is not already on the way.
      * The difference is that: the user does not need to be prompted when they
      * did not request it.
-     * This embeds itself in a thread
+     * This embeds itself in a thread.
      */
     public static void startMatching(boolean userRequested){
         if (!(userRequested || matchItem.isEnabled())) {
             return;
         }
 
-        if (!userRequested || App.showOkCancelDialog("Match Registration Table",
-                "This feature is experimental. Dashboard will start to contact, and bring all the courses\n" +
-                "(if there exists any) you have registered this semester. Continue?\n" +
-                        "This action has consequences. Kindly refer to "+ Tips.reference("Running Courses | Matching"))) {
+        if (!userRequested || App.showYesNoCancelDialog("Match Table",
+                "Do you want to match this table with your Portal?\n" +
+                        "Dashboard will contact the Portal and bring all the courses\n" +
+                "(if there exists any) you have registered this semester.")) {
             new Thread(()-> {
                 matchItem.setEnabled(false);
                 fixRunningDriver();
@@ -284,9 +292,9 @@ public class RunningCourseActivity implements Activity {
                     final WebDriverWait loadWaiter = new WebDriverWait(activeDriver, Portal.MAXIMUM_WAIT_TIME);
                     final int loginAttempt = MDriver.attemptLogin(activeDriver);
                     if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
-                        if (Portal.isPortalBusy(activeDriver)) {
+                        if (Portal.isEvaluationNeeded(activeDriver)) {
                             if (userRequested) {
-                                App.reportBusyPortal();
+                                Portal.reportEvaluationNeeded();
                             }
                             matchItem.setEnabled(true);
                             return;
@@ -308,8 +316,9 @@ public class RunningCourseActivity implements Activity {
                     final List<WebElement> tabs;
                     try {
                         activeDriver.navigate().to(Portal.CONTENTS_PAGE);
-                        Portal.nowOnPortal(activeDriver);
-                        tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(".nav-tabs > li")));
+                        Portal.onPortal(activeDriver);
+                        tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
+                                By.cssSelector(".nav-tabs > li")));
                     } catch (Exception e) {
                         if (userRequested) {
                             App.reportConnectionLost();
@@ -326,7 +335,8 @@ public class RunningCourseActivity implements Activity {
                     final boolean isRegistered = captions.get(captions.size() - 1).getText().equals(Student.getSemester());
                     if (!isRegistered) {
                         if (userRequested) {
-                            App.promptWarning("Match Failed","Dashboard could not locate any registered course on your portal.\n" +
+                            App.reportWarning("Match Problem",
+                                    "Dashboard could not locate any registered course on your portal.\n" +
                                     "Please, register your courses first then try this action.");
                         }
                         matchItem.setEnabled(true);
@@ -362,18 +372,21 @@ public class RunningCourseActivity implements Activity {
                             final RunningCourse existingCourse = Objects.requireNonNull(getByCode(existingCode));
                             if (existingCourse.isConfirmed()) {
                                 ACTIVE_COURSES.remove(existingCourse);
-                                matchBuilder.append(existingCourse.getAbsoluteName()).append(" is not found registered for this semester, hence it was removed.\n");
+                                matchBuilder.append(existingCourse.getAbsoluteName());
+                                matchBuilder.append(" is not found registered for this semester, hence it was removed.\n");
                             } else {
-                                matchBuilder.append(existingCourse.getAbsoluteName()).append(" was not found registered - you can remove it.");
+                                matchBuilder.append(existingCourse.getAbsoluteName());
+                                matchBuilder.append(" was not found registered - you can remove it.");
                             }
                         }
                     }
 
                     if (count == 0) {
-                        App.promptWarning("Match Unsuccessful", "Dashboard could not locate any registered course on your portal.\n" +
+                        App.reportWarning("Match Unsuccessful",
+                                "Dashboard could not locate any registered course on your portal.\n" +
                                 "Did you register for this semester yet?");
                     } else {
-                        App.promptPlain("Matching Successful", matchBuilder.toString());
+                        App.reportInfo("Matching Successful", matchBuilder.toString());
                     }
 
                     matchItem.setEnabled(true);
@@ -383,12 +396,10 @@ public class RunningCourseActivity implements Activity {
     }
 
     private static String generateNotificationWarning(String moduleName) {
-        return "Dear "+Student.getLastName() +
-                "<p>you've added "+moduleName+" to your list of registered courses. " +
-                "However, this does not means that Dashboard will <b>register</b> it on your Portal. " +
-                "Dashboard does not write your portal!</p>" +
-                "<p>If you've registered the course already on your Portal, then let Dashboard check it out " +
-                "by clicking the <b>Checkout Button</b>.</p>";
+        return String.format("Dear %s,", Student.getLastName()) +
+                "<p>you've added <b>"+moduleName+"</b> to your list of registered courses.<br>" +
+                "However, this does not means that Dashboard will <b>register</b> it on your Portal.</p>" +
+                "Dashboard does not write your portal.";
     }
 
     public static String[] names() {
@@ -442,11 +453,7 @@ public class RunningCourseActivity implements Activity {
         final KMenuItem detailsItem = new KMenuItem("Details");
         detailsItem.addActionListener(e-> {
             final String code = String.valueOf(activeModel.getValueAt(activeTable.getSelectedRow(), 0));
-            try {
-                RunningCourse.exhibit(getByCode(code));
-            } catch (NullPointerException npe) {
-                App.silenceException(npe);
-            }
+            RunningCourse.exhibit(getByCode(code));
         });
 
         final KMenuItem checkItem = new KMenuItem("Checkout");
@@ -464,10 +471,12 @@ public class RunningCourseActivity implements Activity {
 
         final KMenuItem removeItem = new KMenuItem("Remove");
         removeItem.addActionListener(e-> {
-            final RunningCourse course = getByCode(String.valueOf(activeModel.getValueAt(activeTable.getSelectedRow(), 0)));
-            if (course != null && App.showOkCancelDialog("Remove", "Do you really wish to remove \""+course.getName()+"\"?")){
+            final String code = String.valueOf(activeModel.getValueAt(activeTable.getSelectedRow(), 0));
+            final RunningCourse course = getByCode(code);
+            if (course != null && App.showYesNoCancelDialog("Remove "+course.getCode(),
+                    "Do you really wish to remove \""+course.getName()+"\"?")){
                 if (course.isConfirmed()) {
-                    final int vInt = App.verifyUser("Enter your Mat. number to proceed with this changes:");
+                    final int vInt = App.verifyUser("Enter your Matriculation number to proceed with this changes:");
                     if (vInt == App.VERIFICATION_TRUE) {
                         ACTIVE_COURSES.remove(course);
                     } else if (vInt == App.VERIFICATION_FALSE) {
@@ -507,11 +516,7 @@ public class RunningCourseActivity implements Activity {
                     final int selectedRow = activeTable.getSelectedRow();
                     if (selectedRow >= 0) {
                         final String code = String.valueOf(activeTable.getValueAt(selectedRow, 0));
-                        try {
-                            RunningCourse.exhibit(getByCode(code));
-                        } catch (NullPointerException npe) {
-                            App.silenceException(npe);
-                        }
+                        RunningCourse.exhibit(getByCode(code));
                         e.consume();
                     }
                 }
@@ -531,20 +536,20 @@ public class RunningCourseActivity implements Activity {
             }
         });
 
-        final KButton addButton = KButton.getIconifiedButton("plus.png", 15, 15);
+        final KButton addButton = KButton.createIconifiedButton("plus.png", 15, 15);
         addButton.redress();
         addButton.setText("Add");
         addButton.setFont(KFontFactory.createPlainFont(16));
         addButton.addActionListener(e-> {
             if (activeTable.getRowCount() >= 6) {
-                App.signalError("Error","The maximum number of registrations per semester is six (6) courses.");
+                App.reportError("Error","You can only register semester up to six (6) courses per semester.");
             } else {
                 SwingUtilities.invokeLater(()-> new RunningCourseAdder().setVisible(true));
             }
         });
 
-        hintLabel = new KLabel("For more actions, right-click a row on the table.", KFontFactory.createPlainFont(16),
-                Color.DARK_GRAY);
+        hintLabel = new KLabel("For more actions, right-click a row (or a course) on the table.",
+                KFontFactory.createBoldFont(15), Color.GRAY);
         hintLabel.setVisible(activeModel.getRowCount() > 0);
 
         final KPanel bottomPanel = new KPanel(new BorderLayout());
@@ -598,14 +603,14 @@ public class RunningCourseActivity implements Activity {
 
             daysBox = new JComboBox<>(Course.getWeekDays());
             daysBox.setFont(KFontFactory.createPlainFont(15));
-            hoursBox = new JComboBox<>(Course.availableCoursePeriods());
+            hoursBox = new JComboBox<>(Course.getCoursePeriods());
             hoursBox.setFont(daysBox.getFont());
             final KPanel scheduleLayer = new KPanel(new FlowLayout(FlowLayout.CENTER));
             scheduleLayer.addAll(newHintLabel("Day:"), daysBox, Box.createRigidArea(new Dimension(50, 30)),
                     newHintLabel("Time:"), hoursBox);
 
             final KCheckBox instantCheck = new KCheckBox("Checkout now", true);
-            instantCheck.setFont(KFontFactory.createPlainFont(15));
+            instantCheck.setFont(KFontFactory.createBoldFont(15));
             instantCheck.setForeground(Color.BLUE);
             instantCheck.setCursor(MComponent.HAND_CURSOR);
             instantCheck.setFocusable(false);
@@ -618,31 +623,33 @@ public class RunningCourseActivity implements Activity {
             doneButton = new KButton("Done");
             doneButton.addActionListener(e-> {
                 if (codeField.isBlank()) {
-                    App.signalError(getRootPane(),"No Code", "Please provide the code of the course.");
+                    App.reportError(getRootPane(),"No Code", "Please provide the code of the course.");
                     codeField.requestFocusInWindow();
                 } else if (nameField.isBlank()) {
-                    App.signalError(getRootPane(),"No Name", "Please provide the name of the course.");
+                    App.reportError(getRootPane(),"No Name", "Please provide the name of the course.");
                     nameField.requestFocusInWindow();
                 } else if (lecturerField.isBlank()) {
-                    App.signalError(getRootPane(),"No Lecturer","Please provide the name of the lecturer.");
+                    App.reportError(getRootPane(),"No Lecturer","Please provide the name of the lecturer.");
                     lecturerField.requestFocusInWindow();
                 } else {
                     final String givenCode = codeField.getText().toUpperCase();
                     if (getByCode(givenCode) != null) {
-                        App.signalError("Duplicate Code","Cannot add this code: "+givenCode+". It's already assigned to a course in the list.");
+                        App.reportError("Duplicate Code",
+                                "Cannot add this code: "+givenCode+". It's already assigned to a course in the list.");
                         return;
                     }
 
-                    final RunningCourse addedCourse = new RunningCourse(codeField.getText(), nameField.getText(), lecturerField.getText(),
-                            venueField.getText(), roomField.getText(), String.valueOf(daysBox.getSelectedItem()),
-                            String.valueOf(hoursBox.getSelectedItem()), false);
+                    final RunningCourse addedCourse = new RunningCourse(codeField.getText(), nameField.getText(),
+                            lecturerField.getText(), venueField.getText(), roomField.getText(),
+                            String.valueOf(daysBox.getSelectedItem()), String.valueOf(hoursBox.getSelectedItem()), false);
                     ACTIVE_COURSES.add(addedCourse);
                     dispose();
                     if (instantCheck.isSelected()) {
                         new Thread(()-> startCheckout(addedCourse)).start();
                     } else {
                         Notification.create("Local Registration", nameField.getText()+
-                                " is locally added, and may not be on your portal", generateNotificationWarning(nameField.getText()));
+                                " is locally added, and may not be on your portal",
+                                generateNotificationWarning(nameField.getText()));
                     }
                 }
             });
@@ -686,25 +693,26 @@ public class RunningCourseActivity implements Activity {
             doneButton.removeActionListener(doneButton.getActionListeners()[0]);
             doneButton.addActionListener(e-> {
                 if (codeField.isBlank()) {
-                    App.signalError(getRootPane(),"No Code", "Please provide the code of the course.");
+                    App.reportError(getRootPane(),"No Code", "Please provide the code of the course.");
                     codeField.requestFocusInWindow();
                 } else if (nameField.isBlank()) {
-                    App.signalError(getRootPane(),"No Name", "Please provide the name of the course.");
+                    App.reportError(getRootPane(),"No Name", "Please provide the name of the course.");
                     nameField.requestFocusInWindow();
                 } else if (lecturerField.isBlank()) {
-                    App.signalError(getRootPane(),"No Lecturer","Please provide the name of the lecturer.");
+                    App.reportError(getRootPane(),"No Lecturer","Please provide the name of the lecturer.");
                     lecturerField.requestFocusInWindow();
                 } else {
-                    final RunningCourse refracted = new RunningCourse(codeField.getText(), nameField.getText(), lecturerField.getText(),
-                            venueField.getText(), roomField.getText(), String.valueOf(daysBox.getSelectedItem()),
-                            String.valueOf(hoursBox.getSelectedItem()), original.isConfirmed());
+                    final RunningCourse refracted = new RunningCourse(codeField.getText(), nameField.getText(),
+                            lecturerField.getText(), venueField.getText(), roomField.getText(),
+                            String.valueOf(daysBox.getSelectedItem()), String.valueOf(hoursBox.getSelectedItem()),
+                            original.isConfirmed());
                     for (int i = 0; i < activeModel.getRowCount(); i++) {
                         if (i == activeTable.getSelectedRow()) {
                             continue;
                         }
                         final String refCode = refracted.getCode();
                         if ((refCode.equalsIgnoreCase(String.valueOf(activeModel.getValueAt(i, 0))))) {
-                            App.signalError("Duplicate Code","Cannot add this code: "+refCode+
+                            App.reportError("Duplicate Code","Cannot add this code: "+refCode+
                                     ". It's already assigned to a course in the list.");
                             return;
                         }
@@ -732,7 +740,7 @@ public class RunningCourseActivity implements Activity {
             return;
         }
         for (String dataLines : runningCourses) {
-            ACTIVE_COURSES.add(RunningCourse.importFromSerial(dataLines));
+            ACTIVE_COURSES.add(RunningCourse.create(dataLines));
         }
     }
 

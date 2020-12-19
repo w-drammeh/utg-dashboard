@@ -15,7 +15,7 @@ public class TaskCreator {
     public static final int TASKS_DESCRIPTION_LIMIT = 50;//Note, this should be increased. it's only small because of irregular component arrangement and fixed layouts
 
 
-    private static Component giveSpace(int w, int h){
+    private static Component createSpace(int w, int h){
         return Box.createRigidArea(new Dimension(w, h));
     }
 
@@ -27,8 +27,8 @@ public class TaskCreator {
 
         public TodoCreator(){
             super("Create Task");
-            this.setModalityType(TodoCreator.DEFAULT_MODALITY_TYPE);
-            this.setResizable(true);
+            setModalityType(TodoCreator.DEFAULT_MODALITY_TYPE);
+            setResizable(true);
 
             final Dimension platesDimension = new Dimension(475, 35);
             final Dimension fieldsDimension = new Dimension(310, 30);
@@ -48,20 +48,20 @@ public class TaskCreator {
             durationPlate.add(new KPanel(durationBox), BorderLayout.CENTER);
 
             final KButton quitButton = new KButton("Cancel");
-            quitButton.addActionListener(e -> this.dispose());
+            quitButton.addActionListener(e -> dispose());
             createButton = new KButton("Create");
             createButton.setFocusable(true);
             createButton.addActionListener(TaskActivity.TodoHandler.additionWaiter());
 
-            this.getRootPane().setDefaultButton(createButton);
+            rootPane.setDefaultButton(createButton);
             final KPanel contentPlate = new KPanel();
             contentPlate.setLayout(new BoxLayout(contentPlate,BoxLayout.Y_AXIS));
             contentPlate.addAll(namePlate,durationPlate, MComponent.contentBottomGap(),
                     new KPanel(new FlowLayout(FlowLayout.RIGHT), quitButton, createButton));
-            this.setContentPane(contentPlate);
-            this.pack();
-            this.setMinimumSize(this.getPreferredSize());
-            this.setLocationRelativeTo(Board.getRoot());
+            setContentPane(contentPlate);
+            pack();
+            setMinimumSize(getPreferredSize());
+            setLocationRelativeTo(Board.getRoot());
         }
 
         public KTextField getDescriptionField(){
@@ -82,8 +82,8 @@ public class TaskCreator {
 
         public ProjectCreator(){
             super("Create Project");
-            this.setModalityType(TodoCreator.DEFAULT_MODALITY_TYPE);
-            this.setResizable(true);
+            setModalityType(TodoCreator.DEFAULT_MODALITY_TYPE);
+            setResizable(true);
 
             final Font labelsFont = KFontFactory.createBoldFont(16);
             final Font boxFont = KFontFactory.createPlainFont(15);
@@ -110,19 +110,19 @@ public class TaskCreator {
             durationPanelPlus.add(new KPanel(durationBox),BorderLayout.CENTER);
 
             final KButton cancelButton = new KButton("Cancel");
-            cancelButton.addActionListener(e -> this.dispose());
+            cancelButton.addActionListener(e-> dispose());
             createButton = new KButton("Create");
             createButton.addActionListener(TaskActivity.ProjectsHandler.additionWaiter());
-            this.getRootPane().setDefaultButton(createButton);
+            rootPane.setDefaultButton(createButton);
 
             final KPanel contentPlate = new KPanel();
             contentPlate.setLayout(new BoxLayout(contentPlate,BoxLayout.Y_AXIS));
-            contentPlate.addAll(namePanelPlus,typePanelPlus,durationPanelPlus, giveSpace(400, 25),
+            contentPlate.addAll(namePanelPlus,typePanelPlus,durationPanelPlus, createSpace(400, 25),
                     new KPanel(new FlowLayout(FlowLayout.RIGHT), cancelButton, createButton));
-            this.setContentPane(contentPlate);
-            this.pack();
-            this.setMinimumSize(this.getPreferredSize());
-            this.setLocationRelativeTo(Board.getRoot());
+            setContentPane(contentPlate);
+            pack();
+            setMinimumSize(this.getPreferredSize());
+            setLocationRelativeTo(Board.getRoot());
         }
 
         public KTextField getNameField(){
@@ -149,8 +149,8 @@ public class TaskCreator {
 
         public AssignmentCreator(){
             super("New Assignment");
-            this.setModalityType(TodoCreator.DEFAULT_MODALITY_TYPE);
-            this.setResizable(true);
+            setModalityType(TodoCreator.DEFAULT_MODALITY_TYPE);
+            setResizable(true);
 
             final Font labelsFont = KFontFactory.createBoldFont(16);
             final Font hintsFont = KFontFactory.createPlainFont(16);
@@ -176,14 +176,14 @@ public class TaskCreator {
             namePanel.add(new KPanel(new KLabel("Course Name:",labelsFont)),BorderLayout.WEST);
             namePanel.add(new KPanel(nameField),BorderLayout.CENTER);
 
-            dField = KTextField.newDayField();
-            mField = KTextField.newMonthField();
-            yField = KTextField.newYearField();
+            dField = KTextField.dayField();
+            mField = KTextField.monthField();
+            yField = KTextField.yearField();
 
             final KPanel deadLinePanel = new KPanel(new FlowLayout(FlowLayout.CENTER));
-            deadLinePanel.addAll(new KLabel("Deadline:",labelsFont),giveSpace(50,30),new KLabel("Day",
-                            hintsFont),dField,giveSpace(20,30),
-                    new KLabel("Month",hintsFont),mField,giveSpace(20,30),new KLabel("Year",hintsFont),yField);
+            deadLinePanel.addAll(new KLabel("Deadline:",labelsFont), createSpace(50,30),new KLabel("Day",
+                            hintsFont),dField, createSpace(20,30),
+                    new KLabel("Month",hintsFont),mField, createSpace(20,30),new KLabel("Year",hintsFont),yField);
 
             groupChoice = new JRadioButton("Group Work");
             groupChoice.setFont(KFontFactory.createPlainFont(15));
@@ -240,13 +240,13 @@ public class TaskCreator {
 
             final KPanel contentPlate = new KPanel();
             contentPlate.setLayout(new BoxLayout(contentPlate,BoxLayout.Y_AXIS));
-            contentPlate.addAll(importPanel, namePanel,deadLinePanel,groupPanel,modePanel,groupPanel,giveSpace(500,25),questionPanel,
+            contentPlate.addAll(importPanel, namePanel,deadLinePanel,groupPanel,modePanel,groupPanel, createSpace(500,25),questionPanel,
                     MComponent.contentBottomGap(), new KPanel(new FlowLayout(FlowLayout.RIGHT), cancelButton, addButton));
-            this.setContentPane(contentPlate);
-            this.getRootPane().setDefaultButton(addButton);
-            this.pack();
-            this.setMinimumSize(this.getPreferredSize());
-            this.setLocationRelativeTo(Board.getRoot());
+            setContentPane(contentPlate);
+            rootPane.setDefaultButton(addButton);
+            pack();
+            setMinimumSize(getPreferredSize());
+            setLocationRelativeTo(Board.getRoot());
 
             addWindowListener(new WindowAdapter() {
                 @Override
@@ -261,7 +261,7 @@ public class TaskCreator {
             if (mailAddress == null) {
                 throw new NullPointerException();
             } else if (Globals.hasNoText(mailAddress)) {
-                App.signalError(this.getRootPane(), "No Email", "Please provide an appropriate email address.");
+                App.reportError(this.getRootPane(), "No Email", "Please provide an appropriate email address.");
                 return keepAskingEmailAddress();
             } else {
                 return mailAddress;
@@ -273,7 +273,7 @@ public class TaskCreator {
             if (webAddress == null) {
                 throw new NullPointerException();
             } else if (Globals.hasNoText(webAddress)) {
-                App.signalError(this.getRootPane(), "No Web Site", "Please provide an appropriate web site name.");
+                App.reportError(this.getRootPane(), "No Web Site", "Please provide an appropriate web site name.");
                 return keepAskingWebAddress();
             } else {
                 return webAddress;
@@ -304,7 +304,7 @@ public class TaskCreator {
         	if (Globals.hasNoText(dField.getText()) || Globals.hasNoText(mField.getText()) || Globals.hasNoText(yField.getText())) {
         		return "";
         	}
-        	final String sep = MDate.SEPARATOR;
+        	final String sep = MDate.VAL_SEP;
         	return dField.getText()+sep+mField.getText()+sep+yField.getText();
         }
     }
@@ -318,8 +318,8 @@ public class TaskCreator {
         private KTextField dayField, monthField, yearField;
 
         public EventCreator(int eType){
-            this.setModalityType(TodoCreator.DEFAULT_MODALITY_TYPE);
-            this.setResizable(true);
+            setModalityType(TodoCreator.DEFAULT_MODALITY_TYPE);
+            setResizable(true);
             final KPanel contentPanel = new KPanel();
             contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
@@ -344,19 +344,19 @@ public class TaskCreator {
             }
 
             if (eType == TEST) {
-                this.setTitle("Upcoming Test");
+                setTitle("Upcoming Test");
                 typeLabel.setText("Course name:");
                 dateLabel.setText("Test Date:");
                 eventType = "Test";
                 contentPanel.add(importPanel);
             } else if (eType == EXAM) {
-                this.setTitle("Upcoming Exam");
+                setTitle("Upcoming Exam");
                 typeLabel.setText("Course name:");
                 dateLabel.setText("Exam Date:");
                 eventType = "Exam";
                 contentPanel.add(importPanel);
             } else if (eType == OTHER) {
-                this.setTitle("Upcoming Event");
+                setTitle("Upcoming Event");
                 typeLabel.setText("Event title:");
                 dateLabel.setText("Date:");
                 eventType = "Event";
@@ -371,13 +371,13 @@ public class TaskCreator {
             titleLayer.add(new KPanel(typeLabel), BorderLayout.WEST);
             titleLayer.add(new KPanel(descriptionField), BorderLayout.CENTER);
 
-            dayField = KTextField.newDayField();
-            monthField = KTextField.newMonthField();
-            yearField = KTextField.newYearField();
+            dayField = KTextField.dayField();
+            monthField = KTextField.monthField();
+            yearField = KTextField.yearField();
 
             final KPanel dateFieldsPanel = new KPanel();
-            dateFieldsPanel.addAll(new KLabel("Day",labelsFont),dayField,giveSpace(10, 20),
-                    new KLabel("Month",labelsFont),monthField,giveSpace(10, 20),new KLabel("Year",labelsFont),yearField);
+            dateFieldsPanel.addAll(new KLabel("Day",labelsFont),dayField, createSpace(10, 20),
+                    new KLabel("Month",labelsFont),monthField, createSpace(10, 20),new KLabel("Year",labelsFont),yearField);
             final KPanel datesLayer = new KPanel(new BorderLayout(),typicalPanelsDimension);
             datesLayer.add(new KPanel(dateLabel),BorderLayout.WEST);
             datesLayer.add(dateFieldsPanel,BorderLayout.CENTER);
@@ -388,13 +388,13 @@ public class TaskCreator {
             final KButton addButton = new KButton("Add");
             addButton.addActionListener(TaskActivity.EventsHandler.newListener());//No fear - if value was not one of the specified 3, compiler won't reach this line
 
-            this.getRootPane().setDefaultButton(addButton);
+            rootPane.setDefaultButton(addButton);
             contentPanel.addAll(titleLayer, datesLayer, MComponent.contentBottomGap(),
-                    new KPanel(new FlowLayout(FlowLayout.RIGHT), cancelButton,addButton));
-            this.setContentPane(contentPanel);
-            this.pack();
-            this.setMinimumSize(this.getPreferredSize());
-            this.setLocationRelativeTo(Board.getRoot());
+                    new KPanel(new FlowLayout(FlowLayout.RIGHT), cancelButton, addButton));
+            setContentPane(contentPanel);
+            pack();
+            setMinimumSize(getPreferredSize());
+            setLocationRelativeTo(Board.getRoot());
         }
 
         public KTextField getDescriptionField(){
@@ -405,7 +405,7 @@ public class TaskCreator {
             if(Globals.hasNoText(dayField.getText()) || Globals.hasNoText(monthField.getText()) || Globals.hasNoText(yearField.getText())) {
                 return "";
             }
-            final String sep = MDate.SEPARATOR;
+            final String sep = MDate.VAL_SEP;
             return dayField.getText()+sep+monthField.getText()+sep+yearField.getText();
         }
 

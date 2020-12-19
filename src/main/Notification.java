@@ -14,6 +14,8 @@ import java.util.Date;
 
 /**
  * Or NotificationSelf
+ * The serialization approach utilized by this class may not be compatible with
+ * later versions of Dashboard.
  */
 public class Notification implements Serializable {
     private String heading;
@@ -35,6 +37,12 @@ public class Notification implements Serializable {
         this.layer = new NotificationLayer(this);
     }
 
+    /**
+     * Creates a new notification.
+     * This call is complete, and must remain a central point for
+     * creating Dashboard specific alerts.
+     * Give the information as a HTML text.
+     */
     public static void create(String heading, String vText, String information) {
         final Notification incoming = new Notification(heading, vText, information);
         NotificationActivity.join(incoming);
@@ -76,11 +84,12 @@ public class Notification implements Serializable {
     private static class Exhibitor extends KDialog {
 
         private  Exhibitor(Notification notification){
-            super(notification.getHeading()+" - Dashboard Notification");
+            super(notification.getHeading()+" - Notification");
             setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
             setResizable(true);
 
-            final String decidedText = notification.getInformation() == null ? notification.getText() : notification.getInformation();
+            final String decidedText = notification.getInformation() == null ? notification.getText() :
+                    notification.getInformation();
             final KTextPane noticePane = KTextPane.htmlFormattedPane(decidedText);
 
             final KScrollPane textScroll = new KScrollPane(noticePane);
@@ -161,7 +170,7 @@ public class Notification implements Serializable {
         Serializer.toDisk(NOTIFICATIONS, "alerts.ser");
     }
 
-    public static void deSerializeAll(){
+    public static void deSerialize(){
         final ArrayList<Notification> savedAlerts = (ArrayList<Notification>) Serializer.fromDisk("alerts.ser");
         if (savedAlerts == null) {
             App.silenceException("Error reading Notifications.");

@@ -8,7 +8,7 @@ import java.awt.*;
 public class ModuleActivity implements Activity {
     private KButton onButton;
     private KLabel indicator;
-    private CardLayout residentLayout;//there's a 'residentPanel'
+    private CardLayout residentLayout;
     private KButton refreshButton;
 
 
@@ -19,23 +19,23 @@ public class ModuleActivity implements Activity {
         } else {
             indicator = new KLabel("First Year: "+Student.firstAcademicYear(), KFontFactory.BODY_HEAD_FONT);
 
-            final KButton tipButton = KButton.getIconifiedButton("warn.png", 25, 25);
+            final KButton tipButton = KButton.createIconifiedButton("warn.png", 25, 25);
             tipButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             tipButton.setToolTipText("Help");
-            tipButton.addActionListener(e-> App.promptPlain("Module Collection", "For more options, simply right-click on the tables.\n" +
+            tipButton.addActionListener(e-> App.reportInfo("Module Collection", "For more options, simply right-click on the tables.\n" +
                     "To Edit, Remove, Verify, or Show the Details of a course, just right-click on it and choose the corresponding\n" +
                     "option from the Popup Menu.\n \n" +
                     "You can navigate through your collection by using the buttons outlined in the left-most panel.\n" +
                     "If Dashboard cannot determine the academic year & semester of a course relative to your level,\n" +
                     "it will be pushed to the Miscellaneous Table.\n \n" +
                     "It should be noted that only the courses that are Confirmed will be included in your Analysis and Transcript.\n \n" +
-                    "For more information about this activity, refer to "+ Tips.reference("Module Collection")));
+                    "For more information about this activity, refer to the Tips."));
 
             refreshButton = new KButton("Sync");
             refreshButton.setFont(KFontFactory.createPlainFont(15));
             refreshButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             refreshButton.setToolTipText("Synchronize Courses");
-            refreshButton.addActionListener(e-> ModuleHandler.startThoroughSync(true, refreshButton));
+            refreshButton.addActionListener(e-> ModuleHandler.launchThoroughSync(true, refreshButton));
 
             final KPanel headerPanel = new KPanel(new BorderLayout());
             headerPanel.add(new KPanel(indicator), BorderLayout.WEST);
@@ -43,7 +43,7 @@ public class ModuleActivity implements Activity {
             headerPanel.add(new KPanel(refreshButton), BorderLayout.EAST);
 
             final SummerModule summerHandler = new SummerModule();
-            final MiscellaneousModule miscHandler = new MiscellaneousModule();
+            final MiscModule miscHandler = new MiscModule();
             final ModuleHandler handler = new ModuleHandler();
 
             residentLayout = new CardLayout();

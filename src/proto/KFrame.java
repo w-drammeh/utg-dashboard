@@ -18,7 +18,8 @@ public class KFrame extends JFrame implements Preference {
     }
 
     /**
-     * Gets the icon used by frames and dialogs. Native systems use this as a launcher icon.
+     * Gets the icon used by frames and dialogs.
+     * Native systems use this as a launcher icon.
      */
     public static Image getIcon() {
         final URL iPath = App.getIconURL("dashboard.png");

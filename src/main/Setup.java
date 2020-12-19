@@ -5,6 +5,9 @@ import proto.*;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * For setting up the user for a trial only.
+ */
 public class Setup extends KDialog {
 
 
@@ -23,7 +26,8 @@ public class Setup extends KDialog {
 
         final KTextField firstNameField = new KTextField(fieldDim);
         final KPanel firstNameLayer = new KPanel(new BorderLayout());
-        firstNameLayer.add(new KPanel(new FlowLayout(FlowLayout.RIGHT), newHintLabel("First Name:")), BorderLayout.WEST);
+        firstNameLayer.add(new KPanel(new FlowLayout(FlowLayout.RIGHT), newHintLabel("First Name:")),
+                BorderLayout.WEST);
         firstNameLayer.add(new KPanel(firstNameField), BorderLayout.CENTER);
 
         final KTextField lastNameField = new KTextField(fieldDim);
@@ -72,6 +76,7 @@ public class Setup extends KDialog {
             welcome.setVisible(true);
         });
 
+        rootPane.setDefaultButton(startButton);
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(contentPanel, BorderLayout.CENTER);
         getContentPane().add(new KPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5), backButton, startButton),
@@ -85,7 +90,7 @@ public class Setup extends KDialog {
     }
 
     private void signalMissingInfo(String info, Component c){
-        App.signalError(getRootPane(), "Error", String.format("Please enter your %s.", info));
+        App.reportError(getRootPane(), "Error", String.format("Please enter your %s.", info));
         c.requestFocusInWindow();
     }
 

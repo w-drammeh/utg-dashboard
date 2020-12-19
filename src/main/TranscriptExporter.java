@@ -66,7 +66,7 @@ public class TranscriptExporter {
         addTable();
         document.close();
         outputStream.close();
-        SwingUtilities.invokeLater(()-> App.promptPlain("Successful",
+        SwingUtilities.invokeLater(()-> App.reportInfo("Successful",
                 "Your Transcript is been exported successfully to "+savePath));
     }
 
@@ -166,7 +166,7 @@ public class TranscriptExporter {
         }
         document.add(headTable);
 
-        final ArrayList<String> semesters = Memory.filterSemesters();
+        final ArrayList<String> semesters = Memory.getSemesters();
         for (String semester : semesters) {
             document.add(newSemesterHeadTable(semester));
             document.add(newSemesterBodyTable(Memory.getFractionBySemester(semester)));
@@ -235,11 +235,11 @@ public class TranscriptExporter {
 
 //    Todo: consider the link-like text at the bottom left - figures blindly generated
     private static class WatermarkEvent extends PdfPageEventHelper {
-        private String k;
+        private String figure;
 
         private WatermarkEvent() {
             final Random r = new Random();
-            k = ""+r.nextInt(10)+r.nextInt(10)+r.nextInt(10)+r.nextInt(10)+r.nextInt(10);
+            figure = ""+r.nextInt(10)+r.nextInt(10)+r.nextInt(10)+r.nextInt(10)+r.nextInt(10);
         }
 
         @Override
@@ -258,7 +258,7 @@ public class TranscriptExporter {
             ColumnText.showTextAligned(contentByte, Element.ALIGN_CENTER, utlText,
                         pageSize.getWidth()/2, pageSize.getHeight() - 10, 0F);
 
-            final Phrase linkText = new Phrase("https://utg.gm/records/transcript/print/"+k, textFont);
+            final Phrase linkText = new Phrase("https://utg.gm/records/transcript/print/"+ figure, textFont);
             ColumnText.showTextAligned(contentByte, Element.ALIGN_LEFT, linkText, 15, 20, 0F);
 
             final Phrase waterMark = new Phrase("CONFIDENTIAL",

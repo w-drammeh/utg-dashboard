@@ -7,30 +7,48 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class MDate {
-    public static final String SEPARATOR = "/";
-    private static final SimpleDateFormat standardFormat = new SimpleDateFormat(
-            "dd"+ SEPARATOR +"MM"+ SEPARATOR +"yyyy H:m:s");
+    /**
+     * Dashboard's date value separator.
+     */
+    public static final String VAL_SEP = "/";
+    /**
+     * The standard date format.
+     * Changing this format has great consequences since some functions
+     * of this class rely on an anticipated output format; and thus,
+     * when changed, such functions must conform accordingly.
+     */
+    private static final SimpleDateFormat standardFormat =
+            new SimpleDateFormat("dd"+ VAL_SEP +"MM"+ VAL_SEP +"yyyy H:m:s");
 
 
     /**
-     * Gets a String representation of this date fully-formatted as specified by the standard format.
-     * This includes both the date and time.
+     * Gets a String representation of the given date
+     * fully-formatted as specified by the standard format.
+     * This includes both the date and time, as per the current form.
      */
     public static String format(Date d){
         return standardFormat.format(d);
     }
 
     /**
-     * Get only the date (and not the time) of this date instance.
+     * Returns only the date (and not the time) of the given date instance.
      */
     public static String formatDateOnly(Date d){
         return standardFormat.format(d).split(" ")[0];
     }
 
+    /**
+     * Returns the current date and time.
+     * Convenient way of calling {@link #format(Date)} with a new Date.
+     */
     public static String now(){
         return format(new Date());
     }
 
+    /**
+     * Returns the current date only, excluding the time.
+     * Convenient way of calling {@link #formatDateOnly(Date)} with a new Date.
+     */
     public static String today(){
         return formatDateOnly(new Date());
     }
@@ -43,9 +61,14 @@ public class MDate {
         return Calendar.getInstance().get(Calendar.YEAR);
     }
 
-    public static Date parse(String dateValue){
+    /**
+     * Constructs a date object from the given date-string
+     * which must be in accordance with the {@link #standardFormat}'s
+     * implementation.
+     */
+    public static Date parse(String dateString){
         try {
-            return standardFormat.parse(dateValue);
+            return standardFormat.parse(dateString);
         } catch (ParseException e) {
             App.silenceException(e);
             return null;
@@ -54,16 +77,22 @@ public class MDate {
 
     /**
      * Gets the specified calendar property from the given date.
+     * As for the property, please use the magic-constants defined
+     * in the {@link Calendar} type.
      */
-    public static int getProperty(Date date, int value){
-        final Calendar t = Calendar.getInstance();
-        t.setTime(date);
-        if (value == Calendar.MONTH) {
-            return t.get(Calendar.MONTH) + 1;
+    public static int getPropertyFrom(Date date, int property){
+        final Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        if (property == Calendar.MONTH) {
+            return c.get(Calendar.MONTH) + 1;
         }
-        return t.get(value);
+        return c.get(property);
     }
 
+    /**
+     * Returns the corresponding month name of n.
+     * Returns null if n is such that 1 < n, or n > 12.
+     */
     public static String getMonthByName(int n){
         switch (n){
             case 1:{
@@ -102,37 +131,6 @@ public class MDate {
             case 12:{
                 return "December";
             }
-
-            default:{
-                return null;
-            }
-        }
-    }
-
-    public static String getDayByName(int n){
-        switch (n){
-            case 1:{
-                return "Monday";
-            }
-            case 2:{
-                return "Tuesday";
-            }
-            case 3:{
-                return "Wednesday";
-            }
-            case 4:{
-                return "Thursday";
-            }
-            case 5:{
-                return "Friday";
-            }
-            case 6:{
-                return "Saturday";
-            }
-            case 7:{
-                return "Sunday";
-            }
-
             default:{
                 return null;
             }
@@ -140,7 +138,8 @@ public class MDate {
     }
 
     /**
-     * Gets a date by adding or subtracting the specified interval of days from the given date.
+     * Returns a Dashboard-formatted date by adding (or subtracting)
+     * the given interval of days from the given date.
      */
     public static String daysAfter(Date date, int days) {
         final Calendar calendar = Calendar.getInstance();
@@ -151,20 +150,33 @@ public class MDate {
 
     /**
      * Returns true if the values presented by date1 and date2 fall in the same day.
-     * This method / condition is rough, and time ignorant.
+     * This method is time-ignorant.
+     * @see #formatDateOnly(Date)
      */
     public static boolean isSameDay(Date d1, Date d2) {
         return formatDateOnly(d1).equals(formatDateOnly(d2));
     }
 
-    public static int actualDayDifference(Date d1, Date d2){
-        return (int) ChronoUnit.DAYS.between(d1.toInstant(), d2.toInstant());
+    /**
+     * Calculates and returns the number of days difference between
+     * the given date instances; which are ordered.
+     * That means, if the d2 is before d1, then a negative long value
+     * will be returned.
+     */
+    public static long actualDayDifference(Date d1, Date d2){
+        return ChronoUnit.DAYS.between(d1.toInstant(), d2.toInstant());
     }
 
+    /**
+     * Returns an integer representation of the given date's time.
+     * This method uses only the time values; i.e the hour, minute and seconds.
+     * This method is to be referred.
+     * @see #getPropertyFrom(Date, int)
+     */
     public static int getTimeValue(Date d){
-        return  (getProperty(d, Calendar.HOUR) + 12) * Globals.HOUR +
-                getProperty(d, Calendar.MINUTE) * Globals.MINUTE +
-                getProperty(d, Calendar.SECOND) * Globals.SECOND;
+        return  (getPropertyFrom(d, Calendar.HOUR) + 12) * Globals.HOUR +
+                getPropertyFrom(d, Calendar.MINUTE) * Globals.MINUTE +
+                getPropertyFrom(d, Calendar.SECOND) * Globals.SECOND;
     }
 
 }

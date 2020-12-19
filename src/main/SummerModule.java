@@ -20,18 +20,12 @@ public class SummerModule {
         configurePopup();
     }
 
-    /**
-     * Triggered by the monitor to signal addition is directed to the summer-table.
-     */
-    public static void welcome(Course summerCourse){
+    public static void add(Course summerCourse){
         summerModel.addRow(new String[] {summerCourse.getCode(), summerCourse.getName(), summerCourse.getLecturer(),
                 summerCourse.getGrade(), summerCourse.getYear()});
     }
 
-    /**
-     * Triggered by the monitor to signal removal is directed to summer-table.
-     */
-    public static void ridOf(Course summerCourse){
+    public static void remove(Course summerCourse){
         summerModel.removeRow(summerModel.getRowOf(summerCourse.getCode()));
     }
 
@@ -69,7 +63,8 @@ public class SummerModule {
                 if (e.getClickCount() >= 2) {
                     final int selectedRow = summerTable.getSelectedRow();
                     if (selectedRow >= 0) {
-                        Course.exhibit(ModuleHandler.getModuleByCode(String.valueOf(summerTable.getValueAt(selectedRow, 0))));
+                        final String code = String.valueOf(summerTable.getValueAt(selectedRow, 0));
+                        Course.exhibit(ModuleHandler.getModuleByCode(code));
                     }
                     e.consume();
                 }
@@ -79,12 +74,15 @@ public class SummerModule {
 
     private void configurePopup(){
         detailsItem = new KMenuItem(ModuleHandler.DETAILS);
-        detailsItem.addActionListener(e-> SwingUtilities.invokeLater(()->
-                Course.exhibit(ModuleHandler.getModuleByCode(String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(), 0))))));
+        detailsItem.addActionListener(e-> {
+            final String code = String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(), 0));
+            Course.exhibit(ModuleHandler.getModuleByCode(code));
+        });
 
         editItem = new KMenuItem(ModuleHandler.EDIT);
         editItem.addActionListener(e-> {
-            final Course course = ModuleHandler.getModuleByCode(String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(), 0)));
+            final String code = String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(), 0));
+            final Course course = ModuleHandler.getModuleByCode(code);
             if (course != null) {
                 final SummerModuleEditor editor = new SummerModuleEditor(course);
                 SwingUtilities.invokeLater(()-> editor.setVisible(true));
@@ -93,15 +91,17 @@ public class SummerModule {
 
         removeItem = new KMenuItem(ModuleHandler.DELETE);
         removeItem.addActionListener(e-> {
-            final Course course = ModuleHandler.getModuleByCode(String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(),0)));
+            final String code = String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(),0));
+            final Course course = ModuleHandler.getModuleByCode(code);
             if (course != null) {
-                ModuleHandler.getModulesMonitor().remove(course);
+                ModuleHandler.getMonitor().remove(course);
             }
         });
 
         confirmItem = new KMenuItem(ModuleHandler.CONFIRM);
         confirmItem.addActionListener(e-> {
-            final Course course = ModuleHandler.getModuleByCode(String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(),0)));
+            final String code = String.valueOf(summerModel.getValueAt(summerTable.getSelectedRow(),0));
+            final Course course = ModuleHandler.getModuleByCode(code);
             if (course != null) {
                 new Thread(()-> ModuleHandler.launchVerification(course)).start();
             }
@@ -155,8 +155,8 @@ public class SummerModule {
         private SummerModuleAdder(){
             super(null, Student.SUMMER_SEMESTER);
             setTitle("New Summer Course");
-            availableYearsBox = new JComboBox<>(new String[] {Student.firstAcademicYear(), Student.secondAcademicYear(),
-                    Student.thirdAcademicYear(), Student.fourthAcademicYear()});
+            availableYearsBox = new JComboBox<>(new String[] {Student.firstAcademicYear(),
+                    Student.secondAcademicYear(), Student.thirdAcademicYear(), Student.fourthAcademicYear()});
             availableYearsBox.setFont(KFontFactory.createPlainFont(15));
             yearPanel.removeLast();
             yearPanel.add(new KPanel(availableYearsBox), BorderLayout.CENTER);
@@ -168,13 +168,13 @@ public class SummerModule {
         private ActionListener additionListener() {
             return e-> {
                 if (codeField.isBlank()) {
-                    App.signalError(getRootPane(), "No Code","Please provide the code of the course.");
+                    App.reportError(getRootPane(), "No Code","Please provide the code of the course.");
                     codeField.requestFocusInWindow();
                 } else if (nameField.isBlank()) {
-                    App.signalError(getRootPane(),"No Name","Please provide the name of the course.");
+                    App.reportError(getRootPane(),"No Name","Please provide the name of the course.");
                     nameField.requestFocusInWindow();
                 } else if (scoreField.isBlank()) {
-                    App.signalError(getRootPane(),"Error","Please enter the score you get from this course.");
+                    App.reportError(getRootPane(),"Error","Please enter the score you get from this course.");
                     scoreField.requestFocusInWindow();
                 } else {
                     final double score;
@@ -191,17 +191,19 @@ public class SummerModule {
                         return;
                     }
 
-                    if (ModuleHandler.existsInList(codeField.getText())) {
+                    if (ModuleHandler.exists(codeField.getText())) {
                         ModuleHandler.reportCodeDuplication(codeField.getText());
                         codeField.requestFocusInWindow();
                         return;
                     }
 
                     final Course course = new Course(String.valueOf(availableYearsBox.getSelectedItem()),
-                            semesterField.getText(), codeField.getText(), nameField.getText(), lecturerField.getText(),
-                            venueField.getText(), String.valueOf(dayBox.getSelectedItem()), String.valueOf(timeBox.getSelectedItem()),
-                            score, Integer.parseInt(String.valueOf(creditBox.getSelectedItem())), String.valueOf(requirementBox.getSelectedItem()), false);
-                    ModuleHandler.getModulesMonitor().add(course);
+                            semesterField.getText(), codeField.getText().toUpperCase(), nameField.getText(),
+                            lecturerField.getText(), venueField.getText(), String.valueOf(dayBox.getSelectedItem()),
+                            String.valueOf(timeBox.getSelectedItem()), score,
+                            Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
+                            String.valueOf(requirementBox.getSelectedItem()), false);
+                    ModuleHandler.getMonitor().add(course);
                     dispose();
                 }
             };
@@ -223,7 +225,7 @@ public class SummerModule {
             codeField.setText(target.getCode());
             nameField.setText(target.getName());
             lecturerField.setText(target.getLecturer());
-            lecturerField.setEditable(target.canEditTutorName());
+            lecturerField.setEditable(target.isLecturerNameEditable());
             dayBox.setSelectedItem(target.getDay());
             timeBox.setSelectedItem(target.getTime());
             venueField.setText(target.getVenue());
@@ -245,13 +247,13 @@ public class SummerModule {
         private ActionListener editionListener() {
             return e-> {
                 if (codeField.isBlank()) {
-                    App.signalError(this.getRootPane(),"No Code","Please provide the code of the course.");
+                    App.reportError(this.getRootPane(),"No Code","Please provide the code of the course.");
                     codeField.requestFocusInWindow();
                 } else if (nameField.isBlank()) {
-                    App.signalError(this.getRootPane(),"No Name","Please provide the name of the course.");
+                    App.reportError(this.getRootPane(),"No Name","Please provide the name of the course.");
                     nameField.requestFocusInWindow();
                 } else if (scoreField.isBlank()) {
-                    App.signalError(this.getRootPane(),"Error","Please enter the score you get from this course.");
+                    App.reportError(this.getRootPane(),"Error","Please enter the score you get from this course.");
                     scoreField.requestFocusInWindow();
                 } else {
                     double score;
@@ -280,16 +282,18 @@ public class SummerModule {
                         }
                     }
 
-                    if (ModuleHandler.existsInListExcept(summerModel, codeField.getText())) {
+                    if (ModuleHandler.existsExcept(summerModel, codeField.getText())) {
                         ModuleHandler.reportCodeDuplication(codeField.getText());
                         codeField.requestFocusInWindow();
                         return;
                     }
 
                     final Course course = new Course(String.valueOf(availableYearsBox.getSelectedItem()),
-                            semesterField.getText(), codeField.getText(), nameField.getText(), lecturerField.getText(),
-                            venueField.getText(), String.valueOf(dayBox.getSelectedItem()), String.valueOf(timeBox.getSelectedItem()),
-                            score, Integer.parseInt(String.valueOf(creditBox.getSelectedItem())), String.valueOf(requirementBox.getSelectedItem()), target.isVerified());
+                            semesterField.getText(), codeField.getText().toUpperCase(), nameField.getText(),
+                            lecturerField.getText(), venueField.getText(), String.valueOf(dayBox.getSelectedItem()),
+                            String.valueOf(timeBox.getSelectedItem()), score,
+                            Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
+                            String.valueOf(requirementBox.getSelectedItem()), target.isVerified());
                     ModuleHandler.substitute(target, course);
                     dispose();
                 }
