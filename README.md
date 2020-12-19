@@ -1,5 +1,5 @@
 # UTG-Student Dashboard
-`v1.6.2`
+`v1.6.3`
 
 A flexible and elegant student management system of the University of The Gambia.
 _Dashboard is built by the students for the students._
