@@ -70,7 +70,8 @@ public class SettingsUI implements Activity {
         resetButton.setFont(changeButton.getFont());
         resetButton.addActionListener(e-> {
             if (Student.isDefaultIconSet()) {
-                App.promptPlain("No Image","No image is currently set. The default  is in use.");
+                App.reportInfo("No Image",
+                        "No image is currently set. The default is already in use.");
             } else {
                 Student.fireIconReset();
             }
@@ -113,7 +114,8 @@ public class SettingsUI implements Activity {
 
         final KPanel yoaPanel = new KPanel(new BorderLayout());
         yoaPanel.add(new KPanel(new KLabel("Year of Admission:", H_FONT)), BorderLayout.WEST);
-        yoaPanel.add(new KPanel(new KLabel(Integer.toString(Student.getYearOfAdmission()), V_FONT)), BorderLayout.CENTER);
+        yoaPanel.add(new KPanel(new KLabel(Integer.toString(Student.getYearOfAdmission()), V_FONT)),
+                BorderLayout.CENTER);
 
         final KPanel moaPanel = new KPanel(new BorderLayout());
         moaPanel.add(new KPanel(new KLabel("Month of Admission:", H_FONT)), BorderLayout.WEST);
@@ -121,7 +123,8 @@ public class SettingsUI implements Activity {
 
         final KPanel eygPanel = new KPanel(new BorderLayout());
         eygPanel.add(new KPanel(new KLabel("Expected Year of Graduation:", H_FONT)), BorderLayout.WEST);
-        eygPanel.add(new KPanel(new KLabel(Integer.toString(Student.getExpectedYearOfGraduation()), V_FONT)), BorderLayout.CENTER);
+        eygPanel.add(new KPanel(new KLabel(Integer.toString(Student.getExpectedYearOfGraduation()), V_FONT)),
+                BorderLayout.CENTER);
 
         final KPanel levelPanel = new KPanel(new BorderLayout());
         levelPanel.add(new KPanel(new KLabel("Level:", H_FONT)), BorderLayout.WEST);
@@ -172,7 +175,8 @@ public class SettingsUI implements Activity {
                 label.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        if (App.showYesNoCancelDialog("Confirm", "Are you sure you want to remove '"+actualDial+"' from your list of contacts?")) {
+                        if (App.showYesNoCancelDialog("Confirm",
+                                "Are you sure you want to remove \""+actualDial+"\" from your list of contacts?")) {
                             contactLabelsPanel.remove(label);
                             MComponent.ready(contactLabelsPanel);
                         }
@@ -187,21 +191,21 @@ public class SettingsUI implements Activity {
             }
         });
 
-        final KButton contactButton = KButton.getIconifiedButton("plus.png", 20, 20);
+        final KButton contactButton = KButton.createIconifiedButton("plus.png", 20, 20);
         contactButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         contactButton.setToolTipText("Add Number");
         contactButton.addActionListener(e-> {
             if (Student.telephonesCount() >= 4) {
-                App.signalError("Error", "Sorry, there can only be a maximum of four (4) contacts.\n" +
+                App.reportError("Error", "Sorry, you cannot add more than four (4) contacts.\n" +
                         "You can remove a contact by clicking on it.");
                 return;
             }
-            final String incomingDial = App.requestInput("New Telephone", "Enter the contact number:");
+            final String incomingDial = App.requestInput("New Telephone", "Enter the new contact number:");
             if (incomingDial == null) {
                 return;
             }
             if (Student.alreadyInContacts(incomingDial)) {
-                App.signalError("Duplicate Error", incomingDial+" is already taken. Please enter a different number.");
+                App.reportError("Duplicate", incomingDial+" is already taken. Please enter a different number.");
                 return;
             }
 
@@ -226,7 +230,7 @@ public class SettingsUI implements Activity {
         telPanel.add(new KPanel(contactButton), BorderLayout.EAST);
 
 //        postpone the extras
-        Board.postProcesses.add(()-> {
+        Board.POST_PROCESSES.add(()-> {
             final LinkedHashMap<String, String> extra = Student.getAdditional();
             for (String key : extra.keySet()) {
                 acceptUserDetail(key, extra.get(key));
@@ -251,7 +255,7 @@ public class SettingsUI implements Activity {
     private static void acceptUserDetail(String key, String value) {
         final KLabel valueLabel = new KLabel(value, V_FONT);
 
-        final KButton editButton = KButton.getIconifiedButton("edit.png",25,25);
+        final KButton editButton = KButton.createIconifiedButton("edit.png",25,25);
         editButton.setPreferredSize(new Dimension(25, 25));
         editButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         editButton.setToolTipText("Edit");
@@ -271,7 +275,7 @@ public class SettingsUI implements Activity {
 
         final KPanel panel = new KPanel(new BorderLayout());
 
-        final KButton removeButton = KButton.getIconifiedButton("terminate.png",20,20);
+        final KButton removeButton = KButton.createIconifiedButton("terminate.png",20,20);
         removeButton.setPreferredSize(new Dimension(25, 25));
         removeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         removeButton.setToolTipText("Remove");
@@ -382,17 +386,16 @@ public class SettingsUI implements Activity {
             portalMailField.setPreferredSize(new Dimension(325, 30));
             portalMailField.setEditable(false);
             final ActionListener portalMailEditorListener = e-> {
-                if (App.showOkCancelDialog("Portal Email","This is the email address Dashboard uses to gain access to your portal.\n" +
-                        "You should only change this provided you've changed your email address.")) {
-                    final String newPortalMail = App.requestInput("New Email","Enter your new Portal Email Address:");
-                    if (Globals.hasText(newPortalMail)) {
-                        final int vInt = App.verifyUser(changeHint);
-                        if (vInt == App.VERIFICATION_TRUE) {
-                            Student.setPortalMail(newPortalMail);
-                            portalMailField.setText(Student.getVisiblePortalMail());
-                        } else if (vInt == App.VERIFICATION_FALSE) {
-                            App.reportMatError();
-                        }
+                App.reportInfo("Portal Email","This is the email address Dashboard uses to gain access to your portal.\n" +
+                        "You should only change this provided you've changed your email address.");
+                final String newPortalMail = App.requestInput("Portal Email","Enter your new Portal Email Address:");
+                if (Globals.hasText(newPortalMail)) {
+                    final int vInt = App.verifyUser(changeHint);
+                    if (vInt == App.VERIFICATION_TRUE) {
+                        Student.setPortalMail(newPortalMail);
+                        portalMailField.setText(Student.getVisiblePortalMail());
+                    } else if (vInt == App.VERIFICATION_FALSE) {
+                        App.reportMatError();
                     }
                 }
             };
@@ -405,18 +408,16 @@ public class SettingsUI implements Activity {
             portalPsswdField.setHorizontalAlignment(SwingConstants.CENTER);
             portalPsswdField.setEditable(false);
             final ActionListener portalPsswdEditorListener = e -> {
-                if (App.showOkCancelDialog("Portal Password","This is the password Dashboard uses, in addition to the email above,\n" +
-                        "to gain access to your portal. It's your responsibility to make sure these information are correct, otherwise\n" +
-                        "Dashboard won't be able to reach your portal, leaving resources un-synced - not even alerts will be updated.")) {
-                    final String newPortalPassword = App.requestInput("New Password","Enter your new Portal Password:");
-                    if (Globals.hasText(newPortalPassword)) {
-                        final int vInt = App.verifyUser(changeHint);
-                        if (vInt == App.VERIFICATION_TRUE) {
-                            Student.setPortalPassword(newPortalPassword);
-                            portalPsswdField.setText(newPortalPassword);
-                        } else if (vInt == App.VERIFICATION_FALSE) {
-                            App.reportMatError();
-                        }
+                App.reportInfo("Portal Password","This is the password Dashboard uses, in addition to the email above,\n" +
+                        "to gain access to your portal. Only change this if you've changed actually your password.");
+                final String newPortalPassword = App.requestInput("Portal Password","Enter your new Portal Password:");
+                if (Globals.hasText(newPortalPassword)) {
+                    final int vInt = App.verifyUser(changeHint);
+                    if (vInt == App.VERIFICATION_TRUE) {
+                        Student.setPortalPassword(newPortalPassword);
+                        portalPsswdField.setText(newPortalPassword);
+                    } else if (vInt == App.VERIFICATION_FALSE) {
+                        App.reportMatError();
                     }
                 }
             };
@@ -452,7 +453,8 @@ public class SettingsUI implements Activity {
             studentPsswdField.setHorizontalAlignment(SwingConstants.CENTER);
             studentPsswdField.setEditable(false);
             final ActionListener studentPsswdEditorListener = e-> {
-                final String newStudentPassword = App.requestInput("New Password","Enter your Student Mail Password:");
+                final String newStudentPassword = App.requestInput("New Password",
+                        "Enter your Student Mail Password:");
                 if (newStudentPassword == null) {
                     return;
                 }
@@ -475,18 +477,16 @@ public class SettingsUI implements Activity {
             final ActionListener majorCodeEditorListener = e-> {
                 final String newMajorCode = App.requestInput("Major Code", "Enter your major-code below.\n" +
                         "Major-code is the 3-letter prefix to the course-codes of your major courses.\n" +
-                        "Dashboard uses the major-code for auto-indexing of your program courses.\n" +
-                        "For accurate analysis sake, make sure this information is right.\n \n");
+                        "Dashboard uses the major-code for auto-indexing of your program courses.");
                 if (newMajorCode == null) {
                     return;
-                }
-                if (newMajorCode.isEmpty()) {
-                    if (!App.showYesNoCancelDialog("Reset", "Do you want to reset your major-code?\n" +
+                } else if (Globals.hasNoText(newMajorCode)) {
+                    if (!App.showYesNoCancelDialog("Reset Major-Code", "Do you want to reset your major-code?\n" +
                             "Dashboard will no longer be able to detect your program courses.")) {
                         return;
                     }
                 } else if (newMajorCode.length() != 3) {
-                    App.signalError("Error", "Sorry, that's not a valid program code. Please try again.");
+                    App.reportError("Error", "Sorry, that's not a valid program code. Please try again.");
                     return;
                 }
 
@@ -504,7 +504,8 @@ public class SettingsUI implements Activity {
             minorField.setText(Student.getMinor());
             minorField.setEditable(false);
             final ActionListener minorEditorListener = e-> {
-                final String newMinor = App.requestInput("Minor", "Add or change your minor program here provided you're doing a minor.");
+                final String newMinor = App.requestInput("Minor",
+                        "Add or change your minor program here if you're doing a minor.");
                 if (newMinor == null) {
                     return;
                 }
@@ -524,24 +525,23 @@ public class SettingsUI implements Activity {
             minorCodeField.setEditable(false);
             final ActionListener minorCodeEditorListener = e-> {
                 if (!Student.isDoingMinor()) {
-                    App.promptPlain("No Minor","To set the minor-code, you first have to set your minor program above.");
+                    App.reportInfo("No Minor",
+                            "To set the minor-code, you first have to set your minor program above.");
                     return;
                 }
 
                 final String newMinorCode = App.requestInput("Minor Code", "Enter your minor-code below.\n" +
                         "Minor-code is the 3-letter prefix to the course-codes of your minor courses.\n" +
-                        "Dashboard uses the minor-code for auto-indexing of your minor courses.\n" +
-                        "For accurate analysis sake, make sure this information is right.\n \n");
+                        "Dashboard uses the minor-code for auto-indexing of your minor courses.");
                 if (newMinorCode == null) {
                     return;
-                }
-                if (newMinorCode.isEmpty()) {
-                    if (!App.showYesNoCancelDialog("Confirm Reset", "Do you want to reset your minor-code?\n" +
+                } else if (Globals.hasNoText(newMinorCode)) {
+                    if (!App.showYesNoCancelDialog("Reset Minor-Code", "Do you want to reset your minor-code?\n" +
                             "Dashboard will no longer be able to detect your minor courses.")) {
                         return;
                     }
                 } else if (newMinorCode.length() != 3) {
-                    App.signalError("Error", "Sorry, that's not a valid program code. Please try again.");
+                    App.reportError("Error", "Sorry, that's not a valid program code. Please try again.");
                     return;
                 }
 
@@ -612,7 +612,7 @@ public class SettingsUI implements Activity {
                 final String key = keyField.getText();
                 final String value = valueField.getText();
                 if (Student.getAdditional().containsKey(key)) {
-                    App.promptPlain(key, key+" is already in your custom details.\n" +
+                    App.reportInfo(key, key+" is already in your custom details.\n" +
                             "You can update or remove it at the 'About Me' tab.");
                     return;
                 }
@@ -621,7 +621,7 @@ public class SettingsUI implements Activity {
                 if (vInt == App.VERIFICATION_TRUE) {
                     acceptUserDetail(key, value);
                     Student.getAdditional().put(key, value);
-                    App.promptPlain("Successful", "Customize detail "+key+" is been added successfully.");
+                    App.reportInfo("Successful", "Customize detail "+key+" is been added successfully.");
                     keyField.setText(null);
                     valueField.setText(null);
                 } else if (vInt == App.VERIFICATION_FALSE) {
@@ -632,7 +632,8 @@ public class SettingsUI implements Activity {
         valueField.addActionListener(keyField.getActionListeners()[0]);
         final KPanel craftPanel = new KPanel(new BorderLayout());
         craftPanel.add(new KPanel(new KLabel("Add a Custom Detail:", H_FONT)), BorderLayout.WEST);
-        craftPanel.add(new KPanel(new KLabel("Key:", V_FONT), keyField, Box.createRigidArea(new Dimension(30,25)),
+        craftPanel.add(new KPanel(new KLabel("Key:", V_FONT), keyField,
+                Box.createRigidArea(new Dimension(30,25)),
                 new KLabel("Value:", V_FONT), valueField), BorderLayout.CENTER);
 
         descriptionArea.setText(Student.getAbout());
@@ -651,7 +652,7 @@ public class SettingsUI implements Activity {
     }
 
     private static KButton newIconifiedEditButton(ActionListener actionListener){
-        final KButton button = KButton.getIconifiedButton("edit.png",25, 25);
+        final KButton button = KButton.createIconifiedButton("edit.png",25, 25);
         button.addActionListener(actionListener);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         button.setToolTipText("Edit");
@@ -671,7 +672,8 @@ public class SettingsUI implements Activity {
             if (userChecking.isSelected()) {
                 Settings.noVerifyNeeded = false;
             } else {
-                final String matString = App.requestInput("Confirm","Dashboard will not ask for your verification in making sensitive changes.\n" +
+                final String matString = App.requestInput("Confirm",
+                        "Dashboard will not ask for your verification in making sensitive changes.\n" +
                         "Enter your mat number if you wish to continue with this changes:");
                 if (!Globals.hasText(matString)) {
                     userChecking.setSelected(true);
@@ -694,7 +696,8 @@ public class SettingsUI implements Activity {
         exitChecking.setCursor(handCursor);
         exitChecking.addItemListener(e-> Settings.confirmExit = (e.getStateChange() == ItemEvent.SELECTED));
 
-        instantToolTip = new KCheckBox("Instantly Show Tooltips",ToolTipManager.sharedInstance().getInitialDelay() == 0);
+        instantToolTip = new KCheckBox("Instantly Show Tooltips",
+                ToolTipManager.sharedInstance().getInitialDelay() == 0);
         instantToolTip.setIconTextGap(hereGap);
         instantToolTip.setFont(H_FONT);
         instantToolTip.setCursor(handCursor);
@@ -706,7 +709,8 @@ public class SettingsUI implements Activity {
             }
         });
 
-        tipDismissible = new KCheckBox("Allow Tooltip Dismiss",ToolTipManager.sharedInstance().getDismissDelay() == 4_000);
+        tipDismissible = new KCheckBox("Allow Tooltip Dismiss",
+                ToolTipManager.sharedInstance().getDismissDelay() == 4_000);
         tipDismissible.setIconTextGap(hereGap);
         tipDismissible.setFont(H_FONT);
         tipDismissible.setCursor(handCursor);
@@ -738,7 +742,8 @@ public class SettingsUI implements Activity {
             Student.setNameFormat(selectedFormat);
         });
         final KPanel nameFormatPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        nameFormatPanel.addAll(new KLabel("Change Name Format:", H_FONT), Box.createRigidArea(new Dimension(30,25)), nameFormatBox);
+        nameFormatPanel.addAll(new KLabel("Change Name Format:", H_FONT),
+                Box.createRigidArea(new Dimension(30,25)), nameFormatBox);
 
         bgBox = new JComboBox<String>(Settings.backgroundNames()) {
             @Override
@@ -756,7 +761,8 @@ public class SettingsUI implements Activity {
             bgBox.setEnabled(true);
         }));
         final KPanel bgPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        bgPanel.addAll(new KLabel("Change Background:", H_FONT), Box.createRigidArea(new Dimension(30,25)), bgBox);
+        bgPanel.addAll(new KLabel("Change Background:", H_FONT),
+                Box.createRigidArea(new Dimension(30,25)), bgBox);
 
         looksBox = new JComboBox<String>(Settings.getLookNames()) {
             @Override
@@ -776,34 +782,47 @@ public class SettingsUI implements Activity {
             looksBox.setEnabled(true);
         }));
         final KPanel lafPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        lafPanel.addAll(new KLabel("Change Look & Feel:", H_FONT), Box.createRigidArea(new Dimension(30,25)), looksBox);
+        lafPanel.addAll(new KLabel("Change Look & Feel:", H_FONT),
+                Box.createRigidArea(new Dimension(30,25)), looksBox);
 
-        final KButton logoutButton = newControlButton("Sign out", 110, 30);
-        logoutButton.addActionListener(e-> {
-            if (App.showYesNoCancelDialog("Sign out", "Are are sure you want to sign out?\n" +
-                    "By signing out, all your data will be lost.")) {
-                final int vInt = App.verifyUser("Enter your matriculation number to sign out:");
-                if (vInt == App.VERIFICATION_TRUE) {
-                    if (Serializer.unMountUserData()) {
-                        Runtime.getRuntime().removeShutdownHook(Board.shutDownThread);
-                        Board.getInstance().dispose();
-                        System.exit(0);
-                    } else {
-                        App.signalError("Error", "Unusual error encountered un-mounting the serializable files.\n" +
-                                "If there is any process using the Dashboard directory, stop it, and try signing out again.");
+        final KLabel signOutLabel = newSignLabel("Sign out");
+        signOutLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (App.showYesNoCancelDialog("Sign out", "Are are sure you want to sign out?\n" +
+                        "By signing out, all your data will be lost.")) {
+                    final String matNumber = App.requestInput("Confirm","Enter your matriculation number to sign out:");
+                    if (Globals.hasText(matNumber)) {
+                        if (matNumber.equals(Student.getMatNumber())) {
+                            if (Serializer.unMountUserData()) {
+                                Runtime.getRuntime().removeShutdownHook(Board.SHUT_DOWN_THREAD);
+                                Board.getInstance().dispose();
+                                System.exit(0);
+                            } else {
+                                App.reportError("Error",
+                                        "Unusual error encountered un-mounting the serializable files.\n" +
+                                        "If there is any process using the Dashboard directory, stop it, and try signing out again.");
+                            }
+                        } else {
+                            App.reportMatError();
+                        }
                     }
-                } else if (vInt == App.VERIFICATION_FALSE) {
-                    App.reportMatError();
                 }
             }
         });
 
-        final KButton loginButton = newControlButton("Sign in", 100, 30);
-        loginButton.addActionListener(Login.loginAction(loginButton));
+        final KLabel signInLabel = newSignLabel("Sign in");
+        signInLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Login.loginAction(signInLabel);
+            }
+        });
 
         final KPanel layoutPanel = new KPanel(new FlowLayout(FlowLayout.LEFT));
-        layoutPanel.addAll(new KLabel("You may wish to:", H_FONT), Box.createRigidArea(new Dimension(30,25)),
-                Student.isTrial() ? loginButton : logoutButton);
+        layoutPanel.addAll(new KLabel("You may wish to:", H_FONT),
+                Box.createRigidArea(new Dimension(30,25)),
+                Student.isTrial() ? signInLabel : signOutLabel);
 
         final KPanel homeOfNice = new KPanel();
         homeOfNice.setLayout(new BoxLayout(homeOfNice, BoxLayout.Y_AXIS));
@@ -818,7 +837,8 @@ public class SettingsUI implements Activity {
         resetButton.setFont(KFontFactory.createPlainFont(15));
         resetButton.setCursor(handCursor);
         resetButton.addActionListener(e-> {
-            if (App.showYesNoCancelDialog("Reset","This action will restore the default developer settings. Continue?")) {
+            if (App.showYesNoCancelDialog("Reset",
+                    "This action will restore the default developer settings. Continue?")) {
                 loadDefaults();
             }
         });
@@ -829,14 +849,11 @@ public class SettingsUI implements Activity {
         return dashUI;
     }
 
-    private static KButton newControlButton(String text, int width, int height){
-        final KButton button = new KButton(text);
-        button.setStyle(KFontFactory.createPlainFont(16), Color.BLUE);
-        button.undress();
-        button.underline(false);
-        button.setPreferredSize(new Dimension(width, height));
-        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        return button;
+    private static KLabel newSignLabel(String text){
+        final KLabel label = new KLabel(text, KFontFactory.createPlainFont(16), Color.BLUE);
+        label.underline(false);
+        label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return label;
     }
 
     public static void setLookTo(String lookName) {
@@ -854,7 +871,8 @@ public class SettingsUI implements Activity {
                         dialog.pack();
                     }
                 } catch (Exception e1) {
-                    App.signalError(e1.getClass().getSimpleName(), "Unexpected error occurred setting the the UI to "+lookName+"\n" +
+                    App.reportError(e1.getClass().getSimpleName(),
+                            "Unexpected error occurred setting the the UI to "+lookName+"\n" +
                             "Error Message: "+e1.getMessage());
                 }
                 break;

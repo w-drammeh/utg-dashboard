@@ -18,10 +18,6 @@ public class NotificationActivity implements Activity {
     private static FirefoxDriver noticeDriver;
     private static KLabel admissionLabel;
     private static KLabel registrationLabel;
-    /**
-     * How may it be needed outside? As for the big-button, it's
-     * only the toolTip needed which is taken cared by renewCount(), herein this class.
-     */
     private static int unreadCount;
 
 
@@ -54,7 +50,7 @@ public class NotificationActivity implements Activity {
         activityPanel.add(northPanel, BorderLayout.NORTH);
         activityPanel.add(centerPanel, BorderLayout.CENTER);
         if (!Dashboard.isFirst()) {
-            Notification.deSerializeAll();
+            Notification.deSerialize();
         }
         Board.addCard(activityPanel, "Notifications");
     }
@@ -133,7 +129,8 @@ public class NotificationActivity implements Activity {
         refreshButton.setFont(KFontFactory.createPlainFont(15));
         refreshButton.addActionListener(e-> {
             if (Student.isTrial()) {
-                App.promptWarning("Unavailable", "Sorry, we cannot access the Portal for notices, because you're not logged in.");
+                App.reportWarning("Unavailable",
+                        "Sorry, we cannot access the Portal for notices, because you're not logged in.");
             } else {
                 updateNotices(true);
             }
@@ -154,6 +151,7 @@ public class NotificationActivity implements Activity {
     /**
      * Do not call this method directly!
      * Call Notification.create(#) instead.
+     * @see Notification#create(String, String, String)
      */
     public static void join(Notification notification) {
         dashboardPanel.addAll(notification.getLayer(), Box.createVerticalStrut(5));
@@ -177,8 +175,8 @@ public class NotificationActivity implements Activity {
      */
     private ActionListener clearAction() {
         return e-> {
-            if (dashboardPanel.getComponentCount() > 0) {
-                if (App.showOkCancelDialog("Clear", "This action will remove all notifications, including unread.\n" +
+            if (!Notification.NOTIFICATIONS.isEmpty()) {
+                if (App.showYesNoCancelDialog("Clear", "This action will clear the notifications. Continue?.\n" +
                                 (unreadCount == 0 ? "" : "You currently have "+ Globals.checkPlurality(unreadCount,
                                         "notifications")+" unread."))) {
                     for (Notification notification : Notification.NOTIFICATIONS) {
@@ -195,8 +193,7 @@ public class NotificationActivity implements Activity {
     /**
      * For all incoming or read alerts, this should be called eventually.
      * If notification is coming(new) parse 1, else if it's being read, parse -1
-     *
-     * This function will also renew the toolTipText of the Board's big-button
+     * This function will also renew the toolTipText of the outline-button.
      */
     public static void effectCount(int value){
         unreadCount += value;
@@ -233,9 +230,10 @@ public class NotificationActivity implements Activity {
             if (loginTry == MDriver.ATTEMPT_SUCCEEDED) {
                 final boolean renew = Portal.startRenewingNotices(noticeDriver, userRequested);
                 if (renew) {
-                    App.promptPlain("Successful", "The \"Admission\" and \"Registration\" Notices are updated successfully.");
+                    App.reportInfo("Successful",
+                            "The \"Admission\" and \"Registration\" Notices are updated successfully.");
                 } else {
-                    App.signalError("Error", "Something went wrong while updating the Notices.\n" +
+                    App.reportError("Error", "Something went wrong while updating the Notices.\n" +
                             "Please try again.");
                 }
             } else if (loginTry == MDriver.ATTEMPT_FAILED) {

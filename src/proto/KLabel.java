@@ -9,8 +9,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * One of the custom classes. One of the most useful. KLabel extends javax.swing.JLabel
- * allowing it to be constructed in numerous ways.
+ * One of the proto types; one of the most useful.
+ * KLabel extends javax.swing.JLabel, and can be constructed in numerous ways.
  * It also overrides the toString() from the Object type, returning its text.
  */
 public class KLabel extends JLabel implements Preference {
@@ -46,15 +46,16 @@ public class KLabel extends JLabel implements Preference {
     }
 
     /**
-     * Used to construct a predefined-label. The text passed is always loaded or
-     * appended anytime setText(String) is invoked on this instance.
-     * The int-param determines the position (left or right) of the permanent-text.
+     * Constructs a label which has the given permanentText appended anytime setText()
+     * is invoked.
+     * The position of the permanentText (left or right) is determined by the given position.
      */
     public static KLabel getPredefinedLabel(String permanentText, int position){
         return new KLabel() {
             @Override
             public void setText(String text) {
-                super.setText(position == SwingConstants.LEFT ? permanentText + text : text + permanentText);
+                super.setText(position == SwingConstants.LEFT ? permanentText + text :
+                        text + permanentText);
             }
         };
     }
@@ -64,28 +65,13 @@ public class KLabel extends JLabel implements Preference {
         setForeground(fg);
     }
 
-    public void setFocusFont(Font focusFont){
-        final Font actualFont = getFont();
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                setFont(focusFont);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                setFont(actualFont);
-            }
-        });
-    }
-
     /**
-     * Underlines this label.
-     * The separator is always shown beneath this label if 'alwaysVisible',
+     * Underlines this label with a separator.
+     * The separator is always shown beneath the label if alwaysVisible,
      * otherwise only on mouseFocus events.
-     * Notice this call sets the layout Border, and puts the Separator beneath the component.
+     * Notice this call sets the layout to Border, and puts the separator beneath the component.
      * Whence should not be called otherwise.
-     * The line uses the color-param as its foreground. If 'null', it will assume the
+     * The separator uses the given foreground as its foreground, but if it's null, it will assume the
      * caller's foreground instead.
      */
     public void underline(Color foreground, boolean alwaysVisible){

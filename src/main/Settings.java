@@ -35,6 +35,7 @@ public class Settings {
         return backgroundName;
     }
 
+    // Todo: implement the black background
     private static LinkedHashMap<String, Color> backgroundsMap() {
         final LinkedHashMap<String, Color> colorMap = new LinkedHashMap<>();
         colorMap.put("Default", null);
@@ -72,7 +73,7 @@ public class Settings {
         Serializer.toDisk(coreMap, "settings.ser");
     }
 
-    public static void deSerialize() {
+    public static void deserialize() {
         final HashMap<String, Object> coreMap = (HashMap) Serializer.fromDisk("settings.ser");
         if (coreMap == null) {
             App.silenceException("Error reading Settings.");

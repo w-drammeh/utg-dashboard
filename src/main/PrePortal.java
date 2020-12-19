@@ -11,9 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * As the name suggests, PrePortal is a once and for all class, technically
- * reserved for verification and collection of start-up data from the Portal
- * which it'll send to the Student, Memory, and Course types.
+ * Todo: to save time, setting-up of the driver should begin (separately) since {@link utg.Dashboard}.
+ * Todo: This type is to wait on that process, if not completed already, and determines if to
+ * Todo: commence a new setup or continue to use a driver already setup.
+ *
+ * Also, Dashboard is to support multiple driver in a future release.
+ * @see MDriver
  */
 public class PrePortal {
     private static String email, password, temporaryName;
@@ -22,7 +25,7 @@ public class PrePortal {
     private static boolean isTerminated;
     public static final ArrayList<String> USER_DATA = new ArrayList<>();
     public static final ActionListener CANCEL_LISTENER = e-> {
-        if (App.showYesNoCancelDialog(Login.getRoot(), "Cancel", "Do you really want to terminate the process?")) {
+        if (App.showYesNoCancelDialog(Login.getRoot(), "Cancel", "Do you really want to cancel the process?")) {
             isTerminated = true;
             Login.getInstance().dispose();
             if (driver != null) {
@@ -38,7 +41,7 @@ public class PrePortal {
         PrePortal.password = password;
         isTerminated = false;
         Login.appendToStatus("Setting up the web driver....... Please wait");
-        startFixingDriver();
+        fixingDriver();
         if (driver == null) {
             if (!isTerminated) {
                 App.reportMissingDriver(Login.getRoot());
@@ -50,7 +53,7 @@ public class PrePortal {
         Login.appendToStatus("Now contacting utg.gm.......");
         loadWaiter = new WebDriverWait(driver, Portal.MAXIMUM_WAIT_TIME);
 //        make sure we are at the login page
-        if (MDriver.isIn(driver)) {
+        if (MDriver.isOnPortal(driver)) {
             final int logoutAttempt = MDriver.attemptLogout(driver);
             if (logoutAttempt != MDriver.ATTEMPT_SUCCEEDED) {
                 if (!isTerminated) {
@@ -70,11 +73,11 @@ public class PrePortal {
             Login.replaceLastUpdate("Now contacting utg....... Ok");
             temporaryName = driver.findElement(By.className("media-heading")).getText();
             Login.appendToStatus("Login successfully : " + temporaryName);
-            onPortal();
+            launchReading();
         } else if (loginAttempt == MDriver.ATTEMPT_FAILED) {
             Login.replaceLastUpdate("Now contacting utg....... Done");
             Login.appendToStatus("Verification failed : No such student");
-            App.signalError(Login.getRoot(),"Invalid Credentials","The information you provided,\n" +
+            App.reportError(Login.getRoot(),"Invalid Credentials","The information you provided,\n" +
                     "Email: "+email+"\nPassword: "+password+"\n" +
                     "do not match any student. Please try again.");
             Login.setInputState(true);
@@ -85,23 +88,28 @@ public class PrePortal {
         }
     }
 
-    private static void startFixingDriver(){
+    private static void fixingDriver(){
         if (driver == null) {
             driver = MDriver.forgeNew(true);
         }
     }
 
-    private static void onPortal(){
-        Board.setReady(false);
+    /**
+     * Once verification succeeds, reading follows.
+     * Error in reading a specific detail is ignored,
+     * and only comes to the user's notice on enlisting.
+     * @see #enlistDetail(String, String)
+     */
+    private static void launchReading(){
         String firstName = "", lastName = "", matNumber = "", program = "", major = "",
                 school = "", division = "", nationality = "", MOA = "", YOA = "",
                 address = "", mStatus = "", DOB = "", tel = "", ongoingSemester, level, status;
 
 //        checking for busyness of the portal, i.e is Course Evaluation required
-        if (Portal.isPortalBusy(driver)) {
+        if (Portal.isEvaluationNeeded(driver)) {
             if (!isTerminated) {
                 Login.appendToStatus("Busy portal: Course Evaluation needed");
-                App.reportBusyPortal(Login.getRoot());
+                Portal.reportEvaluationNeeded(Login.getRoot());
                 Login.setInputState(true);
             }
             return;
@@ -141,7 +149,7 @@ public class PrePortal {
                 lastNameBuilder.append(" ").append(fullName[i]);
             }
             lastName = lastNameBuilder.toString();
-        } catch (Exception e){//though this must be avaided at all costs
+        } catch (Exception e){//though, this must be avoided at all costs
             Login.appendToStatus("Error occurred assigning name parts");
         }
         try {
@@ -156,14 +164,12 @@ public class PrePortal {
         try {
             school = iGroup.get(1).getText().split("\n")[1];
             school = school.replace("School of ", "");//if it's there
-        } catch (Exception e) {
-            App.silenceException("Error reading school");
+        } catch (Exception ignored) {
         }
         try {
             division = iGroup.get(0).getText().split("\n")[1];
             division = division.replace("Division of ", "").replace("Department of", "");
-        } catch (Exception e) {
-            App.silenceException("Error reading department");
+        } catch (Exception ignored) {
         }
         final String[] findingSemester = iGroup.get(6).getText().split("\n")[0].split(" ");
         ongoingSemester = String.join(" ", findingSemester[0], findingSemester[1], findingSemester[2]);
@@ -341,8 +347,8 @@ public class PrePortal {
             Login.appendToStatus("Plus "+runningCount+" registered courses this semester");
         }
 
+        new Thread(()-> driver.quit()).start();
         Login.appendToStatus("#####");
-        driver.quit();
         Login.notifyCompletion();
     }
 

@@ -17,23 +17,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Todo: keep track of all the venues, rooms, lecturer-names the user gives and recommend them on appropriate dialogs
+ * Handles all module related activities.
+ * Even the {@link Memory} has its root from here.
+ * @see #modulesMonitor
+ * Todo: keep track of all venues, rooms, lecturer-names the user gives and recommend them on appropriate dialogs.
  */
 public class ModuleHandler {
-    /**
-     * Value keeps changing to the semester-table currently receiving focus.
-     */
     private static String semesterName;
     private static FirefoxDriver modulesDriver;
     /**
-     * This list has complete dominance over all the addition, removal, and editing changes to every
-     * single module. All the models delegate to it. They only add or delete or substitute after it does.
+     * This list has complete dominance over all the add, remove, and edit events
+     * of modules from wherever, withing Dashboard.
+     * All the models delegate to it. They only add or delete or substitute after it does.
+     * All of the tables, models, the transcript counts on this.
      */
     private static ArrayList<Course> modulesMonitor;
-    private ModuleYear yearOne, yearTwo, yearThree, yearFour;
+    private ModuleYear yearOne;
+    private ModuleYear yearTwo;
+    private ModuleYear yearThree;
+    private ModuleYear yearFour;
     public static final ArrayList<KTableModel> ALL_MODELS = new ArrayList<>();
     public static final ArrayList<Course> STARTUP_COURSES = new ArrayList<>();
-    private static final String[] COLUMN_IDENTIFIERS = new String[] { "CODE", "NAME", "LECTURER", "GRADE" };
+    private static final String[] COLUMNS = new String[] { "CODE", "NAME", "LECTURER", "GRADE" };
     public static final String EDIT = "Edit";
     public static final String CONFIRM = "Verify";
     public static final String DETAILS = "Details";
@@ -51,9 +56,9 @@ public class ModuleHandler {
             @Override
             public boolean add(Course course) {
                 if (course.isMisc()) {
-                    MiscellaneousModule.welcome(course);
+                    MiscModule.add(course);
                 } else if (course.isSummerSemester()) {
-                    SummerModule.welcome(course);
+                    SummerModule.add(course);
                 } else if (course.getYear().equals(Student.firstAcademicYear())) {
                     yearOne.add(course);
                 } else if (course.getYear().equals(Student.secondAcademicYear())) {
@@ -63,7 +68,7 @@ public class ModuleHandler {
                 } else if (course.getYear().equals(Student.fourthAcademicYear())) {
                     yearFour.add(course);
                 }
-                Memory.mayRemember(course);
+                Memory.add(course);
                 return super.add(course);
             }
 
@@ -76,7 +81,7 @@ public class ModuleHandler {
                 }
 
                 if (course.isVerified()) {
-                    final int vInt = App.verifyUser("Enter your your Mat. Number to proceed with this changes:");
+                    final int vInt = App.verifyUser("Enter your Mat. Number to proceed with this changes:");
                     if (vInt == App.VERIFICATION_FALSE) {
                         App.reportMatError();
                         return false;
@@ -86,9 +91,9 @@ public class ModuleHandler {
                 }
 
                 if (course.isMisc()) {
-                    MiscellaneousModule.ridOf(course);
+                    MiscModule.remove(course);
                 } else if (course.isSummerSemester()) {
-                    SummerModule.ridOf(course);
+                    SummerModule.remove(course);
                 } else if (course.isFirstYear()) {
                     yearOne.remove(course);
                 } else if (course.isSecondYear()) {
@@ -98,7 +103,7 @@ public class ModuleHandler {
                 } else if (course.isFourthYear()) {
                     yearFour.remove(course);
                 }
-                Memory.mayForget(course);
+                Memory.remove(course);
                 return super.remove(course);
             }
         };
@@ -133,11 +138,11 @@ public class ModuleHandler {
     }
 
     /**
-     * Checks if the given code exists in the entire list.
+     * Checks if the given code exists in the entire monitor.
      * The edition dialogs should not use this, since they present an exception
-     * by skipping the focused row of the respective model.
+     * by skipping the focused row of the respective table- model.
      */
-    public static boolean existsInList(String code) {
+    public static boolean exists(String code) {
         for (Course course : modulesMonitor) {
             if (course.getCode().equalsIgnoreCase(code)) {
                 return true;
@@ -149,7 +154,7 @@ public class ModuleHandler {
     /**
      * Checks if the given code exists in any other model except the given.
      */
-    public static boolean existsInListExcept(KTableModel targetModel, String code){
+    public static boolean existsExcept(KTableModel targetModel, String code){
         for (KTableModel model : ALL_MODELS) {
             if (model != targetModel && model.getRowOf(code) >= 0) {
                 return true;
@@ -162,15 +167,18 @@ public class ModuleHandler {
      * This call is complete.
      * It makes sure the list replaces the old with recent, and inflict
      * the changes on the appropriate table, thereafter.
-     * This also cater for the case where the old might not exist for whatever reason,
-     * and halt, int that case, the subsequent attempt for visual changes.
+     * This also caters for the case where the old might not exist for whatever reason,
+     * and halt, in that case, the subsequent attempt for visual changes.
      *
-     * Do not call set(Course, Course) on the monitor! Call this.
+     * Do not call set() on the monitor! Call this.
      */
     public static void substitute(Course old, Course recent){
-        if (existsInList(old.getCode())) {//typically for editing. or if it's from a sync / verification, the details should be merged prior to this call
+        if (exists(old.getCode())) {
+            // typically for editing. or if it's from a sync / verification,
+            // the details should be merged prior to this call
             modulesMonitor.set(old.getListIndex(), recent);
-        } else {//may be an issue, after verification - as the user might have removed it during the process
+        } else {
+            //may be an issue, after verification - as the user might have removed it during the process
             modulesMonitor.add(recent);
             return;
         }
@@ -182,27 +190,28 @@ public class ModuleHandler {
                 defaultTableModel.setValueAt(recent.getName(), targetRow, 1);
                 defaultTableModel.setValueAt(recent.getLecturer(), targetRow, 2);
                 defaultTableModel.setValueAt(recent.getGrade(), targetRow, 3);
-                if (defaultTableModel == SummerModule.summerModel || defaultTableModel == MiscellaneousModule.miscModel) {
+                if (defaultTableModel == SummerModule.summerModel || defaultTableModel == MiscModule.miscModel) {
                     defaultTableModel.setValueAt(recent.getYear(), targetRow, 4);
                 }
                 break;
             }
         }
 
-        Memory.mayReplace(old, recent);
+        Memory.replace(old, recent);
     }
 
     public static void reportCodeDuplication(String dCode){
-        App.signalError("Duplicate Error",
+        App.reportError("Duplicate Error",
                 "Sorry, there's already a course with the code '"+dCode.toUpperCase()+"' in the list.");
     }
 
     /**
-     * This method is useful. Especially, since indexing of the single static list and the
-     * many models cannot coincide, call this - never want to retrieve a course from the list
-     * by using get(int#) as the int passed by the model might be matching a different course
-     * according to the list's index.
-     * This function compares only the code.
+     * Returns the first course, in the list, with the given ccode.
+     * This method is useful. Especially, since indexing of the monitor and the
+     * many models do not coincide, call this - never want to retrieve a course from the list
+     * by using get(int) as such an index might be matching a different course
+     * according to the monitor's index.
+     * This function compares only the code, and it's case-insensitive.
      * Null value shall implies no such course in the entire list.
      */
     public static Course getModuleByCode(String code){
@@ -214,7 +223,7 @@ public class ModuleHandler {
         return null;
     }
 
-    public static synchronized void fixModulesDriver(){
+    private static synchronized void fixModulesDriver(){
         if (modulesDriver == null) {
             modulesDriver = MDriver.forgeNew(true);
         }
@@ -225,10 +234,10 @@ public class ModuleHandler {
      * Call this on a different thread.
      */
     public static void launchVerification(Course target) {
-        if (!App.showOkCancelDialog("Verify "+target.getName(),
-                "Dashboard will now launch 'Verification Sequences' for \""+target.getName()+"\".\n" +
-                "It might be taken to another table if this is not its year & semester.\n \n" +
-                        "Refer to "+ Tips.reference("My Courses | Course Verification"))) {
+        if (!App.showYesNoCancelDialog("Verify "+target.getCode(),
+                "Do you want verify \""+target.getName()+"\".\n" +
+                        "Dashboard will find out if it is on your Portal.\n" +
+                        "Refer to Dashboard Tips for more info about this action.")) {
             return;
         }
         fixModulesDriver();
@@ -246,8 +255,8 @@ public class ModuleHandler {
             final WebDriverWait loadWaiter = new WebDriverWait(modulesDriver, Portal.MAXIMUM_WAIT_TIME);
             final int loginAttempt = MDriver.attemptLogin(modulesDriver);
             if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
-                if (Portal.isPortalBusy(modulesDriver)) {
-                    App.reportBusyPortal();
+                if (Portal.isEvaluationNeeded(modulesDriver)) {
+                    Portal.reportEvaluationNeeded();
                     return;
                 }
             } else if (loginAttempt == MDriver.ATTEMPT_FAILED) {
@@ -260,14 +269,15 @@ public class ModuleHandler {
 
             try {
                 modulesDriver.navigate().to(Portal.CONTENTS_PAGE);
-                Portal.nowOnPortal(modulesDriver);
+                Portal.onPortal(modulesDriver);
             } catch (Exception e) {
                 App.reportConnectionLost();
                 return;
             }
 
             Course foundOne = null;
-            final List<WebElement> tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(".nav-tabs > li")));
+            final List<WebElement> tabs = loadWaiter.until(
+                    ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(".nav-tabs > li")));
             //Firstly, the code, name, and score at grades tab
             tabs.get(6).click();
             final WebElement gradesTable = modulesDriver.findElementsByCssSelector(".table-warning").get(1);
@@ -277,14 +287,17 @@ public class ModuleHandler {
                 final List<WebElement> instantRow = row.findElements(By.tagName("td"));
                 if (instantRow.get(0).getText().equalsIgnoreCase(target.getCode())) {
                     foundOne = new Course("","", instantRow.get(0).getText(), instantRow.get(1).getText(),
-                            "","","","", Double.parseDouble(instantRow.get(6).getText()),0,"",true);
+                            "","","","", Double.parseDouble(instantRow.get(6).getText()),
+                            0,"",true);
                     break;
                 }
             }
 
             if (foundOne == null) {
-                App.promptWarning("Checkout Unsuccessful","The process to checkout for "+target.getAbsoluteName()+" was unsuccessful.\n" +
-                        "Dashboard could not locate any trace of it on your portal.\nIf you've done this course, then contact the lecturer.");
+                App.reportWarning("Checkout Unsuccessful",
+                        "The process to checkout for "+target.getAbsoluteName()+" was unsuccessful.\n" +
+                        "Dashboard could not locate any trace of it on your portal.\n" +
+                                "If you've done this course, then contact the lecturer, or the department.");
                 return;
             }
 
@@ -332,19 +345,22 @@ public class ModuleHandler {
                 substitute(existed, foundOne);
             }
 
-            App.promptPlain("Checkout Successful","The process to checkout for "+target.getAbsoluteName()+" is completed successfully.\n" +
-                    "It is now verified-set and can be included in your Analysis and Transcript.");
+            App.reportInfo("Checkout Successful",
+                    "The process to checkout for "+target.getAbsoluteName()+" is completed successfully.\n" +
+                    "It has been found on your Portal. It would now be included your Analysis and Transcript.");
         }
     }
 
     /**
-     * Called to perform a thorough sync. This action has a lot of consequences!
+     * Called to perform a thorough sync.
+     * This action has a lot of consequences!
      * This executes itself on a thread.
      */
-    public static void startThoroughSync(boolean userRequested, KButton triggerButton){
-        if (userRequested && !App.showOkCancelDialog("Synchronize",
-                "This action is experimental. Dashboard will perform a complete 're-indexing' of your modules.\n" +
-                        "Please refer to "+ Tips.reference("My Courses | Modules Synchronization"))) {
+    public static void launchThoroughSync(boolean userRequested, KButton triggerButton){
+        if (userRequested && !App.showYesNoCancelDialog("Synchronize Modules",
+                "Do you want to synchronize your courses with the Portal?\n" +
+                        "Dashboard will perform a complete 're-indexing' of your courses.\n" +
+                        "Refer to the Tips for more info about this action.")) {
             return;
         }
 
@@ -372,9 +388,9 @@ public class ModuleHandler {
                 final WebDriverWait loadWaiter = new WebDriverWait(modulesDriver, 30);
                 final int loginAttempt = MDriver.attemptLogin(modulesDriver);
                 if (loginAttempt == MDriver.ATTEMPT_SUCCEEDED) {
-                    if (Portal.isPortalBusy(modulesDriver)) {
+                    if (Portal.isEvaluationNeeded(modulesDriver)) {
                         if (userRequested) {
-                            App.reportBusyPortal();
+                            Portal.reportEvaluationNeeded();
                             triggerButton.setEnabled(true);
                         }
                         return;
@@ -396,7 +412,7 @@ public class ModuleHandler {
                 final List<WebElement> tabs;
                 try {
                     modulesDriver.navigate().to(Portal.CONTENTS_PAGE);
-                    Portal.nowOnPortal(modulesDriver);
+                    Portal.onPortal(modulesDriver);
                     tabs = loadWaiter.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(".nav-tabs > li")));
                 } catch (Exception e) {
                     if (userRequested) {
@@ -406,8 +422,9 @@ public class ModuleHandler {
                     return;
                 }
 
-                //Firstly, code, name, year, semester, and credit hour at transcript tab
-                //Addition to startupCourses is only here; all the following loops only updates the details. this eradicates the possibility of adding running courses at tab-4
+//                Firstly, code, name, year, semester, and credit hour at transcript tab
+//                Addition to startupCourses is only here; all the following loops only updates the details.
+//                this eradicates the possibility of adding running courses at tab-4
                 final ArrayList<Course> foundCourses = new ArrayList<>();
                 tabs.get(7).click();
                 final WebElement transcriptTable = modulesDriver.findElementByCssSelector(".table-bordered");
@@ -423,7 +440,8 @@ public class ModuleHandler {
                     } else {
                         final List<WebElement> data = transRow.findElements(By.tagName("td"));
                         foundCourses.add(new Course(vYear, vSemester, data.get(1).getText(), data.get(2).getText(),
-                                "", "", "", "", 0.0, Integer.parseInt(data.get(3).getText()), "", true));
+                                "", "", "", "", 0.0, Integer.parseInt(data.get(3).getText()),
+                                "", true));
                     }
                 }
                 final WebElement surrounds = modulesDriver.findElementsByCssSelector(".pull-right").get(3);
@@ -472,8 +490,9 @@ public class ModuleHandler {
 
                 final int foundCount = foundCourses.size();
                 final int semesterCount = semCaptions.size();
-                App.promptPlain("Sync Successful", "Synchronization of the modules completed successfully:\n" +
-                        Globals.checkPlurality(foundCount, "courses")+" were found in "+ Globals.checkPlurality(semesterCount, "semesters."));
+                App.reportInfo("Sync Successful", "Synchronization of the modules completed successfully:\n" +
+                        String.format("%s were found in %s.", Globals.checkPlurality(foundCount, "courses"),
+                                Globals.checkPlurality(semesterCount, "semesters.")));
                 triggerButton.setEnabled(true);
             }
         }).start();
@@ -481,10 +500,12 @@ public class ModuleHandler {
 
     /**
      * This method should:
-     * - Affect only the obligatory program courses
-     * - Spare courses which were requirement-set by the user save majorObligatory
+     * 1. Affect only the obligatory program courses
+     * 2. Spare courses which were requirement-set by the user
+     * except for major-obligatory.
      *
-     * The algorithm is in two-phase form: the first stage involves revoking all previous requirements
+     * The algorithm is in two-phase form:
+     * the first stage involves revoking all previous requirements
      * of the code followed by resetting, if necessary, new requirements as per the code.
      */
     public static void effectMajorCodeChanges(String from, String to) {
@@ -497,7 +518,7 @@ public class ModuleHandler {
     }
 
     /**
-     * Called to relief all major-courses based on this param:from
+     * Called to relief all major-courses from the given from.
      */
     private static void revokeMajors(String from) {
         for (Course course : modulesMonitor) {
@@ -556,21 +577,22 @@ public class ModuleHandler {
         }
     }
 
-    public static void reportScoreInvalid(String invalidScore, Container root){
-        App.signalError(root,"Invalid Score", invalidScore+" is not a valid score. Please enter a correct value.");
+    public static void reportScoreInvalid(String score, Container root){
+        App.reportError(root,"Invalid Score",
+                "\""+score+"\" is not a valid score. Please enter a correct value.");
     }
 
     public static void reportScoreOutOfRange(Container root){
-        App.signalError(root,"Error", "Score cannot be less than 0 or more than 100.");
+        App.reportError(root,"Invalid Score", "Score cannot be less than 0 or more than 100.");
     }
 
-    public static ArrayList<Course> getModulesMonitor(){
+    public static ArrayList<Course> getMonitor(){
         return modulesMonitor;
     }
 
     /**
-     * Deals with pretty much, everything of the year, and presents the entire frame work
-     * on a panel.
+     * Deals with pretty much, everything of the an academic-year,
+     * and presents the entire frame work on a panel.
      */
     public static class ModuleYear {
         private String yearName;
@@ -590,13 +612,14 @@ public class ModuleHandler {
 
             detailsItem = new KMenuItem(DETAILS);
             detailsItem.addActionListener(e-> {
-                final Course course = getModuleByCode(String.valueOf(focusModel.getValueAt(focusTable.getSelectedRow(), 0)));
-                Course.exhibit(course);
+                final String code = String.valueOf(focusModel.getValueAt(focusTable.getSelectedRow(), 0));
+                Course.exhibit(getModuleByCode(code));
             });
 
             editItem = new KMenuItem(EDIT);
             editItem.addActionListener(e-> {
-                final Course course = getModuleByCode(String.valueOf(focusModel.getValueAt(focusTable.getSelectedRow(), 0)));
+                final String code = String.valueOf(focusModel.getValueAt(focusTable.getSelectedRow(), 0));
+                final Course course = getModuleByCode(code);
                 if (course != null) {
                     new ModuleEditor(course, focusModel).setVisible(true);
                 }
@@ -604,7 +627,8 @@ public class ModuleHandler {
 
             removeItem = new KMenuItem(DELETE);
             removeItem.addActionListener(e-> {
-                final Course course = getModuleByCode(String.valueOf(focusModel.getValueAt(focusTable.getSelectedRow(), 0)));
+                final String code = String.valueOf(focusModel.getValueAt(focusTable.getSelectedRow(), 0));
+                final Course course = getModuleByCode(code);
                 if (course != null) {
                     modulesMonitor.remove(course);
                 }
@@ -612,14 +636,15 @@ public class ModuleHandler {
 
             confirmItem = new KMenuItem(CONFIRM);
             confirmItem.addActionListener(e-> {
-                final Course course = getModuleByCode(String.valueOf(focusModel.getValueAt(focusTable.getSelectedRow(), 0)));
+                final String code = String.valueOf(focusModel.getValueAt(focusTable.getSelectedRow(), 0));
+                final Course course = getModuleByCode(code);
                 if (course != null) {
                     new Thread(()-> launchVerification(course)).start();
                 }
             });
 
             newItem = new KMenuItem(ADD);
-            newItem.addActionListener(e->{
+            newItem.addActionListener(e-> {
                 final ModuleAdder adder = new ModuleAdder(yearName, semesterName);
                 SwingUtilities.invokeLater(()-> adder.setVisible(true));
             });
@@ -634,7 +659,7 @@ public class ModuleHandler {
 
         private void setupTable1() {
             model1 = new KTableModel();
-            model1.setColumnIdentifiers(COLUMN_IDENTIFIERS);
+            model1.setColumnIdentifiers(COLUMNS);
 
             table1 = getSemesterTable(model1);
             table1.addMouseListener(new MouseAdapter() {
@@ -663,7 +688,7 @@ public class ModuleHandler {
 
         private void setupTable2() {
             model2 = new KTableModel();
-            model2.setColumnIdentifiers(COLUMN_IDENTIFIERS);
+            model2.setColumnIdentifiers(COLUMNS);
 
             table2 = getSemesterTable(model2);
             table2.addMouseListener(new MouseAdapter() {
@@ -690,19 +715,41 @@ public class ModuleHandler {
             });
         }
 
+        /**
+         * Adds the given course to this academic year.
+         * The given course must not be a miscellaneous course,
+         * because it will be added to the model of either the first
+         * semester of the second depending on its semester.
+         * @see #remove(Course)
+         */
         private void add(Course course){
-            if (course.getSemester().equals(Student.FIRST_SEMESTER)) {
+            final String semester = course.getSemester();
+            if (semester.equals(Student.FIRST_SEMESTER)) {
                 model1.addRow(new String[] {course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
+            } else if (semester.equals(Student.SECOND_SEMESTER)) {
+                model2.addRow(new String[]{course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
             } else {
-                model2.addRow(new String[] {course.getCode(), course.getName(), course.getLecturer(), course.getGrade()});
+                App.silenceException(String.format("Error: %s [%s] cannot be added to the academic year %s.",
+                        course.getName(), course.getAbsoluteSemesterName(), yearName));
             }
         }
 
+        /**
+         * Removes the given course from this academic year.
+         * This course should be pre-existing in one of the models
+         * of this year, otherwise nothing is done.
+         */
         private void remove(Course course){
             if (course.getSemester().equals(Student.FIRST_SEMESTER)) {
-                model1.removeRow(model1.getRowOf(course.getCode()));
-            } else {
-                model2.removeRow(model2.getRowOf(course.getCode()));
+                final int i = model1.getRowOf(course.getCode());
+                if (i >= 0) {
+                    model1.removeRow(i);
+                }
+            } else if (course.getSemester().equals(Student.SECOND_SEMESTER)) {
+                final int i = model2.getRowOf(course.getCode());
+                if (i >= 0) {
+                    model2.removeRow(i);
+                }
             }
         }
 
@@ -723,7 +770,8 @@ public class ModuleHandler {
                     if (e.getClickCount() >= 2) {
                         final int selectedRow = table.getSelectedRow();
                         if (selectedRow >= 0) {
-                            Course.exhibit(getModuleByCode(String.valueOf(table.getValueAt(selectedRow, 0))));
+                            final String code = String.valueOf(table.getValueAt(selectedRow, 0));
+                            Course.exhibit(getModuleByCode(code));
                             e.consume();
                         }
                     }
@@ -733,7 +781,7 @@ public class ModuleHandler {
         }
 
         /**
-         * The entire present of this year in a Panel.
+         * The entire present of this academic year on a Panel.
          */
         private KPanel getPresent() {
             final KScrollPane scrollPane1 = table1.sizeMatchingScrollPane();
@@ -807,7 +855,14 @@ public class ModuleHandler {
         String yearName, semesterName;
         KButton actionButton;
 
-        public ModuleAdder(String yearName, String semesterName){//the yearName and semesterName are provided-set, fields of them are never editable
+        /**
+         * Constructs a course addition dialog.
+         * The yearName and semesterName are provided-set,
+         * fields of them are never editable.
+         * Todo: there should be distinction between the venue and the room.
+         * Todo: 'Checkout Now' option to be added.
+         */
+        public ModuleAdder(String yearName, String semesterName){
             super("New Course");
             setResizable(true);
             setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
@@ -816,7 +871,7 @@ public class ModuleHandler {
 
             final Font hintFont = KFontFactory.createBoldFont(16);
 
-            if (this instanceof MiscellaneousModule.MiscModuleAdder) {
+            if (this instanceof MiscModule.MiscModuleAdder) {
                 yearField = KTextField.rangeControlField(9);
             } else {
                 yearField = new KTextField();
@@ -853,25 +908,26 @@ public class ModuleHandler {
 
             dayBox = new JComboBox<>(Course.getWeekDays());
             dayBox.setFont(KFontFactory.createPlainFont(15));
-            timeBox = new JComboBox<>(Course.availableCoursePeriods());
+            timeBox = new JComboBox<>(Course.getCoursePeriods());
             timeBox.setFont(KFontFactory.createPlainFont(15));
             final KPanel schedulePanel = new KPanel(new FlowLayout(FlowLayout.CENTER));//this a litte sort of an exception
             schedulePanel.addAll(new KLabel("Day:", hintFont), dayBox);
-            schedulePanel.addAll(Box.createRigidArea(new Dimension(25, 30)), new KLabel("Time:", hintFont), timeBox);
+            schedulePanel.addAll(Box.createRigidArea(new Dimension(25, 30)),
+                    new KLabel("Time:", hintFont), timeBox);
 
             venueField = new KTextField(new Dimension(300,30));
             final KPanel venuePanel = new KPanel(new BorderLayout());
             venuePanel.add(new KPanel(new KLabel("Venue:", hintFont)), BorderLayout.WEST);
             venuePanel.add(new KPanel(venueField), BorderLayout.CENTER);
 
-            requirementBox = new JComboBox<>(Course.availableCourseRequirements());
+            requirementBox = new JComboBox<>(Course.getRequirements());
             requirementBox.setFont(KFontFactory.createPlainFont(15));
             requirementBox.setSelectedItem(Course.NONE);
             final KPanel requirementPanel = new KPanel(new BorderLayout());
             requirementPanel.add(new KPanel(new KLabel("Requirement:", hintFont)), BorderLayout.WEST);
             requirementPanel.add(new KPanel(requirementBox), BorderLayout.CENTER);
 
-            creditBox = new JComboBox<>(Course.availableCreditHours());
+            creditBox = new JComboBox<>(Course.creditHours());
             creditBox.setFont(KFontFactory.createPlainFont(15));
             final KPanel creditPanel = new KPanel(new BorderLayout());
             creditPanel.add(new KPanel(new KLabel("Credit Hours:", hintFont)), BorderLayout.WEST);
@@ -906,13 +962,13 @@ public class ModuleHandler {
         private ActionListener additionListener(){
             return e-> {
                 if (codeField.isBlank()) {
-                    App.signalError(getRootPane(),"No Code", "Please provide the code of the course.");
+                    App.reportError(getRootPane(),"No Code", "Please enter the code of the course.");
                     codeField.requestFocusInWindow();
                 } else if (nameField.isBlank()) {
-                    App.signalError(getRootPane(),"No Name","Please provide the name of the course.");
+                    App.reportError(getRootPane(),"No Name","Please enter the name of the course.");
                     nameField.requestFocusInWindow();
                 } else if (scoreField.isBlank()) {
-                    App.signalError(getRootPane(),"Error","Please enter the score you get from this course.");
+                    App.reportError(getRootPane(),"No Score","Please enter the score you get from the course.");
                     scoreField.requestFocusInWindow();
                 } else {
                     double score;
@@ -929,15 +985,17 @@ public class ModuleHandler {
                         return;
                     }
 
-                    if (existsInList(codeField.getText())) {
+                    if (exists(codeField.getText())) {
                         reportCodeDuplication(codeField.getText());
                         codeField.requestFocusInWindow();
                         return;
                     }
 
-                    final Course incomingCourse = new Course(yearName, semesterName, codeField.getText(), nameField.getText(),
-                            lecturerField.getText(), venueField.getText(), String.valueOf(dayBox.getSelectedItem()),
-                            String.valueOf(timeBox.getSelectedItem()), score, Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
+                    final Course incomingCourse = new Course(yearName, semesterName, codeField.getText().toUpperCase(),
+                            nameField.getText(), lecturerField.getText(), venueField.getText(),
+                            String.valueOf(dayBox.getSelectedItem()),
+                            String.valueOf(timeBox.getSelectedItem()), score,
+                            Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
                             String.valueOf(requirementBox.getSelectedItem()), false);
                     modulesMonitor.add(incomingCourse);
                     dispose();
@@ -949,16 +1007,19 @@ public class ModuleHandler {
 
 
     /**
-     * Extends the Adding-dialog to make it an editing-one. Cool uh...
+     * Extends the Adding-dialog to make it an editing-one.
      */
     private static class ModuleEditor extends ModuleAdder {
         private KTableModel onModel;
         private Course target;
 
         /**
-         *
+         * Constructs a course edition dialogue.
+         * Extending the adder-dialogue, this alters the components as appropriate;
+         * it may add new ones, or remove inherited ones; set some editable or not.
          * @param course The course on which edition is to be.
          * @param onModel The model to perform the removal.
+         * @see ModuleAdder
          */
         private ModuleEditor(Course course, KTableModel onModel) {
             super(course.getYear(), course.getSemester());
@@ -969,7 +1030,7 @@ public class ModuleHandler {
             codeField.setText(course.getCode());
             nameField.setText(course.getName());
             lecturerField.setText(course.getLecturer());
-            lecturerField.setEditable(course.canEditTutorName());
+            lecturerField.setEditable(course.isLecturerNameEditable());
             dayBox.setSelectedItem(course.getDay());
             timeBox.setSelectedItem(course.getTime());
             venueField.setText(course.getVenue());
@@ -991,13 +1052,13 @@ public class ModuleHandler {
         private ActionListener editionListener(){
             return e-> {
                 if (codeField.isBlank()) {
-                    App.signalError(getRootPane(),"No Code", "Please provide the code of the course.");
+                    App.reportError(getRootPane(),"No Code", "Please enter the code of the course.");
                     codeField.requestFocusInWindow();
                 } else if (nameField.isBlank()) {
-                    App.signalError(getRootPane(),"No Name","Please provide the name of the course.");
+                    App.reportError(getRootPane(),"No Name","Please enter the name of the course.");
                     nameField.requestFocusInWindow();
                 } else if (scoreField.isBlank()) {
-                    App.signalError(getRootPane(),"Error","Please enter the score you get from this course.");
+                    App.reportError(getRootPane(),"No Score","Please enter the score you get from the course.");
                     scoreField.requestFocusInWindow();
                 } else {
                     double score;
@@ -1027,15 +1088,18 @@ public class ModuleHandler {
                         }
                     }
                     //check for general existence in other tables
-                    if (existsInListExcept(onModel, codeField.getText())) {
+                    if (existsExcept(onModel, codeField.getText())) {
                         reportCodeDuplication(codeField.getText());
                         codeField.requestFocusInWindow();
                         return;
                     }
 
-                    final Course course = new Course(yearField.getText(), semesterField.getText(), codeField.getText(), nameField.getText(),
-                            lecturerField.getText(), venueField.getText(), String.valueOf(dayBox.getSelectedItem()), String.valueOf(timeBox.getSelectedItem()),
-                            score,Integer.parseInt(String.valueOf(creditBox.getSelectedItem())), String.valueOf(requirementBox.getSelectedItem()), target.isVerified());
+                    final Course course = new Course(yearField.getText(), semesterField.getText(),
+                            codeField.getText().toUpperCase(), nameField.getText(), lecturerField.getText(),
+                            venueField.getText(), String.valueOf(dayBox.getSelectedItem()),
+                            String.valueOf(timeBox.getSelectedItem()), score,
+                            Integer.parseInt(String.valueOf(creditBox.getSelectedItem())),
+                            String.valueOf(requirementBox.getSelectedItem()), target.isVerified());
                     substitute(target, course);
                     dispose();
                 }
@@ -1059,7 +1123,7 @@ public class ModuleHandler {
             App.silenceException("Error reading Modules.");
         } else {
             for (String dataLines : modulesData) {
-                modulesMonitor.add(Course.importFromSerial(dataLines));
+                modulesMonitor.add(Course.create(dataLines));
             }
         }
     }

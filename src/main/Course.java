@@ -7,19 +7,25 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * The Course type models a course.
- * It has a generalized constructor, passing all the fundamental attributes
+ * The Course type models a course or a module as often referred to as.
+ * It has a single, generalized constructor, passing all the fundamental attributes
  * at that very instance of creation.
  * A course may be verified in two ways:
- * 1) those that are provided to the main.Memory type by main.PrePortal through
- * main.ModuleHandler.STARTUP_COURSES are automatically "verified" set;
- * 2) those that are put into the table by the user can be verified (checked-out) in the Portal
- * by main.ModuleHandler.
+ * 1) those that are provided to the {@link Memory} from {@link PrePortal} through
+ * {@link ModuleHandler#STARTUP_COURSES} are automatically "verified" set;
+ * 2) those that are put into the tables by the user can be verified
+ * (checked-out) in the Portal {@link ModuleHandler}.
+ * It should be noted that only verified-courses are analyzed,
+ * and only them are printed by the transcript. This limits forgery.
+ * The Course type has many collaborators.
+ * @see ModuleHandler
+ * @see ModuleHandler#launchVerification(Course)
+ * @see SummerModule
+ * @see MiscModule
+ * @see Memory
  */
 public class Course {
-    /*
-     * This order should remain religious for backward-compatibility and deserialization sake.
-     */
+//    This order should remain religious for backward-compatibility and deserialization sake.
     private String year;
     private String semester;
     private String code;
@@ -44,22 +50,28 @@ public class Course {
 //    Known divisional codes
     public static final String DER = "DER";
     public static final String GER = "GER";
-    /**
-     * The unknown constant
-     */
+//    The unknown constant
     public static final String UNKNOWN = Globals.UNKNOWN;
 
 
-    public Course(String year, String semester, String code, String name, String tutor, String place, String day, String time,
-                  double score, int creditHours, String requirement, boolean verified) {
+    /**
+     * Constructs a module, complete and initialized, with the given credentials.
+     * Instead of the empty-string, the default value of the day and time is the
+     * unknown-constant; the requirement is the none-constant.
+     * This helps with the combo-boxes during editing of the modules.
+     * Notice, if no explicit requirement is given, the constructor will
+     * attempt to assign it a requirement.
+     */
+    public Course(String year, String semester, String code, String name, String tutor, String venue, String day,
+                  String time, double score, int creditHours, String requirement, boolean verified) {
         this.year = year;
         this.semester = semester;
-        this.code = code.toUpperCase();
+        this.code = code;
         this.name = name;
         this.lecturer = tutor;
-        this.venue = place;
-        this.day = day.equals(UNKNOWN) ? "" : day;
-        this.time = time.equals(UNKNOWN) ? "" : time;
+        this.venue = venue;
+        this.day = Globals.hasNoText(day) || day.equals(UNKNOWN) ? "" : day;
+        this.time = Globals.hasNoText(time) || time.equals(UNKNOWN) ? "" : time;
         this.score = score;
         this.creditHours = creditHours;
         this.isVerified = verified;
@@ -67,15 +79,15 @@ public class Course {
         this.requirement = Globals.hasText(requirement) ? requirement : NONE;
         if (this.requirement.equals(NONE)) {
             try {
-                final String requirementPart = this.code.substring(0, 3);
-                if (requirementPart.equals(Student.getMajorCode())) {
-                    this.setRequirement(MAJOR_OBLIGATORY);
-                } else if (requirementPart.equals(Student.getMinorCode())) {
-                    this.setRequirement(MINOR_OBLIGATORY);
-                } else if (requirementPart.equals(DER)) {
-                    this.setRequirement(DIVISIONAL_REQUIREMENT);
-                } else if (requirementPart.equals(GER)) {
-                    this.setRequirement(GENERAL_REQUIREMENT);
+                final String programPart = code.substring(0, 3);
+                if (programPart.equals(Student.getMajorCode())) {
+                    setRequirement(MAJOR_OBLIGATORY);
+                } else if (programPart.equals(Student.getMinorCode())) {
+                    setRequirement(MINOR_OBLIGATORY);
+                } else if (programPart.equals(DER)) {
+                    setRequirement(DIVISIONAL_REQUIREMENT);
+                } else if (programPart.equals(GER)) {
+                    setRequirement(GENERAL_REQUIREMENT);
                 }
             } catch (StringIndexOutOfBoundsException ignored){
             }
@@ -120,7 +132,7 @@ public class Course {
 
     public void setLecturer(String lecturer, boolean changeable) {
         this.lecturer = lecturer;
-        this.lecturerNameChangeability = changeable;
+        lecturerNameChangeability = changeable;
     }
 
     public String getVenue() {
@@ -168,7 +180,9 @@ public class Course {
     }
 
     /**
-     * The only options passable are those defined in herein
+     * Sets the requirement of this course.
+     * The given requirement must be a magic-constant, and any of those
+     * defined herein this class.
      */
     public void setRequirement(String requirement) {
         this.requirement = requirement;
@@ -182,18 +196,16 @@ public class Course {
         this.isVerified = verified;
     }
 
-//    field assistants
-
     /**
-     * A compound-string of the code and name.
+     * Returns a compound-string of the code and name of this course.
      */
     public String getAbsoluteName() {
         return String.join(" ", code, name);
     }
 
     /**
-     * A compound-string of the year and semester. This is useful, especially
-     * in comparing if courses were done in the same semester.
+     * Returns a compound-string of the year and semester of this instance.
+     * This is useful, especially, in comparing if courses were done in the same semester.
      */
     public String getAbsoluteSemesterName(){
         return String.join(" ", year, semester);
@@ -249,36 +261,66 @@ public class Course {
         }
     }
 
+    /**
+     * Returns true if this course is a major course; false otherwise.
+     * A module is considered major if its requirement contains "major".
+     * So it might be compulsory, or not.
+     * @see #isMajorObligatory()
+     * @see #isMajorElective()
+     */
     public boolean isMajor() {
         return requirement.contains("Major");
     }
 
+    /**
+     * Returns true if this module has its requirement exactly
+     * equals to {@link #MAJOR_OBLIGATORY}; false otherwise.
+     */
     public boolean isMajorObligatory() {
         return requirement.equals(MAJOR_OBLIGATORY);
     }
 
+    /**
+     * Returns true if this module has its requirement exactly
+     * equals to {@link #MAJOR_OPTIONAL}; false otherwise.
+     */
     public boolean isMajorElective() {
         return requirement.equals(MAJOR_OPTIONAL);
     }
 
+    /**
+     * Returns true if this course is a minor course; false otherwise.
+     * A module is considered minor if its requirement contains "minor".
+     * So it might be compulsory, or not.
+     * @see #isMinorObligatory()
+     * @see #isMinorElective()
+     */
     public boolean isMinor() {
         return requirement.contains("Minor");
     }
 
+    /**
+     * Returns true if this module has its requirement exactly
+     * equals to {@link #MINOR_OBLIGATORY}; false otherwise.
+     */
     public boolean isMinorObligatory() {
         return requirement.equals(MINOR_OBLIGATORY);
     }
 
+    /**
+     * Returns true if this module has its requirement exactly
+     * equals to {@link #MINOR_OPTIONAL}; false otherwise.
+     */
     public boolean isMinorElective() {
         return requirement.equals(MINOR_OPTIONAL);
     }
 
     public boolean isDivisional() {
-        return requirement.contains("Divisional");
+        return requirement.equals(DIVISIONAL_REQUIREMENT);
     }
 
     public boolean isGeneral() {
-        return requirement.contains("General");
+        return requirement.equals(GENERAL_REQUIREMENT);
     }
 
     public boolean isUnclassified() {
@@ -298,17 +340,22 @@ public class Course {
     }
 
     /**
-     * A lecturer's name of a module is changeable iff it was not actually found on the Portal
+     * A lecturer's name of a module is changeable
+     * iff it was not actually found on the Portal.
+     * Note that courses done before the implementation of the Portal
+     * do not have their lecturer names uploaded afterwards.
      */
-    public boolean canEditTutorName() {
+    public boolean isLecturerNameEditable() {
         return Globals.hasNoText(lecturer) || lecturerNameChangeability;
     }
 
     /**
-     * Gets the list-index of this course. This is useful for substitution and editing
+     * Returns the list-index of this course.
+     * This is useful for substitution, editing.
+     * @see ModuleHandler
      */
     public int getListIndex() {
-        final List<Course> monitor = ModuleHandler.getModulesMonitor();
+        final List<Course> monitor = ModuleHandler.getMonitor();
         for (int i = 0; i < monitor.size(); i++) {
             if (code.equals(monitor.get(i).code)) {
                 return i;
@@ -318,7 +365,8 @@ public class Course {
     }
 
     /**
-     * Gets a grade based on the given score
+     * Returns a grade based on the given score.
+     * This must stay updated and in-line with UTG grading system.
      */
     private static String gradeOf(double score) {
         String grade = "F";//0-39, 0
@@ -347,7 +395,40 @@ public class Course {
     }
 
     /**
+     * Returns the appropriate points (grade-value) for the given grade.
+     * This must stay updated and in-line with UTG grading system.
+     * @see #gradeOf(double)
+     */
+    private static double pointsOf(String grade){
+        switch (grade) {
+            case "D":
+                return  1;
+            case "C-":
+                return 1.7;
+            case "C":
+                return 2;
+            case "C+":
+                return 2.3;
+            case "B-":
+                return 2.7;
+            case "B":
+                return 3;
+            case "B+":
+                return 3.3;
+            case "A-":
+                return 3.7;
+            case "A":
+                return 4;
+            case "A+":
+                return 4.3;
+            default:
+                return 0;
+        }
+    }
+
+    /**
      * Assigns a comment to the grade / score. E.g "Excellent", "Fails", etc.
+     * This must stay updated and in-line with UTG grading system.
      */
     private static String gradeCommentOf(double score){
         if (score >= 70) {
@@ -364,47 +445,8 @@ public class Course {
     }
 
     /**
-     * Gets a point based on the grade
-     */
-    private static double pointsOf(String grade){
-        double point = 0;
-        switch (grade) {
-            case "D":
-                point = 1.0;
-                break;
-            case "C-":
-                point = 1.7;
-                break;
-            case "C":
-                point = 2.0;
-                break;
-            case "C+":
-                point = 2.3;
-                break;
-            case "B-":
-                point = 2.7;
-                break;
-            case "B":
-                point = 3.0;
-                break;
-            case "B+":
-                point = 3.3;
-                break;
-            case "A-":
-                point = 3.7;
-                break;
-            case "A":
-                point = 4.0;
-                break;
-            case "A+":
-                point = 4.3;
-                break;
-        }
-        return point;
-    }
-
-    /**
-     * Exports the contents of this course to a string
+     * Exports the contents of this course to a line-separated value text.
+     * During build, a course will be reconstructed with these lines.
      * E.g:
      * 2016/2017
      * First Semester
@@ -413,6 +455,7 @@ public class Course {
      * Amadou Keita
      * ...
      *
+     * @see #create(String)
      */
     public String exportContent(){
         return year + "\n" +
@@ -431,89 +474,94 @@ public class Course {
     }
 
     /**
-     * This is a re-construction process of retrieving the course whose exportContent() is this dataLines.
+     * Creates a course whose exportContent() was this dataLines.
      * Exceptions throwable by this operation must be handled with great care across implementations.
+     * @see #exportContent()
      */
-    public static Course importFromSerial(String dataLines) {
+    public static Course create(String dataLines) {
         final String[] data = dataLines.split("\n");
-        double score = 0D;
+        double score = 0;
         try {
             score = Double.parseDouble(data[8]);
         } catch (Exception e) {
-            App.silenceException("Error reading score for "+data[3]);
+            App.silenceException("Error reading score of "+data[3]);
         }
         int creditsHours = 3;
         try {
             creditsHours = Integer.parseInt(data[9]);
         } catch (Exception e) {
-            App.silenceException("Error reading credit hours for "+data[3]);
-        }
-        boolean isConfirmed = false;
-        try {
-            isConfirmed = Boolean.parseBoolean(data[11]);
-        } catch (Exception e) {
-            App.silenceException("Error reading validity of " + data[3]);
-        }
-        boolean tutorNameChangeability = false;
-        try {
-            tutorNameChangeability = Boolean.parseBoolean(data[12]);
-        } catch (Exception e) {
-            App.silenceException("Error reading lecturer name's status of " + data[3]);
+            App.silenceException("Error reading credit hours of "+data[3]);
         }
 
         final Course serialCourse = new Course(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7],
-                score, creditsHours, data[10], isConfirmed);
-        serialCourse.lecturerNameChangeability = tutorNameChangeability;
+                score, creditsHours, data[10], Boolean.parseBoolean(data[11]));
+        serialCourse.lecturerNameChangeability = Boolean.parseBoolean(data[12]);
         return serialCourse;
     }
 
     /**
-     * When a course is from sync, merge if its like existed
+     * Merges the incoming course with the outgoing course.
+     * This ensures that the user's given details of the outgoing,
+     * prior to verification, are not lost.
+     * By the time this method returns, it's safe to substitute outgoing with incoming.
      */
     public static void merge(Course incoming, Course outgoing) {
         incoming.setDay(outgoing.day);
         incoming.setTime(outgoing.time);
         incoming.setVenue(outgoing.venue);
         incoming.setRequirement(outgoing.requirement);
-        if (incoming.canEditTutorName()) {
+        if (incoming.isLecturerNameEditable()) {
             incoming.setLecturer(outgoing.getLecturer(), true);
         }
     }
 
-    public static String[] availableCoursePeriods(){
-        return new String[] {UNKNOWN, "8:00", "8:30", "9:00", "11:00", "11:30", "14:00", "14:30", "15:00", "17:00",
-                "17:30", "20:00"};
+    /**
+     * Returns an array  of times most, if not all, lectures are conducted in UTG.
+     * All time boxes must delegate to this as their list of time options.
+     */
+    public static String[] getCoursePeriods(){
+        return new String[]{UNKNOWN, "8:00", "8:30", "9:00", "11:00", "11:30", "14:00", "14:30", "15:00",
+                "17:00", "17:30", "20:00"};
     }
 
+    /**
+     * Returns an array of the days of a week.
+     * All day boxes must delegate to this as their list of day options.
+     */
     public static String[] getWeekDays(){
-        return new String[] {UNKNOWN, "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays", "Sundays"};
+        return new String[]{UNKNOWN, "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays",
+                "Saturdays", "Sundays"};
     }
 
     /**
-     * All requirement boxes must delegate to this as their list of options.
+     * Returns an array of the available requirement options.
+     * All requirement boxes must delegate to this as their list of requirement options.
      */
-    public static String[] availableCourseRequirements(){
-        return new String[] {MAJOR_OBLIGATORY, MAJOR_OPTIONAL, MINOR_OBLIGATORY, MINOR_OPTIONAL, DIVISIONAL_REQUIREMENT,
-                GENERAL_REQUIREMENT, NONE};
+    public static String[] getRequirements(){
+        return new String[]{MAJOR_OBLIGATORY, MAJOR_OPTIONAL, MINOR_OBLIGATORY, MINOR_OPTIONAL,
+                DIVISIONAL_REQUIREMENT, GENERAL_REQUIREMENT, NONE};
+    }
+
+    public static String[] creditHours(){
+        return new String[]{"3", "4"};
     }
 
     /**
-     * The elements returned herein are safe to be int-casted.
-     */
-    public static String[] availableCreditHours(){
-        return new String[] {"3", "4"};
-    }
-
-    /**
-     * Nicely exhibits a course.
-     * If the course is null, nothing is done.
+     * Exhibits the contents of the given course on a dialog,
+     * placed on the given base component.
+     * If the course is null, nothing is done; returns immediately.
+     * Do not call this with {@link SwingUtilities#invokeLater(Runnable)},
+     * {@link EventQueue#invokeLater(Runnable)}, etc.
      */
     public static void exhibit(Component base, Course course){
         if (course == null) {
             return;
         }
 
-        final KDialog dialog = new KDialog(course.name+(course.isMisc() ? " - Miscellaneous" : ""));
+        final KDialog dialog = new KDialog(course.name);
+        if (course.isMisc()) {
+            dialog.setTitle(dialog.getTitle()+" - Miscellaneous");
+        }
         dialog.setResizable(true);
         dialog.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
 
@@ -585,11 +633,17 @@ public class Course {
         dialog.getRootPane().setDefaultButton(closeButton);
         dialog.setContentPane(contentPanel);
         dialog.pack();
-        dialog.setMinimumSize(dialog.getPreferredSize());
+        final Dimension packDim = dialog.getPreferredSize();
+        dialog.setMinimumSize(new Dimension(packDim.width + 50, packDim.height));
         dialog.setLocationRelativeTo(base == null ? Board.getRoot() : base);
         SwingUtilities.invokeLater(()-> dialog.setVisible(true));
     }
 
+    /**
+     * Exhibits the contents of the given course on a dialog,
+     * placed the Dashboard's instance.
+     * @see #exhibit(Component, Course)
+     */
     public static void exhibit(Course c){
         exhibit(null, c);
     }

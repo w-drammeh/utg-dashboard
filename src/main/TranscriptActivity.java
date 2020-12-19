@@ -58,7 +58,8 @@ public class TranscriptActivity implements Activity {
                     if (e.getClickCount() >= 2) {
                         final int selectedRow = table.getSelectedRow();
                         if (selectedRow >= 0) {
-                            Course.exhibit(ModuleHandler.getModuleByCode(String.valueOf(TRANSCRIPT_MODEL.getValueAt(selectedRow, 0))));
+                            final String code = String.valueOf(TRANSCRIPT_MODEL.getValueAt(selectedRow, 0));
+                            Course.exhibit(ModuleHandler.getModuleByCode(code));
                             e.consume();
                         }
                     }
@@ -99,23 +100,25 @@ public class TranscriptActivity implements Activity {
         detailsCheck.setFocusable(false);
         detailsCheck.addItemListener(itemEvent -> detailPanel.setVisible(itemEvent.getStateChange() == ItemEvent.SELECTED));
 
-        final KButton downloadButton = new KButton("Export");
-        downloadButton.setPreferredSize(new Dimension(100, 30));
-        downloadButton.setStyle(KFontFactory.createPlainFont(16), Color.BLUE);
-        downloadButton.undress();
-        downloadButton.underline(false);
-        downloadButton.setCursor(MComponent.HAND_CURSOR);
-        downloadButton.addActionListener(actionEvent-> {
-            try {
-                new TranscriptExporter().exportNow();
-            } catch (IOException | DocumentException e) {
-                App.signalError(e);
+        final KLabel exportLabel = new KLabel("Export", KFontFactory.createBoldFont(16), Color.BLUE);
+        exportLabel.underline(false);
+        exportLabel.setCursor(MComponent.HAND_CURSOR);
+        exportLabel.setToolTipText("Export Transcript");
+        exportLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    new TranscriptExporter().exportNow();
+                } catch (IOException | DocumentException ex) {
+                    App.reportError(ex);
+                }
             }
         });
 
         final KPanel topPanel = new KPanel(new BorderLayout());
         topPanel.add(new KPanel(new KLabel("My Transcript", KFontFactory.BODY_HEAD_FONT)), BorderLayout.WEST);
-        topPanel.add(new KPanel(new FlowLayout(), detailsCheck, downloadButton), BorderLayout.EAST);
+        topPanel.add(new KPanel(new FlowLayout(FlowLayout.CENTER, 20, 5), detailsCheck, exportLabel),
+                BorderLayout.EAST);
         return topPanel;
     }
 

@@ -99,7 +99,8 @@ public class Welcome extends KDialog {
 
         final KPanel bottomPanel = new KPanel(new BorderLayout());
         bottomPanel.add(new KPanel(nextCheckBox), BorderLayout.WEST);
-        bottomPanel.add(new KPanel(new FlowLayout(FlowLayout.CENTER, 10, 5), exitButton, nextButton), BorderLayout.EAST);
+        bottomPanel.add(new KPanel(new FlowLayout(FlowLayout.CENTER, 10, 5), exitButton, nextButton),
+                BorderLayout.EAST);
 
         final KPanel welcomePanel = new KPanel();
         welcomePanel.setLayout(new BorderLayout(5, 10));
@@ -140,7 +141,8 @@ public class Welcome extends KDialog {
         final KPanel hintPanel = new KPanel();
         hintPanel.setLayout(new BoxLayout(hintPanel, BoxLayout.Y_AXIS));
         hintPanel.add(new KPanel(new KLabel("Select User Type", KFontFactory.createBoldFont(25))));
-        hintPanel.add(new KPanel(new KLabel("How do you want to use Dashboard?", KFontFactory.createPlainFont(20), Color.GRAY)));
+        hintPanel.add(new KPanel(new KLabel("How do you want to use Dashboard?",
+                KFontFactory.createPlainFont(20), Color.GRAY)));
 
         final Dimension optionPanelDimension = new Dimension(200, 165);
         final Border selectedBorder = BorderFactory.createLineBorder(Color.BLUE, 2, true);
@@ -156,7 +158,8 @@ public class Welcome extends KDialog {
 
         studentOptionPanel.setBorder(selectedBorder);
         studentOptionPanel.add(studentOption, BorderLayout.NORTH);
-        studentOptionPanel.add(new KPanel(KLabel.createIcon("UTGLogo.gif", 100, 100)), BorderLayout.CENTER);
+        studentOptionPanel.add(new KPanel(KLabel.createIcon("UTGLogo.gif", 100, 100)),
+                BorderLayout.CENTER);
         studentOptionPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -164,7 +167,7 @@ public class Welcome extends KDialog {
             }
         });
 
-        final String studentText = "For students of The University of The Gambia:" +
+        final String studentText = "<b>Login</b> as a UTG Student:" +
                 "<ul>" +
                 "<li>Full functionality</li>" +
                 "<li>Enhanced customization</li>" +
@@ -182,7 +185,8 @@ public class Welcome extends KDialog {
         studentTextPane.setOpaque(false);
 
         final KPanel studentPanel = new KPanel(new BorderLayout());
-        studentPanel.add(new KPanel(new FlowLayout(FlowLayout.LEFT, 10, 5), studentOptionPanel), BorderLayout.NORTH);
+        studentPanel.add(new KPanel(new FlowLayout(FlowLayout.LEFT, 10, 5), studentOptionPanel),
+                BorderLayout.NORTH);
         studentPanel.add(new KPanel(studentTextPane), BorderLayout.CENTER);
 
         final KPanel trialOptionPanel = new KPanel(new BorderLayout(0, 5), optionPanelDimension);
@@ -195,7 +199,8 @@ public class Welcome extends KDialog {
 
         trialOptionPanel.setBorder(unselectedBorder);
         trialOptionPanel.add(trylOption, BorderLayout.NORTH);
-        trialOptionPanel.add(new KPanel(KLabel.createIcon("personal.png", 100, 100)), BorderLayout.CENTER);
+        trialOptionPanel.add(new KPanel(KLabel.createIcon("personal.png", 100, 100)),
+                BorderLayout.CENTER);
         trialOptionPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -203,7 +208,7 @@ public class Welcome extends KDialog {
             }
         });
 
-        final String trialText = "Try Dashboard:" +
+        final String trialText = "Having troubles logging in? <b>Try Dashboard</b>:" +
                 "<ul>" +
                 "<li>Limited functionality</li>" +
                 "<li>Customization</li>" +
@@ -217,7 +222,8 @@ public class Welcome extends KDialog {
         trialTextPane.setOpaque(false);
 
         final KPanel trialPanel = new KPanel(new BorderLayout());
-        trialPanel.add(new KPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5), trialOptionPanel), BorderLayout.NORTH);
+        trialPanel.add(new KPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5), trialOptionPanel),
+                BorderLayout.NORTH);
         trialPanel.add(new KPanel(trialTextPane), BorderLayout.CENTER);
 
         final ButtonGroup buttonGroup = new ButtonGroup();

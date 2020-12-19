@@ -24,8 +24,8 @@ public class Login extends JDialog {
 
     public Login(Component parent){
         instance = Login.this;
-        this.parent = parent;
         rootPane = getRootPane();
+        this.parent = parent;
         setSize(720, 425);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setUndecorated(true);
@@ -121,9 +121,9 @@ public class Login extends JDialog {
         }
     }
 
-    public static void replaceLastUpdate(String newUpdate){
+    public static void replaceLastUpdate(String update){
         statusPanel.removeLast();
-        appendToStatus(newUpdate);
+        appendToStatus(update);
     }
 
     public static void setInputState(boolean state){
@@ -148,10 +148,10 @@ public class Login extends JDialog {
 
     private void loginTriggered(){
         if (Globals.hasNoText(emailField.getText())) {
-            App.signalError(rootPane, "No Email", "Email Field cannot be blank. Please insert an email address.");
+            App.reportError(rootPane, "No Email", "Enter your email address.");
             emailField.requestFocusInWindow();
         } else if (Globals.hasNoText(String.valueOf(passwordField.getPassword()))) {
-            App.signalError(rootPane,"No Password", "Password Field cannot be blank. Please insert a password.");
+            App.reportError(rootPane,"No Password", "Enter your password.");
             passwordField.requestFocusInWindow();
         } else {
             new Thread(()-> {
@@ -170,13 +170,13 @@ public class Login extends JDialog {
     }
 
     private static void signalInternetError(){
-        App.signalError(rootPane, "Connection Error", "Internet connection is required to set up Dashboard.\n" +
+        App.reportError(rootPane, "Internet Error", "Internet connection is required to set up Dashboard.\n" +
                 "Please connect to the internet and try again.");
     }
 
-    public static ActionListener loginAction(KButton button){
-        return e-> new Thread(()-> {
-            button.setEnabled(false);
+    public static void loginAction(Component clickable){
+        new Thread(()-> {
+            clickable.setEnabled(false);
             if (Internet.isInternetAvailable()) {
                 final Board boardInstance = Board.getInstance();
                 final Login login = new Login(null);
@@ -186,7 +186,7 @@ public class Login extends JDialog {
             } else {
                 signalInternetError();
             }
-            button.setEnabled(true);
+            clickable.setEnabled(true);
         }).start();
     }
 
@@ -204,6 +204,7 @@ public class Login extends JDialog {
     public static void notifyCompletion(){
         appendToStatus("Now running Pre-Dashboard builds....... Please wait");
         closeButton.setEnabled(false);
+        Board.setReady(false);
         Dashboard.setFirst(true);
         Student.initialize();
         final KButton enter = new KButton();
@@ -211,7 +212,7 @@ public class Login extends JDialog {
         enter.addActionListener(e-> {
             instance.setVisible(false);
             if (Board.getInstance() != null) {
-                Runtime.getRuntime().removeShutdownHook(Board.shutDownThread);
+                Runtime.getRuntime().removeShutdownHook(Board.SHUT_DOWN_THREAD);
                 Board.getInstance().dispose();
             }
             new Board().setVisible(true);

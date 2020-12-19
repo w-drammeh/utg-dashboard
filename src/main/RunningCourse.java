@@ -20,15 +20,15 @@ public class RunningCourse implements Serializable {
     private boolean isConfirmed;
 
 
-    public RunningCourse(String code, String name, String lName, String vName, String rName, String day, String time,
+    public RunningCourse(String code, String name, String lecturer, String venue, String room, String day, String time,
                          boolean onPortal){
         this.code = code.toUpperCase();
         this.name = name;
-        this.lecturer = lName;
-        this.venue = vName;
-        this.room = rName;
-        this.day = day.equals(Course.UNKNOWN) ? "" : day;
-        this. time = time.equals(Course.UNKNOWN) ? "" : time;
+        this.lecturer = lecturer;
+        this.venue = venue;
+        this.room = room;
+        this.day = Globals.hasNoText(day) || day.equals(Course.UNKNOWN) ? "" : day;
+        this. time = Globals.hasNoText(time) || time.equals(Course.UNKNOWN) ? "" : time;
         this.isConfirmed = onPortal;
     }
 
@@ -112,6 +112,9 @@ public class RunningCourse implements Serializable {
         }
     }
 
+    /**
+     * @see Course#exportContent()
+     */
     public String exportContent(){
         return code + "\n" +
                 name + "\n" +
@@ -123,7 +126,10 @@ public class RunningCourse implements Serializable {
                 isConfirmed;
     }
 
-    public static RunningCourse importFromSerial(String dataLines){
+    /**
+     * @see Course#create(String)
+     */
+    public static RunningCourse create(String dataLines){
         final String[] data = dataLines.split("\n");
         boolean validity = false;
         try {
@@ -134,7 +140,14 @@ public class RunningCourse implements Serializable {
         return new RunningCourse(data[0], data[1], data[2], data[3], data[4], data[5], data[6], validity);
     }
 
-    public static void exhibit(RunningCourse course, Component base) throws NullPointerException {
+    /**
+     * @see Course#exhibit(Course)
+     */
+    public static void exhibit(RunningCourse course, Component base) {
+        if (course == null) {
+            return;
+        }
+
         final KDialog dialog = new KDialog(course.name);
         dialog.setResizable(true);
         dialog.setModalityType(KDialog.DEFAULT_MODALITY_TYPE);
@@ -183,12 +196,13 @@ public class RunningCourse implements Serializable {
         dialog.getRootPane().setDefaultButton(closeButton);
         dialog.setContentPane(contentPanel);
         dialog.pack();
-        dialog.setMinimumSize(dialog.getPreferredSize());
+        final Dimension packDim = dialog.getPreferredSize();
+        dialog.setMinimumSize(new Dimension(packDim.width + 50, packDim.height));
         dialog.setLocationRelativeTo(base == null ? Board.getRoot() : base);
         SwingUtilities.invokeLater(()-> dialog.setVisible(true));
     }
 
-    public static void exhibit(RunningCourse runningCourse) throws NullPointerException {
+    public static void exhibit(RunningCourse runningCourse) {
         exhibit(runningCourse, null);
     }
 

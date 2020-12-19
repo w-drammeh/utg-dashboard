@@ -13,8 +13,9 @@ public class Serializer {
 
 
     /**
-     * This does the ultimate serialization.
-     * Any failed attempt in writing is reported
+     * Serializes the given object to the SERIALS_DIR with the given name.
+     * Classes that perform serialization data eventually invoke this to do the ultimate writing.
+     * This method is self-silent.
      */
     public static void toDisk(Object obj, String name){
         try {
@@ -33,16 +34,16 @@ public class Serializer {
     }
 
     /**
-     * This does the ultimate deserialization.
-     * This call also handles potential exceptions.
-     * So caller must after-check if the returned-object is null before an attempt to use.
-     * No failed attempt in reading is reported.
-     * Instead, callers must check nullity of the returned object
+     * reads the object, from the SERIALS_DIR, that was serialized
+     * with the given name.
+     * Classes that perform de-serialization eventually invoke this to do the ultimate reading.
+     * This method is self-silent.
+     * Therefore, callers must check nullity of the returned object
      */
-    public static Object fromDisk(String serName) {
+    public static Object fromDisk(String name) {
         Object serObject = null;
         try {
-            final FileInputStream fileInputStream = new FileInputStream(SERIALS_DIR + File.separator + serName);
+            final FileInputStream fileInputStream = new FileInputStream(SERIALS_DIR + File.separator + name);
             final ObjectInputStream in = new ObjectInputStream(fileInputStream);
             serObject = in.readObject();
             in.close();
@@ -52,15 +53,17 @@ public class Serializer {
     }
 
     public static void placeReadMeFile(){
-        final String readMeText = "This jar file, or its derivatives (Linux Executables, Windows Executables, etc.)\n" +
-                "were compiled and distributed by Muhammed W. Drammeh <wakadrammeh@gmail.com> "+MDate.today()+".\n\n" +
+        final String readMeText = "This jar file, and its derivatives (Linux Executables, Windows Executables, etc.)\n" +
+                "were compiled and distributed by Muhammed W. Drammeh <wakadrammeh@gmail.com>\n\n" +
                 "Kindly report all issues, and feedback to "+Mailer.DEVELOPERS_MAIL+".\n\n" +
                 "Do not modify or delete this file, or any other files in the \"serials\" directory.\n" +
-                "Modifying files in the \"serials\" path can interrupt the 'Launch Sequences' which might cause Dashboard\n" +
-                "to force a new instance, removing all your saved details and setting preferences. Thus, you'll have to login again.\n\n" +
-                "This project is a FOSS [Free & Open Source Software]. So, you are hereby permitted to make changes provided\n" +
+                "Modifying files in the \"serials\" path can interrupt the 'Launch Sequence' which might cause Dashboard\n" +
+                "to force a new instance, removing all your saved details and setting preferences.\n\n" +
+                "This project is a FOSS [Free & Open Source Software]. Hence you are hereby permitted to make changes provided\n" +
                 "you very well know and can make those changes.\n\n" +
-                "--Compilation Version = "+ Dashboard.VERSION;
+                "Use this link - https://github.com/w-drammeh/utg-dashboard - to take part in the Dashboard open project on Github.\n\n" +
+                "#Compilation Version = "+ Dashboard.VERSION+"\n" +
+                "Get newer version from the Github Repository";
         try {
             final Formatter formatter = new Formatter(ROOT_DIR+File.separator+"README.txt");
             formatter.format(readMeText);
@@ -73,7 +76,7 @@ public class Serializer {
     public static void placeUserDetails(){
         final String data = "Month of Admission: "+ Student.getMonthOfAdmissionName()+"\n" +
                 "Year of Admission: "+Student.getYearOfAdmission()+"\n" +
-                "Current Semester: "+Student.getSemester().toUpperCase()+"\n" +
+                "Current Semester: "+Student.getSemester()+"\n" +
                 "First Name: "+Student.getFirstName()+"\n" +
                 "Last Name: "+Student.getLastName()+"\n" +
                 "Mat. Number: "+Student.getMatNumber()+"\n" +
@@ -88,13 +91,12 @@ public class Serializer {
                 "Telephone: "+Student.getTelephone()+"\n" +
                 "Nationality: "+Student.getNationality()+"\n" +
                 "Date of Birth: "+Student.getDateOfBirth()+"\n" +
-                "Portal Email: "+Student.getPortalMail()+"\n" +
                 "Student Mail: "+Student.getStudentMail()+"\n" +
                 "Marital Status: "+Student.getMaritalStatue()+"\n" +
                 "Place of Birth: "+Student.getPlaceOfBirth()+"\n" +
                 "Level: "+Student.getLevel()+"\n" +
                 "Status: "+Student.getStatus()+"\n" +
-                "Last Dashboard Launch: "+ MDate.now()+"\n" +
+                "#\n" +
                 "Dashboard Version: "+ Dashboard.VERSION;
         try {
             final File outputsPath = new File(OUTPUT_DIR);
@@ -132,7 +134,7 @@ public class Serializer {
             return true;
         } catch (IOException ioe) {
             final File userData = new File(SERIALS_DIR + File.separator + "core.ser");
-            return userData.delete();
+            return !userData.exists() || userData.delete();
         }
     }
 

@@ -10,7 +10,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 /**
- * The standard dashboard text-field. One of the custom classes.
+ * The standard Dashboard text-field. One of the proto types.
  * Note that control-fields suspend any form of pasting.
  */
 public class KTextField extends JTextField implements Preference {
@@ -21,6 +21,9 @@ public class KTextField extends JTextField implements Preference {
         setPreferences();
     }
 
+    /**
+     * Constructs a text-field; loaded in it is the given initialText.
+     */
     public KTextField(String initialText){
 	    super(initialText);
 	    setPreferences();
@@ -33,73 +36,88 @@ public class KTextField extends JTextField implements Preference {
 
     /**
      * Provides a field that accepts all input (like any other normal instance) until the
-     * range of values are met.
+     * given limit of values are met.
      */
-    public static KTextField rangeControlField(int range) {
-        final KTextField rangeField = new KTextField() {
+    public static KTextField rangeControlField(int limit) {
+        final KTextField field = new KTextField() {
             @Override
             public void paste() {
                 UIManager.getLookAndFeel().provideErrorFeedback(this);
             }
         };
-
-        rangeField.addKeyListener(new KeyAdapter() {
+        field.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if (rangeField.getText().length() >= range) {
+                if (field.getText().length() >= limit) {
                     e.consume();
                 }
             }
         });
-
-        return rangeField;
+        return field;
     }
 
     /**
-     * Provides a rangeControlField(int) that restricts its input to only numbers.
+     * Provides a {@link #rangeControlField(int)} that restricts its input to only numbers.
+     * @see #rangeControlField(int)
      */
-    public static KTextField digitPlusRangeControlField(int range) {
-        final KTextField digitField = new KTextField(){
+    public static KTextField digitRangeControlField(int limit) {
+        final KTextField field = new KTextField(){
             @Override
             public void paste() {
                 UIManager.getLookAndFeel().provideErrorFeedback(this);
             }
         };
-
-        digitField.addKeyListener(new KeyAdapter() {
+        field.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if (digitField.getText().length() >= range || !Character.isDigit(e.getKeyChar()) &&
-                        !(e.getKeyChar() == KeyEvent.VK_DELETE || e.getKeyChar() == KeyEvent.VK_BACK_SPACE)) {
+                final char keyChar = e.getKeyChar();
+                if (field.getText().length() >= limit || !Character.isDigit(keyChar) &&
+                        !(keyChar == KeyEvent.VK_DELETE || keyChar == KeyEvent.VK_BACK_SPACE)) {
                     e.consume();
                 }
             }
         });
-
-        return digitField;
+        return field;
     }
 
-    public static KTextField newDayField(){
-        final KTextField dayField = digitPlusRangeControlField(2);
-        dayField.setPreferredSize(new Dimension(50,30));
+    /**
+     * Creates a field intended for holding day values.
+     */
+    public static KTextField dayField(){
+        final KTextField dayField = digitRangeControlField(2);
+        dayField.setPreferredSize(new Dimension(50, 30));
         return dayField;
     }
 
-    public static KTextField newMonthField(){
-        return newDayField();
+    /**
+     * Creates a field intended for holding month values.
+     * @see #dayField()
+     */
+    public static KTextField monthField(){
+        return dayField();
     }
 
-    public static KTextField newYearField(){
-        final KTextField yearField = digitPlusRangeControlField(4);
-        yearField.setPreferredSize(new Dimension(75,30));
+    /**
+     * Creates a field intended for holding year values.
+     * Unlike the other, loaded in this is the current year.
+     */
+    public static KTextField yearField(){
+        final KTextField yearField = digitRangeControlField(4);
+        yearField.setPreferredSize(new Dimension(75, 30));
         yearField.setText(String.valueOf(MDate.getYear()));
         return yearField;
     }
 
+    /**
+     * Checks whether this field has any text as defined by {@link Globals#hasText(String)}.
+     */
     public boolean hasText() {
         return Globals.hasText(getText());
     }
 
+    /**
+     * Checks whether this field has no text as defined by {@link Globals#hasNoText(String)}.
+     */
     public boolean isBlank() {
         return Globals.hasNoText(getText());
     }
