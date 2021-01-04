@@ -225,7 +225,7 @@ public class TaskSelf {
         private void setCoreProperties(String name, String type, int duration){
             startDate = MDate.now();
             projectName = name;
-            type = type;
+            this.type = type;
             specifiedDuration = duration;
             setLive(true);
             dateExpectedToComplete = MDate.daysAfter(new Date(), duration);
@@ -1023,6 +1023,7 @@ public class TaskSelf {
         Serializer.toDisk(TaskActivity.AssignmentsHandler.ASSIGNMENTS, "assignments.ser");
         Serializer.toDisk(TaskActivity.EventsHandler.EVENTS, "events.ser");
     }
+
 
     public static void deSerializeAll(){
         final ArrayList<TodoSelf> savedTasks = (ArrayList) Serializer.fromDisk("todos.ser");

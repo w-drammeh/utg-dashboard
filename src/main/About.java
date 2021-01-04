@@ -143,7 +143,7 @@ public class About extends KDialog {
         final String bettermentText = "<b>Help make Dashboard better by giving the developers a Review</b>." +
                 "<p>You may <b>Report a Bug</b> to be fixed, make a <b>Suggestion</b> to be implemented in a future release, " +
                 "or provide an <b>Answer</b> to a Frequently Asked Question. By clicking Send, your review shall be delivered " +
-                "to the developers' mail address: "+Mailer.DEVELOPERS_MAIL+". Your student-mail might be is used for this purpose.</p>";
+                "to the developers' mail address: <b>"+Mailer.DEVELOPERS_MAIL+"</b>. Your student-mail might be used for this purpose.</p>";
 
         final Border lineBorder = BorderFactory.createLineBorder(Color.BLUE, 1,true);
         final Border spaceBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
