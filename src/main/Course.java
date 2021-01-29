@@ -633,8 +633,6 @@ public class Course {
         dialog.getRootPane().setDefaultButton(closeButton);
         dialog.setContentPane(contentPanel);
         dialog.pack();
-        final Dimension packDim = dialog.getPreferredSize();
-        dialog.setMinimumSize(new Dimension(packDim.width + 50, packDim.height));
         dialog.setLocationRelativeTo(base == null ? Board.getRoot() : base);
         SwingUtilities.invokeLater(()-> dialog.setVisible(true));
     }
