@@ -303,8 +303,6 @@ public class About extends KDialog {
                         bugTextArea.setText(null);
                     }
                     bugTextArea.setEditable(true);
-                    bugSender.setEnabled(true);
-                    bugSender.setText("Send");
                 } else {
                     reportNoConnection();
                 }
